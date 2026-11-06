@@ -218,3 +218,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Arquivos de dados da Central de Gestão (mesmo criptografados, não versionar)
+gestao-dados*.json
+*.backup-antes-da-v*.json
