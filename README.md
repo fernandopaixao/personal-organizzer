@@ -23,3 +23,7 @@ Ferramenta de gestão pessoal em um único arquivo HTML, sem servidor e sem inst
 | | Visão do time | Resumo do backlog, features por iniciativa, reunião de status guiada |
 
 O plano da versão atual está em [`docs/plano-v14.md`](docs/plano-v14.md). As versões anteriores ficam em `legacy/` como referência.
+
+## Ferramenta dos times
+
+[`ferramenta-time/quadro_do_time_v1.html`](ferramenta-time/quadro_do_time_v1.html) é o **Quadro do Time**: quadro de cards, backlog, sprints, iniciativas ligadas à Central e métricas de fluxo do time, também num único HTML. Ele publica o backlog e as métricas do time, cifrados, na pasta compartilhada que a Central lê. O [`guia-adaptacao-times.md`](ferramenta-time/guia-adaptacao-times.md) explica como usá-lo ou como adaptar a ferramenta que o time já tem.
