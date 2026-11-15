@@ -22,7 +22,7 @@ Ferramenta de gestão pessoal em um único arquivo HTML, sem servidor e sem inst
 | | Integração | Pasta e chaves, arquivos recebidos, conciliação e compartilhamento com os times |
 | | Visão do time | Resumo do backlog, features por iniciativa, reunião de status guiada |
 
-O plano da versão atual está em [`docs/plano-v14.md`](docs/plano-v14.md). As versões anteriores ficam em `legacy/` como referência.
+A visão geral da solução (Central, Quadro do Time, integração, métricas e agentes) está em [`docs/visao-geral-da-solucao.md`](docs/visao-geral-da-solucao.md). O plano da versão atual está em [`docs/plano-v14.md`](docs/plano-v14.md). As versões anteriores ficam em `legacy/` como referência.
 
 ## Ferramenta dos times
 
