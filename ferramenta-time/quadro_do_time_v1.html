@@ -130,6 +130,39 @@ dialog.wide{width:min(1020px,96vw)}
 .av.lg{width:34px;height:34px;font-size:12px}
 .addp{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) auto;gap:8px;background:var(--bv-soft);border-radius:12px;padding:10px}
 @media (max-width:720px){dialog.wide{overflow:auto}.cm-grid{display:block;flex:none}.cm-main,.cm-side{overflow:visible}.cm-side{border-left:0;border-top:1px solid var(--line)}.flow button{font-size:10.5px;padding:7px 4px}.person{grid-template-columns:auto 1fr;}.addp{grid-template-columns:1fr}}
+/* Iniciativas */
+.ep-layout{display:grid;grid-template-columns:minmax(260px,330px) minmax(0,1fr);gap:20px;align-items:start}
+.ep-list{position:sticky;top:84px;display:flex;flex-direction:column;gap:6px;max-height:calc(100vh - 100px);overflow:auto;padding-bottom:8px}
+.ep-g{font-size:10.5px;font-weight:650;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:10px 4px 2px}
+.ep-row{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:center;text-align:left;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px;width:100%}
+.ep-row:hover{border-color:#d6d9e6}.ep-row.on{border-color:var(--bv);box-shadow:0 0 0 3px var(--bv-soft)}
+.ep-row .nm{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ep-row .sub{display:flex;gap:6px;align-items:center;font-size:11.5px;color:var(--muted);margin-top:2px;flex-wrap:wrap}
+.ep-row.ghost{background:transparent;border-style:dashed}
+.ring{position:relative;display:inline-grid;place-items:center;flex:none}.ring svg{position:absolute;inset:0;transform:rotate(-90deg)}.ring b{position:relative;font-size:10.5px;font-weight:700}
+.ep-head{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+.ep-head h2{font-size:22px;margin:0}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px}.kpi b{display:block;font-family:var(--title);font-size:22px;font-weight:600;letter-spacing:-.02em}.kpi span{font-size:11.5px;color:var(--muted)}
+.kpi.alert b{color:var(--late)}
+.stack-bar{display:flex;height:10px;border-radius:6px;overflow:hidden;background:#eef0f6;margin:8px 0 6px}.stack-bar i{display:block;height:100%}
+.upd{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.upd q{quotes:none;font-size:13.5px}
+.tline{position:relative;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.tl-row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;align-items:center;height:24px;font-size:12px}
+.tl-track{position:relative;height:100%}
+.tl-track .bar{position:absolute;top:6px;height:12px;border-radius:6px;background:var(--bv-mid)}.tl-track .bar.done{background:var(--faint)}
+.tl-track .dia{position:absolute;top:6px;width:11px;height:11px;transform:translateX(-50%) rotate(45deg);background:#fff;border:2px solid var(--bv);border-radius:2px}
+.tl-track .dia.done{background:var(--bv)}.tl-track .dia.late{border-color:var(--late)}
+.tl-vl{position:absolute;top:8px;bottom:22px;width:0;border-left:2px solid var(--late);pointer-events:none}.tl-vl.c{border-left:2px dashed var(--ink)}.tl-vl.f{border-left:2px dashed var(--bv)}
+.tl-ov{position:absolute;left:176px;right:16px;top:0;bottom:0;pointer-events:none}
+.tl-axis{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;font-size:10.5px;color:var(--faint);margin-top:4px}.tl-axis div{position:relative;height:14px}.tl-axis span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px}
+.fcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.fcard.done{background:#fbfbfd}.fcard .cl{display:flex;flex-direction:column;gap:4px}
+.fcard .ci{display:flex;align-items:center;gap:6px;font-size:12px;padding:3px 6px;border-radius:8px;text-align:left;width:100%}.fcard .ci:hover{background:#f3f4f8}
+.fcard .ci .t{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:900px){.ep-layout{grid-template-columns:1fr}.ep-list{position:static;max-height:none}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.tl-row,.tl-axis{grid-template-columns:90px minmax(0,1fr)}.tl-ov{left:116px}}
 dialog::backdrop{background:rgba(22,26,35,.35)}
 .mh{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;z-index:1}
 .mb{padding:16px 20px;overflow:auto}
@@ -285,7 +318,7 @@ let lastMod = 0;            // lastModified conhecido do arquivo de dados
 let dirty = false, saving = false, saveTimer = null, saveState = 'none', saveErr = '';
 let catalog = null, catalogErr = '';  // catálogo decifrado (só em memória)
 let view = 'board';
-const ui = { boardFilter: 'sprint', epicFilter: '', q: '', onlyBlocked: false, showOldDone: false, backlogDone: false, metricsJson: false, centralPreview: '' };
+const ui = { boardFilter: 'sprint', epicFilter: '', q: '', onlyBlocked: false, showOldDone: false, backlogDone: false, metricsJson: false, centralPreview: '', epicSel: '', epicDone: false };
 const pub = { pendingStatus: false, timer: null, busy: false, msg: '', err: '' };
 let keysInfo = { lista: [], atual: null };
 let rootOk = false, rootName = '';
@@ -1017,39 +1050,87 @@ function vSprints() {
 }
 
 /* ------------------------------- Iniciativas ------------------------------- */
-function phaseBar(i) {
-  const ps = (i.phases || []).filter(p => isYmd(p.start) && isYmd(p.end)); if (!ps.length) return '';
-  const a = Math.min(...ps.map(p => +parseYmd(p.start)), isYmd(i.start) ? +parseYmd(i.start) : Infinity), b = Math.max(...ps.map(p => +parseYmd(p.end)), isYmd(i.end) ? +parseYmd(i.end) : 0), span = b - a || 1, now = Date.now();
-  return `<div style="margin:10px 0 4px"><div class="lbl" style="margin-bottom:4px">Fases da Central <span class="n">contexto, podem se sobrepor</span></div>${ps.map(p => `<div class="row small" style="flex-wrap:nowrap"><span style="width:180px;flex:none" class="muted" title="${esc(p.ref)}">${esc(clip(p.name, 26))}</span><div class="ph grow"><i class="${p.done ? 'done' : ''}" style="left:${(parseYmd(p.start) - a) / span * 100}%;width:${Math.max(1, (parseYmd(p.end) - parseYmd(p.start)) / span * 100)}%"></i>${now > a && now < b ? `<span class="now" style="left:${(now - a) / span * 100}%"></span>` : ''}</div><span class="faint" style="width:90px;flex:none;text-align:right">${fmtD(p.start)}–${fmtD(p.end)}</span></div>`).join('')}</div>`;
+const STAGE_COL = ['#d5dbf7', '#aab6ef', '#8e9de9', '#5a6be0', '#223ad2', '#002bab'];
+function ring(pct, size = 34, st = '') {
+  const r = size / 2 - 3, c = 2 * Math.PI * r, col = st === 'late' ? 'var(--late)' : st === 'done' || st === 'paused' ? 'var(--faint)' : 'var(--bv)';
+  return `<span class="ring" style="width:${size}px;height:${size}px"><svg width="${size}" height="${size}"><circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="#eceef4" stroke-width="3.5"/><circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${col}" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="${c * pct / 100} ${c}"/></svg><b>${pct}</b></span>`;
+}
+function epicRow(e) {
+  const cs = epicCards(e), st = e.status === 'done' ? 'done' : epicStatus(e), bl = cs.filter(c => c.blocked && !isDone(c)).length;
+  return `<button class="ep-row ${ui.epicSel === e.id ? 'on' : ''}" data-act="epicSel" data-id="${e.id}">${ring(epicProgress(e), 34, st)}<span style="min-width:0"><div class="nm">${esc(e.name)}</div>
+    <div class="sub"><span class="hd ${st}"></span>${ST_LABEL[st]}${e.centralRef ? ` · <span class="code bvc">${esc(e.centralRef)}</span>` : ''} · ${cs.filter(c => !isDone(c)).length} abertos${bl ? ` · <span class="latec">${bl} bloq.</span>` : ''}</div></span></button>`;
+}
+function timeline(e, ci) {
+  const ps = (ci?.phases || []).filter(p => isYmd(p.start) && isYmd(p.end)), fs = (ci?.features || []).filter(f => f.status !== 'cancelled' && isYmd(f.due));
+  const datas = [...ps.flatMap(p => [p.start, p.end]), ...fs.map(f => f.due), ci?.start, ci?.end, e.forecastEnd, today()].filter(isYmd).map(d => +parseYmd(d));
+  if (datas.length < 2 || (!ps.length && !fs.length)) return '';
+  let a = Math.min(...datas), b = Math.max(...datas); const pad = (b - a) * 0.04 || DAY * 3; a -= pad; b += pad;
+  const x = d => ((+parseYmd(d) - a) / (b - a) * 100).toFixed(2) + '%';
+  const meses = []; { const d = new Date(a); d.setDate(1); d.setMonth(d.getMonth() + 1); while (+d < b) { meses.push(new Date(d)); d.setMonth(d.getMonth() + 1); } }
+  const prog = r => { const cs = epicCards(e).filter(c => c.featureRef === r); return cs.length ? cs.filter(isDone).length / cs.length : null; };
+  return `<div class="tline">
+    ${ps.map(p => `<div class="tl-row"><span class="muted" title="${esc(p.ref)}" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.name)}</span><div class="tl-track"><span class="bar ${p.done ? 'done' : ''}" style="left:${x(p.start)};width:calc(${x(p.end)} - ${x(p.start)})" title="${esc(p.name)}: ${fmtD(p.start)} a ${fmtD(p.end)}"></span></div></div>`).join('')}
+    ${fs.length ? `<div class="tl-row"><span class="muted">Features</span><div class="tl-track">${fs.map(f => { const pr = prog(f.ref), late = f.status !== 'done' && f.due < today(); return `<span class="dia ${f.status === 'done' ? 'done' : late ? 'late' : ''}" style="left:${x(f.due)}" title="${esc(f.ref)} ${esc(f.name)} · prazo ${fmtD(f.due)}${pr != null ? ` · ${Math.round(pr * 100)}% dos cards do time` : ''}"></span>`; }).join('')}</div></div>` : ''}
+    <div class="tl-axis"><i></i><div>${meses.map(m => `<span style="left:${x(ymd(m))}">${m.toLocaleDateString('pt-BR', { month: 'short' })}</span>`).join('')}</div></div>
+    <div class="tl-ov">
+      <span class="tl-vl" style="left:${x(today())}" title="Hoje"></span>
+      ${isYmd(ci?.end) ? `<span class="tl-vl c" style="left:${x(ci.end)}" title="Prazo na Central ${fmtD(ci.end)}"></span>` : ''}
+      ${isYmd(e.forecastEnd) ? `<span class="tl-vl f" style="left:${x(e.forecastEnd)}" title="Previsão do time ${fmtD(e.forecastEnd)}"></span>` : ''}</div>
+    <div class="legend" style="margin-top:8px"><span><i style="background:var(--late)"></i>hoje</span>${isYmd(ci?.end) ? `<span><i style="background:var(--ink)"></i>prazo na Central ${fmtD(ci.end)}</span>` : ''}${isYmd(e.forecastEnd) ? `<span><i style="background:var(--bv)"></i>previsão do time ${fmtD(e.forecastEnd)}</span>` : ''}<span><i style="background:var(--bv-mid)"></i>fases</span><span>◆ features</span></div></div>`;
+}
+function fcardHtml(e, f, ci) {
+  const cs = epicCards(e).filter(c => c.featureRef === f.ref), open = cs.filter(c => !isDone(c)), ph = featPhase({ ...f, init: ci }), deps = featDeps(f), od = openDeps(f);
+  const pr = cs.length ? Math.round((cs.length - open.length) / cs.length * 100) : 0;
+  const st = f.status === 'done' ? 'done' : cs.length ? derivedStatus(cs, { due: f.due, forecast: open.map(c => c.due).filter(isYmd).sort().at(-1) }) : 'ok';
+  return `<div class="fcard ${f.status === 'done' ? 'done' : ''}"><div class="row"><span class="hd ${st}"></span><span class="code bvc">${esc(f.ref)}</span><span class="grow"></span>${f.status === 'done' ? '<span class="chip">concluída na Central</span>' : f.due ? `<span class="small ${f.due < today() ? 'latec' : 'muted'}">prazo ${fmtD(f.due)}</span>` : ''}</div>
+    <b style="font-size:14px">${esc(f.name)}</b>
+    <div class="row">${ph ? `<span class="chip line">fase ${esc(ph.name)}</span>` : ''}${deps.map(d => `<span class="chip ${d.f?.status === 'done' ? '' : 'late'}" title="${esc(d.f?.name || '')} (${d.f?.status === 'done' ? 'concluída' : 'aberta'})">depende de ${esc(d.ref.split('.')[1])}</span>`).join('')}</div>
+    <div class="row small"><div class="pb"><i style="width:${pr}%"></i></div><span class="muted">${cs.length ? `${cs.length - open.length}/${cs.length} cards` : 'sem cards'}</span></div>
+    ${od.length && open.length ? `<div class="small latec">Atenção: depende de ${esc(od.map(d => d.ref).join(', '))}, ainda aberta(s) na Central.</div>` : ''}
+    ${open.length ? `<div class="cl">${open.slice(0, 5).map(c => `<button class="ci" data-act="card" data-card="${c.id}">${c.owner ? avatar(c.owner) : '<span class="av">–</span>'}<span class="t">${esc(c.title)}</span>${c.blocked ? '<span class="chip late">bloq.</span>' : `<span class="faint">${esc(cols()[colIdx(c.col)]?.name || '')}</span>`}</button>`).join('')}${open.length > 5 ? `<span class="small faint" style="padding-left:6px">+${open.length - 5} card(s)</span>` : ''}</div>` : ''}
+    ${f.status !== 'done' ? `<button class="btn sm ghost" style="align-self:flex-start" data-act="addCardFeat" data-epic="${e.id}" data-ref="${esc(f.ref)}">+ Card nesta feature</button>` : ''}</div>`;
 }
 function vEpics() {
-  const eps = epicsLive().sort((a, b) => (a.status === 'done') - (b.status === 'done'));
-  const linked = new Set(eps.map(e => e.centralRef).filter(Boolean));
-  const naoUsadas = catInits().filter(i => !linked.has(i.ref));
-  const html = eps.map(e => {
-    const ci = catInit(e.centralRef), cs = epicCards(e), st = e.status === 'done' ? 'done' : epicStatus(e), prog = epicProgress(e);
-    const feats = ci?.features || [];
-    const byF = r => cs.filter(c => c.featureRef === r);
-    const semF = cs.filter(c => !c.featureRef);
-    return `<div class="card"><div class="row"><span class="hd ${st}"></span><h2 style="margin:0">${esc(e.name)}</h2><span class="code faint">${esc(e.id)}</span>
-      ${e.centralRef ? `<span class="chip bv code">${esc(e.centralRef)}</span>${ci ? `<span class="chip">${esc(BUCKET[ci.bucket] || ci.bucket)}</span>` : '<span class="chip late" title="Código não está no catálogo atual">fora do catálogo</span>'}` : '<span class="chip" title="A Central concilia iniciativas nascidas no time">iniciativa do time, sem vínculo</span>'}
-      <span class="grow"></span><span class="chip line">${ST_LABEL[st]}${e.status === 'auto' || !e.status ? ' (automático)' : ''}</span><button class="btn sm" data-act="editEpic" data-id="${e.id}">Editar</button></div>
-      <div class="row" style="margin:10px 0"><div class="pb"><i style="width:${prog}%"></i></div><span class="small">${prog}% · ${cs.filter(isDone).length} de ${cs.length} cards${e.forecastEnd ? ` · previsão do time ${fmtD(e.forecastEnd)}` : ''}${ci?.end ? ` · prazo na Central ${fmtD(ci.end)}` : ''}</span></div>
-      ${e.updates.at(-1) ? `<p class="small" style="margin:0 0 8px"><span class="muted">${fmtD(e.updates.at(-1).date)}:</span> ${esc(e.updates.at(-1).text)}</p>` : ''}
-      ${ci ? phaseBar(ci) : ''}
-      ${ci ? `<div class="lbl" style="margin-top:12px">Features da Central <span class="n">${feats.length}</span></div>${feats.length ? feats.filter(f => f.status !== 'cancelled').map(f => {
-        const fc = byF(f.ref), ph = featPhase({ ...f, init: ci }), deps = featDeps(f), od = openDeps(f);
-        return `<div style="border-top:1px solid var(--line);padding:8px 0"><div class="row"><span class="code bvc">${esc(f.ref)}</span><b>${esc(f.name)}</b>${f.status === 'done' ? '<span class="chip">concluída na Central</span>' : ''}
-          ${ph ? `<span class="chip" title="Fase ${esc(ph.ref)}">fase: ${esc(ph.name)}</span>` : ''}${deps.length ? `<span class="chip ${od.length ? 'late' : ''}" title="${esc(deps.map(d => d.ref + ' ' + (d.f?.name || '') + (d.f?.status === 'done' ? ' (concluída)' : ' (aberta)')).join('; '))}">depende de ${esc(deps.map(d => d.ref.split('.')[1]).join(', '))}${od.length ? ' (aberta)' : ''}</span>` : ''}
-          <span class="grow"></span><span class="small muted">${f.due ? 'prazo ' + fmtD(f.due) : ''}${fc.length ? ` · ${fc.filter(isDone).length}/${fc.length} cards` : ''}</span></div>
-          ${fc.length ? `<div class="row small" style="margin-top:4px">${fc.filter(c => !isDone(c)).map(c => `<button class="chip ${c.blocked ? 'late' : 'line'}" data-act="card" data-card="${c.id}">${esc(c.id)} ${esc(clip(c.title, 30))}</button>`).join('')}${fc.some(isDone) ? `<details class="small"><summary class="muted" style="cursor:pointer">${fc.filter(isDone).length} concluído(s)</summary><div class="row" style="margin-top:4px">${fc.filter(isDone).map(c => `<button class="chip" data-act="card" data-card="${c.id}">${esc(c.id)} ${esc(clip(c.title, 30))} ✓</button>`).join('')}</div></details>` : ''}</div>` : '<div class="small faint">Nenhum card do time ligado a esta feature.</div>'}</div>`;
-      }).join('') : '<div class="empty">A Central ainda não cadastrou features nesta iniciativa.</div>'}` : ''}
-      ${semF.length && ci ? `<div class="small muted" style="margin-top:8px">${semF.length} card(s) sem feature: ${semF.slice(0, 8).map(c => `<button class="chip line" data-act="card" data-card="${c.id}">${esc(c.id)}</button>`).join(' ')}${semF.length > 8 ? ' …' : ''}</div>` : ''}</div>`;
-  }).join('');
-  return `<div class="bar"><span class="muted small">Iniciativas (épicos) do time. Ligue cada uma à iniciativa da Central, quando houver, e os cards às features dela. Iniciativas que nasceram no time vão para a Central sem vínculo e o gestor as concilia.</span><div class="grow"></div><button class="btn pri" data-act="newEpic">+ Iniciativa do time</button></div>
-    ${!catalog ? `<div class="banner">${esc(catalogErr || 'Catálogo da Central não carregado.')} <button class="btn sm" data-act="view" data-v="central">Abrir Central</button></div>` : ''}
-    ${naoUsadas.length ? `<div class="banner">A Central tem ${naoUsadas.length} iniciativa(s) do time ainda sem épico aqui: ${naoUsadas.map(i => `<button class="btn sm" data-act="epicFromCentral" data-ref="${i.ref}">${esc(i.ref)} · ${esc(clip(i.name, 30))}</button>`).join(' ')}</div>` : ''}
-    <div class="stack">${html || '<div class="card flat muted">Nenhuma iniciativa ainda.</div>'}</div>`;
+  const eps = epicsLive();
+  const ativos = eps.filter(e => e.status !== 'done'), lig = ativos.filter(e => e.centralRef), lat = ativos.filter(e => !e.centralRef), feitos = eps.filter(e => e.status === 'done');
+  const linked = new Set(eps.map(e => e.centralRef).filter(Boolean)), naoUsadas = catInits().filter(i => !linked.has(i.ref));
+  if (!eps.some(e => e.id === ui.epicSel)) ui.epicSel = (lig[0] || lat[0] || feitos[0])?.id || '';
+  const lista = `<div class="ep-list">
+    ${lig.length ? `<div class="ep-g">Ligadas à Central</div>${lig.map(epicRow).join('')}` : ''}
+    ${lat.length ? `<div class="ep-g">Do time, sem vínculo</div>${lat.map(epicRow).join('')}` : ''}
+    ${naoUsadas.length ? `<div class="ep-g">Na Central, sem épico aqui</div>${naoUsadas.map(i => `<div class="ep-row ghost"><span class="code bvc">${esc(i.ref)}</span><span class="row" style="min-width:0;flex-wrap:nowrap"><span class="grow small" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(i.name)}</span><button class="btn sm" data-act="epicFromCentral" data-ref="${esc(i.ref)}">Trazer</button></span></div>`).join('')}` : ''}
+    ${feitos.length ? `<button class="ep-g" data-act="toggleEpDone" style="text-align:left">${ui.epicDone ? '▾' : '▸'} Concluídas (${feitos.length})</button>${ui.epicDone ? feitos.map(epicRow).join('') : ''}` : ''}
+    <button class="btn" style="margin-top:8px" data-act="newEpic">+ Iniciativa do time</button></div>`;
+  const e = epicById(ui.epicSel);
+  if (!e) return `<div class="ep-layout">${lista}<div class="card flat muted">Nenhuma iniciativa ainda. Traga uma da Central ou crie uma do time.</div></div>`;
+  const ci = catInit(e.centralRef), cs = epicCards(e), open = cs.filter(c => !isDone(c)), st = e.status === 'done' ? 'done' : epicStatus(e), prog = epicProgress(e);
+  const bl = open.filter(c => c.blocked), up = e.updates.at(-1);
+  const delta = isYmd(e.forecastEnd) && isYmd(ci?.end) ? Math.round((parseYmd(e.forecastEnd) - parseYmd(ci.end)) / DAY) : null;
+  const porCol = cols().map((col, i) => ({ col, n: cs.filter(c => c.col === col.id).length, cor: STAGE_COL[Math.min(STAGE_COL.length - 1, Math.round(i / Math.max(1, cols().length - 1) * (STAGE_COL.length - 1)))] }));
+  const feats = (ci?.features || []).filter(f => f.status !== 'cancelled');
+  const semF = open.filter(c => !c.featureRef);
+  const detalhe = `<div>
+    ${!catalog && e.centralRef ? `<div class="banner">${esc(catalogErr || 'Catálogo da Central não carregado: features e fases aparecem depois de ler o catálogo.')} <button class="btn sm" data-act="view" data-v="central">Abrir Central</button></div>` : ''}
+    <div class="ep-head">${ring(prog, 56, st)}<div class="grow" style="min-width:0"><div class="row small muted"><span class="code">${esc(e.id)}</span>${e.centralRef ? `<span class="chip bv code">${esc(e.centralRef)}</span>${ci ? `<span class="chip">${esc(BUCKET[ci.bucket] || ci.bucket)}</span>${ci.owner ? `<span>dono na Central: ${esc(ci.owner)}</span>` : ''}` : '<span class="chip late">fora do catálogo</span>'}` : '<span class="chip" title="O gestor concilia na Central">iniciativa do time, sem vínculo</span>'}</div>
+      <h2>${esc(e.name)}</h2>${ci && ci.name !== e.name ? `<div class="small muted">Na Central: ${esc(ci.name)}</div>` : ''}</div>
+      <div class="row"><select class="sel" data-act="epicStatus" data-id="${e.id}" title="Situação que vai para a Central">${['auto', 'ok', 'attn', 'late', 'paused', 'done'].map(x => `<option value="${x}" ${(e.status || 'auto') === x ? 'selected' : ''}>${x === 'auto' ? `Automático: ${ST_LABEL[epicStatus({ ...e, status: 'auto' })]}` : ST_LABEL[x]}</option>`).join('')}</select><button class="btn" data-act="editEpic" data-id="${e.id}">Editar</button></div></div>
+    <div class="kpis">
+      <div class="kpi"><b>${prog}%</b><span>${cs.length - open.length} de ${cs.length} cards concluídos</span></div>
+      <div class="kpi"><b>${open.filter(isWip).length}</b><span>em andamento · ${open.length} abertos</span></div>
+      <div class="kpi ${bl.length ? 'alert' : ''}"><b>${bl.length}</b><span>bloqueado(s)${bl[0] ? ` · ${esc(catLabel(bl[0].blocked.cat))}` : ''}</span></div>
+      <div class="kpi ${delta > 0 ? 'alert' : ''}"><b>${e.forecastEnd ? fmtD(e.forecastEnd) : '–'}</b><span>${e.forecastEnd ? (delta == null ? 'previsão do time' : delta > 0 ? `${delta} dia(s) depois do prazo da Central` : delta < 0 ? `${-delta} dia(s) antes do prazo` : 'no prazo da Central') : `<button class="btn sm ghost" data-act="editEpic" data-id="${e.id}">Informar previsão</button>`}</span></div></div>
+    <div class="stack-bar" title="Cards por coluna">${porCol.filter(x => x.n).map(x => `<i style="width:${x.n / Math.max(1, cs.length) * 100}%;background:${x.cor}" title="${esc(x.col.name)}: ${x.n}"></i>`).join('')}</div>
+    <div class="legend" style="margin-bottom:16px">${porCol.map(x => `<span><i style="background:${x.cor}"></i>${esc(x.col.name)} ${x.n}</span>`).join('')}</div>
+    <div class="upd">${up ? avatar(up.author || db.team.name) : ''}<div class="grow" style="min-width:0">${up ? `<q>${esc(up.text)}</q><div class="small muted">${fmtD(up.date)}${up.author ? ' · ' + esc(up.author) : ''} · vai para a reunião de status do gestor</div>` : '<span class="muted small">Nenhuma atualização ainda. Uma linha basta: o que avançou e o que preocupa.</span>'}
+      <form class="mini" data-act="quickUpdate" data-id="${e.id}" style="margin-top:8px"><input class="sin" name="t" maxlength="500" placeholder="Nova atualização de status"><button class="btn sm pri">Registrar</button></form></div></div>
+    ${ci ? `<div class="sec-t">Linha do tempo da Central <span class="faint" style="text-transform:none;letter-spacing:0;font-weight:500">fases podem se sobrepor</span></div>${timeline(e, ci) || '<div class="small faint">A Central ainda não informou fases nem prazos de features.</div>'}` : ''}
+    ${ci ? `<div class="sec-t">Features da Central <span class="n" style="color:var(--faint)">${feats.length}</span></div>${feats.length ? `<div class="fgrid">${feats.sort((a, b) => (a.status === 'done') - (b.status === 'done') || (a.due || '9').localeCompare(b.due || '9')).map(f => fcardHtml(e, f, ci)).join('')}</div>` : '<div class="small faint">A Central ainda não cadastrou features nesta iniciativa.</div>'}` : ''}
+    <div class="sec-t">${ci ? 'Cards abertos sem feature' : 'Cards abertos'} <span class="faint" style="text-transform:none;letter-spacing:0;font-weight:500">${semF.length}${ci && semF.length ? ' · ligue a uma feature para aparecerem embaixo dela na Central' : ''}</span></div>
+    ${semF.length ? `<div class="card flat" style="padding:6px 10px">${semF.map(c => `<div class="row" style="padding:5px 0;border-bottom:1px solid var(--line);flex-wrap:nowrap"><button class="ci row grow" style="min-width:0;flex-wrap:nowrap;text-align:left" data-act="card" data-card="${c.id}">${c.owner ? avatar(c.owner) : '<span class="av">–</span>'}<span class="code muted">${c.id}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.title)}</span>${c.blocked ? '<span class="chip late">bloq.</span>' : ''}</button>
+      <span class="small faint" style="white-space:nowrap">${esc(cols()[colIdx(c.col)]?.name || '')}</span>${feats.some(f => f.status !== 'done') ? `<select class="sel" data-act="linkFeat" data-card="${c.id}" style="max-width:200px"><option value="">Ligar a feature…</option>${feats.filter(f => f.status !== 'done').map(f => `<option value="${esc(f.ref)}">${esc(f.ref.split('.')[1])} · ${esc(clip(f.name, 30))}</option>`).join('')}</select>` : ''}</div>`).join('')}</div>` : '<div class="small faint">Nenhum.</div>'}
+    <div class="row" style="margin-top:12px"><button class="btn sm" data-act="addCardFeat" data-epic="${e.id}" data-ref="">+ Card nesta iniciativa</button></div></div>`;
+  return `<div class="bar"><span class="muted small">Iniciativas (épicos) do time. Ligue cada uma à iniciativa da Central, quando houver, e os cards às features dela. As que nasceram no time vão sem vínculo e o gestor concilia.</span></div>
+    <div class="ep-layout">${lista}${detalhe}</div>`;
 }
 
 /* --------------------------------- Métricas --------------------------------- */
@@ -1350,8 +1431,11 @@ document.addEventListener('click', async e => {
       case 'cancelCard': { const c = cardById(el.dataset.card); if (!confirm('Cancelar este card? Ele sai do quadro e das métricas, e vai para a Central como cancelado.')) return; c.cancelledAt = agoraComFuso(); if (c.blocked) desbloquear(c); c.upd = Date.now(); closeModal(); touch(); break; }
       case 'uncancel': { const c = cardById(el.dataset.card); c.cancelledAt = null; c.upd = Date.now(); touch(); cardModal(c.id); break; }
       case 'bf': ui.boardFilter = el.dataset.v; render(); break;
-      case 'newEpic': { const n = prompt('Nome da iniciativa (épico) do time'); if (!n?.trim()) return; const ep = novoEpico(clip(n, 200)); touch(); epicModal(ep.id); break; }
-      case 'epicFromCentral': { const ci = catInit(el.dataset.ref); const ep = novoEpico(ci.name); ep.centralRef = ci.ref; touch(); toast(`Iniciativa ${ci.ref} criada no quadro.`); break; }
+      case 'newEpic': { const n = prompt('Nome da iniciativa (épico) do time'); if (!n?.trim()) return; const ep = novoEpico(clip(n, 200)); ui.epicSel = ep.id; touch(); epicModal(ep.id); break; }
+      case 'epicFromCentral': { const ci = catInit(el.dataset.ref); const ep = novoEpico(ci.name); ep.centralRef = ci.ref; ui.epicSel = ep.id; touch(); toast(`Iniciativa ${ci.ref} trazida para o quadro.`); break; }
+      case 'epicSel': ui.epicSel = id; render(); break;
+      case 'toggleEpDone': ui.epicDone = !ui.epicDone; render(); break;
+      case 'addCardFeat': { const c = novoCard({ col: cols()[0].id, epicId: el.dataset.epic, featureRef: el.dataset.ref || null }); touch(); cardModal(c.id); setTimeout(() => $('#dlg .ttl-in')?.select(), 30); break; }
       case 'editEpic': epicModal(id); break;
       case 'addUpdate': { const ep = epicById(id), t = $('#upd').value.trim(); if (!t) return; ep.updates.push({ date: today(), text: clip(t, 500), ...(db.team.contact ? { author: db.team.contact } : {}) }); ep.upd = Date.now(); touch(); epicModal(id); break; }
       case 'delEpic': { const ep = epicById(id); if (!confirm('Excluir esta iniciativa?')) return; ep.deleted = true; ep.upd = Date.now(); closeModal(); touch(); break; }
@@ -1408,6 +1492,8 @@ document.addEventListener('change', e => {
     case 'ob': ui.onlyBlocked = el.checked; render(); break;
     case 'od': ui.showOldDone = el.checked; render(); break;
     case 'bd': ui.backlogDone = el.checked; render(); break;
+    case 'linkFeat': { const c = cardById(el.dataset.card); if (!el.value) return; c.featureRef = el.value; c.upd = t; touch(); toast(`${c.id} ligado a ${el.value}.`); break; }
+    case 'epicStatus': { const ep = epicById(el.dataset.id); ep.status = el.value; ep.doneAt = el.value === 'done' ? agoraComFuso() : null; ep.upd = t; touch(); break; }
     case 'setSprint': { const c = cardById(el.dataset.card); c.sprintId = el.value || null; c.upd = t; touch(); break; }
     case 'slug': { const v = el.value.trim(); if (v && !SLUG_RE.test(v)) { toast('Identificador: só minúsculas, números e hífens (ex.: pagamentos).'); el.value = db.team.slug; return; } db.team.slug = v; db.team.upd = t; catalog = null; touch(); break; }
     case 'contact': db.team.contact = clip(el.value, 80); db.team.upd = t; touch(); break;
@@ -1437,6 +1523,7 @@ document.addEventListener('submit', e => {
     } catch (err) { toast(err.message); }
     return;
   }
+  if (a === 'quickUpdate') { e.preventDefault(); const ep = epicById(f.dataset.id), tx = f.t.value.trim(); if (!tx) return; ep.updates.push({ date: today(), text: clip(tx, 500), ...(db.team.contact ? { author: db.team.contact } : {}) }); ep.upd = Date.now(); touch(); toast('Atualização registrada; vai na próxima publicação do backlog.'); return; }
   if (a !== 'quickAdd') return; e.preventDefault();
   const t = f.t.value.trim(); if (!t) return; novoCard({ title: clip(t, 200), epicId: f.dataset.epic }); touch();
   setTimeout(() => $(`#main form[data-epic="${f.dataset.epic}"] input`)?.focus(), 0);
