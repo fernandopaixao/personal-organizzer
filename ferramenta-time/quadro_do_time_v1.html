@@ -163,6 +163,41 @@ dialog.wide{width:min(1020px,96vw)}
 .fcard .ci{display:flex;align-items:center;gap:6px;font-size:12px;padding:3px 6px;border-radius:8px;text-align:left;width:100%}.fcard .ci:hover{background:#f3f4f8}
 .fcard .ci .t{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:900px){.ep-layout{grid-template-columns:1fr}.ep-list{position:static;max-height:none}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.tl-row,.tl-axis{grid-template-columns:90px minmax(0,1fr)}.tl-ov{left:116px}}
+/* Criação rápida e formulário de card (mesmo padrão da Central) */
+.quick{flex:1;max-width:620px;min-width:220px;position:relative}
+.quick input{width:100%;border:1px solid var(--line);background:#fff;border-radius:12px;padding:9px 92px 9px 34px;outline:none}
+.quick input:focus{border-color:var(--bv);box-shadow:0 0 0 3px var(--bv-soft)}
+.quick .pl{position:absolute;left:13px;top:7px;color:var(--bv);font-weight:700;font-size:16px}
+.quick .more{position:absolute;right:5px;top:5px}
+.qinfo{position:absolute;left:0;top:100%;margin-top:6px;display:none;background:#fff;color:var(--muted);border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:12px;box-shadow:0 8px 24px rgba(20,30,70,.1);width:max-content;max-width:min(560px,90vw);z-index:5}
+.quick:focus-within .qinfo{display:block}
+.tf-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);flex:1;min-height:0}
+.tf-main{padding:24px 28px;display:flex;flex-direction:column;gap:16px;overflow:auto}
+.tf-side{padding:24px;background:#f8f9fc;border-left:1px solid var(--line);display:flex;flex-direction:column;gap:14px;overflow:auto}
+.tf-h{font-family:var(--title);font-size:12px;font-weight:650;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.tf-title{border:0;border-bottom:1.5px solid var(--line);outline:none;font-size:19px;font-weight:600;font-family:var(--title);letter-spacing:-.01em;padding:6px 0 10px;width:100%;background:transparent}
+.tf-title:focus{border-bottom-color:var(--bv)}.tf-title::placeholder{color:var(--faint);font-weight:500}
+.tf-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}.field>label{font-size:11.5px;font-weight:600;color:var(--muted)}
+.field input:not([type=checkbox]),.field select,.field textarea{width:100%;border:1px solid #e1e4ec;border-radius:10px;padding:8px 10px;background:#fff;outline:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--bv)}
+.hint{font-size:11.5px;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.tgl{display:inline-flex;gap:8px;align-items:center;font-size:13px;color:var(--ink);font-weight:500;cursor:pointer}.tgl input{accent-color:var(--bv)}
+.sgw{display:flex;background:#f0f1f6;border-radius:10px;padding:2px;gap:2px;flex-wrap:wrap}.sgw button{flex:1;padding:5px 6px;border-radius:8px;color:var(--muted);font-weight:550;font-size:12px;white-space:nowrap}
+.sgw button.on{background:#fff;color:var(--bv);box-shadow:0 1px 2px rgba(20,30,70,.1)}
+.macts{display:flex;gap:8px;justify-content:flex-end;align-items:center;padding:14px 24px;border-top:1px solid var(--line)}
+/* Lista de cards */
+.lgrp{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.lgh{display:flex;align-items:center;gap:10px;padding:12px 16px;background:#fbfbfd;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.lgh h3{font-size:13.5px}
+.lrow{display:grid;grid-template-columns:22px 62px minmax(0,1fr) 120px 110px 92px 26px;gap:10px;align-items:center;padding:8px 16px;border-bottom:1px solid var(--line);cursor:pointer;font-size:12.5px}
+.lrow:last-child{border-bottom:0}.lrow:hover{background:#f7f8fc}.lrow.done{color:var(--muted)}.lrow.done .lt{text-decoration:line-through;text-decoration-color:var(--faint)}
+.lrow .lt{display:flex;gap:6px;align-items:center;min-width:0}.lrow .lt>span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:550}
+.lrow .sel{padding:3px 6px;font-size:11.5px;width:100%}
+.colp{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden}.colp i{width:8px;height:8px;border-radius:50%;flex:none}
+.kic{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:6px;background:#f0f1f6;color:var(--muted);font-size:10px}.kic.bug{background:var(--late-soft);color:var(--late)}.kic.feature,.kic.entrega{background:var(--bv-soft);color:var(--bv)}
+.due{font-size:11.5px;white-space:nowrap}.due.late{color:var(--late);font-weight:600}.due.soon{color:var(--bv);font-weight:600}
+@media (max-width:900px){.tf-row{grid-template-columns:1fr}.tf-grid{display:block;overflow:auto}.tf-main,.tf-side{overflow:visible}.tf-side{border-left:0;border-top:1px solid var(--line)}.lrow{grid-template-columns:22px minmax(0,1fr) auto 26px}.lrow .hm{display:none}.bar .sgw{flex:1 1 100%!important}.quick{order:3;flex-basis:100%}}
 dialog::backdrop{background:rgba(22,26,35,.35)}
 .mh{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;z-index:1}
 .mb{padding:16px 20px;overflow:auto}
@@ -318,7 +353,7 @@ let lastMod = 0;            // lastModified conhecido do arquivo de dados
 let dirty = false, saving = false, saveTimer = null, saveState = 'none', saveErr = '';
 let catalog = null, catalogErr = '';  // catálogo decifrado (só em memória)
 let view = 'board';
-const ui = { boardFilter: 'sprint', epicFilter: '', q: '', onlyBlocked: false, showOldDone: false, backlogDone: false, metricsJson: false, centralPreview: '', epicSel: '', epicDone: false };
+const ui = { boardFilter: 'sprint', epicFilter: '', q: '', onlyBlocked: false, showOldDone: false, backlogDone: false, metricsJson: false, centralPreview: '', epicSel: '', epicDone: false, bGroup: 'epic', bFilter: 'open', lq: '' };
 const pub = { pendingStatus: false, timer: null, busy: false, msg: '', err: '' };
 let keysInfo = { lista: [], atual: null };
 let rootOk = false, rootName = '';
@@ -359,6 +394,15 @@ function normalizeDb(d) {
   for (const e of d.epics) { e.updates ??= []; e.featureNotes ??= {}; e.uid ??= uid(); }
   for (const s of d.sprints) { s.committed ??= []; s.uid ??= uid(); }
   return d;
+}
+
+const KIND_IC = { 'história': '◧', feature: '◆', entrega: '▲', bug: '●', spike: '✦', melhoria: '↑' };
+const kic = k => `<span class="kic ${k === 'bug' ? 'bug' : k === 'feature' || k === 'entrega' ? 'feature' : ''}" title="${esc(k)}">${KIND_IC[k] || '◧'}</span>`;
+function relDue(c) {         // prazo relativo: "amanhã", "em 3 d", "atrasado 2 d"
+  if (!isYmd(c.due)) return null;
+  if (isDone(c) || c.cancelledAt) return { txt: fmtD(c.due), cls: '' };
+  const n = Math.round((parseYmd(c.due) - parseYmd(today())) / DAY);
+  return n < 0 ? { txt: `atrasado ${-n} d`, cls: 'late' } : n === 0 ? { txt: 'hoje', cls: 'late' } : n === 1 ? { txt: 'amanhã', cls: 'soon' } : n <= 7 ? { txt: `em ${n} d`, cls: 'soon' } : { txt: fmtD(c.due), cls: '' };
 }
 
 /* ------------------------- pessoas do time ------------------------- */
@@ -918,7 +962,7 @@ function render() {
   try { body = ({ board: vBoard, backlog: vBacklog, sprints: vSprints, epics: vEpics, metrics: vMetrics, central: vCentral, settings: vSettings })[view](); }
   catch (e) { console.error(e); body = `<div class="banner warn">Erro ao desenhar a tela: ${esc(e.message)}</div>`; }
   const sx = $('#main').querySelector('.board')?.scrollLeft;
-  $('#main').innerHTML = `<header class="top"><div><h1>${esc(title)}</h1><div class="team">${esc(db.team.name)}${db.team.slug ? ` · <span class="code">${esc(db.team.slug)}</span>` : ''}</div></div><div class="grow"></div><div class="row" id="chrome">${chromeHtml()}</div></header>
+  $('#main').innerHTML = `<header class="top"><div><h1>${esc(title)}</h1><div class="team">${esc(db.team.name)}${db.team.slug ? ` · <span class="code">${esc(db.team.slug)}</span>` : ''}</div></div><div class="quick"><span class="pl">+</span><input id="quickCard" autocomplete="off" placeholder="Novo card… @pessoa amanhã #iniciativa" aria-label="Criar card rápido"><button class="btn sm ghost more" data-act="quickMore" title="Abrir o formulário completo">Detalhes</button><div class="qinfo" id="qinfo">Enter cria no ${esc(cols()[0].name)} · @pessoa responsável · hoje, amanhã ou dd/mm · #iniciativa ou #PAG-042 · F2 feature da Central · !bug, !spike, !feature…</div></div><div class="grow"></div><div class="row" id="chrome">${chromeHtml()}</div></header>
     ${db.demo ? '<div class="banner">Exemplo com dados fictícios do time Pagamentos. Nada é salvo nem publicado. <button class="btn sm" data-act="home">Voltar ao início</button></div>' : ''}
     ${body}`;
   if (sx) { const b = $('#main').querySelector('.board'); if (b) b.scrollLeft = sx; }
@@ -986,9 +1030,9 @@ function vBoard() {
 function kcHtml(c) {
   const age = daysInCol(c);
   return `<article class="kc ${c.blocked ? 'blk' : ''}" draggable="true" data-card="${c.id}" data-act="card">
-    <div class="row small muted"><span class="code">${esc(c.id)}</span><span>${esc(c.kind || '')}</span><span class="grow"></span>${c.points != null && c.points !== '' ? `<span>${esc(c.points)} pt</span>` : ''}</div>
+    <div class="row small muted">${kic(c.kind)}<span class="code">${esc(c.id)}</span><span class="grow"></span>${c.points != null && c.points !== '' ? `<span class="chip line">${esc(c.points)} pt</span>` : ''}</div>
     <div class="tt">${esc(c.title)}</div><div class="mt">${cardChips(c)}</div>
-    <div class="ft">${c.owner ? avatar(c.owner) : ''}${c.due ? `<span class="${!isDone(c) && c.due < today() ? 'latec' : ''}">prazo ${fmtD(c.due)}</span>` : ''}<span class="grow"></span>${!isDone(c) && colIdx(c.col) > 0 ? `<span title="Dias nesta coluna">${age}d</span>` : ''}</div></article>`;
+    <div class="ft">${c.owner ? avatar(c.owner) : ''}${relDue(c) ? `<span class="due ${relDue(c).cls}" title="Prazo ${fmtD(c.due)}">◷ ${relDue(c).txt}</span>` : ''}<span class="grow"></span>${!isDone(c) && colIdx(c.col) > 0 ? `<span title="Dias nesta coluna">${age}d</span>` : ''}</div></article>`;
 }
 function wireBoard() {
   const b = $('#main').querySelector('.board'); if (!b) return;
@@ -1012,21 +1056,39 @@ function epicOpts(sel, vazio, comSem = false) {
 }
 
 /* --------------------------------- Backlog --------------------------------- */
+function colDot(colId) { const i = colIdx(colId), n = Math.max(1, cols().length - 1); return STAGE_COL[Math.min(STAGE_COL.length - 1, Math.round(i / n * (STAGE_COL.length - 1)))] || '#d5dbf7'; }
+function listRow(c, sps) {
+  const d = relDue(c), col = cols()[colIdx(c.col)];
+  const spOpts = [...sps, ...(c.sprintId && !sps.some(s => s.id === c.sprintId) ? [sprintById(c.sprintId)].filter(Boolean) : [])];
+  return `<div class="lrow ${isDone(c) ? 'done' : ''}" data-act="card" data-card="${c.id}">${kic(c.kind)}<span class="code muted hm">${c.id}</span>
+    <span class="lt"><span>${esc(c.title)}</span>${c.featureRef ? `<span class="chip bv code">${esc(c.featureRef.split('.')[1])}</span>` : ''}${c.blocked ? '<span class="chip late">bloqueado</span>' : ''}</span>
+    <span class="colp hm"><i style="background:${colDot(c.col)}"></i>${esc(col?.name || c.col)}</span>
+    <span class="hm"><select class="sel" data-act="setSprint" data-card="${c.id}" onclick="event.stopPropagation()"><option value="">Sem sprint</option>${spOpts.map(s => `<option value="${s.id}" ${c.sprintId === s.id ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></span>
+    <span class="due ${d?.cls || ''}">${d ? '◷ ' + d.txt : '<span class="faint">sem prazo</span>'}</span>${c.owner ? avatar(c.owner) : '<span class="av" title="Sem responsável" style="background:#fff;border:1px dashed var(--faint)"></span>'}</div>`;
+}
 function vBacklog() {
-  const groups = [...epicsLive().filter(e => e.status !== 'done'), { id: '', name: 'Sem iniciativa' }];
-  const sps = db.sprints.filter(s => !s.deleted && s.state !== 'closed');
-  const html = groups.map(e => {
-    const cs = activeCards().filter(c => (c.epicId || '') === e.id && (ui.backlogDone || !isDone(c))).sort((a, b) => colIdx(a.col) - colIdx(b.col) || a.order - b.order);
-    if (!e.id && !cs.length) return '';
-    return `<div class="card flat"><div class="row" style="margin-bottom:8px"><h3>${esc(e.name)}</h3>${e.centralRef ? `<span class="chip bv code">${esc(e.centralRef)}</span>` : e.id ? '<span class="chip">iniciativa do time</span>' : ''}<span class="grow"></span>
-      <form class="row" data-act="quickAdd" data-epic="${e.id}"><input class="sin" name="t" placeholder="Novo card nesta iniciativa" style="width:240px"><button class="btn sm">Adicionar</button></form></div>
-      ${cs.length ? `<table class="t"><thead><tr><th>Card</th><th>Título</th><th>Tipo</th><th>Feature na Central</th><th>Coluna</th><th>Sprint</th><th>Prazo</th></tr></thead><tbody>${cs.map(c => `<tr class="click" data-act="card" data-card="${c.id}">
-        <td class="code">${c.id}</td><td>${esc(c.title)} ${c.blocked ? '<span class="chip late">bloqueado</span>' : ''}</td><td class="muted">${esc(c.kind)}</td><td>${c.featureRef ? `<span class="chip bv code">${esc(c.featureRef)}</span>` : '<span class="faint">–</span>'}</td>
-        <td>${esc(cols()[colIdx(c.col)]?.name || c.col)}</td><td><select class="sel" data-act="setSprint" data-card="${c.id}" onclick="event.stopPropagation()"><option value="">Sem sprint</option>${[...sps, ...(c.sprintId && !sps.some(s => s.id === c.sprintId) ? [sprintById(c.sprintId)].filter(Boolean) : [])].map(s => `<option value="${s.id}" ${c.sprintId === s.id ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></td>
-        <td class="${c.due && c.due < today() && !isDone(c) ? 'latec' : ''}">${fmtD(c.due)}</td></tr>`).join('')}</tbody></table>` : '<div class="empty">Sem cards abertos.</div>'}</div>`;
-  }).join('');
-  return `<div class="bar"><span class="muted small">Todos os cards do time, por iniciativa. As métricas consideram o backlog inteiro, com ou sem vínculo com a Central.</span><div class="grow"></div>
-    <label class="row small muted"><input type="checkbox" data-act="bd" ${ui.backlogDone ? 'checked' : ''}> Mostrar concluídos</label><button class="btn" data-act="newEpic">+ Iniciativa do time</button><button class="btn pri" data-act="newCard">+ Card</button></div><div class="stack">${html}</div>`;
+  const sps = db.sprints.filter(s => !s.deleted && s.state !== 'closed').sort((a, b) => (a.start || '').localeCompare(b.start || ''));
+  const q = normName(ui.lq), t = today();
+  const F = { open: c => !isDone(c), late: c => !isDone(c) && isYmd(c.due) && c.due < t, week: c => !isDone(c) && isYmd(c.due) && c.due <= addDays(t, 7), blocked: c => !!c.blocked && !isDone(c), noowner: c => !c.owner && !isDone(c), all: () => true };
+  const base = activeCards().filter(c => !q || normName(`${c.id} ${c.title} ${c.owner} ${c.featureRef || ''}`).includes(q));
+  const cs = base.filter(F[ui.bFilter] || F.open);
+  const cnt = k => base.filter(F[k]).length;
+  let groups;
+  if (ui.bGroup === 'col') groups = cols().map(c => ({ key: c.id, name: c.name, def: { col: c.id }, cards: cs.filter(x => x.col === c.id), dot: colDot(c.id) }));
+  else if (ui.bGroup === 'owner') { const ps = activePeople(); groups = [...ps.map(p => ({ key: p.id, name: p.name, av: p.name, sub: p.role, def: { owner: p.name }, cards: cs.filter(c => normName(c.owner) === normName(p.name)) })), { key: '-', name: 'Sem responsável', def: {}, cards: cs.filter(c => !c.owner) }, { key: '+', name: 'Fora da lista do time', def: {}, cards: cs.filter(c => c.owner && !ps.some(p => normName(p.name) === normName(c.owner))) }]; }
+  else if (ui.bGroup === 'sprint') groups = [...sps.map(s => ({ key: s.id, name: s.name, sub: `${fmtD(s.start)} a ${fmtD(s.end)}${s.state === 'active' ? ' · em andamento' : ''}`, def: { sprintId: s.id }, cards: cs.filter(c => c.sprintId === s.id) })), { key: '-', name: 'Sem sprint', def: { sprintId: null }, cards: cs.filter(c => !c.sprintId || !sps.some(s => s.id === c.sprintId)) }];
+  else groups = [...epicsLive().filter(e => e.status !== 'done').map(e => ({ key: e.id, name: e.name, ref: e.centralRef || '', lat: !e.centralRef, def: { epicId: e.id }, cards: cs.filter(c => c.epicId === e.id), prog: epicProgress(e) })), { key: '-', name: 'Sem iniciativa', def: { epicId: '' }, cards: cs.filter(c => !c.epicId || epicById(c.epicId)?.status === 'done') }];
+  const sortC = (a, b) => (isDone(a) - isDone(b)) || ((b.blocked ? 1 : 0) - (a.blocked ? 1 : 0)) || (a.due || '9999').localeCompare(b.due || '9999') || colIdx(b.col) - colIdx(a.col) || a.order - b.order;
+  const html = groups.filter(g => g.cards.length || ['epic', 'col', 'sprint'].includes(ui.bGroup) && g.key !== '-').map(g => `<div class="lgrp"><div class="lgh">${g.av ? avatar(g.av) : g.dot ? `<span class="colp"><i style="background:${g.dot}"></i></span>` : ''}<h3>${esc(g.name)}</h3>
+      ${g.ref ? `<span class="chip bv code">${esc(g.ref)}</span>` : g.lat ? '<span class="chip">do time</span>' : ''}${g.sub ? `<span class="small muted">${esc(g.sub)}</span>` : ''}<span class="small faint">${g.cards.length} card(s)</span>
+      ${g.prog != null ? `<span class="row small muted" style="width:140px;flex-wrap:nowrap"><span class="pb"><i style="width:${g.prog}%"></i></span>${g.prog}%</span>` : ''}<span class="grow"></span>
+      <button class="btn sm ghost" data-act="newCardIn" data-def="${esc(JSON.stringify(g.def))}">+ Card</button></div>
+      ${g.cards.length ? g.cards.sort(sortC).map(c => listRow(c, sps)).join('') : '<div class="empty" style="padding:12px 16px">Nada aqui com este filtro.</div>'}</div>`).join('');
+  return `<div class="bar"><div class="sgw" style="flex:none">${[['open', 'Abertos'], ['late', 'Atrasados'], ['week', 'Vencem em 7 dias'], ['blocked', 'Bloqueados'], ['noowner', 'Sem responsável'], ['all', 'Todos']].map(([k, l]) => `<button class="${ui.bFilter === k ? 'on' : ''}" data-act="bFilter" data-v="${k}">${l} <span class="faint">${cnt(k)}</span></button>`).join('')}</div>
+    <input class="sin" data-act="lq" placeholder="Filtrar cards" value="${esc(ui.lq)}" style="width:180px"><div class="grow"></div>
+    <span class="small muted">Agrupar por</span><div class="sgw" style="flex:none">${[['epic', 'Iniciativa'], ['col', 'Coluna'], ['owner', 'Responsável'], ['sprint', 'Sprint']].map(([k, l]) => `<button class="${ui.bGroup === k ? 'on' : ''}" data-act="bGroup" data-v="${k}">${l}</button>`).join('')}</div>
+    <button class="btn" data-act="newEpic">+ Iniciativa do time</button><button class="btn pri" data-act="newCard">+ Card</button></div>
+    <div class="stack">${html || '<div class="card flat muted">Nenhum card ainda. Use a barra no topo ou "+ Card".</div>'}</div>`;
 }
 
 /* --------------------------------- Sprints --------------------------------- */
@@ -1268,7 +1330,6 @@ function featureOpts(c) {
   const extra = c.featureRef && !fs.some(f => f.ref === c.featureRef) ? `<option value="${esc(c.featureRef)}" selected>${esc(c.featureRef)} (fora do catálogo)</option>` : '';
   return `<option value="">Sem feature</option>${extra}${fs.map(f => { const ph = featPhase({ ...f, init: ci }); return `<option value="${esc(f.ref)}" ${c.featureRef === f.ref ? 'selected' : ''}>${esc(f.ref)} · ${esc(f.name)}${ph ? ' · ' + esc(ph.name) : ''}</option>`; }).join('')}`;
 }
-const KIND_IC = { 'história': '◧', feature: '◆', entrega: '▲', bug: '●', spike: '✦', melhoria: '↑' };
 function cardModal(id) {
   const c = cardById(id); if (!c) return;
   const e = epicById(c.epicId), ci = catInit(e?.centralRef), f = c.featureRef ? catFeature(c.featureRef) : null, ph = featPhase(f), deps = featDeps(f);
@@ -1332,6 +1393,84 @@ function cardModal(id) {
   }));
   const t = $('#dlg .ttl-in'); t.onkeydown = ev => { if (ev.key === 'Enter') t.blur(); };
 }
+let nf = null;               // rascunho do formulário de novo card
+function newCardModal(def = {}) {
+  const sp = activeSprint();
+  nf = { title: '', owner: '', due: '', epicId: '', featureRef: null, kind: 'história', col: cols()[0].id, sprintId: view === 'board' && ui.boardFilter === 'sprint' && sp ? sp.id : null, points: '', link: '', notes: '', showToCentral: false, again: false, ...def };
+  if (nf.featureRef && !nf.epicId) { const ini = nf.featureRef.split('.')[0]; nf.epicId = epicsLive().find(e => e.centralRef === ini)?.id || ''; }
+  renderNewCard(); setTimeout(() => { const t = $('#nfTitle'); t?.focus(); t?.setSelectionRange(t.value.length, t.value.length); }, 30);
+}
+function renderNewCard() {
+  const e = epicById(nf.epicId), ci = catInit(e?.centralRef), f = nf.featureRef ? catFeature(nf.featureRef) : null, ph = featPhase(f), od = openDeps(f);
+  const fs = (ci?.features || []).filter(x => x.status === 'open');
+  const pessoas = activePeople();
+  const sps = db.sprints.filter(s => !s.deleted && s.state !== 'closed');
+  const venc = isYmd(nf.due) ? Math.round((parseYmd(nf.due) - parseYmd(today())) / DAY) : null;
+  modal(`<form class="tform" id="nfForm" style="display:flex;flex-direction:column;min-height:0;flex:1"><div class="tf-grid">
+    <div class="tf-main">
+      <div class="tf-h">Novo card</div>
+      <input class="tf-title" id="nfTitle" placeholder="O que precisa ser feito?" value="${esc(nf.title)}" maxlength="200" autocomplete="off" required>
+      <div class="field"><label>Responsável</label><div class="who"><button type="button" class="none ${nf.owner ? '' : 'on'}" data-act="nfSet" data-k="owner" data-v="">Ninguém</button>${pessoas.map(p => `<button type="button" class="${normName(p.name) === normName(nf.owner) ? 'on' : ''}" data-act="nfSet" data-k="owner" data-v="${esc(p.name)}" title="${esc(p.role || '')}">${avatar(p.name)}${esc(p.name.split(' ')[0])}</button>`).join('')}</div>
+        <div class="mini"><input class="sin" id="nfNewP" placeholder="+ Nova pessoa no time" maxlength="80" autocomplete="off"><button type="button" class="btn sm" data-act="nfAddP">Adicionar</button></div></div>
+      <div class="tf-row">
+        <div class="field"><label>Prazo</label><input type="date" data-nf="due" value="${esc(nf.due)}"><div class="hint">${venc == null ? '' : venc < 0 ? '<span class="latec">já vencido</span>' : venc === 0 ? 'hoje' : venc === 1 ? 'amanhã' : `em ${venc} dias`} <button type="button" class="chip line" data-act="nfDue" data-n="0">hoje</button><button type="button" class="chip line" data-act="nfDue" data-n="1">amanhã</button><button type="button" class="chip line" data-act="nfDue" data-n="7">+7 d</button></div></div>
+        <div class="field"><label>Sprint</label><select data-nf="sprintId"><option value="">Sem sprint</option>${sps.map(s => `<option value="${s.id}" ${nf.sprintId === s.id ? 'selected' : ''}>${esc(s.name)}${s.state === 'active' ? ' (atual)' : ''}</option>`).join('')}</select></div>
+      </div>
+      <div class="field"><label>Iniciativa</label><select data-nf="epicId">${epicOpts(nf.epicId, 'Sem iniciativa')}</select><div class="hint">${e ? (e.centralRef ? `Ligada à Central: <span class="code bvc">${esc(e.centralRef)}</span>${ci ? ' · ' + esc(ci.name) : ''}` : 'Iniciativa do time, sem vínculo com a Central') : 'Sem iniciativa, o card conta só nas métricas do time'}</div></div>
+      <div class="field"><label>Feature na Central</label><select data-nf="featureRef" ${fs.length ? '' : 'disabled'}><option value="">${ci ? 'Sem feature' : e?.centralRef ? 'Catálogo não carregado' : 'Ligue a iniciativa à Central para escolher'}</option>${fs.map(x => { const p2 = featPhase({ ...x, init: ci }); return `<option value="${esc(x.ref)}" ${nf.featureRef === x.ref ? 'selected' : ''}>${esc(x.ref)} · ${esc(x.name)}${p2 ? ' · ' + esc(p2.name) : ''}</option>`; }).join('')}</select>
+        ${f ? `<div class="hint">${ph ? `<span class="chip line">fase ${esc(ph.name)}</span>` : ''}${f.due ? `prazo na Central ${fmtD(f.due)}` : ''}${od.length ? `<span class="latec">depende de ${esc(od.map(d => d.ref).join(', '))}, ainda aberta</span>` : ''}</div>` : ''}</div>
+      <div class="field"><label>Descrição <span class="faint">(fica só no time)</span></label><textarea data-nf="notes" rows="3" placeholder="Contexto, critérios de aceite…">${esc(nf.notes)}</textarea></div>
+    </div>
+    <aside class="tf-side">
+      <div class="tf-h">Detalhes</div>
+      <div class="field"><label>Tipo</label><div class="pills">${KINDS.map(k => `<button type="button" class="${nf.kind === k ? 'on' : ''}" data-act="nfSet" data-k="kind" data-v="${k}">${KIND_IC[k]} ${k}</button>`).join('')}</div></div>
+      <div class="field"><label>Começa em</label><div class="sgw">${cols().slice(0, Math.max(2, colIdx(db.settings.startCol) + 1)).map(c => `<button type="button" class="${nf.col === c.id ? 'on' : ''}" data-act="nfSet" data-k="col" data-v="${c.id}">${esc(c.name)}</button>`).join('')}</div></div>
+      <div class="tf-row"><div class="field"><label>Pontos</label><input type="number" min="0" step="0.5" data-nf="points" value="${esc(nf.points)}" placeholder="opcional"></div><div class="field"><label>Link</label><input data-nf="link" value="${esc(nf.link)}" placeholder="https://"></div></div>
+      <label class="tgl"><input type="checkbox" data-nf="showToCentral" ${nf.showToCentral ? 'checked' : ''}><span>Mostrar ao gestor mesmo sem feature</span></label>
+      <div class="hint">Cards com feature sempre aparecem na Central, embaixo da feature.</div>
+    </aside></div>
+    <div class="macts"><label class="tgl small" style="margin-right:auto"><input type="checkbox" data-nf="again" ${nf.again ? 'checked' : ''}><span>Criar outro em seguida</span></label><button type="button" class="btn" data-act="close">Cancelar</button><button class="btn pri">Criar card</button></div></form>`, 'wide');
+  const d = $('#dlg');
+  $('#nfTitle').addEventListener('input', ev => { nf.title = ev.target.value; });
+  d.querySelectorAll('[data-nf]').forEach(el => el.addEventListener(el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && el.type !== 'checkbox' && el.type !== 'date') ? 'input' : 'change', () => {
+    const k = el.dataset.nf; nf[k] = el.type === 'checkbox' ? el.checked : el.value;
+    if (k === 'epicId') { const ne = epicById(nf.epicId); if (nf.featureRef && !nf.featureRef.startsWith((ne?.centralRef || '#') + '.')) nf.featureRef = null; }
+    if (['epicId', 'featureRef', 'due', 'sprintId'].includes(k)) renderNewCard();
+  }));
+  $('#nfNewP').addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); d.querySelector('[data-act=nfAddP]').click(); } });
+  $('#nfForm').addEventListener('submit', ev => { ev.preventDefault(); criarDoFormulario(); });
+}
+function criarDoFormulario() {
+  const title = clip(nf.title, 200); if (!title) { toast('Escreva o que precisa ser feito.'); $('#nfTitle')?.focus(); return; }
+  const c = novoCard({ title, kind: nf.kind, epicId: nf.epicId, featureRef: nf.featureRef || null, owner: nf.owner, due: isYmd(nf.due) ? nf.due : '', col: nf.col, sprintId: nf.sprintId || null, points: nf.points === '' ? null : Number(nf.points) });
+  c.notes = nf.notes; c.link = nf.link.trim(); c.showToCentral = !!nf.showToCentral;
+  touch(); toast(`${c.id} criado em ${cols()[colIdx(c.col)].name}.`);
+  if (nf.again) { nf.title = ''; nf.notes = ''; renderNewCard(); setTimeout(() => $('#nfTitle')?.focus(), 30); } else closeModal();
+}
+function parseQuickCard(raw) {   // mesma ideia da barra da Central: @pessoa, data, #iniciativa, F2, !tipo
+  let s = ' ' + raw + ' '; const o = {};
+  let m = s.match(/\s!([^\s]+)(?=\s)/); if (m) { const k = KINDS.find(x => normName(x).startsWith(normName(m[1]))); if (k) { o.kind = k; s = s.replace(m[0], ' '); } }
+  m = s.match(/\s@([^\s]+)/); if (m) { const q = normName(m[1]); const p = activePeople().find(x => normName(x.name.split(' ')[0]) === q) || activePeople().find(x => normName(x.name).startsWith(q)); if (p) { o.owner = p.name; s = s.replace(m[0], ' '); } }
+  m = s.match(/\s#([^\s]+)/); if (m) { const q = normName(m[1]); const ep = epicsLive().find(x => normName(x.centralRef || '') === q) || epicsLive().find(x => normName(x.name).replace(/\s+/g, '-') === q) || epicsLive().find(x => normName(x.name).startsWith(q.replace(/-/g, ' '))); if (ep) { o.epicId = ep.id; s = s.replace(m[0], ' '); } }
+  m = s.match(/\s(?:([A-Za-z]{2,5}-\d{3,})\.)?[Ff](\d+)(?=\s)/); if (m) { const ini = m[1] ? m[1].toUpperCase() : epicById(o.epicId)?.centralRef; const ref = ini ? `${ini}.F${m[2]}` : null; if (ref && (catFeature(ref) || !catalog)) { o.featureRef = ref; if (!o.epicId) o.epicId = epicsLive().find(x => x.centralRef === ini)?.id || ''; s = s.replace(m[0], ' '); } }
+  const dm = s.match(/\s(\d{1,2})\/(\d{1,2})(?=\s)/);
+  if (/\shoje(?=\s)/i.test(s)) { o.due = today(); s = s.replace(/\shoje(?=\s)/i, ' '); }
+  else if (/\samanh[ãa](?=\s)/i.test(s)) { o.due = addDays(today(), 1); s = s.replace(/\samanh[ãa](?=\s)/i, ' '); }
+  else if (dm) { const y = new Date().getFullYear(); let d = `${y}-${pad(+dm[2])}-${pad(+dm[1])}`; if (isYmd(d)) { if (d < today()) d = `${y + 1}-${pad(+dm[2])}-${pad(+dm[1])}`; o.due = d; s = s.replace(dm[0], ' '); } }
+  o.title = s.replace(/\s+/g, ' ').trim(); return o;
+}
+function quickInfo(o) {
+  const e = epicById(o.epicId);
+  return [o.owner ? 'Com ' + o.owner : 'Sem responsável', o.due ? 'prazo ' + fmtD(o.due) : 'sem prazo', e ? e.name + (e.centralRef ? ' · ' + e.centralRef : '') : 'sem iniciativa', o.featureRef ? 'feature ' + o.featureRef : '', o.kind || ''].filter(Boolean).join(' · ') + ` · entra em ${cols()[0].name}`;
+}
+document.addEventListener('input', e => { if (e.target.id !== 'quickCard' || !db) return; const v = e.target.value.trim(), q = $('#qinfo'); if (q) q.textContent = v ? quickInfo(parseQuickCard(v)) + ' · Enter cria' : `Enter cria no ${cols()[0].name} · @pessoa responsável · hoje, amanhã ou dd/mm · #iniciativa ou #PAG-042 · F2 feature da Central · !bug, !spike, !feature…`; });
+document.addEventListener('keydown', e => {
+  if (e.target.id !== 'quickCard' || e.key !== 'Enter' || !db) return;
+  const v = e.target.value.trim(); if (!v) return; const o = parseQuickCard(v); if (!o.title) return;
+  const c = novoCard({ ...o, col: cols()[0].id, sprintId: null }); e.target.value = ''; touch();
+  toast(`${c.id} criado: ${clip(c.title, 50)}`); setTimeout(() => $('#quickCard')?.focus(), 0);
+});
+
 function epicModal(id) {
   const e = epicById(id); if (!e) return;
   const inits = catInits(), ci = catInit(e.centralRef);
@@ -1425,7 +1564,14 @@ document.addEventListener('click', async e => {
       case 'personOff': case 'personOn': { const p = db.people.find(x => x.id === id); p.active = a === 'personOn'; p.upd = Date.now(); touch(false); break; }
       case 'personDel': { const p = db.people.find(x => x.id === id), n = cardsDe(p).length; if (n) { toast(`${p.name} é responsável por ${n} card(s). Desative em vez de remover, para manter o histórico.`, 5000); return; } if (!confirm(`Remover ${p.name} do time?`)) return; p.deleted = true; p.upd = Date.now(); touch(false); break; }
       case 'card': if (e.target.closest('select')) return; cardModal(el.dataset.card); break;
-      case 'newCard': { const c = novoCard({ col: el.dataset.col || cols()[0].id, epicId: ui.epicFilter && ui.epicFilter !== '-' ? ui.epicFilter : '' }); touch(); cardModal(c.id); setTimeout(() => { const t = $('#dlg [data-cf=title]'); t?.select(); }, 30); break; }
+      case 'newCard': newCardModal({ col: el.dataset.col || cols()[0].id, epicId: ui.epicFilter && ui.epicFilter !== '-' ? ui.epicFilter : '' }); break;
+      case 'newCardIn': newCardModal(JSON.parse(el.dataset.def || '{}')); break;
+      case 'quickMore': { const inp = $('#quickCard'), o = parseQuickCard(inp?.value || ''); if (inp) inp.value = ''; newCardModal(o); break; }
+      case 'nfSet': nf[el.dataset.k] = el.dataset.v; renderNewCard(); break;
+      case 'nfDue': nf.due = addDays(today(), +el.dataset.n); renderNewCard(); break;
+      case 'nfAddP': { const r = novaPessoa($('#nfNewP').value); nf.owner = r.p.name; touch(false); renderNewCard(); toast(r.novo ? `${r.p.name} entrou no time.` : `${r.p.name} já estava no time.`); break; }
+      case 'bFilter': ui.bFilter = el.dataset.v; render(); break;
+      case 'bGroup': ui.bGroup = el.dataset.v; render(); break;
       case 'block': { const c = cardById(el.dataset.card); bloquear(c, $('#bcat').value, $('#breason').value); touch(); cardModal(c.id); break; }
       case 'unblock': { const c = cardById(el.dataset.card); desbloquear(c); touch(); cardModal(c.id); break; }
       case 'cancelCard': { const c = cardById(el.dataset.card); if (!confirm('Cancelar este card? Ele sai do quadro e das métricas, e vai para a Central como cancelado.')) return; c.cancelledAt = agoraComFuso(); if (c.blocked) desbloquear(c); c.upd = Date.now(); closeModal(); touch(); break; }
@@ -1435,7 +1581,7 @@ document.addEventListener('click', async e => {
       case 'epicFromCentral': { const ci = catInit(el.dataset.ref); const ep = novoEpico(ci.name); ep.centralRef = ci.ref; ui.epicSel = ep.id; touch(); toast(`Iniciativa ${ci.ref} trazida para o quadro.`); break; }
       case 'epicSel': ui.epicSel = id; render(); break;
       case 'toggleEpDone': ui.epicDone = !ui.epicDone; render(); break;
-      case 'addCardFeat': { const c = novoCard({ col: cols()[0].id, epicId: el.dataset.epic, featureRef: el.dataset.ref || null }); touch(); cardModal(c.id); setTimeout(() => $('#dlg .ttl-in')?.select(), 30); break; }
+      case 'addCardFeat': newCardModal({ epicId: el.dataset.epic, featureRef: el.dataset.ref || null }); break;
       case 'editEpic': epicModal(id); break;
       case 'addUpdate': { const ep = epicById(id), t = $('#upd').value.trim(); if (!t) return; ep.updates.push({ date: today(), text: clip(t, 500), ...(db.team.contact ? { author: db.team.contact } : {}) }); ep.upd = Date.now(); touch(); epicModal(id); break; }
       case 'delEpic': { const ep = epicById(id); if (!confirm('Excluir esta iniciativa?')) return; ep.deleted = true; ep.upd = Date.now(); closeModal(); touch(); break; }
@@ -1491,7 +1637,6 @@ document.addEventListener('change', e => {
     case 'ef': ui.epicFilter = el.value; render(); break;
     case 'ob': ui.onlyBlocked = el.checked; render(); break;
     case 'od': ui.showOldDone = el.checked; render(); break;
-    case 'bd': ui.backlogDone = el.checked; render(); break;
     case 'linkFeat': { const c = cardById(el.dataset.card); if (!el.value) return; c.featureRef = el.value; c.upd = t; touch(); toast(`${c.id} ligado a ${el.value}.`); break; }
     case 'epicStatus': { const ep = epicById(el.dataset.id); ep.status = el.value; ep.doneAt = el.value === 'done' ? agoraComFuso() : null; ep.upd = t; touch(); break; }
     case 'setSprint': { const c = cardById(el.dataset.card); c.sprintId = el.value || null; c.upd = t; touch(); break; }
@@ -1505,7 +1650,7 @@ document.addEventListener('change', e => {
     case 'colStart': { const id = cols()[+el.dataset.i].id; if (colIdx(id) < colIdx(db.settings.commitCol)) { toast('O início vem depois ou na mesma coluna do compromisso.'); render(); return; } db.settings.startCol = id; db.settings.upd = t; touch(false); break; }
   }
 });
-document.addEventListener('input', e => { if (e.target.dataset?.act === 'q') { ui.q = e.target.value; const pos = e.target.selectionStart; render(); const q = $('#main [data-act=q]'); q.focus(); q.setSelectionRange(pos, pos); } });
+document.addEventListener('input', e => { if (e.target.dataset?.act === 'lq') { ui.lq = e.target.value; const pos = e.target.selectionStart; render(); const q = $('#main [data-act=lq]'); q.focus(); q.setSelectionRange(pos, pos); return; } if (e.target.dataset?.act === 'q') { ui.q = e.target.value; const pos = e.target.selectionStart; render(); const q = $('#main [data-act=q]'); q.focus(); q.setSelectionRange(pos, pos); } });
 document.addEventListener('submit', e => {
   const f = e.target, a = f.dataset.act;
   if (a === 'addPerson' || a === 'addPeople' || a === 'addPersonCard') {
