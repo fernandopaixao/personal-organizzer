@@ -31,5 +31,12 @@
 - Teclas 1 a 0 trocam de página; o botão do topo virou "Importar e agentes".
 - Hoje ganhou o cartão **Dos times**: arquivos novos, iniciativas que os times marcaram com atenção ou atraso, épicos sem vínculo e times sem chave.
 
+## 7. Painel da iniciativa redesenhado
+- Painel mais largo, com abas: **Visão geral**, **Features**, **Do time**, **Tarefas** e **Ajustes**.
+- **Visão geral:** quatro indicadores (andamento, próxima feature, atrasadas e bloqueadas, status do time ou fim), linha do tempo com as fases em faixas paralelas (preenchidas conforme as features concluídas), losangos com os prazos das features, linha de hoje e fim da iniciativa; lista do que pede atenção; última atualização com sugestão do time.
+- **Features:** agrupadas por fase, cada grupo com período, "em curso" e barra de conclusão; cada feature mostra de quem depende (em vermelho quando bloqueada), quem depende dela, o andamento dos itens do time e as tarefas ligadas.
+- **Do time:** status do time, itens sem feature, métricas do time com escopo nesta iniciativa ou nas features dela e o downstream por feature.
+- **Ajustes:** andamento, horizonte, datas das fases, dependências entre iniciativas e histórico de atualizações.
+
 ## 6. Testado
 Fluxo completo no Chromium com os exemplos cifrados de `integracao-time/exemplos/`: criar time com prefixo, importar features pelo formato dos agentes, aplicar backlog e métricas, conciliar, compartilhar (o catálogo gerado decifra com a implementação de referência e valida no schema), métricas malformadas sem quebrar a tela, migração de dados da v13, todas as páginas sem erro no console.
