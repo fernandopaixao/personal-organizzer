@@ -452,6 +452,32 @@ textarea.paste:focus{border-color:var(--bv)}
 .igpre{white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:11.5px;background:#f6f7fb;border:1px solid var(--line);border-radius:10px;padding:10px;max-height:220px;overflow:auto}
 .igpbtn{margin-left:auto}
 @media(max-width:900px){.igrow{grid-template-columns:1fr}.igrow .acts{justify-content:flex-start}}
+
+/* painel da iniciativa v14 */
+.drawer.drw{width:min(820px,100%)}
+.drtabs{display:flex;gap:2px;padding:10px 26px 0;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;z-index:2;overflow-x:auto}
+.drtabs button{padding:8px 12px;font-size:12.5px;font-weight:550;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.drtabs button:hover{color:var(--ink)}.drtabs button.on{color:var(--bv);border-bottom-color:var(--bv)}
+.drtabs .n{font-size:10.5px;background:#f0f1f6;border-radius:99px;padding:0 6px;margin-left:2px;color:var(--muted)}.drtabs .n.hot{background:var(--bv);color:#fff}
+.drkpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:18px 0 6px}
+.drk{border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0}.drk .k{font-size:10.5px;font-weight:650;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.drk .v{font-size:20px;font-weight:650;font-family:var(--title);letter-spacing:-.02em;margin-top:2px}.drk .s{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.drk.late .v{color:var(--late)}.drk.attn .v{color:#8a5a12}
+.drtl{margin:18px 0 4px}.drtl-a{position:relative;border-left:1px solid var(--line);border-right:1px solid var(--line);background:repeating-linear-gradient(90deg,transparent 0,transparent calc(25% - 1px),#f2f3f8 calc(25% - 1px),#f2f3f8 25%)}
+.drph{position:absolute;height:24px;border-radius:7px;background:var(--bv-soft);border:1px solid var(--bv-line);overflow:hidden;font-size:11px;color:var(--bv-deep)}
+.drph i{position:absolute;left:0;top:0;bottom:0;background:var(--bv-line)}.drph span{position:relative;padding:0 8px;line-height:22px;white-space:nowrap;display:block;overflow:hidden;text-overflow:ellipsis}.drph b{font-weight:650}
+.drph.done{opacity:.55}.drph.late{border-color:#e7b9b4;background:#fbeeed;color:var(--late)}.drph.late i{background:#f1d1cd}
+.drfm{position:absolute;width:10px;height:10px;margin-left:-5px;transform:rotate(45deg);background:#fff;border:2px solid var(--bv)}.drfm.done{background:var(--bv)}.drfm.late{border-color:var(--late);background:#fbeeed}
+.drtd{position:absolute;top:-4px;bottom:-4px;width:0;border-left:2px solid var(--bv)}.drtd span{position:absolute;top:-14px;left:-14px;font-size:9.5px;color:var(--bv);font-weight:650}
+.drte{position:absolute;top:0;bottom:0;width:0;border-left:2px dashed var(--late)}
+.drtl-x{position:relative;height:16px;font-size:10px;color:var(--muted)}.drtl-x span{position:absolute;transform:translateX(-50%);white-space:nowrap}.drtl-x span:first-child{transform:none}.drtl-x span:last-child{transform:translateX(-100%)}
+.drg{margin-top:20px;border:1px solid var(--line);border-radius:14px;padding:10px 14px 6px}.drg-h{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:4px}
+.drbar{display:inline-block;width:56px;height:6px;border-radius:3px;background:#eceef4;overflow:hidden;vertical-align:middle}.drbar.wide{width:90px}.drbar i{display:block;height:100%;background:var(--bv)}
+.drds{display:inline-flex;gap:6px;align-items:center;font-size:11.5px;color:var(--muted);background:#f6f7fb;border-radius:99px;padding:2px 9px}
+.chip.drblk{background:#f9e7e5;color:var(--late)}
+.drdone{margin:6px 0}.drdone summary{cursor:pointer}
+@media(max-width:700px){.drkpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.calbox{margin-top:14px;border:1px solid var(--bv-line);background:var(--bv-soft);border-radius:12px;padding:10px 12px;max-height:280px;overflow:auto}.calr{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:5px 0;border-top:1px solid var(--bv-line)}.calr .sel{max-width:260px}
 </style>
 </head>
 <body>
@@ -613,12 +639,12 @@ textarea.paste:focus{border-color:var(--bv)}
   <h2>Importar e agentes</h2>
   <div class="sg" style="margin-bottom:14px"><button class="on" data-act="imp-tab" data-v="imp">Importar JSON</button><button data-act="imp-tab" data-v="prompts">Prompts para agentes</button></div>
   <div id="impPaneImp">
-    <textarea class="paste" id="impText" placeholder='{ "schema": "gestao-import/3", "features": [ ... ], "tasks": [ ... ], "updates": [ ... ] } ou um arquivo gestao-metricas/1'></textarea>
+    <textarea class="paste" id="impText" placeholder='{ "schema": "gestao-import/3", "features": [ ... ], "tasks": [ ... ], "updates": [ ... ] } , um arquivo gestao-metricas/1 ou um .ics do Outlook'></textarea>
     <div class="bar" style="margin:10px 0 0">
       <button class="btn sm" data-act="imp-file">Escolher arquivo…</button>
       <button class="btn sm" data-act="imp-template">Baixar modelo</button>
       <button class="btn sm" data-act="imp-guide">Baixar guia (.md)</button>
-      <input type="file" id="impFile" accept=".json,.txt,application/json" hidden>
+      <input type="file" id="impFile" accept=".json,.txt,.ics,application/json,text/calendar" hidden>
     </div>
     <div id="impPrev"></div>
   </div>
@@ -1194,40 +1220,16 @@ function ganttHTML(list,opt={}){
 let updLimit=4;
 function renderDrawer(){
   const box=$('#drawer'),sc=$('#scrim');
-  if(openMeet&&forumById(openMeet.f)){const keep=box.scrollTop;box.classList.remove('hidden');sc.classList.remove('hidden');renderMeet(box);box.scrollTop=keep;return}
-  openMeet=null;const i=openInitId&&initById(openInitId);
+  if(openMeet&&forumById(openMeet.f)){box.classList.remove('drw');const keep=box.scrollTop;box.classList.remove('hidden');sc.classList.remove('hidden');renderMeet(box);box.scrollTop=keep;return}
+  openMeet=null;box.classList.remove('drw');const i=openInitId&&initById(openInitId);
   if(!i){box.classList.add('hidden');sc.classList.add('hidden');return}
   const keep=box.scrollTop;box.classList.remove('hidden');sc.classList.remove('hidden');
   const h=health(i),pr=progressOf(i),ts=tasksOfInit(i.id),openT=ts.filter(t=>!t.done),doneT=ts.filter(t=>t.done),blocks=db.initiatives.filter(x=>x.dependsOn.includes(i.id));
   const feats=ts.filter(t=>t.type==='feature'),fOpen=feats.filter(t=>!t.done),fDone=feats.filter(t=>t.done),tks=ts.filter(t=>t.type!=='feature'),tOpen=tks.filter(t=>!t.done),tDone=tks.filter(t=>t.done);
   const phNames=t=>[phaseOf(i,t.phaseId)].filter(Boolean).map(p=>p.name),depOf=t=>{const d=t.dependsOn&&db.tasks.find(x=>x.id===t.dependsOn);return d?`<span class="chip" title="Depende de">↳ ${esc(d.ref||'')} ${esc(d.title)}</span>`:''};
   const auto=i.autoProgress!==false&&ts.length>0,pBase=feats.length?feats:ts,cp=curPhase(i),cands=db.initiatives.filter(x=>x.id!==i.id&&!i.dependsOn.includes(x.id)&&!initCycle(i.id,x.id));
-  box.innerHTML=`<div class="dr-h">${ring(pr,56,5)}<div style="flex:1;min-width:0"><h2>${i.ref?`<span class="ref lg">${esc(i.ref)}</span>`:''}${esc(i.name)}</h2><div class="muted small" style="margin-top:2px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">${hd(h)} ${h.label}${teamName(i.teamId)?' · '+esc(teamName(i.teamId)):''}${i.ownerId?` · ${av(i.ownerId,'xs')} ${esc(first(nameOf(i.ownerId)))}`:i.ownerLabel?' · '+esc(i.ownerLabel):''}</div></div>
-    <button class="ib" data-act="edit-init" data-id="${i.id}" title="Editar">${ic('edit')}</button><button class="ib danger" data-act="del-init" data-id="${i.id}" title="Excluir">${ic('trash')}</button><button class="ib" data-act="close-drawer" title="Fechar">${ic('x')}</button></div>
-  <div class="dr-b">${phaseTrack(i,true)}
-    <div class="dr-s"><div class="lbl">Andamento</div><div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
-      <label class="muted small" style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-qi="auto" data-id="${i.id}" ${i.autoProgress!==false?'checked':''}> automático${auto?` · ${pBase.filter(t=>t.done).length}/${pBase.length} ${feats.length?'features':'itens'}`:''}</label>
-      ${auto?'':`<input type="range" class="range" min="0" max="100" step="5" value="${clampP(i.progress)}" data-qi="progress" data-id="${i.id}" style="flex:1;min-width:140px"><span class="small" style="min-width:34px">${clampP(i.progress)}%</span>`}
-      <select class="sel" data-qi="bucket" data-id="${i.id}">${BUCKETS.map(([k,l])=>`<option value="${k}" ${i.bucket===k?'selected':''}>${l}</option>`).join('')}</select></div></div>
-    <div class="dr-s"><div class="lbl">Atualizações<span class="n">${(i.updates||[]).length}</span></div>
-      <div class="pl-in" style="margin-bottom:6px"><input type="text" data-upd="${i.id}" placeholder="O que mudou? (Enter salva)"><button class="btn sm" data-act="pl-save" data-id="${i.id}">Registrar</button></div>
-      ${(i.updates||[]).slice().sort((a,b)=>b.date.localeCompare(a.date)||b.createdAt-a.createdAt).slice(0,updLimit).map(u=>`<div class="ulog"><div class="d" style="display:flex;gap:6px;align-items:center">${esc(fmtFull(u.date))}<span class="grow"></span><button class="ib danger" data-act="del-upd" data-id="${i.id}" data-u="${u.id}" title="Excluir">${ic('trash','sm')}</button></div><div class="x">${esc(u.text)}</div></div>`).join('')}
-      ${(i.updates||[]).length>updLimit?`<button class="btn sm" data-act="upd-more">Ver todas</button>`:''}</div>
-    <div class="dr-s"><div class="lbl">Datas</div><div class="sched"><span class="muted">Iniciativa</span><input type="date" class="dt" data-sd="init:start" data-id="${i.id}" value="${esc(i.start||'')}" title="Início"><input type="date" class="dt ${okDate(i.end)&&i.end<today()&&pr<100?'late':''}" data-sd="init:end" data-id="${i.id}" value="${esc(i.end||'')}" title="Fim">
-      ${i.phases.map(p=>`<span class="${p.done?'dim':''}">${esc(p.name)}</span><input type="date" class="dt" data-sd="phase:start" data-id="${i.id}" data-p="${p.id}" value="${esc(p.start||'')}" title="Início da fase"><input type="date" class="dt ${!p.done&&okDate(p.end)&&p.end<today()?'late':''}" data-sd="phase:end" data-id="${i.id}" data-p="${p.id}" value="${esc(p.end||'')}" title="Fim da fase">`).join('')}</div></div>
-    <div class="dr-s"><div class="lbl">Dependências</div><div class="dpx">${i.dependsOn.map(d=>initById(d)).filter(Boolean).map(o=>`<span class="chip"><button data-act="open-init" data-id="${o.id}">← ${hd(health(o))} ${esc(cut(o.name,24))}</button><button data-act="dep-rm" data-a="${o.id}" data-b="${i.id}" title="Remover dependência">${ic('x','sm')}</button></span>`).join('')}${i.depNote?`<span class="chip">${esc(i.depNote)}</span>`:''}
-      ${cands.length?`<select class="sel" data-dep-add="${i.id}"><option value="">+ depende de…</option>${cands.map(o=>`<option value="${o.id}">${esc(cut(o.name,40))}</option>`).join('')}</select>`:''}</div>
-      ${blocks.length?`<div class="tm" style="margin-top:8px"><span class="muted small">Bloqueia:</span>${blocks.map(o=>`<button class="chip" data-act="open-init" data-id="${o.id}">→ ${esc(cut(o.name,24))}</button>`).join('')}</div>`:''}</div>
-    ${igInitTeamBlock(i)}
-    <div class="dr-s"><div class="lbl">Features<span class="n">${fDone.length}/${feats.length}</span><button class="btn sm igpbtn" data-act="copy-prompt" data-id="features" data-ctx="${esc(i.ref?i.ref+' · '+i.name:i.name)}" title="Copia um prompt para o agente levantar as features desta iniciativa">${ic('copy','sm')} Prompt para agente</button></div>
-      ${fOpen.sort(byTask).map(t=>taskRow(t,{noIni:true,dateInput:true})+(phNames(t).length||t.dependsOn?`<div class="phl">${phNames(t).map(n=>`<span class="chip">${esc(n)}</span>`).join('')}${depOf(t)}</div>`:'')+igFeatDs(t)).join('')||empty('Nenhuma feature aberta.')}
-      <div class="qadd wrap" data-dq="f:${i.id}"><input type="text" data-q="title" placeholder="+ Nova feature…"><select data-q="who" title="Responsável"><option value="${ME}">Eu</option>${db.people.map(p=>`<option value="${p.id}" ${p.id===i.ownerId?'selected':''}>${esc(first(p.name))}</option>`).join('')}</select><input type="date" data-q="end" value="${phaseEndDefault(i,cp)}">${i.phases.length?`<select data-q="phase"><option value="">Sem fase</option>${i.phases.map(p=>`<option value="${p.id}" ${cp&&cp.id===p.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select>`:''}<button class="btn sm" data-act="dr-add" data-id="f:${i.id}">Adicionar</button></div>
-      ${fDone.length?`<details style="margin-top:14px"><summary class="muted small" style="cursor:pointer">Features concluídas · ${fDone.length}</summary>${fDone.sort((a,b)=>(b.doneAt||'').localeCompare(a.doneAt||'')).map(t=>taskRow(t,{noIni:true})+igFeatDs(t)).join('')}</details>`:''}</div>
-    ${igUnlinkedItemsBlock(i)}
-    <div class="dr-s"><div class="lbl">Tarefas<span class="n">${tOpen.length}</span></div>
-      ${tOpen.sort(byTask).map(t=>taskRow(t,{noIni:true,dateInput:true})).join('')||empty('Sem tarefas abertas.')}
-      <div class="qadd wrap" data-dq="t:${i.id}"><input type="text" data-q="title" placeholder="+ Nova tarefa…"><select data-q="who" title="Responsável"><option value="${ME}">Eu</option>${db.people.map(p=>`<option value="${p.id}" ${p.id===i.ownerId?'selected':''}>${esc(first(p.name))}</option>`).join('')}</select><input type="date" data-q="end" value="${phaseEndDefault(i,cp)}"><button class="btn sm" data-act="dr-add" data-id="t:${i.id}">Adicionar</button></div>
-      ${tDone.length?`<details style="margin-top:14px"><summary class="muted small" style="cursor:pointer">Tarefas concluídas · ${tDone.length}</summary>${tDone.sort((a,b)=>(b.doneAt||'').localeCompare(a.doneAt||'')).map(t=>taskRow(t,{noIni:true})).join('')}</details>`:''}</div></div>`;
+  if(drFor!==i.id){drFor=i.id;drTab='geral'}box.classList.add('drw');
+  box.innerHTML=drInitHTML(i);
   box.scrollTop=keep;
 }
 function drawerAdd(key){
@@ -1900,7 +1902,7 @@ function oneOnOneHTML(){
   const agenda=db.tasks.filter(t=>!t.done&&(t.oneOnOneWith||[]).includes(p.id)).sort(byTask),aIds=new Set(agenda.map(t=>t.id)),openD=openAll.filter(t=>!aIds.has(t.id));
   const notes=db.notes.filter(n=>n.personId===p.id&&(!hide||!isFbNote(n))),elig=notes.filter(n=>n.eligible),inits=personInits(p.id),otr=onTimeRate(p.id);
   const fbOn=!hide&&diaryFilter==='fb',dg=dayGroups(fbOn?elig:notes,false,diaryLimit);
-  return strip+`<div class="ph-head">${av(p.id,'lg')}<div><h2>${esc(p.name)}</h2><div class="muted small">${esc([p.role,personTeamNames(p).join(', ')].filter(Boolean).join(' · ')||'—')}</div></div>
+  return strip+`<div class="ph-head">${av(p.id,'lg')}<div><h2>${esc(p.name)}</h2><div class="muted small">${esc([p.role,personTeamNames(p).join(', ')].filter(Boolean).join(' · ')||'—')}</div>${p.calSeries?`<div class="muted small" title="${esc(p.calSeries.title)}">${ic('cal','sm')} 1:1 no calendário: ${esc(CAL_FREQ[p.calSeries.frequency]||'')}${calWhen(p.calSeries)?' · '+esc(calWhen(p.calSeries)):''}</div>`:''}</div>
     <button class="ib" data-act="edit-person" data-id="${p.id}" title="Editar">${ic('edit')}</button><button class="ib danger" data-act="del-person" data-id="${p.id}" title="Remover">${ic('trash')}</button>
     <div class="sig"><div class="s">${ring(otr.rate==null?0:otr.rate,40,4)}<span>no prazo<b>${otr.rate==null?'—':Math.round(otr.rate)+'%'}</b></span></div>
       <div class="s"><span>último 1:1<b>${ts.days==null?'—':ts.days+' d'}</b></span>${ts.late?'<i class="hd late" title="Acima da cadência"></i>':'<i class="hd"></i>'}</div>
@@ -2207,9 +2209,10 @@ $('#cycleForm').onsubmit=e=>{e.preventDefault();const v=readForm(e.target);if(v.
   const old=db.cycles.find(x=>x.id===v.id);if(old)Object.assign(old,v);else{v.id=uid();db.cycles.push(v);cycleSel=v.id}$('#cycleDialog').close();changed()};
 document.addEventListener('click',e=>{if(e.target.matches('[data-close]'))e.target.closest('dialog').close()});
 /* ============ Importação em massa (gestao-import/2) ============ */
-const RES=['teams','people','initiatives','features','tasks','updates','agreements','notes','cycles','staffTopics','forums','agenda','teamLinks'];
+const RES=['teams','people','initiatives','features','tasks','updates','agreements','notes','cycles','staffTopics','forums','calendarSeries','agenda','teamLinks'];
 function parseImport(text){
   let s=text.trim().replace(/^```(?:json)?\s*/i,'').replace(/```\s*$/,'').trim(),data;
+  if(/^BEGIN:VCALENDAR/i.test(s)){const o={source:'outlook-ics'};RES.forEach(k=>{o[k]=[]});o.calendarSeries=icsToSeries(s);if(!o.calendarSeries.length)throw new Error('Nenhuma reunião recorrente ativa encontrada no arquivo .ics.');return o}
   try{data=JSON.parse(s)}catch(e){const a=s.search(/[\[{]/),b=Math.max(s.lastIndexOf('}'),s.lastIndexOf(']'));try{data=JSON.parse(s.slice(a,b+1))}catch{throw new Error('JSON inválido: '+e.message)}}
   if(Array.isArray(data))data={tasks:data};
   if(data&&/^gestao-(status|metricas)\/1$/.test(data.schema||'')){const o={source:'agente',integ:data};RES.forEach(k=>{o[k]=[]});return o}
@@ -2217,7 +2220,7 @@ function parseImport(text){
   const out={source:String(data.source||'import').slice(0,60)};RES.forEach(k=>{out[k]=Array.isArray(data[k])?data[k]:[]});return out;
 }
 function runImport(parsed){
-  const real=db,draft=normalizeDb(JSON.parse(JSON.stringify(db))),log=[];db=draft;
+  const real=db,draft=normalizeDb(JSON.parse(JSON.stringify(db))),log=[],calRes=[];db=draft;
   const L=(kind,res,label,note,warn)=>log.push({kind,res,label,note:note||'',warn:warn||[]});
   try{
     const dateOr=(v,w,l)=>{if(v==null||v==='')return'';if(okDate(v))return v;w.push(l+' inválida ignorada');return''};
@@ -2319,6 +2322,27 @@ function runImport(parsed){
       if(r.participants)[].concat(r.participants).forEach(x=>{const id=rp(x,false);if(id&&!f.participants.includes(id))f.participants.push(id);else if(!id)w.push(`participante "${x}" não encontrado`)});
       if(/staff/i.test(n)&&!forumById(db.settings.staffForumId))db.settings.staffForumId=f.id;
       L(isNew?'new':JSON.stringify(f)!==before?'update':'same','Fórum',n,isNew?CAD[f.cadence]+' · próxima '+fmtShort(occFrom(f,today())):'',w)});
+    parsed.calendarSeries.forEach((r,idx)=>{const w=[],title=String(r?.title||'').trim().slice(0,120);if(!title){L('skip','Reunião recorrente','Item '+(idx+1),'sem título');return}
+      const sid=String(r.seriesId||'').trim().slice(0,300),freq=['weekly','biweekly','monthly','daily','other'].includes(r.frequency)?r.frequency:'other',names=[].concat(r.attendees||[],r.organizer||[]).map(x=>String(x||'').trim()).filter(Boolean);
+      const ppl=[...new Set(names.map(x=>rp(x,false)).filter(id=>id&&id!==ME))],nAtt=new Set(names.map(plain)).size;
+      let prop=null;const byF=sid&&db.forums.find(f=>f.calSeries?.id===sid),byP=sid&&db.people.find(x=>x.calSeries?.id===sid);
+      if(byF)prop='f:'+byF.id;else if(byP)prop='p:'+byP.id;else{const sg=r.suggestion||{},tg=String(sg.target||'').trim();
+        if(sg.kind==='ignore')prop='skip';else if(sg.kind==='oneOnOne'&&tg){const id=rp(tg,false);if(id&&id!==ME)prop='p:'+id}else if(sg.kind==='forum'&&tg){const f=db.forums.find(x=>plain(x.name)===plain(tg));prop=f?'f:'+f.id:'new'}
+        if(!prop){const pt=plain(title),f=db.forums.find(x=>plain(x.name)===pt)||db.forums.find(x=>x.name.length>3&&pt.includes(plain(x.name)));
+          prop=f?'f:'+f.id:ppl.length===1&&nAtt<=2?'p:'+ppl[0]:(freq==='daily'||freq==='other')?'skip':'new'}}
+      const ch=parsed.calChoice&&parsed.calChoice[idx]!=null?parsed.calChoice[idx]:prop;calRes.push({idx,title,freq,ch,time:String(r.time||''),start:String(r.start||'')});
+      const cad=['weekly','biweekly','monthly'].includes(freq)?freq:'';if(!cad&&ch!=='skip')w.push(`recorrência ${CAL_FREQ[freq]||freq}: tratada como semanal`);
+      const anchor=okDate(r.start)?r.start:'',time=/^\d{1,2}:\d{2}$/.test(r.time||'')?String(r.time).padStart(5,'0'):'',dur=+r.duration>0?Math.max(15,Math.min(480,Math.round(+r.duration))):0;
+      if(r.start&&!anchor)w.push('data inicial inválida ignorada');
+      const meta={id:sid,title,organizer:String(r.organizer||'').slice(0,80),frequency:freq,time,duration:dur,anchor};
+      if(ch==='skip'){L('skip','Reunião recorrente',title,'não associada');return}
+      if(ch.startsWith('p:')){const pp=person(ch.slice(2));if(!pp){L('skip','Reunião recorrente',title,'pessoa não encontrada');return}const before=JSON.stringify(pp);
+        pp.cadence=freq==='monthly'?30:freq==='biweekly'?14:7;pp.calSeries=meta;L(before===JSON.stringify(pp)?'same':'update','1:1',pp.name,`${CAL_FREQ[freq]}${anchor||time?' · '+calWhen(meta):''} · "${cut(title,40)}"`,w);return}
+      let f=ch.startsWith('f:')?forumById(ch.slice(2)):null;if(ch.startsWith('f:')&&!f){L('skip','Reunião recorrente',title,'fórum não encontrado');return}
+      const isNew=!f;if(!f){f=mkForum({name:title,anchor:anchor||today()});db.forums.push(f)}const before=JSON.stringify(f);
+      f.cadence=cad||f.cadence||'weekly';if(anchor)f.anchor=anchor;if(time)f.time=time;if(dur)f.duration=dur;ppl.forEach(id=>{if(!f.participants.includes(id))f.participants.push(id)});
+      const unk=[].concat(r.attendees||[]).map(x=>String(x||'').trim()).filter(x=>x&&!rp(x,false)&&plain(x)!==plain(r.organizer||''));if(unk.length)w.push(`${unk.length} participante(s) não cadastrado(s): ${cut(unk.slice(0,4).join(', '),80)}`);
+      f.calSeries=meta;L(isNew?'new':JSON.stringify(f)!==before?'update':'same','Fórum',f.name,`${CAL_FREQ[f.cadence]}${f.time?' · '+f.time:''} · próxima ${fmtShort(occFrom(f,today()))}${isNew?'':' · "'+cut(title,40)+'"'}`,w)});
     const agendaIn=(r,idx,fixed)=>{const text=String(typeof r==='string'?r:r?.text||'').trim();if(!text){L('skip','Pauta','Item '+(idx+1),'sem texto');return}
       let f=fixed;if(!f){const q=plain(r.forum||'');f=q?db.forums.find(x=>plain(x.name)===q)||db.forums.find(x=>plain(x.name).startsWith(q)):null;if(!f){L('skip','Pauta',cut(text,52),`fórum "${r.forum||'(vazio)'}" não encontrado`);return}}
       if(db.agendaItems.some(a=>a.forumId===f.id&&a.status==='open'&&plain(a.text)===plain(text))){L('same','Pauta',cut(text,52),f.name);return}
@@ -2334,17 +2358,19 @@ function runImport(parsed){
       L('new',kind==='decision'?'Decisão':'Compromisso',cut(text,52),`${fo.name} · ${fmtShort(date)}`,w)});
     igFinalize(db);
   }finally{db=real}
-  return{draft,log};
+  return{draft,log,cal:calRes};
 }
 let impPlan=null;
 function analyzeImport(){
   const txt=$('#impText').value,box=$('#impPrev'),go_=$('#impGo');impPlan=null;go_.disabled=true;if(!txt.trim()){box.innerHTML='';return}
-  try{const plan=runImport(parseImport(txt)),c=k=>plan.log.filter(p=>p.kind===k).length;impPlan=plan;go_.disabled=!(c('new')+c('update'));
+  try{const parsed=parseImport(txt);parsed.calChoice=impCalChoice;const plan=runImport(parsed),c=k=>plan.log.filter(p=>p.kind===k).length;impPlan=plan;go_.disabled=!(c('new')+c('update'));
     const L={new:'Nova',update:'Atualiza',same:'Igual',skip:'Ignorada'};
-    box.innerHTML=`<div class="small" style="margin-top:14px"><b>${c('new')}</b> novos · <b>${c('update')}</b> atualizados · <b>${c('same')}</b> iguais · <b>${c('skip')}</b> ignorados</div><div class="prev">${plan.log.map(p=>`<div class="it"><span class="k-${p.kind}">${L[p.kind]}</span><span class="muted">${p.res}</span><span>${esc(p.label)}${p.note?` <span class="muted">· ${esc(p.note)}</span>`:''}${p.warn.map(w=>`<div class="warn">${esc(w)}</div>`).join('')}</span></div>`).join('')}</div>`}
+    const calOpts=ch=>[['new','Criar fórum novo'],...db.forums.filter(f=>!f.archived).map(f=>['f:'+f.id,'Fórum: '+f.name]),...db.people.map(p=>['p:'+p.id,'1:1 com '+p.name]),['skip','Ignorar']].map(([v,l])=>`<option value="${esc(v)}" ${v===ch?'selected':''}>${esc(l)}</option>`).join('');
+    const cal=(plan.cal||[]).length?`<div class="calbox"><div class="lbl" style="margin:0 0 6px">Reuniões recorrentes do calendário<span class="n">${plan.cal.length}</span></div><div class="muted small" style="margin-bottom:6px">Confira a associação sugerida de cada série: um fórum (ritual) existente, um 1:1 com uma pessoa, um fórum novo, ou ignorar.</div>${plan.cal.map(x=>`<div class="calr"><div><b>${esc(x.title)}</b> <span class="muted small">${esc(CAL_FREQ[x.freq]||'')}${x.start||x.time?' · '+esc(calWhen({anchor:x.start,time:x.time})):''}</span></div><select class="sel" data-calch="${x.idx}">${calOpts(x.ch)}</select></div>`).join('')}</div>`:'';
+    box.innerHTML=cal+`<div class="small" style="margin-top:14px"><b>${c('new')}</b> novos · <b>${c('update')}</b> atualizados · <b>${c('same')}</b> iguais · <b>${c('skip')}</b> ignorados</div><div class="prev">${plan.log.map(p=>`<div class="it"><span class="k-${p.kind}">${L[p.kind]}</span><span class="muted">${p.res}</span><span>${esc(p.label)}${p.note?` <span class="muted">· ${esc(p.note)}</span>`:''}${p.warn.map(w=>`<div class="warn">${esc(w)}</div>`).join('')}</span></div>`).join('')}</div>`}
   catch(e){box.innerHTML=`<div class="err">${esc(e.message)}</div>`}
 }
-function applyImport(){
+function applyImport(){impCalChoice={};
   if(!impPlan)return;const snap=JSON.stringify(db),n=impPlan.log.filter(p=>p.kind==='new').length,u=impPlan.log.filter(p=>p.kind==='update').length;
   db=impPlan.draft;closePastWeeks();$('#importDialog').close();$('#impText').value='';$('#impPrev').innerHTML='';impPlan=null;changed();
   toast(`Importação concluída: ${n} novos, ${u} atualizados`,()=>restore(snap));
@@ -2363,6 +2389,7 @@ const PROMPTS=[
  {id:'staff',area:'Fóruns › staff',label:'Staff da semana',desc:'Atualizações de iniciativas, features da semana e pautas.',body:`Prepare minha staff semanal. Com base nas iniciativas e features cadastradas e nas fontes dos últimos 7 dias, indique: (a) atualizações das iniciativas em "updates"; (b) features previstas até o fim desta semana, com código, prazo e status; (c) encaminhamentos como tarefas com responsável e prazo; (d) assuntos que valem ser levados à staff, em "staffTopics", com o time quando houver.\nFormato: {"schema":"gestao-import/3","source":"agente-staff","updates":[{"initiative":"código","date":"","text":""}],"features":[{"ref":"código","initiative":"código","status":"open|done","end":""}],"tasks":[${TASK_F}],"staffTopics":[{"text":"","team":"nome exato"}]}`},
  {id:'topics',area:'Fóruns',label:'Pautas para meus fóruns',desc:'Assuntos recentes, já distribuídos entre staff e comitês.',body:`Revise minhas transcrições de reuniões, chats e e-mails dos últimos 7 dias e liste assuntos que eu deveria levar aos meus fóruns recorrentes (decisões pendentes, riscos, dependências entre times, pedidos de apoio). Distribua cada assunto no fórum mais adequado entre os cadastrados abaixo; se nenhum servir, use o fórum da staff. Uma linha por pauta, quem traz o assunto quando não for eu e uma estimativa de minutos.\nFormato: {"schema":"gestao-import/3","source":"agente-pautas","agenda":[{"forum":"nome exato do fórum","text":"","owner":"nome exato","minutes":15}]}`},
  {id:'1on1',area:'Rituais › 1:1',ph:'<NOME>',label:'Preparar um 1:1',desc:'Pauta, pendências e observações factuais de uma pessoa.',body:`Prepare meu 1:1 com <NOME>: revise as conversas, e-mails e reuniões recentes com essa pessoa e traga (a) itens de pauta como tarefas minhas com "oneOnOneWith" = ["<NOME>"]; (b) o que está delegado a ela e pendente; (c) observações factuais e observáveis das últimas duas semanas como notas, com "kind" forte ou desenv e "eligible" true quando forem evidências para feedback. Não registre julgamentos sem evidência.\nFormato: {"schema":"gestao-import/3","source":"agente-1on1","tasks":[${TASK_F}],"notes":[{"person":"<NOME>","date":"","text":"","kind":"geral|forte|desenv","eligible":false}]}`},
+ {id:'calendar',area:'Fóruns e Pessoas › 1:1',label:'Reuniões recorrentes do calendário',desc:'Séries recorrentes do meu calendário, já sugeridas como fórum (ritual) ou 1:1.',body:`Liste as REUNIÕES RECORRENTES ativas do meu calendário corporativo (séries que se repetem e ainda têm ocorrências futuras), das quais sou organizador ou participante obrigatório. Para cada série: o identificador da série (iCalUID ou seriesMasterId), título, organizador, participantes (nomes como aparecem no convite), recorrência (weekly = toda semana, biweekly = a cada 2 semanas, monthly = mensal, daily = diária, other = outra), data da PRÓXIMA ocorrência, horário de início (HH:MM, no meu fuso) e duração em minutos. Em "suggestion", indique como associar a série: kind "oneOnOne" com target = nome exato da pessoa quando for um 1:1 (só eu e uma pessoa), kind "forum" com target = nome exato do fórum cadastrado quando corresponder a um dos fóruns abaixo (ou o próprio título, se for um ritual novo), kind "ignore" para reuniões que não são rituais de gestão (bloqueios de agenda, eventos sociais, treinamentos). Não inclua ocorrências avulsas nem séries encerradas.\nFormato: {"schema":"gestao-import/3","source":"agente-calendario","calendarSeries":[{"seriesId":"","title":"","organizer":"nome","attendees":["nome"],"frequency":"weekly|biweekly|monthly|daily|other","start":"AAAA-MM-DD da próxima ocorrência","time":"HH:MM","duration":30,"suggestion":{"kind":"forum|oneOnOne|ignore","target":"nome exato"}}]}`},
  {id:'people',area:'Pessoas',label:'Pessoas e times',desc:'Cadastro inicial a partir do organograma.',body:`Liste as pessoas do meu time direto e os times ou squads de que participam (organograma, listas de distribuição e convites recorrentes).\nFormato: {"schema":"gestao-import/3","source":"agente-pessoas","teams":[{"name":""}],"people":[{"name":"","role":"","teams":["nome do time"],"cadence":14}]}`},
  {id:'conc',area:'Integração › conciliação',ph:'<TIME>',label:'Conciliar iniciativas do time',desc:'Quais épicos do time correspondem a iniciativas da Central, com evidência.',body:`O time <TIME> acompanha épicos próprios na ferramenta dele; alguns são as mesmas iniciativas que eu acompanho na Central (lista abaixo, com códigos). Revise transcrições de reuniões, chats e e-mails dos últimos 60 dias e indique, para cada épico do time que você consegue relacionar com segurança, a iniciativa correspondente da Central. Informe o identificador do épico no time (localId, ex.: EPIC-OBS) quando aparecer, senão o nome usado pelo time, e cite a evidência (quem disse, onde, quando). Não sugira vínculo sem evidência; a decisão final é minha, na tela de conciliação.\nFormato: {"schema":"gestao-import/3","source":"agente-conciliacao","teamLinks":[{"team":"<TIME>","localId":"","teamName":"nome do épico no time","initiative":"código da Central","evidence":""}]}`},
  {id:'metrics',area:'Métricas › times',ph:'<TIME>',label:'Métricas de fluxo de um time sem ferramenta',desc:'Métricas citadas em relatórios de sprint, e-mails e reuniões, no formato que a Central desenha.',body:`O time <TIME> não publica métricas pela ferramenta. A partir de relatórios de sprint, e-mails e transcrições de reviews e retrospectivas, monte o arquivo de métricas do time SOMENTE com números que aparecem nas fontes (nunca estime). Use os ids do dicionário quando a métrica for uma destas: throughput (vazão semanal), sprint_closed (cards fechados por sprint), lead_time, cycle_time, wip, blocked_pct, predictability (compromisso da sprint cumprido), items_on_time. Outras métricas podem entrar com id próprio. Uma série por métrica, um ponto por semana ou sprint ("t" = data de início, "label" = nome da sprint). "source.team" é a pasta do time listada abaixo; "revision" é a data e hora no formato AAAAMMDDhhmm.\nFormato: {"schema":"gestao-metricas/1","source":{"team":"pasta-do-time","teamName":"<TIME>","tool":"agente-metricas"},"generatedAt":"<ISO com fuso>","revision":202611150900,"sprint":{"name":"","start":"","end":""},"metrics":[{"id":"sprint_closed","standard":"sprint_closed","name":"Cards fechados por sprint","valueType":"count","unit":"cards","direction":"higher_is_better","grain":"sprint","viz":{"type":"bar"},"data":{"series":[{"key":"fechados","label":"Fechados","points":[{"t":"AAAA-MM-DD","v":0,"label":"Sprint N"}]}]}},{"id":"wip","standard":"wip","name":"Trabalho em andamento","valueType":"count","unit":"cards","viz":{"type":"kpi"},"data":{"value":0,"asOf":"AAAA-MM-DD"}}]}`}
@@ -2396,6 +2423,7 @@ ${RULES.split('\n').map(l=>'- '+l).join('\n')}
 | forums | name | name*, cadence (weekly/biweekly/monthly), next, time (HH:MM), duration (min), team, purpose, participants[] |
 | agenda | fórum+texto | forum*, text*, date, owner, team, minutes, discussed |
 | staffTopics | texto | text*, team, discussed (vai para o fórum da staff) |
+| calendarSeries | seriesId (ou título) | title*, seriesId, organizer, attendees[], frequency (weekly/biweekly/monthly/daily/other), start (próxima ocorrência), time (HH:MM), duration (min), suggestion {kind: forum/oneOnOne/ignore, target}. Na prévia você escolhe, para cada série, um fórum existente, um 1:1, um fórum novo ou ignorar. Também aceita um arquivo .ics exportado do Outlook |
 | teamLinks | time+épico | team*, localId ou teamName*, initiative* (código), evidence. Vira sugestão na tela de conciliação; nada é unido sem a sua confirmação |
 
 Métricas de times sem ferramenta própria usam o contrato **gestao-metricas/1** (o mesmo das ferramentas dos times), sem cifra, importado pelo mesmo botão ou em Integração › Importar arquivos.
@@ -2413,12 +2441,13 @@ const IMPORT_TEMPLATE=()=>JSON.stringify({schema:'gestao-import/3',source:'model
   updates:[{initiative:'Estratégia PA 2027',date:today(),text:'No prazo: discovery com 6 entrevistas feitas; próximo passo é consolidar o roadmap.'}],
   notes:[{person:'Nome da pessoa',date:today(),text:'Conduziu a reunião de alinhamento com clareza.',kind:'forte',eligible:true}],
   cycles:[{name:'2026 S2',start:'2026-07-01',end:'2026-12-31'}],forums:[{name:'Comitê de produto',cadence:'biweekly',next:addDays(3),time:'10:00',duration:60,team:'People Analytics',participants:['Nome da pessoa']}],
+  calendarSeries:[{seriesId:'exemplo-serie-1',title:'1:1 Nome da pessoa',organizer:'Eu',attendees:['Nome da pessoa'],frequency:'biweekly',start:addDays(2),time:'09:00',duration:30,suggestion:{kind:'oneOnOne',target:'Nome da pessoa'}},{seriesId:'exemplo-serie-2',title:'Comitê de produto',organizer:'Eu',attendees:['Nome da pessoa'],frequency:'biweekly',start:addDays(3),time:'10:00',duration:60,suggestion:{kind:'forum',target:'Comitê de produto'}}],
   agreements:[{forum:'Comitê de produto',date:today(),kind:'decision',text:'Piloto começa pela área comercial',initiative:'Estratégia PA 2027'}],
   agenda:[{forum:'Comitê de produto',text:'Priorização do backlog do 1º trimestre',owner:'Nome da pessoa',minutes:20}],
   staffTopics:[{text:'Alinhar prioridades entre People Analytics e HR Tech',team:'People Analytics'}]},null,2);
 function renderPrompts(){$('#promptList').innerHTML=PROMPTS.map(p=>`<div class="pr"><b>${esc(p.label)}</b><span>${esc(p.area)} · ${esc(p.desc)}${p.ph?` Troque ${esc(p.ph)} no texto.`:''}</span><button class="btn sm" data-act="copy-prompt" data-id="${p.id}">${ic('copy','sm')} Copiar</button></div>`).join('')}
-let impTimer;$('#impText').addEventListener('input',()=>{clearTimeout(impTimer);impTimer=setTimeout(analyzeImport,250)});
-$('#impFile').onchange=async ev=>{const f=ev.target.files[0];if(f){$('#impText').value=await f.text();analyzeImport()}ev.target.value=''};
+let impTimer;$('#impText').addEventListener('input',()=>{impCalChoice={};clearTimeout(impTimer);impTimer=setTimeout(analyzeImport,250)});
+$('#impFile').onchange=async ev=>{const f=ev.target.files[0];if(f){impCalChoice={};$('#impText').value=await f.text();analyzeImport()}ev.target.value=''};
 /* ============ v14: integração com as ferramentas dos times (pasta SharePoint, arquivos cifrados) ============ */
 /* Contratos: gestao-catalogo/1 (Central → time), gestao-status/1 e gestao-metricas/1 (time → Central), todos em gestao-envelope/1 (AES-256-GCM). */
 const IG_ENV='gestao-envelope/1',IG_LIM={series:8,points:120,cats:30,bins:40,metrics:80};
@@ -2814,6 +2843,111 @@ function igHomeCard(){const ts=db.teams.filter(t=>t.slug);if(!ts.length)return''
     ${hot.slice(0,4).map(({i,t,x})=>`<div class="li" data-act="open-init" data-id="${i.id}"><span class="igd s-${esc(x.status)}"></span><div class="tt">${esc(cut(i.name,36))} <span class="muted small">· ${esc(t.name)}</span></div><span class="due ${x.status==='late'?'late':''}">${esc(ST_L[x.status])}</span></div>`).join('')}
     ${lonely?`<div class="li" data-act="ig-goconc" data-id="${ts.find(t=>igLonely(t).length).id}"><span class="fdot"></span><div class="tt">${lonely} iniciativa${lonely>1?'s':''} do time sem vínculo</div></div>`:''}
     ${noKey?`<div class="li" data-go="integ"><span class="fdot"></span><div class="tt">${noKey} time${noKey>1?'s':''} sem chave de integração</div></div>`:''}</div>`}
+/* ============ v14: painel da iniciativa (visão geral, features por fase, time, tarefas, ajustes) ============ */
+let drTab='geral',drFor='';
+const DR_TABS=[['geral','Visão geral'],['feat','Features'],['time','Do time'],['tasks','Tarefas'],['cfg','Ajustes']];
+function drFeatMeta(i,t){const d=t.dependsOn&&db.tasks.find(x=>x.id===t.dependsOn),its=igItemsOfFeature(t),fs=igFeatStatus(t),dn=its.filter(x=>x.y.status==='done').length,out=[];
+  if(d){const blk=!d.done&&!t.done;out.push(`<button class="chip ${blk?'drblk':''}" data-act="edit-task" data-id="${d.id}" title="${blk?'Bloqueada: a feature de que depende ainda não terminou':'Depende de'}">${blk?'⛔':'↳'} ${esc(d.ref||'')} ${esc(cut(d.title,28))}${blk&&okDate(d.end)?' · '+esc(fmtShort(d.end)):''}</button>`)}
+  const nx=db.tasks.filter(x=>x.type==='feature'&&x.dependsOn===t.id&&!x.done);if(nx.length)out.push(`<span class="chip" title="Features que dependem desta">→ ${nx.map(x=>esc(x.ref||cut(x.title,16))).join(', ')}</span>`);
+  if(its.length||fs)out.push(`<span class="drds" title="Itens do time ligados a esta feature">${fs?`<span class="igd s-${esc(fs.y.status)}"></span>`:''}<span class="drbar"><i style="width:${its.length?Math.round(dn/its.length*100):0}%"></i></span>${dn}/${its.length} do time${fs&&fs.y.forecastEnd?` · prev. ${esc(fmtShort(fs.y.forecastEnd))}`:''}</span>`);
+  const ot=db.tasks.filter(x=>x.featureId===t.id&&!x.done).length;if(ot)out.push(`<span class="chip">${ot} tarefa${ot>1?'s':''}</span>`);
+  return out.length?`<div class="phl">${out.join('')}</div>`:''}
+function drTimeline(i,feats){
+  const ds=[i.start,i.end,...i.phases.flatMap(p=>[p.start,p.end]),...feats.map(f=>f.end)].filter(okDate).sort();if(ds.length<2)return'';
+  let a=ds[0],b=ds[ds.length-1];if(a===b)b=addD(a,7);const T=today(),span=Math.max(1,dayDiff(a,b)),X=d=>Math.max(0,Math.min(100,dayDiff(a,d)/span*100));
+  const phs=i.phases.filter(p=>okDate(p.start)&&okDate(p.end)).slice().sort((x,y)=>x.start.localeCompare(y.start)),ends=[],lane=new Map();
+  phs.forEach(p=>{let l=ends.findIndex(e=>e<p.start);if(l<0){l=ends.length;ends.push(p.end)}else ends[l]=p.end;lane.set(p.id,l)});
+  const NL=ends.length,rows=[];
+  phs.forEach(p=>{const f=feats.filter(x=>x.phaseId===p.id),d=f.filter(x=>x.done).length,late=!p.done&&p.end<T,pc=f.length?d/f.length*100:(p.done?100:0);
+    rows.push(`<div class="drph ${p.done?'done':late?'late':''}" style="left:${X(p.start)}%;width:${Math.max(2,X(p.end)-X(p.start))}%;top:${lane.get(p.id)*30}px" title="${esc(p.name)} · ${esc(fmtShort(p.start))} a ${esc(fmtShort(p.end))} · ${d}/${f.length} features"><i style="width:${pc}%"></i><span>${esc(p.name)} <b>${d}/${f.length}</b></span></div>`)});
+  const fy=NL*30+6,mk=feats.filter(f=>okDate(f.end)).map(f=>{const late=!f.done&&f.end<T;return`<button class="drfm ${f.done?'done':late?'late':''}" style="left:${X(f.end)}%;top:${fy}px" data-act="edit-task" data-id="${f.id}" title="${esc(f.ref||'')} ${esc(f.title)} · ${esc(fmtShort(f.end))}${f.done?' · concluída':late?' · atrasada':''}"></button>`}).join('');
+  const H=fy+22,ticks=[a,...(span>20?[addD(a,Math.round(span/3)),addD(a,Math.round(span*2/3))]:[]),b];
+  return`<div class="drtl"><div class="drtl-a" style="height:${H}px">${rows.join('')}${mk}${T>=a&&T<=b?`<div class="drtd" style="left:${X(T)}%"><span>hoje</span></div>`:''}${okDate(i.end)?`<div class="drte" style="left:${X(i.end)}%" title="Fim da iniciativa · ${esc(fmtShort(i.end))}"></div>`:''}</div>
+    <div class="drtl-x">${ticks.map(d=>`<span style="left:${X(d)}%">${esc(fmtShort(d))}</span>`).join('')}</div>
+    <div class="muted small" style="margin-top:6px">Barras: fases (preenchido = features concluídas) · losangos: prazos das features · linha vermelha tracejada: fim da iniciativa</div></div>`}
+function drMetrics(i){if(!i.ref)return[];const out=[];db.teams.forEach(t=>{const r=db.integ.received[t.slug]?.metricas;if(!r)return;r.payload.metrics.forEach(m=>{const ref=igStr(m?.scope?.ref,40);if(ref&&(igCanon(ref)===i.ref||ref.startsWith(i.ref+'.')))out.push({t,m})})});return out}
+function drInitHTML(i){
+  const h=health(i),pr=progressOf(i),ts=tasksOfInit(i.id),T=today(),blocks=db.initiatives.filter(x=>x.dependsOn.includes(i.id));
+  const feats=ts.filter(t=>t.type==='feature'),fOpen=feats.filter(t=>!t.done),fDone=feats.filter(t=>t.done),tks=ts.filter(t=>t.type!=='feature'),tOpen=tks.filter(t=>!t.done),tDone=tks.filter(t=>t.done);
+  const auto=i.autoProgress!==false&&ts.length>0,pBase=feats.length?feats:ts,cp=curPhase(i),cands=db.initiatives.filter(x=>x.id!==i.id&&!i.dependsOn.includes(x.id)&&!initCycle(i.id,x.id));
+  const nxt=fOpen.filter(t=>okDate(t.end)).sort((a,b)=>a.end.localeCompare(b.end))[0],lateF=fOpen.filter(t=>okDate(t.end)&&t.end<T),blkF=fOpen.filter(t=>{const d=t.dependsOn&&db.tasks.find(x=>x.id===t.dependsOn);return d&&!d.done});
+  const team=igTeamInits(i),tx=team[0]?.x,mets=drMetrics(i),unl=team.reduce((n,{t,x})=>n+igUnlinkedOf(t,x).length,0),last=lastUpd(i);
+  const who=`<select data-q="who" title="Responsável"><option value="${ME}">Eu</option>${db.people.map(p=>`<option value="${p.id}" ${p.id===i.ownerId?'selected':''}>${esc(first(p.name))}</option>`).join('')}</select>`;
+  const kpi=(k,v,s,cls='')=>`<div class="drk ${cls}"><div class="k">${k}</div><div class="v">${v}</div>${s?`<div class="s">${s}</div>`:''}</div>`;
+  const left=okDate(i.end)?dayDiff(T,i.end):null;
+  const head=`<div class="dr-h">${ring(pr,60,5)}<div style="flex:1;min-width:0"><h2>${i.ref?`<span class="ref lg">${esc(i.ref)}</span>`:''}${esc(i.name)}</h2><div class="muted small" style="margin-top:4px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">${hd(h)} ${h.label}${teamName(i.teamId)?' · '+esc(teamName(i.teamId)):''}${i.ownerId?` · ${av(i.ownerId,'xs')} ${esc(first(nameOf(i.ownerId)))}`:i.ownerLabel?' · '+esc(i.ownerLabel):''} · ${esc(bucketName(i.bucket))}${igInitBadge(i)}</div></div>
+    <button class="ib" data-act="edit-init" data-id="${i.id}" title="Editar">${ic('edit')}</button><button class="ib danger" data-act="del-init" data-id="${i.id}" title="Excluir">${ic('trash')}</button><button class="ib" data-act="close-drawer" title="Fechar">${ic('x')}</button></div>
+    <div class="drtabs">${DR_TABS.map(([k,l])=>`<button class="${drTab===k?'on':''}" data-act="dr-tab" data-v="${k}">${l}${k==='feat'?` <span class="n">${fOpen.length}</span>`:k==='tasks'&&tOpen.length?` <span class="n">${tOpen.length}</span>`:k==='time'&&(team.length||mets.length)?` <span class="n ${unl?'hot':''}">${unl||team.length+mets.length}</span>`:''}</button>`).join('')}</div>`;
+  const updBox=`<div class="pl-in" style="margin-bottom:6px"><input type="text" data-upd="${i.id}" placeholder="O que mudou? (Enter salva)"><button class="btn sm" data-act="pl-save" data-id="${i.id}">Registrar</button></div>`;
+  const addFeat=`<div class="qadd wrap" data-dq="f:${i.id}"><input type="text" data-q="title" placeholder="+ Nova feature…">${who}<input type="date" data-q="end" value="${phaseEndDefault(i,cp)}">${i.phases.length?`<select data-q="phase"><option value="">Sem fase</option>${i.phases.map(p=>`<option value="${p.id}" ${cp&&cp.id===p.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select>`:''}<button class="btn sm" data-act="dr-add" data-id="f:${i.id}">Adicionar</button></div>`;
+  let body='';
+  if(drTab==='geral'){
+    body=`<div class="drkpis">${kpi('Andamento',pct(pr),auto?`${pBase.filter(t=>t.done).length}/${pBase.length} ${feats.length?'features':'itens'}`:'manual')}
+      ${kpi('Próxima feature',nxt?esc(fmtShort(nxt.end)):'—',nxt?esc(cut(nxt.title,34)):'nenhuma com prazo',nxt&&nxt.end<T?'late':'')}
+      ${kpi('Atrasadas · bloqueadas',`${lateF.length} · ${blkF.length}`,lateF.length||blkF.length?'features':'nenhuma',lateF.length?'late':blkF.length?'attn':'')}
+      ${kpi(tx?'Time':'Fim',tx?`${tx.progress!=null?Math.round(tx.progress)+'%':esc(ST_L[tx.status])}`:okDate(i.end)?esc(fmtShort(i.end)):'—',tx?`${esc(ST_L[tx.status])}${tx.forecastEnd?' · prev. '+esc(fmtShort(tx.forecastEnd)):''}`:left==null?'sem data':left<0?`${-left} dias de atraso`:`em ${left} dias`,tx?(tx.status==='late'?'late':tx.status==='attn'?'attn':''):left!=null&&left<0&&pr<100?'late':'')}</div>
+      ${drTimeline(i,feats)||phaseTrack(i,true)}
+      ${lateF.length||blkF.length?`<div class="dr-s"><div class="lbl">Pedindo atenção</div>${[...new Set([...lateF,...blkF])].sort(byTask).map(t=>taskRow(t,{noIni:true,dateInput:true})+drFeatMeta(i,t)).join('')}</div>`:''}
+      <div class="dr-s"><div class="lbl">Última atualização<span class="grow"></span><button class="btn sm" data-act="dr-tab" data-v="cfg">Histórico</button></div>${updBox}
+        ${last?`<div class="ulog"><div class="d">${esc(fmtFull(last.date))}</div><div class="x">${esc(last.text)}</div></div>`:empty('Sem atualização registrada.')}${igMeetSuggest(i)}</div>
+      ${tx?`<div class="dr-s"><div class="lbl">Do time<span class="grow"></span><button class="btn sm" data-act="dr-tab" data-v="time">Ver tudo</button></div>${igInitTeamLine(i)||`<div class="muted small">${esc(team[0].t.name)} · ${esc(ST_L[tx.status])}</div>`}${tx.blockers.length?`<div class="small" style="color:var(--late)">${tx.blockers.length} bloqueio${tx.blockers.length>1?'s':''} no time</div>`:''}</div>`:''}`}
+  else if(drTab==='feat'){
+    const groups=i.phases.slice().sort((a,b)=>(a.start||'9').localeCompare(b.start||'9')).map(p=>({p,fs:feats.filter(f=>f.phaseId===p.id)})).concat([{p:null,fs:feats.filter(f=>!phaseOf(i,f.phaseId))}]).filter(g=>g.p||g.fs.length);
+    body=`<div class="bar" style="margin:14px 0 4px"><span class="muted small">${fDone.length}/${feats.length} concluídas · agrupadas por fase</span><span class="grow"></span><button class="btn sm" data-act="copy-prompt" data-id="features" data-ctx="${esc(i.ref?i.ref+' · '+i.name:i.name)}" title="Copia um prompt para o agente levantar as features desta iniciativa">${ic('copy','sm')} Prompt para agente</button></div>
+      ${groups.map(({p,fs})=>{const o=fs.filter(f=>!f.done).sort(byTask),d=fs.filter(f=>f.done),pc=fs.length?d.length/fs.length*100:0,late=p&&!p.done&&okDate(p.end)&&p.end<T;
+        return`<div class="drg"><div class="drg-h"><b>${p?esc(p.name):'Sem fase'}</b>${p&&p.ref?`<span class="ref">${esc(p.ref)}</span>`:''}${p&&okDate(p.start)&&okDate(p.end)?`<span class="muted small ${late?'due late':''}">${esc(fmtShort(p.start))} a ${esc(fmtShort(p.end))}</span>`:''}${p&&isCurPh(p)?'<span class="chip igc">em curso</span>':''}${p&&p.done?'<span class="chip">concluída</span>':''}<span class="grow"></span><span class="drbar wide"><i style="width:${pc}%"></i></span><span class="muted small">${d.length}/${fs.length}</span></div>
+          ${o.map(t=>taskRow(t,{noIni:true,dateInput:true})+drFeatMeta(i,t)+igFeatDs(t)).join('')||(fs.length?'':`<div class="empty" style="padding:6px 0">Nenhuma feature nesta fase.</div>`)}
+          ${d.length?`<details class="drdone"><summary class="muted small">Concluídas · ${d.length}</summary>${d.sort((a,b)=>(b.doneAt||'').localeCompare(a.doneAt||'')).map(t=>taskRow(t,{noIni:true})+igFeatDs(t)).join('')}</details>`:''}</div>`}).join('')||empty('Nenhuma feature ainda.')}
+      ${addFeat}`}
+  else if(drTab==='time'){
+    body=`${igInitTeamBlock(i)||`<div class="dr-s">${empty(i.ref?'Nenhum time publicou status desta iniciativa ainda. O vínculo é pelo código '+esc(i.ref)+' ou pela conciliação.':'Defina o prefixo do time para a iniciativa ganhar código e poder ser compartilhada.')}</div>`}
+      ${igUnlinkedItemsBlock(i)}
+      ${mets.length?`<div class="dr-s"><div class="lbl">Métricas do time desta iniciativa<span class="n">${mets.length}</span></div><div class="igmet" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">${mets.map(({t,m})=>igMetricCard(t.id,m)).join('')}</div></div>`:''}
+      ${feats.some(f=>igItemsOfFeature(f).length)?`<div class="dr-s"><div class="lbl">Downstream por feature</div>${feats.filter(f=>igItemsOfFeature(f).length).map(f=>`<div style="margin:6px 0"><b class="small">${esc(f.ref||'')} ${esc(f.title)}</b></div>${igFeatDs(f).replace('<details class="ds">','<details class="ds" open>')}`).join('')}</div>`:''}`}
+  else if(drTab==='tasks'){
+    body=`<div class="dr-s"><div class="muted small" style="margin-bottom:6px">Tarefas ligadas à iniciativa ou a uma das features dela.</div>
+      ${tOpen.sort(byTask).map(t=>{const f=t.featureId&&db.tasks.find(x=>x.id===t.featureId);return taskRow(t,{noIni:true,dateInput:true})+(f?`<div class="phl"><span class="chip">◆ ${esc(f.ref||'')} ${esc(cut(f.title,30))}</span></div>`:'')}).join('')||empty('Sem tarefas abertas.')}
+      <div class="qadd wrap" data-dq="t:${i.id}"><input type="text" data-q="title" placeholder="+ Nova tarefa…">${who}<input type="date" data-q="end" value="${phaseEndDefault(i,cp)}"><button class="btn sm" data-act="dr-add" data-id="t:${i.id}">Adicionar</button></div>
+      ${tDone.length?`<details style="margin-top:14px"><summary class="muted small" style="cursor:pointer">Tarefas concluídas · ${tDone.length}</summary>${tDone.sort((a,b)=>(b.doneAt||'').localeCompare(a.doneAt||'')).map(t=>taskRow(t,{noIni:true})).join('')}</details>`:''}</div>`}
+  else{
+    body=`<div class="dr-s"><div class="lbl">Andamento e horizonte</div><div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+      <label class="muted small" style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-qi="auto" data-id="${i.id}" ${i.autoProgress!==false?'checked':''}> automático${auto?` · ${pBase.filter(t=>t.done).length}/${pBase.length} ${feats.length?'features':'itens'}`:''}</label>
+      ${auto?'':`<input type="range" class="range" min="0" max="100" step="5" value="${clampP(i.progress)}" data-qi="progress" data-id="${i.id}" style="flex:1;min-width:140px"><span class="small" style="min-width:34px">${clampP(i.progress)}%</span>`}
+      <select class="sel" data-qi="bucket" data-id="${i.id}">${BUCKETS.map(([k,l])=>`<option value="${k}" ${i.bucket===k?'selected':''}>${l}</option>`).join('')}</select></div></div>
+    <div class="dr-s"><div class="lbl">Datas e fases</div><div class="sched"><span class="muted">Iniciativa</span><input type="date" class="dt" data-sd="init:start" data-id="${i.id}" value="${esc(i.start||'')}" title="Início"><input type="date" class="dt ${okDate(i.end)&&i.end<T&&pr<100?'late':''}" data-sd="init:end" data-id="${i.id}" value="${esc(i.end||'')}" title="Fim">
+      ${i.phases.map(p=>`<span class="${p.done?'dim':''}">${esc(p.name)}</span><input type="date" class="dt" data-sd="phase:start" data-id="${i.id}" data-p="${p.id}" value="${esc(p.start||'')}" title="Início da fase"><input type="date" class="dt ${!p.done&&okDate(p.end)&&p.end<T?'late':''}" data-sd="phase:end" data-id="${i.id}" data-p="${p.id}" value="${esc(p.end||'')}" title="Fim da fase">`).join('')}</div>
+      <div class="muted small" style="margin-top:6px">Para criar, renomear ou concluir fases, use Editar (lápis). Fases podem se sobrepor.</div></div>
+    <div class="dr-s"><div class="lbl">Dependências entre iniciativas</div><div class="dpx">${i.dependsOn.map(d=>initById(d)).filter(Boolean).map(o=>`<span class="chip"><button data-act="open-init" data-id="${o.id}">← ${hd(health(o))} ${esc(cut(o.name,24))}</button><button data-act="dep-rm" data-a="${o.id}" data-b="${i.id}" title="Remover dependência">${ic('x','sm')}</button></span>`).join('')}${i.depNote?`<span class="chip">${esc(i.depNote)}</span>`:''}
+      ${cands.length?`<select class="sel" data-dep-add="${i.id}"><option value="">+ depende de…</option>${cands.map(o=>`<option value="${o.id}">${esc(cut(o.name,40))}</option>`).join('')}</select>`:''}</div>
+      ${blocks.length?`<div class="tm" style="margin-top:8px"><span class="muted small">Bloqueia:</span>${blocks.map(o=>`<button class="chip" data-act="open-init" data-id="${o.id}">→ ${esc(cut(o.name,24))}</button>`).join('')}</div>`:''}</div>
+    <div class="dr-s"><div class="lbl">Atualizações<span class="n">${(i.updates||[]).length}</span></div>${updBox}
+      ${(i.updates||[]).slice().sort((a,b)=>b.date.localeCompare(a.date)||b.createdAt-a.createdAt).slice(0,updLimit).map(u=>`<div class="ulog"><div class="d" style="display:flex;gap:6px;align-items:center">${esc(fmtFull(u.date))}<span class="grow"></span><button class="ib danger" data-act="del-upd" data-id="${i.id}" data-u="${u.id}" title="Excluir">${ic('trash','sm')}</button></div><div class="x">${esc(u.text)}</div></div>`).join('')}
+      ${(i.updates||[]).length>updLimit?`<button class="btn sm" data-act="upd-more">Ver todas</button>`:''}</div>`}
+  return head+`<div class="dr-b">${body}</div>`}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act="dr-tab"]');if(!b)return;drTab=b.dataset.v;renderDrawer();$('#drawer').scrollTop=0});
+
+/* ============ v14: séries recorrentes do calendário (calendarSeries ou .ics do Outlook) ============ */
+let impCalChoice={};
+const CAL_FREQ={weekly:'Semanal',biweekly:'Quinzenal',monthly:'Mensal',daily:'Diária',other:'Outra recorrência'};
+const calWhen=m=>[okDate(m.anchor)?parseD(m.anchor).toLocaleDateString('pt-BR',{weekday:'short'}).replace('.',''):'',m.time||''].filter(Boolean).join(' ');
+function icsToSeries(txt){
+  const lines=String(txt).replace(/\r\n?/g,'\n').replace(/\n[ \t]/g,'').split('\n'),evs=[];let cur=null;
+  for(const ln of lines){if(/^BEGIN:VEVENT$/i.test(ln)){cur={att:[]};continue}if(/^END:VEVENT$/i.test(ln)){if(cur)evs.push(cur);cur=null;continue}if(!cur)continue;
+    const m=/^([A-Za-z-]+)((?:;[^:]*)?):(.*)$/.exec(ln);if(!m)continue;const k=m[1].toUpperCase(),cn=(/;CN="?([^";:]+)"?/i.exec(m[2])||[])[1]||'',val=m[3].replace(/^mailto:/i,'');
+    if(k==='ATTENDEE')cur.att.push(cn||val);else if(k==='ORGANIZER')cur.org=cn||val;else cur[k]={v:m[3],params:m[2]}}
+  const un=x=>String(x||'').replace(/\\n/gi,' ').replace(/\\([,;\\])/g,'$1').trim();
+  const dt=v=>{const m=/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})?(Z)?)?$/.exec(String(v||'').trim());if(!m)return null;
+    if(m[7]){const d=new Date(Date.UTC(+m[1],m[2]-1,+m[3],+m[4],+m[5]));return{date:iso(d),time:pad(d.getHours())+':'+pad(d.getMinutes()),ms:d.getTime()}}
+    return{date:`${m[1]}-${m[2]}-${m[3]}`,time:m[4]?`${m[4]}:${m[5]}`:'',ms:new Date(+m[1],m[2]-1,+m[3],+(m[4]||0),+(m[5]||0)).getTime()}};
+  const seen=new Set(),out=[];
+  evs.forEach(e=>{if(!e.RRULE||e['RECURRENCE-ID'])return;const id=un(e.UID?.v);if(id&&seen.has(id))return;if(id)seen.add(id);
+    const r=Object.fromEntries(e.RRULE.v.split(';').map(x=>x.split('=')).filter(x=>x.length===2).map(([a,b])=>[a.toUpperCase(),b])),iv=+r.INTERVAL||1;
+    if(r.UNTIL){const u=dt(r.UNTIL);if(u&&u.date<today())return}
+    const freq=r.FREQ==='WEEKLY'?(iv===1?'weekly':iv===2?'biweekly':'other'):r.FREQ==='MONTHLY'&&iv===1?'monthly':r.FREQ==='DAILY'?'daily':'other';
+    const s=dt(e.DTSTART?.v),en=dt(e.DTEND?.v);let dur=s&&en?Math.round((en.ms-s.ms)/60000):0;if(!dur&&e.DURATION){const d=/PT(?:(\d+)H)?(?:(\d+)M)?/.exec(e.DURATION.v);if(d)dur=(+d[1]||0)*60+(+d[2]||0)}
+    out.push({seriesId:id?'ics:'+id:'',title:un(e.SUMMARY?.v)||'(sem título)',organizer:un(e.org),attendees:e.att.map(un).filter(Boolean).slice(0,60),frequency:freq,start:s?.date||'',time:s?.time||'',duration:dur>0?dur:'',source:'ics'})});
+  return out.slice(0,200)}
+document.addEventListener('change',e=>{const el=e.target;if(el.dataset?.calch!=null){impCalChoice[el.dataset.calch]=el.value;analyzeImport()}});
 /* ============ Eventos ============ */
 document.addEventListener('input',e=>{
   const el=e.target,m=(el.id||'').match(/^(cp|cf)-(text|date|person)$/);if(m)comp[m[1]][m[2]]=el.value;

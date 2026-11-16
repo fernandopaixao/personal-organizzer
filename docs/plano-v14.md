@@ -24,12 +24,25 @@
 
 ## 4. Agentes de reuniões, chats e e-mails
 - Importação **gestao-import/3** (a /2 continua aceita): novas listas `features`, `updates`, `agreements` (decisões e compromissos), `teamLinks` (sugestões de conciliação) e `feature` nas tarefas; aceita também `gestao-metricas/1` e `gestao-status/1` sem cifra.
-- 12 prompts, um por funcionalidade, com o contexto (códigos e nomes) já incluído; botões "Prompt para agente" no painel da iniciativa, na conciliação e nas métricas. Guia completo em `integracao-time/06-prompts-para-agentes.md`.
+- 13 prompts, um por funcionalidade (inclui reuniões recorrentes do calendário), com o contexto (códigos e nomes) já incluído; botões "Prompt para agente" no painel da iniciativa, na conciliação e nas métricas. Guia completo em `integracao-time/06-prompts-para-agentes.md`.
 
 ## 5. Interface
 - Menu lateral agrupado pelo fluxo do dia: **Meu dia** (Hoje, Demandas, Delegação), **Portfólio** (Iniciativas, Roadmap), **Rituais** (Fóruns, Staff, Pessoas), **Times** (Métricas, Integração), e atalhos para a visão de cada time.
 - Teclas 1 a 0 trocam de página; o botão do topo virou "Importar e agentes".
 - Hoje ganhou o cartão **Dos times**: arquivos novos, iniciativas que os times marcaram com atenção ou atraso, épicos sem vínculo e times sem chave.
+
+## 7. Painel da iniciativa redesenhado
+- Painel mais largo, com abas: **Visão geral**, **Features**, **Do time**, **Tarefas** e **Ajustes**.
+- **Visão geral:** quatro indicadores (andamento, próxima feature, atrasadas e bloqueadas, status do time ou fim), linha do tempo com as fases em faixas paralelas (preenchidas conforme as features concluídas), losangos com os prazos das features, linha de hoje e fim da iniciativa; lista do que pede atenção; última atualização com sugestão do time.
+- **Features:** agrupadas por fase, cada grupo com período, "em curso" e barra de conclusão; cada feature mostra de quem depende (em vermelho quando bloqueada), quem depende dela, o andamento dos itens do time e as tarefas ligadas.
+- **Do time:** status do time, itens sem feature, métricas do time com escopo nesta iniciativa ou nas features dela e o downstream por feature.
+- **Ajustes:** andamento, horizonte, datas das fases, dependências entre iniciativas e histórico de atualizações.
+
+## 8. Reuniões recorrentes do calendário
+- Importação de séries recorrentes (lista `calendarSeries` do gestao-import/3, gerada pelo Copilot com o prompt "Reuniões recorrentes do calendário", ou um arquivo .ics exportado do Outlook).
+- Na prévia, cada série aparece com a associação sugerida e um seletor: fórum (ritual) existente, 1:1 com uma pessoa, fórum novo ou ignorar.
+- Fórum: recebe recorrência (semanal, quinzenal, mensal), próxima data, horário, duração e participantes cadastrados. 1:1: a cadência da pessoa passa a seguir a série, e o dia e horário aparecem no topo do 1:1.
+- Reimportar casa pela mesma série (seriesId ou UID do .ics) e só atualiza; séries diárias ou encerradas vêm como "ignorar" por padrão.
 
 ## 6. Testado
 Fluxo completo no Chromium com os exemplos cifrados de `integracao-time/exemplos/`: criar time com prefixo, importar features pelo formato dos agentes, aplicar backlog e métricas, conciliar, compartilhar (o catálogo gerado decifra com a implementação de referência e valida no schema), métricas malformadas sem quebrar a tela, migração de dados da v13, todas as páginas sem erro no console.
