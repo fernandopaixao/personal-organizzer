@@ -46,3 +46,11 @@
 
 ## 6. Testado
 Fluxo completo no Chromium com os exemplos cifrados de `integracao-time/exemplos/`: criar time com prefixo, importar features pelo formato dos agentes, aplicar backlog e métricas, conciliar, compartilhar (o catálogo gerado decifra com a implementação de referência e valida no schema), métricas malformadas sem quebrar a tela, migração de dados da v13, todas as páginas sem erro no console.
+
+## 9. Times: revisão e HTML do time (16/11/2026)
+- **Correções no cadastro do time:** a pasta é sugerida a partir do nome; pasta inválida avisa (antes ficava vazia sem aviso); trocar a pasta de um time que já tem chave, catálogo compartilhado ou arquivos recebidos pede confirmação, porque a ferramenta do time continua publicando na pasta antiga; a pasta não pode ser apagada enquanto o time tem chave; o prefixo pode ser apagado enquanto não houver códigos emitidos; excluir um time apaga a chave dele (antes ela ficava guardada nos dados); "1 pessoa" e "1 iniciativa" no singular.
+- **Cartão do time** mostra prefixo, pasta e situação da chave, com o botão **HTML do time** (também na visão do time e em Integração › Pasta e chaves).
+- **HTML do time:** gera o Quadro do Time já configurado (contrato `quadro-preset/1`: nome, pasta, prefixo, pessoas do time, contato e, se marcado, a chave). A chave fica desmarcada por padrão. O Quadro vai embutido na Central (gzip + base64, ~70 KB); `tools/embutir_quadro.py` atualiza essa cópia quando o Quadro mudar, e o diálogo aceita um arquivo do Quadro mais novo.
+- **Quadro do Time 1.1.0:** lê a pré-configuração (aviso na tela inicial, "Criar quadro novo" preenchido com identificador travado, chave cadastrada uma única vez, alerta na aba Central se o quadro aberto usa outro identificador). Sem pré-configuração, funciona como a 1.0.
+- **Formulários de tarefa, feature e iniciativa redesenhados:** uma coluna com propriedades (ícone, rótulo e campo), título grande, tipo Tarefa/Feature no topo, "Alta prioridade" como botão ao lado do prazo, campos secundários em "Mais detalhes" (abre sozinho quando já há algo preenchido e mostra um resumo), iniciativa com período em uma linha, progresso manual só quando o automático está desligado, fases em linhas com dica quando vazias e dependências recolhidas. Botões dizem "Criar tarefa", "Criar feature" ou "Criar iniciativa".
+

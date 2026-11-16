@@ -241,7 +241,19 @@ pre.json{background:#f6f7fb;border-radius:10px;padding:12px;font-size:11.5px;max
      gestao-status/1, gestao-metricas/1 dentro de gestao-envelope/1 (AES-256-GCM).
    - Só métricas de time, calculadas a partir da movimentação dos cards.
    ========================================================================= */
-const TOOL = 'quadro_do_time_v1.html', TOOL_VERSION = '1.0.0';
+const TOOL = 'quadro_do_time_v1.html', TOOL_VERSION = '1.1.0';
+/* Pré-configuração gravada pela Central de Gestão (Pessoas › Times › HTML do time).
+   No arquivo original fica null; a Central troca o trecho entre os marcadores por um
+   objeto quadro-preset/1: { team: { name, slug, prefix, contact }, people: [{ name, role }], key? }.
+   A chave só vem quando o gestor escolhe incluí-la; ela é cadastrada uma vez no navegador. */
+const PRESET = (() => {
+  const p = /*QUADRO-PRESET*/null/*FIM-QUADRO-PRESET*/;
+  if (!p || p.schema !== 'quadro-preset/1' || !p.team || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(p.team.slug || '')) return null;
+  const s = (v, n) => String(v ?? '').replace(/[\u0000-\u001f]+/g, ' ').trim().slice(0, n);
+  return { team: { name: s(p.team.name, 80) || p.team.slug, slug: p.team.slug, prefix: /^[A-Z]{2,5}$/.test(p.team.prefix || '') ? p.team.prefix : '', contact: s(p.team.contact, 80) },
+    people: (Array.isArray(p.people) ? p.people : []).slice(0, 200).map(x => ({ name: s(x?.name, 80), role: s(x?.role, 40) })).filter(x => x.name),
+    key: typeof p.key === 'string' ? p.key.trim() : '', generatedAt: s(p.generatedAt, 40) };
+})();
 const DB_SCHEMA = 'quadro-time/1', DB_SCHEMA_ENC = 'quadro-time-cifrado/1';
 const KINDS = ['história','feature','entrega','bug','spike','melhoria'];
 const BLOCK_CATS = [['terceiro','Dependência de terceiro'],['decisao','Aguardando decisão'],['ambiente','Ambiente ou acesso'],['negocio','Dúvida de negócio'],['outro','Outro']];
@@ -869,6 +881,7 @@ async function abrirArquivo(handle, { pedir = true } = {}) {
   await aposAbrir();
 }
 async function aposAbrir() {
+  if (PRESET && !db.demo && !db.team.slug) { db.team.slug = PRESET.team.slug; db.team.upd = db.upd = Date.now(); dirty = true; scheduleSave(); toast(`Identificador do time definido pela Central: ${PRESET.team.slug}.`); }
   keysInfo = await chaveiro();
   await catalogoDoCache();
   const root = await obterPasta();
@@ -880,6 +893,7 @@ async function criarArquivo(name, slug, senha, pessoas = []) {
   if (!window.showSaveFilePicker) throw new Error('Este navegador não permite salvar arquivos diretamente. Use Edge ou Chrome.');
   const h = await window.showSaveFilePicker({ id: 'quadro-time', suggestedName: `quadro-${slug || 'time'}.json`, types: [{ description: 'Quadro do time', accept: { 'application/json': ['.json'] } }] });
   db = newDb(name, slug);
+  if (PRESET && PRESET.team.slug === slug && PRESET.team.contact) db.team.contact = PRESET.team.contact;
   for (const x of pessoas) try { novaPessoa(x.name, x.role); } catch {}
   if (senha) { const salt = crypto.getRandomValues(new Uint8Array(16)); fileKey = { key: await chaveDaSenha(senha, salt), salt, iter: PBKDF2_ITER }; } else fileKey = null;
   fileHandle = h; lastMod = 0;
@@ -978,6 +992,7 @@ async function renderWelcome() {
     <h1 style="font-family:var(--title);font-size:26px;margin:0 0 6px">Quadro do Time</h1>
     <p class="muted">Backlog, quadro de cards, sprints e métricas de fluxo do time, num único arquivo HTML. Os dados ficam num arquivo do time; a Central de Gestão recebe o backlog e as métricas pela pasta compartilhada, cifrados.</p>
     ${fs ? '' : '<div class="banner warn">Este navegador não tem a File System Access API. Use Microsoft Edge ou Google Chrome.</div>'}
+    ${PRESET ? `<div class="banner"><span>Preparado pela Central de Gestão para o time <b>${esc(PRESET.team.name)}</b>: pasta <span class="code">times/${esc(PRESET.team.slug)}/</span>${PRESET.team.prefix ? `, códigos <span class="code">${esc(PRESET.team.prefix)}-…</span>` : ''}${PRESET.people.length ? `, ${PRESET.people.length} pessoa(s)` : ''}${PRESET.key ? ', chave da Central incluída' : ''}. ${h ? 'Abra o quadro do time ou crie um novo.' : 'Crie o quadro do time: o nome, a pasta e as pessoas já vêm preenchidos.'}</span></div>` : ''}
     <div class="opts">
       ${h ? `<button class="opt" data-act="reopen"><b>Abrir ${esc(h.name)}</b><span class="muted small">Último quadro usado neste navegador.</span></button>` : ''}
       <button class="opt" data-act="openFile" ${fs ? '' : 'disabled'}><b>Abrir quadro existente</b><span class="muted small">Escolha o arquivo quadro-&lt;time&gt;.json na pasta do time.</span></button>
@@ -1248,12 +1263,13 @@ function vMetrics() {
 function vCentral() {
   const ls = db.publish.lastStatus, lm = db.publish.lastMetrics, slugOk = SLUG_RE.test(db.team.slug || '');
   const passos = [
-    [slugOk, 'Identificador do time', slugOk ? `<span class="code">${esc(db.team.slug)}</span>` : 'Combine com o gestor (ex.: pagamentos)'],
+    [slugOk, 'Identificador do time', slugOk ? `<span class="code">${esc(db.team.slug)}</span>${PRESET?.team.prefix && PRESET.team.slug === db.team.slug ? ` · códigos da Central <span class="code">${esc(PRESET.team.prefix)}-…</span>` : ''}` : 'Combine com o gestor (ex.: pagamentos)'],
     [!!keysInfo.atual, 'Chave da Central', keysInfo.atual ? `em uso: <span class="code">${esc(keysInfo.atual.kid)}</span>` : 'Cole a chave enviada pelo gestor por Teams ou e-mail'],
     [rootOk, 'Pasta compartilhada', rootOk ? `conectada: <b>${esc(rootName)}</b>` : rootName ? 'Clique em Reconectar pasta' : 'Escolha a pasta Gestao-Integracao sincronizada pelo OneDrive'],
     [!!catalog, 'Catálogo da Central', catalog ? `revisão ${catalog.revision}, ${catInits().length} iniciativa(s)` : esc(catalogErr || 'Ainda não lido')]
   ];
-  return `<div class="grid wide">
+  const outro = PRESET && !db.demo && db.team.slug && db.team.slug !== PRESET.team.slug;
+  return `${outro ? `<div class="banner warn"><span>Este HTML foi preparado pela Central para o time <b>${esc(PRESET.team.name)}</b> (<span class="code">${esc(PRESET.team.slug)}</span>), mas este quadro usa <span class="code">${esc(db.team.slug)}</span>. Confira com o gestor antes de publicar.</span><button class="btn sm" data-act="usePresetSlug">Usar ${esc(PRESET.team.slug)}</button></div>` : ''}<div class="grid wide">
     <div class="card"><div class="lbl">Conexão</div>
       ${passos.map(([ok, t, d]) => `<div class="row" style="padding:7px 0;border-top:1px solid var(--line)"><span class="hd ${ok ? '' : 'attn'}"></span><b style="width:170px">${t}</b><span class="small muted grow">${d}</span></div>`).join('')}
       <div class="fg" style="margin-top:14px">
@@ -1534,6 +1550,10 @@ Bruno Lima; Desenvolvimento"></textarea></label></div>
     <div class="mf"><button class="btn" data-act="close">Cancelar</button><button class="btn pri" data-act="createBoard">Escolher local e criar</button></div>`);
   $('#nbName').oninput = () => { if (!$('#nbSlug').dataset.touched) $('#nbSlug').value = slugify($('#nbName').value); };
   $('#nbSlug').oninput = () => { $('#nbSlug').dataset.touched = 1; };
+  if (PRESET) {   // o identificador é o combinado na Central: não muda aqui
+    $('#nbName').value = PRESET.team.name; const sl = $('#nbSlug'); sl.value = PRESET.team.slug; sl.readOnly = true; sl.dataset.touched = 1; sl.title = 'Definido pela Central de Gestão';
+    $('#nbPeople').value = PRESET.people.map(x => x.role ? `${x.name}; ${x.role}` : x.name).join('\n');
+  }
 }
 function pwModal() {
   modal(`<div class="mh"><h2 class="grow" style="margin:0">Senha do arquivo</h2></div><div class="mb"><p class="small muted">Deixe em branco para tirar a senha. Todas as pessoas que usam o arquivo vão precisar da nova senha.</p><div class="fg"><input class="sin" type="password" id="pw1" placeholder="Nova senha" autocomplete="new-password"><input class="sin" type="password" id="pw2" placeholder="Repita" autocomplete="new-password"></div></div>
@@ -1611,6 +1631,7 @@ document.addEventListener('click', async e => {
         await catalogoDoCache(); const root = await obterPasta(); if (root) await lerCatalogo(root, { silencioso: true });
         if (pub.pendingStatus) publicar('status'); render(); break;
       }
+      case 'usePresetSlug': { if (!PRESET || !confirm(`Trocar o identificador deste quadro para "${PRESET.team.slug}"? As próximas publicações vão para times/${PRESET.team.slug}/.`)) return; db.team.slug = PRESET.team.slug; db.team.upd = Date.now(); catalog = null; touch(); const r = await obterPasta(); if (r) await lerCatalogo(r, { silencioso: true }); render(); break; }
       case 'rmKey': { if (!confirm(`Remover a chave ${el.dataset.kid} deste navegador?`)) return; await removerChave(el.dataset.kid); keysInfo = await chaveiro(); render(); break; }
       case 'downloadEnc': await baixarCifrados(); break;
       case 'catFromFile': { const inp = $('#fileIn'); inp.accept = '.json'; inp.onchange = async () => { const f = inp.files[0]; inp.value = ''; if (!f) return; try { await lerCatalogoEnvelope(JSON.parse(await f.text()), true); } catch (err) { catalogErr = 'Catálogo não pôde ser aberto: ' + err.message; toast(catalogErr, 5000); } render(); }; inp.click(); break; }
@@ -1727,13 +1748,23 @@ function demoDb() {
 }
 
 /* ------------------------------- início ------------------------------- */
+async function chaveDoPreset() {   // cadastra a chave embutida uma única vez (se a pessoa remover, não volta)
+  if (!PRESET?.key) return;
+  try { const { kid } = lerChaveTexto(PRESET.key), feitas = (await IDB.get('presetKids')) || [];
+    if (feitas.includes(kid)) return;
+    const r = await colarChave(PRESET.key); await IDB.set('presetKids', [...feitas, kid]);
+    if (r.novo) setTimeout(() => toast(`Chave ${kid} da Central cadastrada neste navegador.`, 5000), 600);
+  } catch (e) { setTimeout(() => toast('A chave que veio neste HTML não é válida: ' + e.message, 6000), 600); }
+}
 (async () => {
+  if (PRESET) document.title = `Quadro do Time · ${PRESET.team.name}`;
+  await chaveDoPreset();
   keysInfo = await chaveiro();
   const h = await IDB.get('dataFile');
   if (h && h.queryPermission && (await h.queryPermission({ mode: 'readwrite' })) === 'granted') { try { await abrirArquivo(h, { pedir: false }); return; } catch {} }
   renderWelcome();
 })();
-window.__qt = { conectarPasta, get db() { return db; }, set db(v) { db = v; }, get catalog() { return catalog; }, buildStatus, buildMetrics, validar, publicar, colarChave, chaveiro, decifrar, cifrar, lerCatalogoEnvelope, render, mergeDb, demoDb, abrirArquivo, salvar, get pub() { return pub; } };
+window.__qt = { PRESET, conectarPasta, get db() { return db; }, set db(v) { db = v; }, get catalog() { return catalog; }, buildStatus, buildMetrics, validar, publicar, colarChave, chaveiro, decifrar, cifrar, lerCatalogoEnvelope, render, mergeDb, demoDb, abrirArquivo, salvar, get pub() { return pub; } };
 </script>
 </body>
 </html>
