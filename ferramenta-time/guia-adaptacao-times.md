@@ -64,6 +64,9 @@ Cada feature do catálogo pode trazer dois campos opcionais:
 | **Ajustes** | Nome do time, pessoas do time, colunas (qual é o compromisso e qual é o início), senha do arquivo, cópia de segurança |
 
 ### 2.2 Primeiro uso (uma pessoa do time, uns 10 minutos)
+
+> **HTML já configurado pelo gestor.** Na Central (Pessoas › Times, visão do time ou Integração), o botão **HTML do time** gera uma cópia do Quadro (versão 1.1 ou mais nova) com o nome do time, o identificador (pasta), o prefixo dos códigos, as pessoas e o contato já preenchidos. Ao abrir, o aviso no topo confirma para qual time ele foi preparado, e "Criar quadro novo" vem preenchido, com o identificador travado. Se o gestor marcou "incluir a chave", ela é cadastrada sozinha na primeira abertura (só uma vez: se for removida, não volta). Nesse caso, guarde o HTML só com o time e nunca na pasta `Gestao-Integracao`. Sem a chave embutida, cole a que chegar por Teams ou e-mail (passo 3).
+
 1. **Criar quadro novo**: nome do time, o identificador (slug) combinado com o gestor (ex.: `pagamentos`) e, se quiser, as pessoas do time (uma por linha, com o papel depois de `;`). Escolha onde salvar o arquivo `quadro-<slug>.json`: **numa pasta do time** (por exemplo, a biblioteca do time no SharePoint, sincronizada), **nunca** dentro de `Gestao-Integracao`. Se quiser, proteja com senha (não há como recuperar).
 2. **Ajustes › Colunas**: deixe as colunas iguais às do time e marque a coluna de **compromisso** (onde o card entra no fluxo) e a de **início** (onde o trabalho começa). A última coluna é sempre a **entrega**. Defina limites de WIP.
 3. **Central**: cole a chave recebida do gestor (`GK1.<id>.<…>`), clique em **Conectar pasta** e escolha a raiz `Gestao-Integracao`. O catálogo é lido e as iniciativas da Central aparecem para vínculo.

@@ -294,6 +294,33 @@ dialog.wide{width:min(780px,calc(100% - 24px))}dialog.xl{width:min(880px,calc(10
 .rrow label{font-size:12px;color:var(--muted);display:flex;gap:4px;align-items:center;white-space:nowrap}
 .r-ph{grid-template-columns:minmax(0,1fr) 128px 128px auto 26px}
 /* Formulário de tarefa: essencial à esquerda, detalhes à direita */
+.fx{padding:24px 28px 0}dialog.fxd{width:min(660px,calc(100% - 24px))}
+.fx-top{display:flex;align-items:center;gap:10px;justify-content:space-between;margin-bottom:6px}.fx-top .ref{margin:0 auto 0 0}
+.fx-kick{font-family:var(--title);font-size:11.5px;font-weight:650;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.fx-top .sg button{padding:4px 12px;font-size:12px}
+.fx-title{border:0;outline:none;font-size:21px;font-weight:600;font-family:var(--title);letter-spacing:-.015em;padding:6px 0 4px;width:100%;background:transparent;color:var(--ink)}.fx-title::placeholder{color:var(--faint);font-weight:500}
+.fx-hint{font-size:12px;color:var(--muted);min-height:16px;margin-bottom:10px}
+.fx-props{display:grid;gap:2px;border-top:1px solid var(--line);padding-top:10px}
+.fx-p{display:grid;grid-template-columns:136px minmax(0,1fr);gap:12px;align-items:start;padding:3px 0}
+.fx-l{display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--muted);font-weight:550;min-height:36px}.fx-l .ic{color:var(--faint)}
+.fx-c{display:grid;gap:4px;min-width:0}.fx-c.fx-in{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.fx-c.fx-in>input,.fx-c.fx-in>select{flex:1;min-width:130px}
+.fx input:not([type=checkbox]):not(.fx-title),.fx select{width:100%;border:1px solid transparent;border-radius:9px;padding:8px 10px;background:#f6f7fb;outline:none;font-size:13.5px;color:var(--ink);transition:background .12s,border-color .12s}
+.fx input:not([type=checkbox]):not(.fx-title):hover,.fx select:hover{background:#eef0f6}
+.fx input:not([type=checkbox]):not(.fx-title):focus,.fx select:focus{background:#fff;border-color:var(--bv);box-shadow:0 0 0 3px var(--bv-soft)}
+.fx select:disabled{opacity:.7;cursor:not-allowed}
+.fx-flag{display:inline-flex;cursor:pointer;flex:0 0 auto}.fx-flag input{position:absolute;opacity:0;pointer-events:none}
+.fx-flag span{display:inline-flex;gap:6px;align-items:center;font-size:12.5px;font-weight:550;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:6px 12px;background:#fff}
+.fx-flag input:checked+span{color:var(--late);border-color:#f0cfcc;background:var(--late-soft,#fdeeec)}.fx-flag input:focus-visible+span{box-shadow:0 0 0 3px var(--bv-soft)}
+.fx-to{font-size:12px;color:var(--muted)}
+.fx-pct{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;color:var(--muted)}.fx-pct input{width:76px!important;flex:0 0 auto}.fx-pct.off{display:none}
+.fx-more{border-top:1px solid var(--line);margin-top:10px;padding:10px 0 4px}.fx-more>summary{list-style:none;cursor:pointer;display:flex;gap:6px;align-items:center;font-size:12.5px;font-weight:600;color:var(--muted);padding:4px 0}.fx-more>summary::-webkit-details-marker{display:none}
+.fx-more>summary .ic{transition:transform .15s}.fx-more[open]>summary .ic{transform:rotate(90deg)}.fx-more>summary:hover{color:var(--ink)}.fx-sum{font-weight:500;color:var(--faint);margin-left:4px}.fx-more .fx-props{border-top:0;padding-top:6px}
+.fx-sec{display:flex;gap:10px;align-items:baseline;border-top:1px solid var(--line);margin-top:10px;padding-top:12px;font-size:12.5px;font-weight:650}.fx-sec .grow{flex:1}.fx-sec .btn{align-self:center}
+.fx-rows{display:grid;gap:6px;margin-top:8px}.fx-rows:empty::before{content:'Sem fases. Use fases para agrupar as features no tempo (ex.: MVP, Piloto, Escala).';font-size:12px;color:var(--faint)}
+.fx-rows .r-ph{background:#f8f9fc;border-radius:10px;padding:6px 6px 6px 8px}.fx-rows .r-ph input:not([type=checkbox]){background:#fff}
+.fx .macts{position:sticky;bottom:0;background:#fff;margin:14px -28px 0;padding:14px 28px;border-top:1px solid var(--line)}
+.fx .chips{margin-top:6px}.fx-c>.tgl{min-height:36px}.fx-sec .btn{white-space:nowrap}
+@media (max-width:640px){.fx{padding:20px 18px 0}.fx .macts{margin:14px -18px 0;padding:12px 18px}.fx-p{grid-template-columns:1fr;gap:2px}.fx-l{min-height:0}.fx-top{flex-wrap:wrap}.fx-rows .r-ph{grid-template-columns:1fr 1fr;}.fx-rows .r-ph input[data-f=name]{grid-column:1/-1}.fx-sec .muted{display:none}}
 .tform{padding:0}.tf-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:0;min-height:400px}.tform .macts{margin:0;padding:14px 24px;border-top:1px solid var(--line)}
 .tf-main{padding:26px 28px;display:flex;flex-direction:column;gap:16px}
 .tf-side{padding:26px 24px;background:#f8f9fc;border-left:1px solid var(--line);display:flex;flex-direction:column;gap:14px;border-radius:0 20px 0 0}
@@ -531,32 +558,29 @@ textarea.paste:focus{border-color:var(--bv)}
   <aside class="drawer hidden" id="drawer"></aside>
 </div>
 
-<dialog id="taskDialog" class="xl"><form class="modal tform" id="taskForm">
+<dialog id="taskDialog" class="fxd"><form class="modal fx" id="taskForm">
   <input type="hidden" name="id"><input type="hidden" name="type" id="tType">
-  <div class="tf-grid">
-    <div class="tf-main">
-      <div class="tf-h" id="taskDlgTitle">Nova tarefa</div>
-      <input class="tf-title" name="title" id="tTitle" placeholder="O que precisa ser feito?" required autocomplete="off">
-      <div class="tf-row">
-        <div class="field"><label>Quem</label><select name="assigneeId" id="tAssignee"></select></div>
-        <div class="field"><label>Prazo</label><input type="date" name="end" id="tEnd"></div>
-      </div>
-      <div class="field"><label>Iniciativa</label><select name="initiativeId" id="tIni"></select><div class="hint" id="tIniHint"></div></div>
-      <div class="field" id="tFeatWrap"><label>Feature</label><select name="featureId" id="tFeat"></select></div>
-      <div class="field dl-only"><label>Pronto quando…</label><input name="ready" placeholder="O que precisa existir para dar como pronto"></div>
-      <label class="tgl"><input type="checkbox" name="high" id="tHigh"><span>Alta prioridade</span></label>
-    </div>
-    <aside class="tf-side">
-      <div class="tf-h">Detalhes</div>
-      <div class="field"><label>Tipo</label><div class="sg" id="tTypeSg"><button type="button" data-act="tf-type" data-v="task">Tarefa</button><button type="button" data-act="tf-type" data-v="feature">Feature</button></div><div class="hint" id="tTypeHint"></div></div>
-      <div class="tf-row"><div class="field ft-only"><label>Fase (agrupamento no tempo)</label><select name="phaseId" id="tPhase"></select></div><div class="field"><label>Início</label><input type="date" name="start" id="tStart"></div></div>
-      <div class="field dl-only"><label>Cobrar em</label><input type="date" name="followUp" id="tFu"><div class="hint" id="tFuHint"></div></div>
-      <div class="field"><label>Para quem (stakeholder)</label><input name="forWhom"></div>
-      <div class="field"><label class="tgl"><input type="checkbox" id="tOoOn"><span>Levar para o 1:1</span></label><div class="chips" id="tOoChips"></div></div>
-      <div class="field"><label>Depende de</label><select name="dependsOn" id="tDep"></select></div>
-    </aside>
+  <div class="fx-top"><span class="fx-kick" id="taskDlgTitle">Nova tarefa</span><div class="sg" id="tTypeSg"><button type="button" data-act="tf-type" data-v="task">Tarefa</button><button type="button" data-act="tf-type" data-v="feature">Feature</button></div></div>
+  <input class="fx-title" name="title" id="tTitle" placeholder="O que precisa ser feito?" required autocomplete="off">
+  <div class="fx-hint" id="tTypeHint"></div>
+  <div class="fx-props">
+    <div class="fx-p"><span class="fx-l"><i data-ic="users"></i>Responsável</span><div class="fx-c"><select name="assigneeId" id="tAssignee"></select></div></div>
+    <div class="fx-p"><span class="fx-l"><i data-ic="cal"></i>Prazo</span><div class="fx-c fx-in"><input type="date" name="end" id="tEnd"><label class="fx-flag" title="Alta prioridade"><input type="checkbox" name="high" id="tHigh"><span><i data-ic="flag"></i>Alta prioridade</span></label></div></div>
+    <div class="fx-p dl-only"><span class="fx-l"><i data-ic="check"></i>Pronto quando</span><div class="fx-c"><input name="ready" placeholder="O que precisa existir para dar como pronto"></div></div>
+    <div class="fx-p"><span class="fx-l"><i data-ic="target"></i>Iniciativa</span><div class="fx-c"><select name="initiativeId" id="tIni"></select><div class="hint" id="tIniHint"></div></div></div>
+    <div class="fx-p" id="tFeatWrap"><span class="fx-l"><i data-ic="star"></i>Feature</span><div class="fx-c"><select name="featureId" id="tFeat"></select></div></div>
+    <div class="fx-p ft-only"><span class="fx-l"><i data-ic="layers"></i>Fase</span><div class="fx-c"><select name="phaseId" id="tPhase"></select><div class="hint">Agrupamento no tempo dentro da iniciativa.</div></div></div>
   </div>
-  <div class="macts"><button type="button" class="btn" data-close>Cancelar</button><button class="btn pri">Salvar</button></div>
+  <details class="fx-more" id="tMore"><summary><i data-ic="chevr"></i>Mais detalhes<span class="fx-sum" id="tMoreSum"></span></summary>
+    <div class="fx-props">
+      <div class="fx-p"><span class="fx-l"><i data-ic="clock"></i>Início</span><div class="fx-c"><input type="date" name="start" id="tStart"></div></div>
+      <div class="fx-p dl-only"><span class="fx-l"><i data-ic="send"></i>Cobrar em</span><div class="fx-c"><input type="date" name="followUp" id="tFu"><div class="hint" id="tFuHint"></div></div></div>
+      <div class="fx-p"><span class="fx-l"><i data-ic="mail"></i>Para quem</span><div class="fx-c"><input name="forWhom" placeholder="Stakeholder que espera a entrega"></div></div>
+      <div class="fx-p"><span class="fx-l"><i data-ic="link"></i>Depende de</span><div class="fx-c"><select name="dependsOn" id="tDep"></select></div></div>
+      <div class="fx-p"><span class="fx-l"><i data-ic="chat"></i>1:1</span><div class="fx-c"><label class="tgl"><input type="checkbox" id="tOoOn"><span>Levar para o 1:1</span></label><div class="chips" id="tOoChips"></div></div></div>
+    </div>
+  </details>
+  <div class="macts"><button type="button" class="btn" data-close>Cancelar</button><button class="btn pri" id="tSave">Salvar</button></div>
 </form></dialog>
 
 <dialog id="ooDialog"><div class="modal">
@@ -565,22 +589,21 @@ textarea.paste:focus{border-color:var(--bv)}
   <div class="macts"><button type="button" class="btn" data-close>Cancelar</button><button class="btn pri" data-act="oo-save">Salvar</button></div>
 </div></dialog>
 
-<dialog id="initDialog" class="wide"><form class="modal" id="initForm">
-  <h2 id="initDlgTitle">Nova iniciativa</h2><input type="hidden" name="id">
-  <div class="form">
-    <div class="field full"><label>Nome</label><input name="name" required></div>
-    <div class="field"><label>Time</label><select name="teamId" id="iTeam"></select></div>
-    <div class="field"><label>ou novo time</label><input name="newTeam" placeholder="Ex.: People Analytics"></div>
-    <div class="field"><label>Responsável</label><select name="ownerId" id="iOwner"></select></div>
-    <div class="field"><label>Horizonte</label><select name="bucket"><option value="now">Agora</option><option value="next">Próximas</option><option value="later">Depois</option><option value="discovery">Discovery</option></select></div>
-    <div class="field"><label>Início</label><input type="date" name="start"></div>
-    <div class="field"><label>Fim</label><input type="date" name="end"></div>
-    <div class="field chk"><input type="checkbox" name="autoProgress" id="iAuto"><label for="iAuto">Progresso automático (pelas tarefas)</label></div>
-    <div class="field"><label>Progresso manual (%)</label><input type="number" min="0" max="100" name="progress" value="0"></div>
-    <div class="field full"><label>Depende de</label><div class="chkgrid" id="iDeps"></div></div>
-    <div class="sechd"><span>Fases</span><button type="button" class="btn sm" data-act="add-phase">+ Fase</button></div><div class="form" style="grid-column:1/-1;gap:6px" id="phRows"></div>
+<dialog id="initDialog" class="fxd"><form class="modal fx" id="initForm">
+  <input type="hidden" name="id">
+  <div class="fx-top"><span class="fx-kick" id="initDlgTitle">Nova iniciativa</span><span class="ref hidden" id="iRef"></span></div>
+  <input class="fx-title" name="name" required placeholder="Nome da iniciativa" autocomplete="off">
+  <div class="fx-props">
+    <div class="fx-p"><span class="fx-l"><i data-ic="users"></i>Time</span><div class="fx-c fx-in"><select name="teamId" id="iTeam"></select><input name="newTeam" id="iNewTeam" placeholder="ou crie um time"></div></div>
+    <div class="fx-p"><span class="fx-l"><i data-ic="star"></i>Responsável</span><div class="fx-c"><select name="ownerId" id="iOwner"></select></div></div>
+    <div class="fx-p"><span class="fx-l"><i data-ic="layers"></i>Horizonte</span><div class="fx-c"><select name="bucket" id="iBucket"><option value="now">Agora · em execução</option><option value="next">Próximas</option><option value="later">Depois</option><option value="discovery">Discovery</option></select></div></div>
+    <div class="fx-p"><span class="fx-l"><i data-ic="cal"></i>Período</span><div class="fx-c fx-in"><input type="date" name="start" aria-label="Início"><span class="fx-to">até</span><input type="date" name="end" aria-label="Fim"></div></div>
+    <div class="fx-p"><span class="fx-l"><i data-ic="chart"></i>Progresso</span><div class="fx-c fx-in"><label class="tgl"><input type="checkbox" name="autoProgress" id="iAuto"><span>Automático, pelas tarefas</span></label><span class="fx-pct" id="iPct"><input type="number" min="0" max="100" name="progress" value="0" aria-label="Progresso manual">%</span></div></div>
   </div>
-  <div class="macts"><button type="button" class="btn" data-close>Cancelar</button><button class="btn pri">Salvar</button></div>
+  <div class="fx-sec"><span>Fases</span><span class="muted small">agrupam features no tempo e podem se sobrepor</span><span class="grow"></span><button type="button" class="btn sm" data-act="add-phase">+ Fase</button></div>
+  <div class="fx-rows" id="phRows"></div>
+  <details class="fx-more" id="iMore"><summary><i data-ic="chevr"></i>Depende de<span class="fx-sum" id="iMoreSum"></span></summary><div class="chkgrid" id="iDeps" style="margin-top:10px"></div></details>
+  <div class="macts"><button type="button" class="btn" data-close>Cancelar</button><button class="btn pri" id="iSave">Salvar</button></div>
 </form></dialog>
 
 <dialog id="personDialog"><form class="modal" id="personForm">
@@ -699,6 +722,7 @@ const ICON={
   clock:'<circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/>',
   arrow:'<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>'
 };
+const hydrateIcons=()=>$$('i[data-ic]').forEach(e=>{e.outerHTML=ic(e.dataset.ic,'sm')});
 const ic=(n,c='')=>`<svg class="ic ${c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[n]}</svg>`;
 /* ============ Utilidades ============ */
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
@@ -994,7 +1018,7 @@ $('#btnCreate').onclick=async()=>{const pass=getPass();if(!pass)return;
     if(window.showSaveFilePicker){handle=await showSaveFilePicker({suggestedName:'gestao-dados.json',types:[{description:'JSON de gestão',accept:{'application/json':['.json']}}]});await kvSet('handle',handle);await save()}
     enter()}catch(e){if(e.name!=='AbortError')lockMsg('Não foi possível criar: '+e.message)}};
 $('#lockPass').addEventListener('keydown',e=>{if(e.key==='Enter')($('#btnLast').classList.contains('hidden')?$('#btnOpen'):$('#btnLast')).click()});
-$('#saveNow').onclick=save;$('#lockBtn').onclick=lockApp;$('#lockBtn').innerHTML=ic('lock','sm');
+hydrateIcons();$('#saveNow').onclick=save;$('#lockBtn').onclick=lockApp;$('#lockBtn').innerHTML=ic('lock','sm');
 $('#importBtn').innerHTML=ic('upload','sm')+' Importar e agentes';$('#importBtn').title='Importar arquivos dos agentes (reuniões, chats, e-mails) e copiar os prompts';$('#quickIc').innerHTML=ic('plus');
 /* ============ Toast e desfazer ============ */
 let toastTimer;
@@ -2115,7 +2139,9 @@ function autoEnd(){if(tf.touched.end)return;const i=initById($('#tIni').value),p
 function syncTaskForm(){
   const del=$('#tAssignee').value!==ME;$$('#taskForm .dl-only').forEach(e=>e.classList.toggle('hidden',!del));
   $$('#tTypeSg button').forEach(b=>b.classList.toggle('on',b.dataset.v===$('#tType').value));const ft=$('#tType').value==='feature';$$('#taskForm .ft-only').forEach(e=>e.classList.toggle('hidden',!ft));$('#tTypeHint').textContent=ft?'Feature pertence a uma iniciativa; o dono acompanha a entrega.':'Tarefa pode estar ligada a uma iniciativa, a uma feature ou a nada.';$('#tFeatWrap').classList.toggle('hidden',ft);renderOoChips();followHint();suggestIni();
+  const isNew=!$('#taskForm [name=id]').value;$('#taskDlgTitle').textContent=(isNew?'Nova ':'Editar ')+(ft?'feature':'tarefa');$('#tSave').textContent=isNew?(ft?'Criar feature':'Criar tarefa'):'Salvar';tMoreSum();$('#tTitle').placeholder=ft?'Nome da feature (o que será entregue)':'O que precisa ser feito?';
 }
+function tMoreSum(){const f=$('#taskForm'),bits=[];if(f.forWhom.value.trim())bits.push('para '+cut(f.forWhom.value.trim(),24));if(f.dependsOn.value)bits.push('com dependência');if($('#tOoOn').checked)bits.push('no 1:1');if(f.followUp.value&&$('#tAssignee').value!==ME)bits.push('cobrar '+fmtShort(f.followUp.value));$('#tMoreSum').textContent=bits.length?'· '+bits.join(' · '):''}
 function openTask(task,defaults={}){
   const ord=['now','next','later','discovery'];
   $('#tAssignee').innerHTML=`<option value="${ME}">Eu</option>`+db.people.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
@@ -2128,7 +2154,7 @@ function openTask(task,defaults={}){
   v.high=v.priority==='high';fillPhases(v.initiativeId,v.phaseId);fillFeat(v.initiativeId,v.featureId);fillForm($('#taskForm'),v);const lockI=!!(task&&task.type==='feature'&&task.initiativeId);$('#tIni').disabled=lockI;$('#tIni').title=lockI?'Uma feature não muda de iniciativa':'';
   $('#tOoOn').checked=(v.oneOnOneWith||[]).length>0;
   tf={touched:{end:!!task||!!defaults.end,oo:!!task||(defaults.oneOnOneWith||[]).length>0,follow:!!task},ooIds:(v.oneOnOneWith||[]).slice()};
-  syncTaskForm();$('#taskDlgTitle').textContent=task?(v.type==='feature'?'Editar feature':'Editar tarefa'):(v.type==='feature'?'Nova feature':'Nova tarefa');
+  syncTaskForm();$('#tMore').open=!!(task&&(String(v.forWhom||'').trim()||v.dependsOn||(v.oneOnOneWith||[]).length||okDate(v.followUp)));
   $('#taskDialog').showModal();setTimeout(()=>$('#tTitle').focus(),30);
 }
 $('#taskForm').addEventListener('change',e=>{
@@ -2139,7 +2165,8 @@ $('#taskForm').addEventListener('change',e=>{
   else if(el.id==='tFeat'){const f=db.tasks.find(x=>x.id===el.value);if(f&&!$('#tIni').value){$('#tIni').value=f.initiativeId}}
   else if(el.id==='tEnd'){tf.touched.end=true;followHint()}
   else if(el.id==='tFu'){tf.touched.follow=true;followHint()}
-  else if(el.id==='tOoOn'){if(el.checked&&!tf.ooIds.length){const a=$('#tAssignee').value;if(a!==ME)tf.ooIds=[a]}tf.touched.oo=true;renderOoChips()}
+  if(el.closest('#tMore'))tMoreSum();
+  if(el.id==='tOoOn'){if(el.checked&&!tf.ooIds.length){const a=$('#tAssignee').value;if(a!==ME)tf.ooIds=[a]}tf.touched.oo=true;renderOoChips()}
   else if(el.dataset.oo){const id=el.dataset.oo;tf.ooIds=el.checked?[...new Set([...tf.ooIds,id])]:tf.ooIds.filter(x=>x!==id);tf.touched.oo=true;renderOoChips()}
 });
 $('#taskForm').onsubmit=e=>{
@@ -2170,8 +2197,11 @@ function openInit(init,defaults={}){
   $('#iOwner').innerHTML=`<option value="">—</option><option value="${ME}">Eu</option>`+db.people.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
   $('#iDeps').innerHTML=db.initiatives.filter(x=>!init||x.id!==init.id).map(x=>`<label class="chkl"><input type="checkbox" data-dep="${x.id}" ${init&&init.dependsOn.includes(x.id)?'checked':''}><span>${esc(x.name)}</span></label>`).join('')||'<span class="muted small">Sem outras iniciativas.</span>';
   $('#initForm').reset();const v=Object.assign({bucket:'now',progress:0,autoProgress:true,start:today()},defaults,init||{});if(!v.teamId)v.teamId=defaults.teamId||'';fillForm($('#initForm'),v);
-  $('#phRows').innerHTML=(v.phases||[]).map(ROWPH).join('');$('#initDlgTitle').textContent=init?'Editar iniciativa':'Nova iniciativa';$('#initDialog').showModal();
+  $('#phRows').innerHTML=(v.phases||[]).map(ROWPH).join('');$('#initDlgTitle').textContent=init?'Editar iniciativa':'Nova iniciativa';$('#iSave').textContent=init?'Salvar':'Criar iniciativa';
+  $('#iRef').textContent=v.ref||'';$('#iRef').classList.toggle('hidden',!v.ref);syncInitForm();$('#iMore').open=!!(init&&init.dependsOn.length);$('#initDialog').showModal();setTimeout(()=>$('#initForm [name=name]').focus(),30);
 }
+function syncInitForm(){$('#iPct').classList.toggle('off',$('#iAuto').checked);const n=$$('#iDeps input[data-dep]').filter(x=>x.checked).length;$('#iMoreSum').textContent=n?`· ${n} iniciativa${n>1?'s':''}`:'';$('#iNewTeam').classList.toggle('hidden',!!$('#iTeam').value)}
+$('#initForm').addEventListener('change',syncInitForm);
 $('#initForm').onsubmit=e=>{e.preventDefault();const v=readForm(e.target);
   if((v.newTeam||'').trim())v.teamId=ensureTeam(v.newTeam);delete v.newTeam;v.progress=clampP(v.progress);
   v.phases=readRows('#phRows');v.dependsOn=$$('#iDeps input[data-dep]').filter(x=>x.checked).map(x=>x.dataset.dep);
