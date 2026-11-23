@@ -18,6 +18,8 @@ const srv = http.createServer((q, r) => {
 
 // Cada página escolhe pastas do OPFS: o id do seletor aponta para um nome de pasta.
 const stub = mapa => `(() => { const M = ${JSON.stringify(mapa)};
+  // No Chromium sem janela, ler um FileSystemHandle guardado no IndexedDB derruba a página: não guarda handles.
+  const put0 = IDBObjectStore.prototype.put; IDBObjectStore.prototype.put = function (v, k) { return put0.call(this, (typeof FileSystemHandle !== 'undefined' && v instanceof FileSystemHandle) ? null : v, k); };
   const raiz = () => navigator.storage.getDirectory();
   const dir = async nome => { let d = await raiz(); for (const p of nome.split('/')) d = await d.getDirectoryHandle(p, { create: true }); return d; };
   window.showDirectoryPicker = async ({ id } = {}) => dir((window.__M || M)[id] || id);
@@ -197,6 +199,53 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   await c.evaluate(() => { window.__abrir = { dir: 'LocalGestor2', arq: 'gestao-tecnologia.json' }; });
   await c.fill('#lockPass', SENHA2); await c.click('#btnOpen'); await c.waitForTimeout(1500);
   ok(await c.evaluate(() => !document.querySelector('#app').classList.contains('hidden')), 'Central abre o arquivo cifrado criado pelo assistente');
+
+  ok(await c.evaluate(() => /Onde estou/.test(document.getElementById('ondeEstou')?.textContent || '')), 'Central mostra o botão "Onde estou?"');
+  await c.click('#ondeEstou .f4btn'); ok(/Central de Gestão/.test(await c.textContent('#f4dlg')) && /gestao-tecnologia\.json/.test(await c.textContent('#f4dlg')), '"Onde estou?" da Central mostra ferramenta e arquivo');
+  await c.click('#f4fecha');
+
+  console.log('8. Quadro 2.1: senha obrigatória e um arquivo por pessoa');
+  const qa = await nova('/ferramenta-time/quadro_do_time_v1.html', {});
+  await qa.waitForFunction(() => window.__qt);
+  // a) quadro antigo sem senha: a ferramenta exige criar uma
+  await opfs(qa, async () => gravar('LocalVelho', 'quadro-velho.json', JSON.stringify({ schema: 'quadro-time/1', team: { name: 'Velho', slug: 'velho' } })));
+  await qa.evaluate(async () => { const d = await (await navigator.storage.getDirectory()).getDirectoryHandle('LocalVelho'); setTimeout(async () => window.__qt.abrirArquivo(await d.getFileHandle('quadro-velho.json')), 0); });
+  await qa.waitForSelector('#f4p1'); await qa.fill('#f4p1', 'curta'); await qa.fill('#f4p2', 'curta'); await qa.click('#f4pok');
+  ok(/12 caracteres/.test(await qa.textContent('#f4pm')), 'senha curta recusada');
+  await qa.fill('#f4p1', SENHA); await qa.fill('#f4p2', SENHA); await qa.click('#f4pok'); await qa.waitForSelector('#f4ok'); await qa.check('#f4ok'); await qa.click('#f4go'); await qa.waitForTimeout(1500);
+  ok(JSON.parse(await opfs(qa, async () => ler('LocalVelho', 'quadro-velho.json'))).schema === 'quadro-time-cifrado/1', 'quadro sem senha passa a ser gravado cifrado');
+  ok(await qa.evaluate(() => /Onde estou/.test(document.getElementById('ondeEstou')?.textContent || '')), 'Quadro mostra o botão "Onde estou?"');
+  // b) duas pessoas, cada uma com o próprio arquivo local e o próprio arquivo na pasta comum
+  const chaveTime = await qa.evaluate(() => 'GK1.cartoes-2611.' + btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''));
+  const txtLocal = await opfs(qa, async () => ler('LocalInicio', 'quadro-cartoes.json'));
+  await opfs(qa, async t => gravar('LocalBia', 'quadro-cartoes.json', t), txtLocal);
+  const prepara = async (pg, dir, eu, disp) => {
+    await pg.waitForFunction(() => window.__qt);
+    await pg.evaluate(async ([chave, eu, disp]) => { await colarChave(chave); rootMem = await (await navigator.storage.getDirectory()).getDirectoryHandle('Gestao-Compartilhado');
+      f4dispositivo = () => ({ id: disp }); f4eu = () => eu; }, [chaveTime, eu, disp]);
+    await pg.evaluate(async dir => { const d = await (await navigator.storage.getDirectory()).getDirectoryHandle(dir); setTimeout(async () => window.__qt.abrirArquivo(await d.getFileHandle('quadro-cartoes.json')), 0); }, dir);
+    await senhaAbrirQ(pg); await pg.waitForTimeout(1200);
+  };
+  const senhaAbrirQ = async pg => { await pg.waitForSelector('#pw'); await pg.fill('#pw', SENHA); await pg.click('#dlg [data-x="ok"]'); };
+  const qc = await nova('/financas/testes/saida/quadro_cartoes.html', {}); await prepara(qc, 'LocalInicio', 'caio', 'aaaaa');
+  const qb = await nova('/financas/testes/saida/quadro_cartoes.html', {}); await prepara(qb, 'LocalBia', 'bia', 'bbbbb');
+  await qc.evaluate(async () => { novoCard({ title: 'Card do Caio', col: cols()[0].id }); touch(); await salvar(); await f4sincronizar(); });
+  await qb.evaluate(async () => { novoCard({ title: 'Card da Bia', col: cols()[0].id }); touch(); await salvar(); await f4sincronizar(); });
+  await qc.evaluate(() => f4sincronizar()); await qc.waitForTimeout(300);
+  const arqs = (await opfs(qc, async () => listar('Gestao-Compartilhado/times/cartoes/quadro'))).filter(n => !n.startsWith('.'));
+  ok(arqs.join(',') === 'bia-bbbbb.json,caio-aaaaa.json', 'um arquivo por pessoa e computador na pasta comum: ' + arqs.join(', '));
+  const titulos = pg => pg.evaluate(() => db.cards.filter(c => !c.deleted).map(c => c.title).sort().join(' | '));
+  ok(await titulos(qc) === 'Card da Bia | Card do Caio' && await titulos(qb) === 'Card da Bia | Card do Caio', 'as duas pessoas veem os cards das duas (união por item)');
+  const ids = await qc.evaluate(() => db.cards.map(c => c.id).sort().join(','));
+  ok(new Set(ids.split(',')).size === 2, 'códigos iguais criados ao mesmo tempo são renumerados: ' + ids);
+  const env = JSON.parse(await opfs(qc, async () => ler('Gestao-Compartilhado/times/cartoes/quadro', 'caio-aaaaa.json')));
+  ok(env.schema === 'gestao-envelope/1' && env.content === 'quadro-contrib/1' && !JSON.stringify(env).includes('Card do Caio'), 'arquivo da pessoa cifrado com a chave do time');
+  // c) cópia de conflito do próprio arquivo: é lida, unida e apagada
+  await qc.evaluate(async () => { const d = await f4pasta(false); const t = await (await (await d.getFileHandle('caio-aaaaa.json')).getFile()).text(); const w = await (await d.getFileHandle('caio-aaaaa-NOTEBOOK01.json', { create: true })).createWritable(); await w.write(t); await w.close(); });
+  await qc.evaluate(async () => { novoCard({ title: 'Mais um', col: cols()[0].id }); touch(); await salvar(); await f4sincronizar(); });
+  ok(!(await opfs(qc, async () => listar('Gestao-Compartilhado/times/cartoes/quadro'))).includes('caio-aaaaa-NOTEBOOK01.json'), 'cópia de conflito do próprio arquivo apagada depois de unida');
+  await qb.evaluate(() => f4sincronizar()); await qb.waitForTimeout(300);
+  ok(/Mais um/.test(await titulos(qb)), 'mudança nova chega para a outra pessoa');
 
   for (const [p, n] of [[g, 'grupo-consolidado'], [t2, 'time-resumo']]) { await p.setViewportSize({ width: 1280, height: 860 }); await p.evaluate(() => { view = typeof vCons === 'function' ? 'consolidado' : 'resumo'; render(); }); await p.screenshot({ path: path.join(SAIDA, n + '.png') }); }
   await t2.evaluate(() => { view = 'plano'; render(); }); await t2.screenshot({ path: path.join(SAIDA, 'time-plano.png') });

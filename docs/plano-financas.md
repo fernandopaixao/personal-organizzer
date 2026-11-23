@@ -1,6 +1,6 @@
 # Plano · Finanças do grupo e do time, assistente inicial e sincronização segura
 
-*23/11/2026 · F0 a F3 implementados (PR no repositório); F4 depois do redesenho da Central e do Quadro*
+*23/11/2026 · F0 a F4 implementados (PR #10)*
 
 Este plano acrescenta finanças à solução sem quebrar o que já existe (Central v14, Quadro do Time 1.1, contratos da integração). Ele também muda três regras gerais que passam a valer para todas as ferramentas: **criptografia sempre**, **dado individual na máquina e pedaço comum na pasta sincronizada**, e **nenhum arquivo comum escrito por duas pessoas**.
 
@@ -256,11 +256,13 @@ Em 23/11/2026 o Fernando pediu para implementar sem responder às perguntas abai
 | F1 assistente | Feito | `inicio.html` (raiz do repositório). Gera Finanças do Grupo/Time, Central e Quadro, cria o primeiro arquivo cifrado de cada um e o cartão `onde-fica-cada-coisa.html` |
 | F2 Finanças do Time | Feito | `financas/financas_time.html` (1.0.0) |
 | F3 Finanças do Grupo | Feito | `financas/financas_grupo.html` (1.0.0), com "HTML de finanças do time" |
-| F4 Central e Quadro | **Aguardando** o redesenho da Central (v15) e do Quadro (2.0) mergear, combinado com a thread da nova interface: senha obrigatória no Quadro, aviso de cofre no "HTML do time" da Central, botão "Onde estou?", Quadro com um arquivo por pessoa, pasta `Gestao-Compartilhado` | — |
-| F5 documentação e testes | Feito para F0 a F3 | `financas/testes/teste-e2e.js` (43 verificações), contratos em `financas/contrato/` |
+| F4 Central e Quadro | Feito sobre a Central v15 e o Quadro 2.0 (que vira 2.1.0): senha obrigatória no Quadro (quadros antigos sem senha pedem uma ao abrir), aviso de cofre ao criar senha, gerar/copiar chave e gerar "HTML do time" com chave, lembrete de teste da senha, botão "Onde estou?" nas duas, e Quadro com **um arquivo por pessoa e computador** em `times/<time>/quadro/<pessoa>-<computador>.json` (cifrado com a chave do time, unido item a item a cada 20 s) | `financas/src/seguranca.js`, `central-f4.js`, `quadro-f4.js`, injetados por `python3 tools/injetar_seguranca.py` |
+| F5 documentação e testes | Feito para F0 a F3 | `financas/testes/teste-e2e.js` (53 verificações), contratos em `financas/contrato/` |
 
 Como montar: `python3 tools/build_financas.py` (lê a Central mais nova e o Quadro, sem alterá-los, e gera os três HTMLs). Como testar: `node financas/testes/teste-e2e.js`.
 
 O que o teste cobre: criação dos arquivos sempre cifrados (nada em claro na pasta local nem na comum), aviso de cofre ao criar senha, gerar chave e gerar HTML com chave; diretriz do grupo lida pelo time; plano publicado só com agregados; prévia e soma no grupo; cópia de conflito `plano (1).json` com revisão maior escolhida; cópia `plano-NOTEBOOK01.json` resolvida; publicação bloqueada quando o dono é outra pessoa e "assumir" com revisão = maior + 1; arquivo truncado ignorado mantendo o último válido; revisão antiga reaparecendo ignorada; senha errada recusada; lembrete de 30 dias; backup rotativo; assistente nas combinações "responsável: finanças + tarefas" e "gestor: finanças + tarefas", com a Central, o Quadro e as Finanças abrindo os arquivos que ele criou.
 
-Limites conhecidos desta versão: o navegador não revela o caminho completo da pasta, então a checagem "a pasta local não está no OneDrive" é indireta (nome, `desktop.ini`, estrutura) mais a confirmação da pessoa; e lançamentos de várias pessoas do mesmo time (seção 6.3) ficam para quando houver demanda.
+O teste também cobre o F4: quadro antigo sem senha passa a ser cifrado, senha curta recusada, duas pessoas com arquivos próprios vendo os cards uma da outra, códigos iguais renumerados, cópia de conflito do próprio arquivo unida e apagada, e o botão "Onde estou?" na Central e no Quadro.
+
+Limites conhecidos desta versão: o navegador não revela o caminho completo da pasta, então a checagem "a pasta local não está no OneDrive" é indireta (nome, `desktop.ini`, estrutura) mais a confirmação da pessoa; lançamentos de várias pessoas do mesmo time (seção 6.3) ficam para quando houver demanda; o arquivo antigo compartilhado do Quadro continua funcionando (união a cada 20 s), mas o recomendado agora é o arquivo local de cada pessoa mais a pasta sincronizada; e o nome da pasta comum recomendado é `Gestao-Compartilhado`, mas `Gestao-Integracao` continua aceito.
