@@ -10,7 +10,7 @@ import base64, gzip, hashlib, pathlib, re, sys
 
 RAIZ = pathlib.Path(__file__).resolve().parent.parent
 QUADRO = RAIZ / 'ferramenta-time' / 'quadro_do_time_v1.html'
-CENTRAL = RAIZ / 'gestao_pessoal_v14.html'
+CENTRAL = RAIZ / 'gestao_pessoal_v15.html'
 
 def main():
     q = QUADRO.read_bytes()
