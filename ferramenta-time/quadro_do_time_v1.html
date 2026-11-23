@@ -279,7 +279,7 @@ pre.json{background:#f6f7fb;border-radius:10px;padding:12px;font-size:11.5px;max
      gestao-status/1, gestao-metricas/1 dentro de gestao-envelope/1 (AES-256-GCM).
    - Só métricas de time, calculadas a partir da movimentação dos cards.
    ========================================================================= */
-const TOOL = 'quadro_do_time_v1.html', TOOL_VERSION = '2.0.0';
+const TOOL = 'quadro_do_time_v1.html', TOOL_VERSION = '2.1.0';
 /* Pré-configuração gravada pela Central de Gestão (Pessoas › Times › HTML do time).
    No arquivo original fica null; a Central troca o trecho entre os marcadores por um
    objeto quadro-preset/1: { team: { name, slug, prefix, contact }, people: [{ name, role }], key? }.
@@ -1435,7 +1435,7 @@ function vSettings() {
     <div class="card"><div class="lbl">Arquivo de dados</div>
       <dl class="kv"><dt>Arquivo</dt><dd>${db.demo ? 'exemplo em memória' : esc(fileHandle?.name || '–')}</dd><dt>Senha</dt><dd>${fileKey ? 'protegido por senha' : 'sem senha'}</dd><dt>Cards</dt><dd>${activeCards().length} ativos, ${live().filter(c => c.cancelledAt).length} cancelados</dd></dl>
       <p class="small muted">Guarde o arquivo numa pasta do próprio time (não na pasta da Central). Várias pessoas podem usar o mesmo arquivo: a ferramenta confere a cada 20 s e une as mudanças de cada um.</p>
-      <div class="row"><button class="btn" data-act="setPw" ${db.demo ? 'disabled' : ''}>${fileKey ? 'Trocar ou tirar senha' : 'Proteger com senha'}</button><button class="btn" data-act="backup">Baixar cópia (.json)</button><button class="btn" data-act="home">Trocar de quadro</button></div></div>
+      <div class="row"><button class="btn" data-act="setPw" ${db.demo ? 'disabled' : ''}>${fileKey ? 'Trocar senha' : 'Proteger com senha'}</button><button class="btn" data-act="backup">Baixar cópia (.json)</button><button class="btn" data-act="home">Trocar de quadro</button></div></div>
   </div>`;
 }
 
@@ -1651,11 +1651,11 @@ function newBoardModal() {
   modal(`<div class="mh"><h2 class="grow" style="margin:0">Criar quadro do time</h2></div><div class="mb"><div class="fg">
     <label class="f"><span>Nome do time</span><input class="sin" id="nbName" placeholder="Pagamentos"></label>
     <label class="f"><span>Identificador (slug) combinado com o gestor</span><input class="sin" id="nbSlug" placeholder="pagamentos"></label>
-    <label class="f"><span>Senha do arquivo (opcional)</span><input class="sin" type="password" id="nbPw" autocomplete="new-password"></label>
+    <label class="f"><span>Senha do arquivo (obrigatória, 12+ caracteres)</span><input class="sin" type="password" id="nbPw" autocomplete="new-password"></label>
     <label class="f"><span>Repita a senha</span><input class="sin" type="password" id="nbPw2" autocomplete="new-password"></label>
     <label class="f full"><span>Pessoas do time (opcional, uma por linha; papel depois de ponto e vírgula)</span><textarea class="sin" id="nbPeople" rows="4" placeholder="Ana Souza; Produto (PO)
 Bruno Lima; Desenvolvimento"></textarea></label></div>
-    <p class="small muted">Em seguida você escolhe onde salvar o arquivo de dados. Use uma pasta do time (por exemplo, a biblioteca do time no SharePoint, sincronizada), nunca a pasta Gestao-Integracao. A senha não pode ser recuperada.</p></div>
+    <p class="small muted">Em seguida você escolhe onde salvar o arquivo de dados: uma pasta <b>deste computador, fora do OneDrive</b> (cada pessoa tem o seu). O quadro do time se junta pela pasta sincronizada, onde cada pessoa grava só o próprio arquivo. A senha não pode ser recuperada: você vai guardá-la no cofre de senhas.</p></div>
     <div class="mf"><button class="btn" data-act="close">Cancelar</button><button class="btn pri" data-act="createBoard">Escolher local e criar</button></div>`);
   $('#nbName').oninput = () => { if (!$('#nbSlug').dataset.touched) $('#nbSlug').value = slugify($('#nbName').value); };
   $('#nbSlug').oninput = () => { $('#nbSlug').dataset.touched = 1; };
@@ -1665,7 +1665,7 @@ Bruno Lima; Desenvolvimento"></textarea></label></div>
   }
 }
 function pwModal() {
-  modal(`<div class="mh"><h2 class="grow" style="margin:0">Senha do arquivo</h2></div><div class="mb"><p class="small muted">Deixe em branco para tirar a senha. Todas as pessoas que usam o arquivo vão precisar da nova senha.</p><div class="fg"><input class="sin" type="password" id="pw1" placeholder="Nova senha" autocomplete="new-password"><input class="sin" type="password" id="pw2" placeholder="Repita" autocomplete="new-password"></div></div>
+  modal(`<div class="mh"><h2 class="grow" style="margin:0">Senha do arquivo</h2></div><div class="mb"><p class="small muted">A senha é obrigatória (12+ caracteres) e não pode ser recuperada. Depois de trocar, guarde a nova no cofre de senhas.</p><div class="fg"><input class="sin" type="password" id="pw1" placeholder="Nova senha" autocomplete="new-password"><input class="sin" type="password" id="pw2" placeholder="Repita" autocomplete="new-password"></div></div>
     <div class="mf"><button class="btn" data-act="close">Cancelar</button><button class="btn pri" data-act="savePw">Salvar</button></div>`);
 }
 
@@ -1683,8 +1683,8 @@ document.addEventListener('click', async e => {
       case 'newBoard': newBoardModal(); break;
       case 'createBoard': {
         const n = $('#nbName').value.trim(), s = $('#nbSlug').value.trim(), p1 = $('#nbPw').value, p2 = $('#nbPw2').value;
-        if (!n) return toast('Informe o nome do time.'); if (s && !SLUG_RE.test(s)) return toast('Identificador: só minúsculas, números e hífens.'); if (p1 !== p2) return toast('As senhas não conferem.');
-        const lote = lerLote($('#nbPeople').value); closeModal(); await criarArquivo(n, s, p1, lote); break;
+        if (!n) return toast('Informe o nome do time.'); if (s && !SLUG_RE.test(s)) return toast('Identificador: só minúsculas, números e hífens.'); if (p1.length < 12) return toast('A senha é obrigatória e precisa de pelo menos 12 caracteres.'); if (p1 !== p2) return toast('As senhas não conferem.');
+        const lote = lerLote($('#nbPeople').value); closeModal(); if (!await f4Cofre('senha')) return; await criarArquivo(n, s, p1, lote); break;
       }
       case 'close': closeModal(); break;
       case 'cmove': { const c = cardById(el.dataset.card); moverCard(c, el.dataset.col); touch(); cardModal(c.id); break; }
@@ -1743,7 +1743,7 @@ document.addEventListener('click', async e => {
       case 'pasteKey': {
         const inp = $('#keyIn'); const v = inp.value; inp.value = '';
         const r = await colarChave(v); keysInfo = await chaveiro();
-        toast(r.novo ? `Chave ${r.kid} adicionada.` : `A chave ${r.kid} já estava cadastrada.`);
+        toast(r.novo ? `Chave ${r.kid} adicionada.` : `A chave ${r.kid} já estava cadastrada.`); if (r.novo) await f4Cofre('chave');
         await catalogoDoCache(); const root = await obterPasta(); if (root) await lerCatalogo(root, { silencioso: true });
         if (pub.pendingStatus) publicar('status'); render(); break;
       }
@@ -1754,7 +1754,7 @@ document.addEventListener('click', async e => {
       case 'retrySave': if (fileHandle?.requestPermission) await fileHandle.requestPermission({ mode: 'readwrite' }); await salvar(); break;
       case 'backup': { const a2 = document.createElement('a'); a2.href = URL.createObjectURL(new Blob([await serializar(db)], { type: 'application/json' })); a2.download = `quadro-${db.team.slug || 'time'}-copia-${today()}.json`; a2.click(); break; }
       case 'setPw': pwModal(); break;
-      case 'savePw': { const p1 = $('#pw1').value, p2 = $('#pw2').value; if (p1 !== p2) return toast('As senhas não conferem.'); if (p1) { const salt = crypto.getRandomValues(new Uint8Array(16)); fileKey = { key: await chaveDaSenha(p1, salt), salt, iter: PBKDF2_ITER }; } else fileKey = null; closeModal(); lastMod = 0; scheduleSave(); toast(p1 ? 'Arquivo protegido por senha.' : 'Senha removida.'); break; }
+      case 'savePw': { const p1 = $('#pw1').value, p2 = $('#pw2').value; if (p1.length < 12) return toast('A senha é obrigatória e precisa de pelo menos 12 caracteres.'); if (p1 !== p2) return toast('As senhas não conferem.'); closeModal(); if (!await f4Cofre('senha')) return; if (p1) { const salt = crypto.getRandomValues(new Uint8Array(16)); fileKey = { key: await chaveDaSenha(p1, salt), salt, iter: PBKDF2_ITER }; } else fileKey = null; closeModal(); lastMod = 0; scheduleSave(); toast(p1 ? 'Arquivo protegido por senha.' : 'Senha removida.'); break; }
       case 'colAdd': db.settings.columns.splice(cols().length - 1, 0, { id: 'col' + Date.now().toString(36), name: 'Nova coluna', wip: null }); db.settings.upd = Date.now(); touch(false); break;
       case 'colUp': { const i = +el.dataset.i; if (i === cols().length - 1 || i - 1 < 0) { toast('A última coluna é sempre a entrega.'); return; } const c = cols(); [c[i - 1], c[i]] = [c[i], c[i - 1]]; db.settings.upd = Date.now(); touch(false); break; }
       case 'colDel': { const i = +el.dataset.i, col = cols()[i]; if (cols().length <= 3) return toast('O quadro precisa de pelo menos 3 colunas.'); if (activeCards().some(c => c.col === col.id)) return toast('Mova os cards desta coluna antes de removê-la.'); if ([db.settings.commitCol, db.settings.startCol].includes(col.id)) return toast('Escolha outra coluna de compromisso ou início antes.'); cols().splice(i, 1); db.settings.upd = Date.now(); touch(false); break; }
@@ -1871,7 +1871,7 @@ async function chaveDoPreset() {   // cadastra a chave embutida uma única vez (
   try { const { kid } = lerChaveTexto(PRESET.key), feitas = (await IDB.get('presetKids')) || [];
     if (feitas.includes(kid)) return;
     const r = await colarChave(PRESET.key); await IDB.set('presetKids', [...feitas, kid]);
-    if (r.novo) setTimeout(() => toast(`Chave ${kid} da Central cadastrada neste navegador.`, 5000), 600);
+    if (r.novo) { setTimeout(() => toast(`Chave ${kid} da Central cadastrada neste navegador.`, 5000), 600); setTimeout(() => f4Cofre('chave', '<p style="font-size:12px">A chave veio dentro deste HTML. Peça ao gestor o texto da chave (GK1…) e guarde no cofre: se o navegador for limpo, você vai precisar dela.</p>'), 900); }
   } catch (e) { setTimeout(() => toast('A chave que veio neste HTML não é válida: ' + e.message, 6000), 600); }
 }
 (async () => {
@@ -1883,6 +1883,212 @@ async function chaveDoPreset() {   // cadastra a chave embutida uma única vez (
   renderWelcome();
 })();
 window.__qt = { PRESET, conectarPasta, get db() { return db; }, set db(v) { db = v; }, get catalog() { return catalog; }, buildStatus, buildMetrics, validar, publicar, colarChave, chaveiro, decifrar, cifrar, lerCatalogoEnvelope, render, mergeDb, demoDb, abrirArquivo, salvar, get pub() { return pub; } };
+</script>
+<script id="f4seg">
+/* seguranca-comum 1.0 · aviso de senha e cofre, lembrete de teste da senha e "Onde estou?"
+   Bloco injetado na Central e no Quadro por tools/injetar_seguranca.py (o mesmo texto das ferramentas de finanças).
+   Usa um <dialog> próprio para não interferir nos diálogos da ferramenta. */
+(() => {
+  const css = `.f4d{border:0;border-radius:18px;padding:0;width:min(600px,94vw);max-height:90vh;box-shadow:0 24px 64px rgba(20,30,70,.25);font:13.5px/1.5 Inter,"Segoe UI",system-ui,sans-serif;color:#161a23}
+  .f4d::backdrop{background:rgba(22,26,35,.35)}.f4d .h{padding:16px 20px;border-bottom:1px solid #eceef4;font:600 16px "BV Leve",Montserrat,Inter,sans-serif}
+  .f4d .b{padding:16px 20px;overflow:auto;max-height:62vh}.f4d .f{display:flex;gap:8px;justify-content:flex-end;padding:12px 20px;border-top:1px solid #eceef4}
+  .f4d button{font:inherit;cursor:pointer;border:1px solid #eceef4;background:#fff;border-radius:10px;padding:6px 12px;font-weight:550}
+  .f4d button.p{background:#223ad2;border-color:#223ad2;color:#fff}.f4d button:disabled{opacity:.4;cursor:not-allowed}
+  .f4d .cofre{border:1.5px solid #c4574f;background:#fbefee;border-radius:14px;padding:12px 14px;color:#6d2620}
+  .f4d .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0 0 12px}.f4d .kv dt{color:#6f7689}.f4d .kv dd{margin:0;font-weight:600;word-break:break-all}
+  .f4d .mp{display:grid;grid-template-columns:1fr 1fr;gap:10px}.f4d .mp div{border:1px solid #eceef4;border-radius:12px;padding:10px 12px;font-size:12.5px}
+  .f4d h4{margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#6f7689}.f4d .t{font-size:12.5px;padding:6px 0;border-bottom:1px solid #eceef4}
+  .f4d input[type=password]{width:100%;border:1px solid #eceef4;border-radius:10px;padding:7px 10px;font:inherit}
+  .f4btn{font:inherit;font-size:12px;cursor:pointer;border:1px solid #eceef4;background:#fff;border-radius:99px;padding:4px 11px;color:#6f7689;white-space:nowrap}.f4btn:hover{color:#161a23;border-color:#cfd3e0}`;
+  const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
+  const e = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  function abrir(html) {
+    let d = document.getElementById('f4dlg');
+    if (!d) { d = document.createElement('dialog'); d.id = 'f4dlg'; d.className = 'f4d'; document.body.appendChild(d); }
+    d.innerHTML = html; if (!d.open) d.showModal(); return d;
+  }
+  const TXT = {
+    senha: '<b>Esta senha é a única forma de abrir seus dados.</b> Ela não fica guardada em lugar nenhum e ninguém consegue recuperá-la. Se você esquecer, os dados se perdem.<br><br><b>Guarde agora num cofre de senhas</b> (por exemplo, o gerenciador de senhas da empresa) antes de continuar.',
+    chave: '<b>Esta chave abre os arquivos do time na pasta compartilhada.</b> Quem tiver a chave lê e publica em nome do time.<br><br><b>Guarde no cofre de senhas</b> e envie só por mensagem direta no Teams ou por e-mail. <b>Nunca</b> coloque a chave na pasta compartilhada.',
+    html: '<b>Este HTML leva a chave do time embutida.</b> Trate o arquivo como uma senha: envie só ao responsável do time, por mensagem direta ou e-mail, e nunca o deixe na pasta compartilhada.<br><br>Peça para a pessoa <b>guardar a chave no cofre de senhas</b>.'
+  };
+  // Resolve true só quando a pessoa marca "Já guardei no cofre" e continua.
+  window.f4Cofre = (tipo = 'senha', extra = '') => new Promise(ok => {
+    const d = abrir(`<div class="h">Guarde no cofre antes de seguir</div><div class="b"><div class="cofre">${TXT[tipo] || TXT.senha}</div>${extra}
+      <label style="display:flex;gap:8px;align-items:center;margin-top:12px"><input type="checkbox" id="f4ok"> Já guardei no cofre de senhas</label></div>
+      <div class="f"><button id="f4no">Voltar</button><button class="p" id="f4go" disabled>Continuar</button></div>`);
+    let fim = false; const sai = v => { fim = true; d.close(); ok(v); };
+    d.querySelector('#f4ok').onchange = ev => d.querySelector('#f4go').disabled = !ev.target.checked;
+    d.querySelector('#f4no').onclick = () => sai(false); d.querySelector('#f4go').onclick = () => sai(true);
+    d.addEventListener('close', function h() { if (d.open) return; d.removeEventListener('close', h); if (!fim) ok(false); });
+  });
+  // Lembrete: 30 dias depois da primeira confirmação e depois a cada 90 dias, pede a senha uma vez.
+  // conferir(senha) -> Promise<boolean>. O estado fica no navegador (sem mudar o formato do arquivo).
+  window.f4LembreteSenha = async (chave, conferir) => {
+    let s = {}; try { s = JSON.parse(localStorage.getItem('f4.senha.' + chave) || '{}'); } catch {}
+    const agora = Date.now();
+    if (!s.desde) { s.desde = agora; try { localStorage.setItem('f4.senha.' + chave, JSON.stringify(s)); } catch {} return; }
+    const base = s.teste || s.desde, lim = s.teste ? 90 : 30;
+    if ((agora - base) / 864e5 < lim) return;
+    const r = await new Promise(ok => {
+      const d = abrir(`<div class="h">Confirme que a senha está no cofre</div><div class="b"><p style="margin-top:0">Para garantir que você não vai perder o acesso, digite a senha deste arquivo (ela deve estar no seu cofre de senhas).</p><input type="password" id="f4pw" autocomplete="current-password"><p id="f4msg" style="color:#c4574f;font-size:12px"></p></div>
+        <div class="f"><button id="f4dep">Lembrar amanhã</button><button class="p" id="f4conf">Confirmar</button></div>`);
+      let n = 0;
+      d.querySelector('#f4dep').onclick = () => { d.close(); ok('adiar'); };
+      d.querySelector('#f4conf').onclick = async () => { if (await conferir(d.querySelector('#f4pw').value)) { d.close(); ok('ok'); } else if (++n >= 2) { d.close(); ok('falhou'); } else d.querySelector('#f4msg').textContent = 'Senha não confere. Tente de novo.'; };
+      d.querySelector('#f4pw').onkeydown = ev => { if (ev.key === 'Enter') d.querySelector('#f4conf').click(); };
+    });
+    if (r === 'ok') s.teste = agora; else if (r === 'adiar') s.teste = agora - (lim - 1) * 864e5;
+    try { localStorage.setItem('f4.senha.' + chave, JSON.stringify(s)); } catch {}
+    if (r === 'falhou') abrir(`<div class="h">Senha não confere</div><div class="b"><div class="cofre">Você não lembrou a senha. Enquanto o arquivo ainda está aberto, <b>troque a senha</b> e guarde a nova no cofre.</div></div><div class="f"><button class="p" onclick="this.closest('dialog').close()">Entendi</button></div>`);
+  };
+  const FERR = [
+    ['Início da solução', 'inicio.html', 'Assistente: pergunta o uso, cria o primeiro arquivo e gera os HTMLs.'],
+    ['Finanças do Grupo', 'financas_grupo.html', 'Consolidado das finanças: soma os planos publicados pelos times.'],
+    ['Finanças do Time', 'financas_<time>.html', 'Dia a dia e futuro das finanças de um time.'],
+    ['Central de Gestão', 'gestao_pessoal_vNN.html', 'Tarefas consolidado: gestão do gestor, iniciativas e times.'],
+    ['Quadro do Time', 'quadro_<time>.html', 'Tarefas de um time: quadro, backlog, sprints e métricas.']
+  ];
+  // info = { ferramenta, versao, arquivo, pastaComum, voce, local: [], comum: [] }
+  window.f4OndeEstou = info => {
+    const d = abrir(`<div class="h">Onde estou?</div><div class="b"><dl class="kv"><dt>Ferramenta</dt><dd>${e(info.ferramenta)} <span style="color:#aab0bf;font-weight:400">${e(info.versao || '')}</span></dd>
+      <dt>Arquivo aberto</dt><dd>${info.arquivo ? e(info.arquivo) : '<span style="color:#aab0bf">nenhum</span>'}</dd>
+      <dt>Pasta sincronizada</dt><dd>${info.pastaComum ? e(info.pastaComum) : '<span style="color:#aab0bf">não ligada</span>'}</dd>${info.voce ? `<dt>Você neste computador</dt><dd>${e(info.voce)}</dd>` : ''}</dl>
+      <div class="mp"><div><h4>Fica só neste computador</h4>${info.local.map(x => '• ' + e(x)).join('<br>')}</div><div><h4>Vai para a pasta sincronizada</h4>${info.comum.map(x => '• ' + e(x)).join('<br>')}</div></div>
+      <h4 style="margin-top:16px">Ferramentas da solução</h4>${FERR.map(([n, a, t]) => `<div class="t"><b>${e(n)}</b> <code style="color:#aab0bf">${e(a)}</code>${n === info.ferramenta ? ' <b style="color:#223ad2">· você está aqui</b>' : ''}<br><span style="color:#6f7689">${e(t)}</span></div>`).join('')}
+      <p style="font-size:12px;color:#6f7689">Os HTMLs não guardam dados. Os dados ficam em arquivos cifrados: o individual numa pasta local fora do OneDrive, o comum na pasta sincronizada.</p></div>
+      <div class="f"><button class="p" id="f4fecha">Fechar</button></div>`);
+    d.querySelector('#f4fecha').onclick = () => d.close();
+  };
+  window.f4Abrir = abrir;
+  window.f4BotaoOnde = (alvo, infoFn) => { const el = typeof alvo === 'string' ? document.getElementById(alvo) : alvo; if (!el || el.querySelector('.f4btn')) return; el.innerHTML = '<button type="button" class="f4btn" title="Qual ferramenta é esta, qual arquivo está aberto e o que é local ou compartilhado">Onde estou?</button>'; el.firstChild.onclick = () => f4OndeEstou(infoFn()); };
+})();
+</script>
+<script id="f4quadro">
+/* ---------- Quadro 2.1 · senha obrigatória, cofre, "Onde estou?" e um arquivo por pessoa ----------
+   Cada pessoa grava só o próprio arquivo na pasta sincronizada:
+     times/<time>/quadro/<pessoa>-<computador>.json   (envelope gestao-envelope/1, conteúdo quadro-contrib/1)
+   com o retrato do quadro dela. Quem abre o Quadro lê os arquivos das outras pessoas e une item a item
+   (mergeDb: vence a alteração mais recente). Ninguém sobrescreve o arquivo de ninguém, então o OneDrive
+   não gera cópias de conflito; se gerar (mesma pessoa e computador), as cópias também são lidas e depois apagadas. */
+const CONTRIB = 'quadro-contrib/1';
+function f4dispositivo() {
+  let d = null; try { d = JSON.parse(localStorage.getItem('nucleo.dispositivo') || 'null'); } catch {}
+  if (!d?.id) { d = { id: Array.from(crypto.getRandomValues(new Uint8Array(3)), x => x.toString(36).padStart(2, '0')).join('').slice(0, 5) }; try { localStorage.setItem('nucleo.dispositivo', JSON.stringify(d)); } catch {} }
+  return d;
+}
+function f4eu() { try { return db?.team.slug ? localStorage.getItem('quadro.eu.' + db.team.slug) : null; } catch { return null; } }
+const f4writer = () => `${f4eu()}~${f4dispositivo().id}`;
+const f4arquivo = () => `${f4eu()}-${f4dispositivo().id}.json`;
+let f4vistos = {}, f4syncT = null, f4sincronizando = false, f4ultima = { lidos: 0, publicado: null, erro: '' };
+async function f4pasta(criar) {
+  const root = await obterPasta(); if (!root || !db?.team.slug) return null;
+  try { let d = await root.getDirectoryHandle('times', { create: criar }); d = await d.getDirectoryHandle(db.team.slug, { create: criar }); return await d.getDirectoryHandle('quadro', { create: criar }); } catch { return null; }
+}
+function f4quemSou() {
+  return new Promise(ok => {
+    const ps = activePeople();
+    const d = f4Abrir(`<div class="h">Quem é você neste quadro?</div><div class="b"><p style="margin-top:0">Cada pessoa grava só o próprio arquivo na pasta do time, para o OneDrive nunca juntar duas versões. Escolha seu nome (fica guardado neste navegador).</p>
+      <select id="f4eu" style="width:100%;padding:7px;border:1px solid #eceef4;border-radius:10px">${ps.map(p => `<option value="${esc(p.name)}">${esc(p.name)}</option>`).join('')}<option value="">Outro nome…</option></select>
+      <input id="f4euN" placeholder="Seu nome" style="width:100%;margin-top:8px;padding:7px;border:1px solid #eceef4;border-radius:10px;${ps.length ? 'display:none' : ''}"></div>
+      <div class="f"><button id="f4euNo">Agora não</button><button class="p" id="f4euOk">Confirmar</button></div>`);
+    const sel = d.querySelector('#f4eu'), inp = d.querySelector('#f4euN');
+    sel.onchange = () => inp.style.display = sel.value ? 'none' : '';
+    d.querySelector('#f4euNo').onclick = () => { d.close(); ok(null); };
+    d.querySelector('#f4euOk').onclick = () => {
+      const nome = sel.value || inp.value.trim(); const s = slugify(nome).replace(/-/g, '').slice(0, 16); if (!s) return;
+      try { localStorage.setItem('quadro.eu.' + db.team.slug, s); } catch {} d.close(); ok(s);
+    };
+  });
+}
+async function f4ler() {
+  const dir = await f4pasta(false); if (!dir) return false;
+  const { mapa } = await chaveiro(); let mudou = false, lidos = 0;
+  const assinatura = () => JSON.stringify([db.cards, db.epics, db.sprints, db.people, db.settings, db.team]);
+  for await (const [n, h] of dir.entries()) {
+    if (h.kind !== 'file' || !n.endsWith('.json') || n.startsWith('.') || n === f4arquivo()) continue;
+    try {
+      const f = await h.getFile(); if (f4vistos[n] === f.lastModified) { lidos++; continue; }
+      const env = JSON.parse(await f.text()), p = await decifrar(env, mapa);
+      if (p.schema !== CONTRIB || env.team !== db.team.slug || p.source?.team !== db.team.slug) continue;
+      const antes = assinatura();
+      db = mergeDb(db, normalizeDb(p.db));
+      f4vistos[n] = f.lastModified; lidos++;
+      if (assinatura() !== antes) mudou = true;
+    } catch { /* arquivo pela metade ou de outra chave: tenta de novo na próxima leitura */ }
+  }
+  f4ultima.lidos = lidos;
+  if (mudou) { dirty = true; scheduleSave(); if (!$('#dlg').open) render(); else renderChrome(); }
+  return mudou;
+}
+async function f4publicar() {
+  const k = keysInfo?.atual; if (!k || !f4eu()) return;
+  const dir = await f4pasta(true); if (!dir) return;
+  const chaveRev = 'quadro.contribRev.' + db.team.slug, rev = (+localStorage.getItem(chaveRev) || 0) + 1;
+  const snap = structuredClone(db);
+  const payload = { schema: CONTRIB, revision: rev, generatedAt: agoraComFuso(), source: { team: db.team.slug, writer: f4writer(), tool: TOOL, toolVersion: TOOL_VERSION }, db: snap };
+  const env = await cifrar(payload, { key: k.key, kid: k.kid, team: db.team.slug });
+  const texto = JSON.stringify(env), fh = await dir.getFileHandle(f4arquivo(), { create: true });
+  const w = await fh.createWritable(); await w.write(texto); await w.close();       // troca atômica no close()
+  if ((await (await fh.getFile()).text()) !== texto) throw new Error('gravação não confirmada');
+  try { localStorage.setItem(chaveRev, String(rev)); } catch {}
+  const base = f4arquivo().replace(/\.json$/, ''), copia = new RegExp('^' + base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?:-[^\\\\/]+?| ?\\(\\d+\\))\\.json$');
+  for await (const [n] of dir.entries()) if (copia.test(n)) { try { await dir.removeEntry(n); } catch {} }   // cópias de conflito do próprio arquivo: já foram unidas em f4ler
+  f4ultima.publicado = new Date().toISOString();
+}
+async function f4sincronizar() {
+  if (f4sincronizando || !db || db.demo || !db.team.slug || !keysInfo?.atual) return;
+  f4sincronizando = true;
+  try { if (!(await obterPasta())) return; await f4ler(); if (f4eu()) await f4publicar(); f4ultima.erro = ''; }
+  catch (e) { f4ultima.erro = e.message || String(e); }
+  finally { f4sincronizando = false; }
+}
+function f4agendar() { clearTimeout(f4syncT); f4syncT = setTimeout(f4sincronizar, 4000); }
+setInterval(f4sincronizar, 20000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) f4sincronizar(); });
+
+// Senha obrigatória: quadros antigos sem senha ganham uma antes de continuar.
+function f4exigirSenha() {
+  return new Promise(ok => {
+    const d = f4Abrir(`<div class="h">Proteja este quadro com senha</div><div class="b"><p style="margin-top:0">A partir do Quadro 2.1 todo arquivo de dados é cifrado. Este quadro ainda não tem senha: crie uma agora (pelo menos 12 caracteres).</p>
+      <input type="password" id="f4p1" placeholder="Senha" autocomplete="new-password"><input type="password" id="f4p2" placeholder="Repita a senha" autocomplete="new-password" style="margin-top:8px"><p id="f4pm" style="color:#c4574f;font-size:12px"></p></div>
+      <div class="f"><button class="p" id="f4pok">Continuar</button></div>`);
+    d.addEventListener('cancel', ev => ev.preventDefault());
+    d.querySelector('#f4pok').onclick = async () => {
+      const a = d.querySelector('#f4p1').value, b = d.querySelector('#f4p2').value, m = d.querySelector('#f4pm');
+      if (a.length < 12) return m.textContent = 'Use pelo menos 12 caracteres.'; if (a !== b) return m.textContent = 'As duas senhas não são iguais.';
+      d.close(); if (!await f4Cofre('senha')) return f4exigirSenha().then(ok);
+      const salt = crypto.getRandomValues(new Uint8Array(16)); fileKey = { key: await chaveDaSenha(a, salt), salt, iter: PBKDF2_ITER };
+      lastMod = 0; dirty = true; await salvar(); toast('Quadro protegido por senha.'); ok(true);
+    };
+  });
+}
+async function f4senhaConfere(s) {
+  if (!fileKey) return false;
+  const k2 = await chaveDaSenha(s, fileKey.salt, fileKey.iter), iv = new Uint8Array(12), msg = te.encode('teste-de-senha');
+  const [a, b] = await Promise.all([crypto.subtle.encrypt({ name: 'AES-GCM', iv }, fileKey.key, msg), crypto.subtle.encrypt({ name: 'AES-GCM', iv }, k2, msg)]);
+  return b64.enc(new Uint8Array(a)) === b64.enc(new Uint8Array(b));
+}
+function f4info() {
+  return { ferramenta: 'Quadro do Time', versao: TOOL_VERSION, arquivo: db?.demo ? 'exemplo em memória' : fileHandle?.name, pastaComum: rootMem ? `${rootMem.name}/times/${db?.team.slug || '?'}/` : '', voce: f4eu() ? f4writer() : '',
+    local: ['Arquivo do quadro (cifrado com a senha), numa pasta fora do OneDrive', 'Chaves do time (no navegador, não exportáveis)'],
+    comum: [`quadro/${f4eu() ? f4arquivo() : '<você>.json'}: seu retrato do quadro (só você grava)`, 'Arquivos das outras pessoas do time, unidos a cada 20 s', 'status.json e metricas.json para a Central'] };
+}
+// Ganchos nas funções do Quadro (as chamadas resolvem o nome na hora, então a troca vale para todos).
+{
+  const render0 = render; render = function () { const r = render0.apply(this, arguments); if (db) f4BotaoOnde('ondeEstou', f4info); return r; };
+  const salvar0 = salvar; salvar = async function () { const r = await salvar0.apply(this, arguments); if (saveState === 'saved') f4agendar(); return r; };
+  const apos0 = aposAbrir; aposAbrir = async function () {
+    const r = await apos0.apply(this, arguments);
+    if (db && !db.demo) {
+      if (!fileKey) await f4exigirSenha();
+      else setTimeout(() => f4LembreteSenha('quadro:' + (db.team.slug || fileHandle?.name), f4senhaConfere), 1500);
+      if (keysInfo?.atual && db.team.slug && (await obterPasta()) && !f4eu()) await f4quemSou();
+      f4sincronizar();
+    }
+    return r;
+  };
+}
 </script>
 </body>
 </html>

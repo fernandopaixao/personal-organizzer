@@ -1,0 +1,1042 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Finanças do Grupo</title>
+<style>
+:root{
+  --bv:#223ad2; --bv-deep:#002bab; --bv-mid:#8e9de9; --bv-line:#d5dbf7; --bv-soft:#f2f4fd;
+  --ink:#161a23; --muted:#6f7689; --faint:#aab0bf; --line:#eceef4; --bg:#fafafc; --card:#fff; --late:#c4574f; --late-soft:#fbefee;
+  --ok:#2f7d5b; --ok-soft:#eaf5ef;
+  --font:Inter,"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+  --title:"BV Leve",Montserrat,Inter,"Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--font);background:var(--bg);color:var(--ink);font-size:13.5px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;padding:0}
+a{color:var(--bv)}
+.hidden{display:none!important}
+.muted{color:var(--muted)}.faint{color:var(--faint)}.grow{flex:1}.small{font-size:12px}.bvc{color:var(--bv)}.latec{color:var(--late)}.okc{color:var(--ok)}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rail{position:fixed;left:0;top:0;bottom:0;width:84px;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:2px;z-index:20}
+.logo{width:36px;height:36px;border-radius:10px;background:var(--bv);color:#fff;display:grid;place-items:center;font-weight:700;font-family:var(--title);margin-bottom:12px;font-size:11px}
+.nv{width:70px;padding:8px 0 6px;border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);font-size:10.5px;position:relative;text-align:center}
+.nv svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.nv:hover{color:var(--ink)}.nv.on{color:var(--bv);background:var(--bv-soft);font-weight:600}
+.nv .b{position:absolute;top:3px;right:10px;min-width:15px;height:15px;border-radius:8px;background:var(--late);color:#fff;font-size:9.5px;display:grid;place-items:center;padding:0 4px;font-weight:700}
+.main{margin-left:84px;padding:0 clamp(18px,2.6vw,56px) 80px}
+.top{position:sticky;top:0;z-index:10;background:rgba(250,250,252,.95);backdrop-filter:blur(8px);display:flex;align-items:center;gap:12px;padding:14px 0 12px;flex-wrap:wrap}
+.top h1{margin:0;font-family:var(--title);font-size:20px;font-weight:600;letter-spacing:-.02em}
+.top .sub{font-size:12px;color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);padding:4px 10px;border-radius:99px;border:1px solid var(--line);background:#fff;white-space:nowrap}
+.pill .led{width:7px;height:7px;border-radius:50%;background:var(--bv)}.pill .led.wait{background:var(--faint)}.pill .led.err{background:var(--late)}
+button.pill:hover{border-color:#cfd3e0;color:var(--ink)}
+.banner{background:var(--bv-soft);border:1px solid var(--bv-line);color:var(--bv-deep);border-radius:12px;padding:9px 14px;margin:0 0 14px;font-size:12.5px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.banner.warn{background:var(--late-soft);border-color:#f0cfcc;color:#8a2f28}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px 12px;font-weight:550;font-size:12.5px;white-space:nowrap}
+.btn:hover{border-color:#cfd3e0}.btn.pri{background:var(--bv);border-color:var(--bv);color:#fff}.btn.pri:hover{background:var(--bv-deep)}
+.btn.sm{padding:3px 9px;font-size:12px;border-radius:8px}.btn:disabled{opacity:.4;cursor:not-allowed}.btn.danger{color:var(--late)}
+.btn.ghost{border-color:transparent;background:none;color:var(--muted)}.btn.ghost:hover{color:var(--ink);background:#f0f1f6}
+.sg{display:inline-flex;background:#f0f1f6;border-radius:10px;padding:2px;gap:2px;flex-wrap:wrap}
+.sg button{padding:5px 12px;border-radius:8px;color:var(--muted);font-weight:550;font-size:12.5px}
+.sg button.on{background:#fff;color:var(--bv);box-shadow:0 1px 2px rgba(20,30,70,.1)}
+.sel,.sin,textarea.sin{border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px 10px;outline:none;font-size:12.5px;min-width:0}
+.sel:focus,.sin:focus{border-color:var(--bv);box-shadow:0 0 0 3px var(--bv-soft)}
+textarea.sin{width:100%;resize:vertical;min-height:60px}
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:2px 0 16px}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:550;padding:1px 8px;border-radius:99px;background:#f2f3f8;color:var(--muted);white-space:nowrap}
+.chip.bv{background:var(--bv-soft);color:var(--bv)}.chip.late{background:var(--late-soft);color:var(--late)}.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:11.5px;letter-spacing:-.01em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin-bottom:16px}
+.lbl{font-size:11px;font-weight:650;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 10px;display:flex;align-items:center;gap:8px}
+h2{font-family:var(--title);font-size:16px;font-weight:600;margin:0 0 4px;letter-spacing:-.01em}
+h3{font-size:14px;font-weight:650;margin:0}
+.empty{color:var(--faint);padding:14px 0;font-size:12.5px}
+.grid{display:grid;gap:16px}.g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px}.kpi b{display:block;font-family:var(--title);font-size:21px;font-weight:600;letter-spacing:-.02em}.kpi span{font-size:11.5px;color:var(--muted)}
+.kpi.alert b{color:var(--late)}
+table.t{width:100%;border-collapse:collapse;font-size:12.5px}
+table.t th{font-size:11px;font-weight:650;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.t td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.t td.n,table.t th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.t tr.tot td{font-weight:650;background:#f7f8fb}
+table.t tr:hover td{background:#fbfbfe}
+.scroll{overflow-x:auto}
+.cell{width:92px;text-align:right;border:1px solid transparent;background:transparent;border-radius:6px;padding:3px 5px;font-variant-numeric:tabular-nums}
+.cell:hover{border-color:var(--line)}.cell:focus{border-color:var(--bv);background:#fff;outline:none}
+.cell.closed{color:var(--muted)}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 16px;border-radius:10px;font-size:12.5px;z-index:100;max-width:90vw;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+dialog{border:0;border-radius:18px;padding:0;width:min(620px,94vw);max-height:90vh;box-shadow:0 24px 64px rgba(20,30,70,.25)}
+dialog.wide{width:min(900px,96vw)}
+dialog::backdrop{background:rgba(22,26,35,.35)}
+dialog[open]{display:flex;flex-direction:column}dialog>.mb{flex:1;min-height:0}
+.mh{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--line);background:#fff}
+.mb{padding:16px 20px;overflow:auto}
+.mf{display:flex;gap:8px;justify-content:flex-end;padding:12px 20px;border-top:1px solid var(--line);flex-wrap:wrap}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.field>span{font-size:11.5px;font-weight:600;color:var(--muted)}
+.field .sin,.field .sel{width:100%}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.cofre{border:1.5px solid var(--late);background:var(--late-soft);border-radius:14px;padding:12px 14px;color:#6d2620;font-size:12.5px;margin:6px 0 12px}
+.cofre b{color:#8a2f28}
+.quick{position:relative;margin-bottom:16px}
+.quick input{width:100%;padding:10px 14px 10px 36px;border:1px solid var(--line);border-radius:12px;background:#fff;outline:none;font-size:13px}
+.quick input:focus{border-color:var(--bv);box-shadow:0 0 0 3px var(--bv-soft)}
+.quick .pl{position:absolute;left:13px;top:7px;color:var(--bv);font-weight:700;font-size:16px}
+.quick .hint{font-size:11.5px;color:var(--muted);margin-top:4px}
+.al{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--line);font-size:12.5px}.al:last-child{border-bottom:0}
+.al .dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex:none;background:var(--bv)}.al .dot.late{background:var(--late)}
+.welcome{max-width:640px;margin:8vh auto;padding:0 20px}
+.welcome .card{padding:26px 28px}
+.steps{display:flex;gap:6px;margin:0 0 18px;flex-wrap:wrap}.steps i{height:4px;flex:1;min-width:30px;border-radius:2px;background:#e6e8f0}.steps i.on{background:var(--bv)}
+.opt{display:block;width:100%;text-align:left;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:8px;background:#fff}
+.opt:hover{border-color:var(--bv-mid)}.opt.on{border-color:var(--bv);background:var(--bv-soft)}
+.opt b{display:block;font-size:13.5px}.opt span{font-size:12px;color:var(--muted)}
+.map{display:grid;grid-template-columns:1fr 1fr;gap:12px}.map>div{border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:12.5px}
+.map h4{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+svg.ch{width:100%;height:auto;display:block}
+.legend{display:flex;gap:14px;font-size:11.5px;color:var(--muted);flex-wrap:wrap;margin-top:6px}.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+@media (max-width:720px){.rail{position:fixed;top:auto;bottom:0;width:100%;height:62px;flex-direction:row;justify-content:space-around;padding:0;border-right:0;border-top:1px solid var(--line)}.logo{display:none}.main{margin-left:0;padding-bottom:90px}.f2,.map{grid-template-columns:1fr}}
+
+</style>
+</head>
+<body>
+<div id="app"></div>
+<dialog id="dlg"></dialog>
+<script>
+/* ======================================================================
+   nucleo-sync 1.0 · bloco comum das ferramentas da solução
+   (finanças do grupo, finanças do time, assistente inicial)
+   - criptografia: arquivo local com senha (PBKDF2 600k + AES-256-GCM)
+     e envelope gestao-envelope/1 com chave aleatória por time
+   - pasta sincronizada (OneDrive/SharePoint): escrita segura, um dono por
+     arquivo, revisão monotônica, confere-antes-de-gravar, cópias de conflito
+   - aviso de senha e cofre, lembrete de teste da senha, "Onde estou?"
+   Este arquivo é injetado no HTML pelo build (tools/build_financas.py).
+   ====================================================================== */
+const NUCLEO_VERSION = '1.0.0';
+const te = new TextEncoder(), td = new TextDecoder();
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = (p = '') => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const clamp = (s, n) => String(s ?? '').slice(0, n);
+const slugify = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+
+const b64 = {
+  enc: u8 => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); },
+  dec: s => Uint8Array.from(atob(s), c => c.charCodeAt(0)),
+  urlDec: s => b64.dec(s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4)),
+  urlEnc: u8 => b64.enc(u8).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+};
+
+/* ---------------------------- dinheiro e datas ---------------------------- */
+// Valores sempre em centavos inteiros.
+const fmtMoeda = (c, moeda = 'BRL', dec = false) => ((c || 0) / 100).toLocaleString('pt-BR', { style: 'currency', currency: moeda, minimumFractionDigits: dec ? 2 : 0, maximumFractionDigits: dec ? 2 : 0 });
+const fmtCurto = (c) => { const v = (c || 0) / 100, a = Math.abs(v); return a >= 1e6 ? (v / 1e6).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' mi' : a >= 1e3 ? (v / 1e3).toLocaleString('pt-BR', { maximumFractionDigits: 0 }) + ' mil' : v.toLocaleString('pt-BR', { maximumFractionDigits: 0 }); };
+// Aceita "12.400", "12.400,50", "12400.5", "12,4 mil", "1,2 mi", "R$ 3.000", "15k"
+function parseValor(txt) {
+  let s = String(txt ?? '').trim().toLowerCase().replace(/r\$\s*/g, '').replace(/\s+/g, ' ');
+  if (!s) return null;
+  let mult = 1;
+  const m = /^(-?[\d.,]+)\s*(k|mil|mi|milh[oõ]es|milh[aã]o)?$/.exec(s);
+  if (!m) return null;
+  let n = m[1];
+  if (m[2]) mult = m[2] === 'k' || m[2] === 'mil' ? 1e3 : 1e6;
+  if (n.includes(',')) n = n.replace(/\./g, '').replace(',', '.');
+  else if (/^\-?\d{1,3}(\.\d{3})+$/.test(n)) n = n.replace(/\./g, '');
+  const v = Number(n);
+  return Number.isFinite(v) ? Math.round(v * mult * 100) : null;
+}
+const pad2 = n => String(n).padStart(2, '0');
+const hojeISO = () => { const d = new Date(); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; };
+const mesAtual = () => hojeISO().slice(0, 7);
+const mesesDoAno = ano => Array.from({ length: 12 }, (_, i) => `${ano}-${pad2(i + 1)}`);
+const NOMES_MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+const nomeMes = m => NOMES_MES[+m.slice(5, 7) - 1] + (m.slice(0, 4) !== String(new Date().getFullYear()) ? '/' + m.slice(2, 4) : '');
+const somaMeses = (m, k) => { const [a, b] = m.split('-').map(Number); const t = a * 12 + (b - 1) + k; return `${Math.floor(t / 12)}-${pad2(t % 12 + 1)}`; };
+const fmtData = iso => iso ? new Date(iso.length === 10 ? iso + 'T12:00:00' : iso).toLocaleDateString('pt-BR') : '';
+const fmtDataHora = iso => iso ? new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+function isoComFuso(d = new Date()) {
+  const o = -d.getTimezoneOffset(), s = o >= 0 ? '+' : '-', a = Math.abs(o);
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}${s}${pad2(Math.floor(a / 60))}:${pad2(a % 60)}`;
+}
+
+/* ------------------------------ IndexedDB kv ------------------------------ */
+const kv = (() => {
+  let dbp = null;
+  const open = () => dbp ??= new Promise((ok, err) => { const r = indexedDB.open('nucleo-sync', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => ok(r.result); r.onerror = () => err(r.error); });
+  const tx = async (mode, fn) => { const db = await open(); return new Promise((ok, err) => { const t = db.transaction('kv', mode); const st = t.objectStore('kv'); const r = fn(st); t.oncomplete = () => ok(r?.result); t.onerror = () => err(t.error); }); };
+  return { get: k => tx('readonly', s => s.get(k)).catch(() => undefined), set: (k, v) => tx('readwrite', s => s.put(v, k)).catch(() => {}), del: k => tx('readwrite', s => s.delete(k)).catch(() => {}) };
+})();
+
+/* ---------------------- identidade do computador (dispositivo) ---------------------- */
+// Identificador aleatório e curto, guardado no navegador. Junto com a pessoa forma o "dono"
+// de um arquivo comum: ana-k3f9. Nunca usa o nome real do computador.
+function dispositivo() {
+  let d = null;
+  try { d = JSON.parse(localStorage.getItem('nucleo.dispositivo') || 'null'); } catch {}
+  if (!d?.id) { d = { id: Array.from(crypto.getRandomValues(new Uint8Array(3)), x => x.toString(36).padStart(2, '0')).join('').slice(0, 5), nome: '' }; try { localStorage.setItem('nucleo.dispositivo', JSON.stringify(d)); } catch {} }
+  return d;
+}
+function nomearDispositivo(nome) { const d = dispositivo(); d.nome = clamp(nome, 40); try { localStorage.setItem('nucleo.dispositivo', JSON.stringify(d)); } catch {} }
+
+/* ---------------------- relógio lógico híbrido (HLC) ---------------------- */
+// "<ms>.<contador>": cresce sempre, mesmo se o relógio do computador voltar.
+function hlcAgora(visto) {
+  let ult = { t: 0, c: 0 };
+  try { ult = JSON.parse(localStorage.getItem('nucleo.hlc') || '{"t":0,"c":0}'); } catch {}
+  const vis = hlcLer(visto);
+  const fisico = Date.now();
+  const t = Math.max(fisico, ult.t, vis.t);
+  const c = t === ult.t && t === vis.t ? Math.max(ult.c, vis.c) + 1 : t === ult.t ? ult.c + 1 : t === vis.t ? vis.c + 1 : 0;
+  try { localStorage.setItem('nucleo.hlc', JSON.stringify({ t, c })); } catch {}
+  return `${t}.${c}`;
+}
+const hlcLer = h => { const m = /^(\d+)\.(\d+)$/.exec(String(h || '')); return m ? { t: +m[1], c: +m[2] } : { t: 0, c: 0 }; };
+const hlcCmp = (a, b) => { const x = hlcLer(a), y = hlcLer(b); return x.t - y.t || x.c - y.c; };
+
+/* ------------------------ arquivo local cifrado com senha ------------------------ */
+const LOCAL_ENC = 'gestao-local-cifrado/1';
+const PBKDF2_ITER = 600000;
+async function chaveDaSenha(senha, salt, iter = PBKDF2_ITER) {
+  const base = await crypto.subtle.importKey('raw', te.encode(senha), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations: iter }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+// ctx = { key, salt, iter, app }
+async function cifrarLocal(obj, ctx) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv, additionalData: te.encode(LOCAL_ENC + '|' + ctx.app) }, ctx.key, te.encode(JSON.stringify(obj))));
+  return JSON.stringify({ schema: LOCAL_ENC, app: ctx.app, kdf: { name: 'PBKDF2', hash: 'SHA-256', iter: ctx.iter, salt: b64.enc(ctx.salt) }, alg: 'A256GCM', iv: b64.enc(iv), ct: b64.enc(ct) });
+}
+function lerCabecalhoLocal(texto) {
+  let o; try { o = JSON.parse(texto); } catch { throw new Error('O arquivo não é JSON (pode estar incompleto).'); }
+  if (o?.schema !== LOCAL_ENC) throw new Error('Este arquivo não é um arquivo cifrado da solução.');
+  return o;
+}
+async function decifrarLocal(texto, senha) {
+  const o = lerCabecalhoLocal(texto);
+  const salt = b64.dec(o.kdf.salt), iter = o.kdf.iter || PBKDF2_ITER;
+  const key = await chaveDaSenha(senha, salt, iter);
+  let pt;
+  try { pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64.dec(o.iv), additionalData: te.encode(LOCAL_ENC + '|' + o.app) }, key, b64.dec(o.ct)); }
+  catch { const e = new Error('Senha incorreta ou arquivo alterado.'); e.code = 'SENHA'; throw e; }
+  return { dados: JSON.parse(td.decode(pt)), ctx: { key, salt, iter, app: o.app } };
+}
+async function novoCtx(senha, app) { const salt = crypto.getRandomValues(new Uint8Array(16)); return { key: await chaveDaSenha(senha, salt), salt, iter: PBKDF2_ITER, app }; }
+// Confere uma senha digitada contra o contexto aberto, sem reabrir o arquivo.
+async function senhaConfere(senha, ctx) {
+  const k2 = await chaveDaSenha(senha, ctx.salt, ctx.iter), iv = new Uint8Array(12), msg = te.encode('teste-de-senha');
+  const [a, b] = await Promise.all([crypto.subtle.encrypt({ name: 'AES-GCM', iv }, ctx.key, msg), crypto.subtle.encrypt({ name: 'AES-GCM', iv }, k2, msg)]);
+  return b64.enc(new Uint8Array(a)) === b64.enc(new Uint8Array(b));
+}
+function forcaSenha(s) {
+  const tipos = [/[a-z]/, /[A-Z]/, /\d/, /[^A-Za-z0-9]/].filter(r => r.test(s)).length;
+  if (s.length < 12) return { ok: false, msg: 'Use pelo menos 12 caracteres.' };
+  if (tipos < 2 && s.length < 20) return { ok: false, msg: 'Misture letras, números ou símbolos (ou use uma frase com 20+ caracteres).' };
+  return { ok: true, msg: s.length >= 16 ? 'Senha forte.' : 'Senha aceitável.' };
+}
+function gerarSenhaForte() {
+  const pal = 'acima,brisa,cacto,dente,euro,folha,girafa,horta,ilha,janela,kiwi,limao,manga,nuvem,ostra,pedra,quadro,rio,sapo,tigre,uva,vela,xale,zebra,cobre,trilho,farol,lontra,museu,pipoca'.split(',');
+  const r = crypto.getRandomValues(new Uint32Array(5));
+  return [0, 1, 2, 3].map(i => pal[r[i] % pal.length]).join('-') + '-' + (r[4] % 900 + 100);
+}
+
+/* --------------------- envelope gestao-envelope/1 (chave do time) --------------------- */
+const ENVELOPE = 'gestao-envelope/1';
+function lerChaveTexto(txt) {
+  const m = /^GK1\.([a-z0-9]+(?:-[a-z0-9]+)*)\.([A-Za-z0-9_-]{43})$/.exec(String(txt).trim());
+  if (!m) throw new Error('Chave inválida: formato esperado GK1.<id>.<43 caracteres>');
+  const raw = b64.urlDec(m[2]);
+  if (raw.length !== 32) throw new Error('Chave inválida: tamanho');
+  return { kid: m[1], raw };
+}
+const importarChave = raw => crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+const gerarChaveTexto = kid => `GK1.${kid}.${b64.urlEnc(crypto.getRandomValues(new Uint8Array(32)))}`;
+const aadDe = h => te.encode([ENVELOPE, h.content, h.team, h.kid, h.revision, h.generatedAt].join('|'));
+// O cabeçalho ganha "writer" em claro (dono do arquivo). Ele não entra no AAD, para manter
+// compatibilidade com o contrato; depois de decifrar, confere com payload.source.writer.
+async function cifrarEnv(payload, { key, kid, team }) {
+  const h = { schema: ENVELOPE, content: payload.schema, team, kid, revision: payload.revision, generatedAt: payload.generatedAt, alg: 'A256GCM' };
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv, additionalData: aadDe(h) }, key, te.encode(JSON.stringify(payload))));
+  return { ...h, writer: payload.source?.writer || undefined, iv: b64.enc(iv), ct: b64.enc(ct) };
+}
+async function decifrarEnv(env, chaves) {
+  if (env?.schema !== ENVELOPE) throw new Error('Não é um envelope gestao-envelope/1');
+  if (env.alg !== 'A256GCM') throw new Error('Algoritmo não suportado: ' + env.alg);
+  const key = chaves.get(env.kid);
+  if (!key) throw new Error(`Chave "${env.kid}" não cadastrada`);
+  let pt;
+  try { pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64.dec(env.iv), additionalData: aadDe(env) }, key, b64.dec(env.ct)); }
+  catch { throw new Error('Falha ao decifrar: chave errada ou arquivo alterado/incompleto'); }
+  const p = JSON.parse(td.decode(pt));
+  if (p.schema !== env.content || p.revision !== env.revision || p.generatedAt !== env.generatedAt) throw new Error('Cabeçalho do envelope não confere com o conteúdo');
+  if (env.writer && p.source?.writer !== env.writer) throw new Error('Dono no cabeçalho não confere com o conteúdo');
+  return p;
+}
+
+/* ------------------------- pastas e arquivos (File System Access) ------------------------- */
+const temFS = () => typeof window.showDirectoryPicker === 'function';
+async function escolherPasta(id) { return window.showDirectoryPicker({ id, mode: 'readwrite' }); }
+async function permissao(h, pedir = true) {
+  if (!h?.queryPermission) return true;
+  const o = { mode: 'readwrite' };
+  if (await h.queryPermission(o) === 'granted') return true;
+  return pedir ? (await h.requestPermission(o)) === 'granted' : false;
+}
+async function subpasta(raiz, caminho, criar = false) {
+  let d = raiz;
+  for (const p of caminho.filter(Boolean)) { try { d = await d.getDirectoryHandle(p, { create: criar }); } catch (e) { if (!criar && e.name === 'NotFoundError') return null; throw e; } }
+  return d;
+}
+async function lerTexto(dir, nome) {
+  try { const f = await (await dir.getFileHandle(nome)).getFile(); return await f.text(); }
+  catch (e) { if (e.name === 'NotFoundError' || e.name === 'TypeMismatchError') return null; throw e; }
+}
+async function existe(dir, nome) { try { await dir.getFileHandle(nome); return true; } catch { try { await dir.getDirectoryHandle(nome); return true; } catch { return false; } } }
+// Escrita atômica: createWritable grava num arquivo temporário e troca na hora do close().
+// Depois relê e confere o conteúdo, para nunca deixar um arquivo pela metade sem perceber.
+async function gravarSeguro(dir, nome, texto) {
+  const fh = await dir.getFileHandle(nome, { create: true });
+  const w = await fh.createWritable({ keepExistingData: false });
+  try { await w.write(texto); await w.close(); } catch (e) { try { await w.abort(); } catch {} throw e; }
+  const lido = await (await fh.getFile()).text();
+  if (lido !== texto) throw new Error(`A gravação de ${nome} não pôde ser confirmada. Tente de novo.`);
+}
+// Arquivo local: guarda as N últimas versões em backup/ (no máximo uma a cada 30 min).
+async function gravarLocal(dir, nome, texto, manter = 5, intervaloMin = 30) {
+  const atual = await lerTexto(dir, nome);
+  if (atual && atual !== texto) {
+    const bk = await subpasta(dir, ['backup'], true);
+    const base = nome.replace(/\.json$/, '');
+    const nomes = []; for await (const [n] of bk.entries()) if (n.startsWith(base + '.') && n.endsWith('.json')) nomes.push(n);
+    nomes.sort();
+    const ult = nomes.at(-1), ultTxt = ult ? await lerTexto(bk, ult) : null;
+    const mc = ult && /\.(\d{8}T\d{6})\.json$/.exec(ult), ultEm = mc ? Date.parse(mc[1].replace(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/, '$1-$2-$3T$4:$5:$6Z')) : 0;
+    if (ultTxt !== atual && Date.now() - ultEm > intervaloMin * 60000) {
+      const carimbo = new Date().toISOString().replace(/[-:]/g, '').slice(0, 15);
+      await gravarSeguro(bk, `${base}.${carimbo}.json`, atual); nomes.push(`${base}.${carimbo}.json`);
+    }
+    for (const n of nomes.slice(0, Math.max(0, nomes.length - manter))) { try { await bk.removeEntry(n); } catch {} }
+  }
+  await gravarSeguro(dir, nome, texto);
+}
+
+/* -------------------- cópias de conflito do OneDrive / SharePoint -------------------- */
+// O cliente do OneDrive não sobrescreve quando dois computadores gravam o mesmo arquivo:
+// renomeia um deles ("plano-NOTEBOOK01.json", "plano-NOTEBOOK01-2.json", "plano (1).json").
+const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const reCopia = (base, ext = '.json') => new RegExp('^' + escRe(base) + '(?:-[^\\\\/]+?| ?\\(\\d+\\))?' + escRe(ext) + '$', 'i');
+async function arquivosDoNome(dir, base, ext = '.json') {
+  const re = reCopia(base, ext), out = [];
+  for await (const [n, h] of dir.entries()) if (h.kind === 'file' && re.test(n)) out.push({ nome: n, principal: n === base + ext, handle: h });
+  return out.sort((a, b) => (b.principal - a.principal) || a.nome.localeCompare(b.nome));
+}
+// Lê o arquivo e todas as cópias, decifra e escolhe o mais novo (maior revisão; empate: HLC).
+// Arquivos que não decifram, de outro time ou de outro conteúdo são ignorados, sem derrubar nada.
+async function lerEnvelopes(dir, base, chaves, { team, content }) {
+  const res = { melhor: null, validos: [], invalidos: [], copias: [], conflito: false };
+  if (!dir) return res;
+  for (const a of await arquivosDoNome(dir, base)) {
+    let texto = null;
+    try { texto = await (await a.handle.getFile()).text(); } catch {}
+    let env = null, p = null, erro = null;
+    try { env = JSON.parse(texto); p = await decifrarEnv(env, chaves); } catch (e) { erro = e.message; }
+    if (p && (env.team !== team || p.source?.team !== team || p.schema !== content)) { if (!a.principal) continue; erro = 'Arquivo de outro time ou de outro tipo'; p = null; }
+    const item = { nome: a.nome, principal: a.principal, env, payload: p, erro };
+    if (!a.principal) res.copias.push(item);
+    if (p) res.validos.push(item); else res.invalidos.push(item);
+  }
+  res.validos.sort((x, y) => (y.payload.revision - x.payload.revision) || hlcCmp(y.payload.hlc, x.payload.hlc));
+  res.melhor = res.validos[0] || null;
+  res.conflito = res.copias.length > 0;
+  return res;
+}
+// Publica um arquivo de dono único (ex.: plano.json do time, diretriz-<time>.json do grupo).
+// 1) relê tudo (inclusive cópias); 2) recusa se o dono é outra pessoa ou outro computador,
+// a menos que o usuário assuma; 3) revisão = maior revisão vista + 1; 4) grava atômico e confere;
+// 5) apaga cópias de conflito que este mesmo dono pode reescrever (o retrato novo as substitui).
+async function publicarUnico({ dir, base, montar, chave, team, writer, assumir = false, ultimaRevisao = 0 }) {
+  const lido = await lerEnvelopes(dir, base, new Map([[chave.kid, chave.key]]), { team, content: montar.schema });
+  const dono = lido.melhor?.payload.source?.writer;
+  if (dono && dono !== writer && !assumir) {
+    const [pd] = dono.split('~'), [pw] = writer.split('~');
+    const e = new Error(pd === pw ? `Este arquivo foi publicado por você em outro computador (${dono}).` : `Este arquivo pertence a ${dono}.`);
+    e.code = pd === pw ? 'DISPOSITIVO' : 'DONO'; e.dono = dono; throw e;
+  }
+  const maxRev = Math.max(ultimaRevisao, ...lido.validos.map(v => v.payload.revision), ...lido.invalidos.map(v => +v.env?.revision || 0), 0);
+  const payload = montar.payload({ revision: maxRev + 1, generatedAt: isoComFuso(), hlc: hlcAgora(lido.melhor?.payload.hlc) });
+  payload.source = { ...(payload.source || {}), team, writer };
+  const env = await cifrarEnv(payload, { key: chave.key, kid: chave.kid, team });
+  const texto = JSON.stringify(env, null, 1);
+  await gravarSeguro(dir, base + '.json', texto);
+  const conf = await decifrarEnv(JSON.parse(await lerTexto(dir, base + '.json')), new Map([[chave.kid, chave.key]]));
+  if (conf.revision !== payload.revision) throw new Error('Outro computador gravou ao mesmo tempo. Leia a pasta e publique de novo.');
+  const removidas = [];
+  for (const c of lido.copias) {
+    const cd = c.payload?.source?.writer;
+    if (cd === writer || (assumir && c.payload && c.payload.revision <= payload.revision) || (!c.payload && c.erro && !c.env?.ct)) {
+      try { await dir.removeEntry(c.nome); removidas.push(c.nome); } catch {}
+    }
+  }
+  return { revision: payload.revision, generatedAt: payload.generatedAt, removidas, conflitos: lido.copias.length, payload };
+}
+// Aviso de "aberto em outro computador": arquivo pequeno renovado a cada minuto.
+// É só aviso (o atraso do OneDrive torna trava pouco confiável). Só ids e horário, sem dados.
+async function marcarAberto(dir, writer, ferramenta) {
+  if (!dir) return;
+  try { await gravarSeguro(dir, `.aberto-${writer.replace('~', '-')}.json`, JSON.stringify({ writer, ferramenta, ate: Date.now() + 3 * 60000 })); } catch {}
+}
+async function abertosEmOutros(dir, writer) {
+  const out = []; if (!dir) return out;
+  try {
+    for await (const [n, h] of dir.entries()) {
+      if (h.kind !== 'file' || !/^\.aberto-.*\.json$/.test(n)) continue;
+      try { const o = JSON.parse(await (await h.getFile()).text()); if (o.writer !== writer && o.ate > Date.now()) out.push(o); } catch {}
+    }
+  } catch {}
+  return out;
+}
+async function desmarcarAberto(dir, writer) { try { await dir?.removeEntry(`.aberto-${writer.replace('~', '-')}.json`); } catch {} }
+
+/* ------------------------------- interface comum ------------------------------- */
+function toast(msg, ms = 3400) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), ms); }
+function dlg() { let d = $('#dlg'); if (!d) { d = document.createElement('dialog'); d.id = 'dlg'; document.body.appendChild(d); } return d; }
+function modal(html, cls = '') { const d = dlg(); d.className = cls; d.innerHTML = html; if (!d.open) d.showModal(); return d; }
+function fecharModal() { const d = dlg(); if (d.open) d.close(); }
+// O evento "close" chega depois, numa tarefa separada: se outro diálogo já abriu no lugar,
+// o evento antigo é ignorado (d.open de novo verdadeiro).
+function aoFechar(d, fn) { d.addEventListener('close', function h() { if (d.open) return; d.removeEventListener('close', h); fn(); }); }
+function perguntar(titulo, html, botoes = [['ok', 'OK', 'pri']], cls = '') {
+  return new Promise(ok => {
+    const d = modal(`<div class="mh"><h2>${esc(titulo)}</h2></div><div class="mb">${html}</div><div class="mf">${botoes.map(([v, t, c]) => `<button class="btn ${c || ''}" data-r="${v}">${esc(t)}</button>`).join('')}</div>`, cls);
+    let feito = false;
+    const fim = v => { feito = true; fecharModal(); ok(v); };
+    aoFechar(d, () => { if (!feito) ok(null); });
+    $$('[data-r]', d).forEach(b => b.onclick = () => { const v = b.dataset.r; if (v !== 'no' && d._validar && !d._validar(v)) return; fim(v); });
+  });
+}
+
+// Aviso de senha e cofre. tipo: 'senha' (arquivo local) | 'chave' (chave de time) | 'html' (HTML gerado com chave)
+const TEXTO_COFRE = {
+  senha: '<b>Esta senha é a única forma de abrir seus dados.</b> Ela não fica guardada em lugar nenhum e ninguém, nem quem fez a ferramenta, consegue recuperá-la. Se você esquecer, os dados se perdem.<br><br><b>Guarde agora num cofre de senhas</b> (por exemplo, o gerenciador de senhas da empresa) antes de continuar.',
+  chave: '<b>Esta chave abre os arquivos do time na pasta compartilhada.</b> Quem tiver a chave lê e publica em nome do time.<br><br><b>Guarde no cofre de senhas</b> e envie ao responsável do time só por mensagem direta no Teams ou por e-mail. <b>Nunca</b> coloque a chave na pasta compartilhada.',
+  html: '<b>Este HTML leva a chave do time embutida.</b> Trate o arquivo como uma senha: envie só ao responsável do time, por mensagem direta ou e-mail, e nunca o deixe na pasta compartilhada.<br><br>Peça para a pessoa <b>guardar a chave no cofre de senhas</b> ao abrir a ferramenta pela primeira vez.'
+};
+async function avisoCofre(tipo = 'senha', extra = '') {
+  const d = modal(`<div class="mh"><h2>Guarde no cofre antes de seguir</h2></div><div class="mb">
+    <div class="cofre">${TEXTO_COFRE[tipo]}</div>${extra}
+    <label class="row" style="margin-top:10px"><input type="checkbox" id="cofreOk"> <span>Já guardei no cofre de senhas</span></label></div>
+    <div class="mf"><button class="btn" data-r="no">Voltar</button><button class="btn pri" data-r="ok" disabled id="cofreBtn">Continuar</button></div>`);
+  $('#cofreOk', d).onchange = e => $('#cofreBtn', d).disabled = !e.target.checked;
+  return new Promise(ok => { $$('[data-r]', d).forEach(b => b.onclick = () => { fecharModal(); ok(b.dataset.r === 'ok'); }); aoFechar(d, () => ok(false)); });
+}
+// Cria a senha do arquivo local: força mínima, confirmação, gerador e aviso do cofre.
+function criarSenhaDlg(titulo = 'Crie a senha do arquivo') {
+  return new Promise(ok => {
+    const d = modal(`<div class="mh"><h2>${esc(titulo)}</h2></div><div class="mb">
+      <p class="muted small" style="margin-top:0">Todos os dados ficam cifrados com esta senha. Não existe arquivo sem senha.</p>
+      <label class="field"><span>Senha</span><input class="sin" type="password" id="s1" autocomplete="new-password"></label>
+      <label class="field"><span>Repita a senha</span><input class="sin" type="password" id="s2" autocomplete="new-password"></label>
+      <div class="row"><button class="btn sm" id="sGer">Gerar senha forte</button><span class="small muted" id="sMsg"></span></div>
+      <div class="small code" id="sMostra" style="margin-top:8px"></div></div>
+      <div class="mf"><button class="btn" id="sNo">Cancelar</button><button class="btn pri" id="sOk">Continuar</button></div>`);
+    const msg = t => $('#sMsg', d).innerHTML = t;
+    $('#s1', d).oninput = () => { const f = forcaSenha($('#s1', d).value); msg(`<span class="${f.ok ? 'okc' : 'latec'}">${f.msg}</span>`); };
+    $('#sGer', d).onclick = () => { const s = gerarSenhaForte(); $('#s1', d).value = $('#s2', d).value = s; $('#sMostra', d).textContent = 'Senha gerada: ' + s; msg('<span class="okc">Copie para o cofre agora.</span>'); };
+    let fim = false;
+    $('#sNo', d).onclick = () => { fim = true; fecharModal(); ok(null); };
+    $('#sOk', d).onclick = async () => {
+      const a = $('#s1', d).value, b = $('#s2', d).value, f = forcaSenha(a);
+      if (!f.ok) return msg(`<span class="latec">${f.msg}</span>`);
+      if (a !== b) return msg('<span class="latec">As duas senhas não são iguais.</span>');
+      fim = true; fecharModal();
+      ok(await avisoCofre('senha') ? a : null);
+    };
+    aoFechar(d, () => { if (!fim) ok(null); });
+  });
+}
+function pedirSenhaDlg(titulo, errou) {
+  return new Promise(ok => {
+    const d = modal(`<div class="mh"><h2>${esc(titulo)}</h2></div><div class="mb">${errou ? '<p class="latec small" style="margin-top:0">Senha incorreta.</p>' : ''}
+      <label class="field"><span>Senha</span><input class="sin" type="password" id="pw" autocomplete="current-password"></label>
+      <p class="small muted">Esqueceu? A senha está no seu cofre de senhas. Sem ela não há como abrir o arquivo.</p></div>
+      <div class="mf"><button class="btn" data-r="no">Cancelar</button><button class="btn pri" data-r="ok">Abrir</button></div>`);
+    let fim = false;
+    const go = v => { fim = true; const s = $('#pw', d).value; fecharModal(); ok(v === 'ok' ? s : null); };
+    $$('[data-r]', d).forEach(b => b.onclick = () => go(b.dataset.r));
+    $('#pw', d).onkeydown = e => { if (e.key === 'Enter') go('ok'); };
+    setTimeout(() => $('#pw', d)?.focus(), 30);
+    aoFechar(d, () => { if (!fim) ok(null); });
+  });
+}
+// Lembrete periódico: 30 dias após criar e depois a cada 90, pede a senha uma vez.
+// seg = { cofreConfirmadoEm, ultimoTesteEm }. Retorna true se o estado mudou.
+async function lembreteTesteSenha(seg, ctx) {
+  const base = seg.ultimoTesteEm || seg.cofreConfirmadoEm; if (!base) return false;
+  const dias = (Date.now() - new Date(base).getTime()) / 864e5, limite = seg.ultimoTesteEm ? 90 : 30;
+  if (dias < limite) return false;
+  for (let i = 0; i < 2; i++) {
+    const s = await pedirSenhaDlg('Confirme que a senha está no cofre', i > 0);
+    if (s == null) { toast('Lembrete adiado para amanhã.'); seg.ultimoTesteEm = new Date(Date.now() - (limite - 1) * 864e5).toISOString(); return true; }
+    if (await senhaConfere(s, ctx)) { seg.ultimoTesteEm = new Date().toISOString(); toast('Senha confirmada. Próximo lembrete em 90 dias.'); return true; }
+  }
+  await perguntar('Senha não confere', '<div class="cofre">Você não lembrou a senha. Enquanto o arquivo ainda está aberto, <b>troque a senha</b> (Ajustes › Trocar senha) e guarde a nova no cofre.</div>');
+  return false;
+}
+
+// "Onde estou?": qual ferramenta é esta, qual arquivo está aberto, o que é local e o que é comum.
+const FERRAMENTAS = [
+  ['Início da solução', 'inicio.html', 'Assistente: pergunta o uso, cria o primeiro arquivo e gera os HTMLs.'],
+  ['Finanças do Grupo', 'financas_grupo.html', 'Consolidado: soma os planos publicados pelos times. Uso do gestor.'],
+  ['Finanças do Time', 'financas_<time>.html', 'Dia a dia e futuro das finanças de um time. Publica o plano para o grupo.'],
+  ['Central de Gestão', 'gestao_pessoal_vNN.html', 'Tarefas consolidado: gestão do gestor, iniciativas e times.'],
+  ['Quadro do Time', 'quadro_<time>.html', 'Tarefas de um time: quadro, backlog, sprints e métricas.']
+];
+function ondeEstou(info) {
+  const lin = (k, v) => `<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line);padding:6px 0"><span class="muted">${k}</span><b style="text-align:right">${v}</b></div>`;
+  modal(`<div class="mh"><h2>Onde estou?</h2></div><div class="mb">
+    ${lin('Ferramenta', esc(info.ferramenta) + ` <span class="faint small">${esc(info.versao)}</span>`)}
+    ${lin('Arquivo aberto (local)', info.arquivo ? `<span class="code">${esc(info.arquivo)}</span>` : '<span class="faint">nenhum</span>')}
+    ${lin('Pasta local', info.pastaLocal ? `<span class="code">${esc(info.pastaLocal)}</span>` : '<span class="faint">não escolhida</span>')}
+    ${lin('Pasta sincronizada (OneDrive)', info.pastaComum ? `<span class="code">${esc(info.pastaComum)}</span>` : '<span class="faint">não ligada</span>')}
+    ${lin('Você neste computador', `<span class="code">${esc(info.writer || '')}</span>`)}
+    <div class="map" style="margin-top:14px">
+      <div><h4>Fica só neste computador</h4>${info.local.map(x => '• ' + esc(x)).join('<br>')}</div>
+      <div><h4>Vai para a pasta sincronizada</h4>${info.comum.map(x => '• ' + esc(x)).join('<br>')}</div>
+    </div>
+    <p class="lbl" style="margin-top:16px">Ferramentas da solução</p>
+    ${FERRAMENTAS.map(([n, a, d]) => `<div class="al"><span class="dot ${n === info.ferramenta ? '' : 'late'}" style="${n === info.ferramenta ? '' : 'background:var(--faint)'}"></span><div><b>${esc(n)}</b> <span class="code faint">${esc(a)}</span>${n === info.ferramenta ? ' <span class="chip bv">você está aqui</span>' : ''}<br><span class="muted">${esc(d)}</span></div></div>`).join('')}
+    <p class="small muted">Os HTMLs não guardam dados: podem ser trocados por versões novas. Os dados ficam nos arquivos cifrados.</p>
+    </div><div class="mf"><button class="btn pri" onclick="fecharModal()">Fechar</button></div>`, 'wide');
+}
+
+/* ----------------------- HTML embutido e pré-configuração ----------------------- */
+async function lerEmbutido(id) {
+  const el = document.getElementById(id); if (!el) throw new Error('HTML embutido não encontrado: ' + id);
+  const bytes = b64.dec(el.textContent.trim());
+  const s = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+  return await new Response(s).text();
+}
+// Troca o bloco entre /*<MARCA>*/ e /*FIM-<MARCA>*/ por um JSON (escapado para <script>).
+function aplicarPreset(html, marca, obj) {
+  const ini = `/*${marca}*/`, fim = `/*FIM-${marca}*/`, i = html.indexOf(ini), j = html.indexOf(fim);
+  if (i < 0 || j < i) throw new Error('O HTML não tem o marcador de pré-configuração ' + marca);
+  const json = JSON.stringify(obj).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+  return html.slice(0, i + ini.length) + json + html.slice(j);
+}
+function baixar(nome, texto, tipo = 'application/json') {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([texto], { type: tipo })); a.download = nome; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+}
+// Nome sugerido da pasta comum (aceita o nome antigo durante a transição)
+const PASTA_COMUM = 'Gestao-Compartilhado', PASTA_COMUM_ANTIGA = 'Gestao-Integracao';
+async function validarPastaComum(raiz) {
+  const tem = await existe(raiz, 'times') || await existe(raiz, 'grupo') || await existe(raiz, 'central');
+  const nomeOk = [PASTA_COMUM, PASTA_COMUM_ANTIGA].includes(raiz.name);
+  return { tem, nomeOk };
+}
+// Checagens indiretas de que a pasta "local" não está sincronizada (o navegador não mostra o caminho).
+async function suspeitaDeSincronizada(dir) {
+  const sinais = [];
+  if ([PASTA_COMUM, PASTA_COMUM_ANTIGA].includes(dir.name)) sinais.push('tem o nome da pasta compartilhada');
+  if (/onedrive|sharepoint/i.test(dir.name)) sinais.push('o nome lembra OneDrive/SharePoint');
+  try { for await (const [n] of dir.entries()) { if (/^desktop\.ini$/i.test(n)) sinais.push('tem desktop.ini'); if (n === 'times' || n === 'grupo') sinais.push('tem a estrutura da pasta compartilhada'); } } catch {}
+  return [...new Set(sinais)];
+}
+
+</script>
+<script>
+/* =====================================================================
+   Finanças do Grupo · consolidado dos planos publicados pelos times
+   Soma os JSONs times/<time>/financas/plano.json (nunca altera o número de um time),
+   compara com o orçamento do grupo e publica diretrizes grupo/financas/diretriz-<time>.json.
+   Orçamento aprovado, itens do grupo, chaves e versões ficam no arquivo local cifrado.
+   ===================================================================== */
+const TOOL = 'financas-grupo', TOOL_NOME = 'Finanças do Grupo', TOOL_VERSION = '1.0.0';
+const LOCAL_SCHEMA = 'gestao-financas-local/1', PLANO_SCHEMA = 'gestao-financas-plano/1', DIRETRIZ_SCHEMA = 'gestao-financas-diretriz/1';
+const PRESET = /*FING-PRESET*/null/*FIM-FING-PRESET*/;
+const CATS_PADRAO = [
+  ['pessoas', 'Pessoas', 'OPEX'], ['terceiros', 'Terceiros e consultoria', 'OPEX'], ['licencas', 'Licenças e software', 'OPEX'],
+  ['nuvem', 'Nuvem e infraestrutura', 'OPEX'], ['viagens', 'Viagens e eventos', 'OPEX'], ['treinamento', 'Treinamento', 'OPEX'],
+  ['equipamentos', 'Equipamentos', 'CAPEX'], ['desenvolvimento', 'Desenvolvimento capitalizável', 'CAPEX'], ['outras', 'Outras', 'OPEX']
+].map(([id, nome, tipo]) => ({ id, nome, tipo }));
+
+let db = null, ctx = null, dirLocal = null, arquivo = '', raiz = null;
+let view = 'consolidado', pendentes = [], saude = {}, salvarT = null, salvando = false, sujo = false, verVersao = '', agrupar = 'time';
+
+function novoDb({ nome, ano, moeda, pessoa }) {
+  return { schema: LOCAL_SCHEMA, version: 1, tool: TOOL, criadoEm: new Date().toISOString(), grupo: { nome, slug: slugify(nome) }, ano: +ano, moeda,
+    pessoa: { nome: pessoa, slug: slugify(pessoa).split('-')[0] || 'gestor' }, categorias: CATS_PADRAO.map(c => ({ ...c })), centros: [],
+    orcamento: { total: 0, nota: '' }, itens: [], times: [], retratos: {}, versoes: [], seg: {} };
+}
+function normalizar(d) {
+  if (d?.schema !== LOCAL_SCHEMA || d.tool !== TOOL) throw new Error('Este arquivo não é das Finanças do Grupo.');
+  d.categorias ??= CATS_PADRAO.map(c => ({ ...c })); d.centros ??= []; d.orcamento ??= { total: 0 }; d.itens ??= []; d.times ??= []; d.retratos ??= {}; d.versoes ??= []; d.seg ??= {};
+  for (const t of d.times) { t.chaves ??= []; t.teto ??= { total: 0, caps: {} }; t.diretriz ??= {}; }
+  return d;
+}
+const writer = () => `${db.pessoa.slug}~${dispositivo().id}`;
+const fm = c => fmtMoeda(c, db.moeda);
+const catPorId = id => db.categorias.find(c => c.id === id);
+const timePorSlug = s => db.times.find(t => t.slug === s);
+const mesesAno = () => mesesDoAno(db.ano);
+const ytd = () => mesesAno().filter(m => m <= mesAtual());
+
+/* --------------------------- soma dos planos --------------------------- */
+// Um retrato só entra na soma se for do mesmo ano fiscal e da mesma moeda do grupo.
+function somavel(p) { return p && p.fiscalYear === db.ano && p.currency === db.moeda; }
+function totaisPlano(p, meses = mesesAno(), filtro = () => true) {
+  const t = { orcado: 0, previsto: 0, realizado: 0 };
+  if (!p) return t;
+  for (const l of p.lines || []) { if (!filtro(l)) continue; for (const m of meses) { const v = l.months?.[m]; if (!v) continue; t.orcado += +v.budget || 0; t.previsto += +v.forecast || 0; t.realizado += +v.actual || 0; } }
+  return t;
+}
+function totaisItens(meses = mesesAno(), filtro = () => true) {
+  const t = { orcado: 0, previsto: 0, realizado: 0 };
+  for (const i of db.itens.filter(filtro)) for (const m of meses) { t.orcado += i.orcado?.[m] || 0; t.previsto += i.previsto?.[m] ?? i.orcado?.[m] ?? 0; t.realizado += i.realizado?.[m] || 0; }
+  return t;
+}
+const soma = (...ts) => ts.reduce((a, b) => ({ orcado: a.orcado + b.orcado, previsto: a.previsto + b.previsto, realizado: a.realizado + b.realizado }), { orcado: 0, previsto: 0, realizado: 0 });
+function consolidado(meses = mesesAno()) {
+  const porTime = db.times.map(t => { const r = db.retratos[t.slug]; return { t, r, ok: somavel(r?.payload), tot: somavel(r?.payload) ? totaisPlano(r.payload, meses) : { orcado: 0, previsto: 0, realizado: 0 } }; });
+  return { porTime, itens: totaisItens(meses), total: soma(...porTime.map(x => x.tot), totaisItens(meses)) };
+}
+function linhasTodas() {
+  const out = [];
+  for (const t of db.times) { const p = db.retratos[t.slug]?.payload; if (!somavel(p)) continue; for (const l of p.lines || []) out.push({ time: t, l }); }
+  return out;
+}
+
+/* -------------------------------- arquivo -------------------------------- */
+function agendarSalvar() { sujo = true; clearTimeout(salvarT); salvarT = setTimeout(salvar, 1200); render(); }
+async function salvar() {
+  if (!db || !ctx || !dirLocal || salvando) return;
+  salvando = true;
+  try { await gravarLocal(dirLocal, arquivo, await cifrarLocal(db, ctx)); sujo = false; } catch (e) { toast('Não foi possível salvar: ' + e.message, 6000); }
+  finally { salvando = false; renderTopo(); }
+}
+window.addEventListener('beforeunload', e => { if (db && sujo) { salvar(); e.preventDefault(); e.returnValue = ''; } });
+async function chavesDoTime(t) {
+  const m = new Map();
+  for (const c of t.chaves.filter(c => !c.revogada)) { try { const k = lerChaveTexto(c.texto); m.set(k.kid, await importarChave(k.raw)); } catch {} }
+  return m;
+}
+const chaveAtualTexto = t => t.chaves.filter(c => !c.revogada).at(-1);
+
+/* -------------------------- pasta sincronizada -------------------------- */
+let pollT = null;
+async function ligarPasta(h, silencioso = false) {
+  if (!await permissao(h, !silencioso)) return false;
+  const v = await validarPastaComum(h);
+  if (!v.tem && !silencioso) {
+    const r = await perguntar('Esta é a pasta compartilhada?', `<p>A pasta <b class="code">${esc(h.name)}</b> ainda não tem a estrutura da solução.</p><p class="muted small">Recomendado: uma biblioteca do SharePoint do grupo, sincronizada pelo OneDrive, chamada <span class="code">${PASTA_COMUM}</span>. Se for esta, a ferramenta cria <span class="code">grupo/financas/</span> e <span class="code">times/</span>.</p>`, [['no', 'Escolher outra'], ['ok', 'É esta, criar', 'pri']]);
+    if (r !== 'ok') return false;
+  }
+  raiz = h; await subpasta(raiz, ['grupo', 'financas'], true); await subpasta(raiz, ['times'], true);
+  if (!await lerTexto(raiz, 'LEIA-ME.md')) { try { await gravarSeguro(raiz, 'LEIA-ME.md', LEIA_ME()); } catch {} }
+  db.pastaComum = h.name; agendarSalvar();
+  if (!navigator.webdriver) kv.set('fin-grupo-raiz:' + db.grupo.slug, h);
+  clearInterval(pollT); pollT = setInterval(() => lerPasta(true), 60000);
+  await lerPasta(silencioso);
+  return true;
+}
+const LEIA_ME = () => `# ${PASTA_COMUM}\n\nPasta compartilhada da solução de gestão (sincronizada pelo OneDrive). **Tudo aqui é cifrado**; não há chaves nem senhas nesta pasta.\n\n- grupo/financas/diretriz-<time>.json: só a ferramenta Finanças do Grupo escreve.\n- times/<time>/financas/plano.json: só o responsável financeiro do time escreve.\n- Arquivos com nome de computador no final (ex.: plano-NOTEBOOK01.json) são cópias de conflito do OneDrive: as ferramentas resolvem sozinhas.\n- Não edite nem renomeie os arquivos à mão.\n`;
+document.addEventListener('visibilitychange', () => { if (!document.hidden && raiz) lerPasta(true); });
+async function lerPasta(silencioso = false) {
+  if (!raiz) return;
+  pendentes = []; saude = {};
+  for (const t of db.times) {
+    const s = saude[t.slug] = { avisos: [], copias: [] };
+    const ch = await chavesDoTime(t);
+    if (!ch.size) { s.avisos.push('sem chave de finanças'); continue; }
+    const dir = await subpasta(raiz, ['times', t.slug, 'financas'], false);
+    if (!dir) { s.avisos.push('ainda não publicou'); continue; }
+    const r = await lerEnvelopes(dir, 'plano', ch, { team: t.slug, content: PLANO_SCHEMA });
+    s.copias = r.copias.map(c => c.nome);
+    if (r.copias.length) s.avisos.push(`${r.copias.length} cópia(s) de conflito do OneDrive (vale a de maior revisão)`);
+    const inval = r.invalidos.find(x => x.principal);
+    if (inval && !r.melhor) s.avisos.push('arquivo não abre: ' + inval.erro);
+    if (!r.melhor) { if (!inval) s.avisos.push('ainda não publicou'); continue; }
+    const p = r.melhor.payload, atual = db.retratos[t.slug]?.payload;
+    if (atual && p.revision < atual.revision) { s.avisos.push(`arquivo na pasta (rev. ${p.revision}) é mais antigo que o já lido (rev. ${atual.revision}): ignorado`); continue; }
+    if (atual && p.revision === atual.revision && p.generatedAt === atual.generatedAt) continue;
+    if (p.fiscalYear !== db.ano) s.avisos.push(`plano do ano ${p.fiscalYear} (grupo está em ${db.ano}): não entra na soma`);
+    if (p.currency !== db.moeda) s.avisos.push(`moeda ${p.currency} diferente de ${db.moeda}: não entra na soma`);
+    pendentes.push({ t, p, de: r.melhor.nome });
+  }
+  for (const t of db.times) {
+    const r = db.retratos[t.slug]; if (!r) continue; const s = saude[t.slug] ??= { avisos: [] };
+    const dias = (Date.now() - new Date(r.payload.generatedAt).getTime()) / 864e5;
+    if (dias > 35) s.avisos.push(`plano sem atualização há ${Math.floor(dias)} dias`);
+    const fora = (r.payload.lines || []).filter(l => !catPorId(l.category)).length;
+    if (fora) s.avisos.push(`${fora} linha(s) com categoria fora da lista do grupo (somadas em "Outras")`);
+  }
+  if (!silencioso) toast(pendentes.length ? `${pendentes.length} plano(s) novo(s) para revisar.` : 'Pasta lida. Nada novo.');
+  render();
+}
+function diffPlano(antes, depois) {
+  const a = totaisPlano(antes), b = totaisPlano(depois), out = [];
+  const porLinha = p => Object.fromEntries((p?.lines || []).map(l => [l.id, l]));
+  const la = porLinha(antes), lb = porLinha(depois), anual = l => { let s = 0; for (const m of mesesAno()) s += +l?.months?.[m]?.forecast || 0; return s; };
+  for (const id of new Set([...Object.keys(la), ...Object.keys(lb)])) {
+    const va = anual(la[id]), vb = anual(lb[id]);
+    if (!la[id]) out.push(`nova linha "${lb[id].name}" (${fm(vb)} no ano)`);
+    else if (!lb[id]) out.push(`linha removida "${la[id].name}" (${fm(va)})`);
+    else if (va !== vb) out.push(`"${lb[id].name}": previsto ${fm(va)} → ${fm(vb)}`);
+  }
+  const fechAntes = antes?.closedMonths || [], novos = (depois.closedMonths || []).filter(m => !fechAntes.includes(m));
+  if (novos.length) out.push(`fechou ${novos.map(nomeMes).join(', ')}`);
+  return { a, b, linhas: out };
+}
+function aplicar(slug) {
+  for (const x of pendentes.filter(x => !slug || x.t.slug === slug)) db.retratos[x.t.slug] = { payload: x.p, lidoEm: new Date().toISOString(), de: x.de };
+  pendentes = pendentes.filter(x => slug && x.t.slug !== slug);
+  agendarSalvar(); toast('Consolidado atualizado.');
+}
+
+/* -------------------------- diretrizes e chaves -------------------------- */
+function montarDiretriz(t, meta) {
+  return { schema: DIRETRIZ_SCHEMA, ...meta, source: { group: db.grupo.slug, tool: TOOL, toolVersion: TOOL_VERSION },
+    team: { name: t.nome, slug: t.slug }, fiscalYear: db.ano, currency: db.moeda,
+    categories: db.categorias.map(c => ({ id: c.id, name: c.nome, kind: c.tipo })), costCenters: db.centros,
+    caps: Object.fromEntries(Object.entries(t.teto.caps || {}).filter(([, v]) => v > 0)), capTotal: t.teto.total || undefined,
+    planVersion: db.versaoAtual || 'Orçamento original', publishBy: t.publishBy || undefined, closingDay: db.diaFechamento || undefined, note: t.nota ? clamp(t.nota, 500) : undefined };
+}
+async function publicarDiretriz(t, assumir = false) {
+  if (!raiz) return toast('Ligue a pasta sincronizada primeiro.');
+  const c = chaveAtualTexto(t); if (!c) return toast(`Gere a chave de finanças do time ${t.nome} primeiro.`);
+  const k = lerChaveTexto(c.texto), dir = await subpasta(raiz, ['grupo', 'financas'], true);
+  try {
+    const r = await publicarUnico({ dir, base: `diretriz-${t.slug}`, chave: { kid: k.kid, key: await importarChave(k.raw) }, team: t.slug, writer: writer(), assumir, ultimaRevisao: t.diretriz.revision || 0,
+      montar: { schema: DIRETRIZ_SCHEMA, payload: meta => montarDiretriz(t, meta) } });
+    t.diretriz = { revision: r.revision, em: r.generatedAt }; agendarSalvar();
+    toast(`Diretriz publicada para ${t.nome} (revisão ${r.revision}).`);
+  } catch (e) {
+    if ((e.code === 'DONO' || e.code === 'DISPOSITIVO') && await perguntar('Assumir a publicação?', `<p>${esc(e.message)}</p><p class="small muted">Cada arquivo comum tem um único dono. Assuma só se você trocou de computador ou combinou com o outro dono.</p>`, [['no', 'Cancelar'], ['ok', 'Assumir e publicar', 'pri']]) === 'ok') return publicarDiretriz(t, true);
+    if (e.code !== 'DONO' && e.code !== 'DISPOSITIVO') toast('Não foi possível publicar: ' + e.message, 6000);
+  }
+}
+async function gerarChave(t) {
+  const kid = `${t.slug}-fin-${String(new Date().getFullYear()).slice(2)}${pad2(new Date().getMonth() + 1)}`;
+  const kidFinal = t.chaves.some(c => c.kid === kid) ? kid + '-' + (t.chaves.length + 1) : kid;
+  const texto = gerarChaveTexto(kidFinal);
+  if (!await avisoCofre('chave', `<p class="small">Chave de finanças do time <b>${esc(t.nome)}</b> (diferente da chave de tarefas e da sua senha):</p><input class="sin code" style="width:100%" readonly value="${esc(texto)}" onclick="this.select()"><div class="row" style="margin-top:6px"><button class="btn sm" onclick="navigator.clipboard?.writeText('${texto}');toast('Chave copiada.')">Copiar</button></div>`)) return false;
+  t.chaves.push({ kid: kidFinal, texto, em: new Date().toISOString() }); agendarSalvar();
+  return true;
+}
+async function revogarChave(t) {
+  if (await perguntar('Revogar a chave?', `<div class="cofre">Use só se a chave vazou. Arquivos com a chave antiga deixam de ser aceitos na hora. Você vai gerar uma nova e enviar ao time, e o time publica de novo.</div>`, [['no', 'Cancelar'], ['ok', 'Revogar e gerar nova', 'danger']]) !== 'ok') return;
+  for (const c of t.chaves) c.revogada = c.revogada || new Date().toISOString();
+  if (await gerarChave(t) && raiz) await publicarDiretriz(t);
+}
+async function htmlDoTime(t) {
+  const c = chaveAtualTexto(t);
+  const r = await perguntar(`Finanças do Time para ${t.nome}`, `<p>Gera o HTML das Finanças do Time já configurado para <b>${esc(t.nome)}</b> (nome, identificador, ano, moeda, categorias e centros de custo do grupo).</p>
+    <label class="row"><input type="checkbox" id="hCh" ${c ? '' : 'disabled'}> <span>Incluir a chave de finanças do time no HTML ${c ? '' : '<span class="faint">(gere a chave antes)</span>'}</span></label>
+    <p class="small muted">Sem a chave, o responsável cola a chave que você enviar por mensagem direta. Com a chave, o arquivo vira um segredo e deve ir só por mensagem direta ou e-mail.</p>`, [['no', 'Cancelar'], ['ok', 'Gerar HTML', 'pri']]);
+  if (r !== 'ok') return;
+  const comChave = !!document.getElementById('hCh')?.checked;
+  return gerarHtmlTime(t, comChave);
+}
+async function gerarHtmlTime(t, comChave) {
+  if (comChave && !await avisoCofre('html')) return;
+  const c = chaveAtualTexto(t);
+  const preset = { schema: 'financas-preset/1', team: { nome: t.nome, slug: t.slug, prefixo: t.prefixo || '' }, ano: db.ano, moeda: db.moeda,
+    categorias: db.categorias.map(x => ({ id: x.id, nome: x.nome, tipo: x.tipo })), centros: db.centros, pasta: db.pastaComum || PASTA_COMUM, chave: comChave && c ? c.texto : undefined, contato: db.pessoa.nome, geradoEm: new Date().toISOString() };
+  let html; try { html = aplicarPreset(await lerEmbutido('finTimeEmb'), 'FIN-PRESET', preset); } catch (e) { return toast(e.message, 6000); }
+  baixar(`financas_${t.slug}.html`, html, 'text/html');
+  toast(comChave ? 'HTML baixado com a chave. Envie só por mensagem direta.' : 'HTML baixado. Envie a chave separadamente por mensagem direta.', 6000);
+}
+
+/* ------------------------------- interface ------------------------------- */
+const ICONES = {
+  consolidado: '<svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>',
+  revisar: '<svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>',
+  times: '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5M17 11a3 3 0 1 0 0-6M21 20c0-2.5-1.5-4-4-4.6"/></svg>',
+  versoes: '<svg viewBox="0 0 24 24"><path d="M12 8v5l3 2"/><circle cx="12" cy="12" r="9"/></svg>',
+  ajustes: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>'
+};
+const NAV = [['consolidado', 'Consolidado'], ['revisar', 'Ler pasta'], ['times', 'Times'], ['versoes', 'Versões'], ['ajustes', 'Ajustes']];
+function render() {
+  if (!db) return;
+  $('#app').innerHTML = `<nav class="rail"><div class="logo">GRP</div>${NAV.map(([k, n]) => `<button class="nv ${view === k ? 'on' : ''}" data-v="${k}">${ICONES[k]}${n}${k === 'revisar' && pendentes.length ? `<span class="b">${pendentes.length}</span>` : ''}</button>`).join('')}</nav>
+    <main class="main"><header class="top" id="topo"></header><div id="pg"></div></main>`;
+  $$('.nv').forEach(b => b.onclick = () => { view = b.dataset.v; render(); });
+  renderTopo();
+  ({ consolidado: vCons, revisar: vRevisar, times: vTimes, versoes: vVersoes, ajustes: vAjustes })[view]($('#pg'));
+}
+function renderTopo() {
+  const t = $('#topo'); if (!t) return;
+  t.innerHTML = `<div><h1>${esc(NAV.find(n => n[0] === view)[1])}</h1><div class="sub">${esc(db.grupo.nome)} · ${db.ano} · ${esc(db.moeda)}</div></div><span class="grow"></span>
+    <span class="pill"><span class="led ${sujo || salvando ? 'wait' : ''}"></span>${sujo || salvando ? 'Salvando…' : 'Salvo e cifrado'}</span>
+    <button class="pill" id="tPasta"><span class="led ${raiz ? '' : 'wait'}"></span>${raiz ? 'Pasta ligada' : 'Ligar pasta'}</button>
+    ${raiz ? '<button class="btn" id="tLer">Ler pasta</button>' : ''}<button class="btn ghost" id="tOnde">Onde estou?</button>`;
+  $('#tPasta').onclick = async () => { try { await ligarPasta(await escolherPasta('fin-comum')); } catch (e) { if (e.name !== 'AbortError') toast(e.message); } };
+  if ($('#tLer')) $('#tLer').onclick = () => lerPasta();
+  $('#tOnde').onclick = () => ondeEstou({ ferramenta: TOOL_NOME, versao: TOOL_VERSION, arquivo, pastaLocal: dirLocal?.name, pastaComum: raiz?.name, writer: writer(),
+    local: ['Orçamento aprovado do grupo e itens do grupo', 'Chaves de finanças de cada time', 'Retratos lidos dos times e versões do plano', 'Cópias de segurança em backup/'],
+    comum: ['grupo/financas/diretriz-<time>.json (tetos, categorias, prazos)', 'Leitura de times/<time>/financas/plano.json'] });
+}
+const kpi = (r, v, c = '') => `<div class="kpi ${c}"><span>${r}</span><b>${v}</b></div>`;
+
+/* --- Consolidado --- */
+function vCons(el) {
+  const c = consolidado(), y = consolidado(ytd()), orc = db.orcamento.total || 0;
+  const semPlano = db.times.filter(t => !db.retratos[t.slug]);
+  const dims = { time: 'Por time', categoria: 'Por categoria', iniciativa: 'Por iniciativa', tipo: 'OPEX × CAPEX' };
+  el.innerHTML = `${pendentes.length ? `<div class="banner">${pendentes.length} plano(s) novo(s) na pasta. <button class="btn sm pri" id="cRev">Revisar</button></div>` : ''}
+    ${semPlano.length && db.times.length ? `<div class="banner warn">Sem plano: ${semPlano.map(t => esc(t.nome)).join(', ')}.</div>` : ''}
+    <div class="kpis">${kpi('Orçamento aprovado do grupo', orc ? fm(orc) : '<span class="faint">definir</span>')}${kpi('Orçado (times + grupo)', fm(c.total.orcado), orc && c.total.orcado > orc ? 'alert' : '')}
+      ${kpi('Previsto no ano', fm(c.total.previsto), orc && c.total.previsto > orc ? 'alert' : '')}${kpi('Realizado até ' + nomeMes(mesAtual()), fm(y.total.realizado))}
+      ${kpi('Saldo previsto', orc ? fm(orc - c.total.previsto) : '—', orc && orc - c.total.previsto < 0 ? 'alert' : '')}</div>
+    <div class="card"><div class="row"><div class="sg">${Object.entries(dims).map(([k, n]) => `<button class="${agrupar === k ? 'on' : ''}" data-g="${k}">${n}</button>`).join('')}</div><span class="grow"></span><button class="btn sm" id="cCsv">Exportar CSV</button></div>
+      <div style="margin-top:12px">${tabelaAgrupada(agrupar)}</div></div>
+    <div class="card"><p class="lbl">Previsto por mês, empilhado por time</p>${graficoTimes()}</div>`;
+  if ($('#cRev')) $('#cRev').onclick = () => { view = 'revisar'; render(); };
+  $$('[data-g]', el).forEach(b => b.onclick = () => { agrupar = b.dataset.g; render(); });
+  $('#cCsv').onclick = exportarCsv;
+  $$('[data-tm]', el).forEach(b => b.onclick = () => detalheTime(b.dataset.tm));
+}
+function tabelaAgrupada(dim) {
+  const ms = mesesAno(), ys = ytd(), cab = `<tr><th>${{ time: 'Time', categoria: 'Categoria', iniciativa: 'Iniciativa', tipo: 'Tipo' }[dim]}</th><th class="n">Orçado</th><th class="n">Previsto</th><th class="n">Realizado (ano)</th><th class="n">Previsto − orçado</th>${dim === 'time' ? '<th class="n">Teto</th><th>Situação</th>' : ''}</tr>`;
+  const lin = (nome, t, extra = '') => `<tr><td>${nome}</td><td class="n">${fm(t.orcado)}</td><td class="n">${fm(t.previsto)}</td><td class="n">${fm(t.realizado)}</td><td class="n ${t.previsto - t.orcado > 0 ? 'latec' : ''}">${fm(t.previsto - t.orcado)}</td>${extra}</tr>`;
+  let rows = [];
+  if (dim === 'time') {
+    const c = consolidado();
+    rows = c.porTime.map(({ t, r, ok, tot }) => {
+      const s = saude[t.slug]?.avisos || [], teto = t.teto.total;
+      const sit = !r ? '<span class="chip late">sem plano</span>' : !ok ? '<span class="chip late">não somado</span>' : `<span class="chip ${s.length ? 'late' : 'ok'}" title="${esc(s.join('; '))}">rev. ${r.payload.revision} · ${fmtData(r.payload.generatedAt)}</span> <span class="small faint">${esc(r.payload.planVersion || '')}</span>`;
+      return lin(`<button class="bvc" data-tm="${t.slug}">${esc(t.nome)}</button>`, tot, `<td class="n ${teto && tot.previsto > teto ? 'latec' : ''}">${teto ? fm(teto) : '—'}</td><td>${sit}</td>`);
+    });
+    if (db.itens.length) rows.push(lin('<i>Itens do grupo</i>', c.itens, '<td></td><td></td>'));
+    rows.push(`<tr class="tot"><td>Total</td><td class="n">${fm(c.total.orcado)}</td><td class="n">${fm(c.total.previsto)}</td><td class="n">${fm(c.total.realizado)}</td><td class="n">${fm(c.total.previsto - c.total.orcado)}</td><td></td><td></td></tr>`);
+  } else {
+    const grupos = new Map(), add = (k, nome, t) => { const g = grupos.get(k) || { nome, t: { orcado: 0, previsto: 0, realizado: 0 } }; g.t = soma(g.t, t); grupos.set(k, g); };
+    for (const { time, l } of linhasTodas()) {
+      const t = totaisPlano({ lines: [l] }, ms);
+      if (dim === 'categoria') { const c = catPorId(l.category); add(c ? c.id : 'outras', c ? c.nome : 'Outras (fora da lista)', t); }
+      else if (dim === 'iniciativa') add(l.initiative || '—', l.initiative ? `<span class="code">${esc(l.initiative)}</span> <span class="faint small">${esc(time.nome)}</span>` : '<span class="faint">Sem iniciativa</span>', t);
+      else add(l.kind === 'CAPEX' ? 'CAPEX' : 'OPEX', l.kind === 'CAPEX' ? 'CAPEX' : 'OPEX', t);
+    }
+    for (const i of db.itens) { const t = totaisItens(ms, x => x === i), c = catPorId(i.cat); if (dim === 'categoria') add(c?.id || 'outras', c?.nome || 'Outras', t); else if (dim === 'iniciativa') add('—', '<span class="faint">Sem iniciativa</span>', t); else add(c?.tipo || 'OPEX', c?.tipo || 'OPEX', t); }
+    rows = [...grupos.values()].sort((a, b) => b.t.previsto - a.t.previsto).map(g => lin(g.nome, g.t));
+  }
+  return rows.length ? `<div class="scroll"><table class="t">${cab}${rows.join('')}</table></div>` : '<div class="empty">Nada para somar ainda. Cadastre os times, gere as chaves e leia a pasta.</div>';
+}
+function graficoTimes() {
+  const ms = mesesAno(), cores = ['#223ad2', '#8e9de9', '#002bab', '#c9d0f5', '#5b6fe0', '#aab0bf', '#3a4a9a', '#dfe3fb'];
+  const series = db.times.map((t, i) => ({ nome: t.nome, cor: cores[i % cores.length], v: ms.map(m => somavel(db.retratos[t.slug]?.payload) ? totaisPlano(db.retratos[t.slug].payload, [m]).previsto : 0) }));
+  if (db.itens.length) series.push({ nome: 'Itens do grupo', cor: '#6f7689', v: ms.map(m => totaisItens([m]).previsto) });
+  const tot = ms.map((_, i) => series.reduce((s, x) => s + x.v[i], 0)), max = Math.max(1, ...tot, db.orcamento.total ? db.orcamento.total / 12 : 0);
+  const W = 760, H = 210, bw = (W - 16) / 12, y = v => H - 24 - (v / max) * (H - 40);
+  let svg = '';
+  ms.forEach((m, i) => { let acc = 0; const x = 8 + i * bw + bw * 0.18, w = bw * 0.64; for (const s of series) { const v = s.v[i]; if (!v) continue; svg += `<rect x="${x}" y="${y(acc + v)}" width="${w}" height="${y(acc) - y(acc + v)}" fill="${s.cor}"><title>${esc(s.nome)} · ${nomeMes(m)}: ${fm(v)}</title></rect>`; acc += v; } svg += `<text x="${x + w / 2}" y="${H - 8}" text-anchor="middle" font-size="10.5" fill="var(--muted)">${nomeMes(m)}</text>`; });
+  if (db.orcamento.total) svg += `<line x1="8" x2="${W - 8}" y1="${y(db.orcamento.total / 12)}" y2="${y(db.orcamento.total / 12)}" stroke="var(--late)" stroke-dasharray="4 4"/>`;
+  return `<svg class="ch" viewBox="0 0 ${W} ${H}">${svg}</svg><div class="legend">${series.map(s => `<span><i style="background:${s.cor}"></i>${esc(s.nome)}</span>`).join('')}${db.orcamento.total ? '<span><i style="background:var(--late);height:2px"></i>Orçamento do grupo ÷ 12</span>' : ''}</div>`;
+}
+function detalheTime(slug) {
+  const t = timePorSlug(slug), r = db.retratos[slug], p = r?.payload; if (!p) return toast('Este time ainda não tem plano lido.');
+  const ms = mesesAno();
+  modal(`<div class="mh"><h2>${esc(t.nome)} · ${esc(p.planVersion || '')}</h2><span class="grow"></span><span class="chip">rev. ${p.revision}</span></div><div class="mb">
+    <p class="small muted" style="margin-top:0">Publicado em ${fmtDataHora(p.generatedAt)} por <span class="code">${esc(p.source?.writer || '')}</span> · meses fechados: ${(p.closedMonths || []).map(nomeMes).join(', ') || 'nenhum'}. Só leitura: o número do time só muda quando o time publica.</p>
+    <div class="scroll"><table class="t"><tr><th>Linha</th><th>Categoria</th>${ms.map(m => `<th class="n">${nomeMes(m)}</th>`).join('')}<th class="n">Previsto</th><th class="n">Orçado</th></tr>
+    ${(p.lines || []).map(l => { const tt = totaisPlano({ lines: [l] }, ms); return `<tr><td>${esc(l.name)}${l.initiative ? ` <span class="code faint">${esc(l.initiative)}</span>` : ''}</td><td>${esc(catPorId(l.category)?.nome || l.category)}</td>${ms.map(m => `<td class="n">${l.months?.[m]?.forecast ? fmtCurto(l.months[m].forecast) : '—'}</td>`).join('')}<td class="n"><b>${fmtCurto(tt.previsto)}</b></td><td class="n">${fmtCurto(tt.orcado)}</td></tr>`; }).join('')}</table></div>
+    ${(p.commitments || []).length ? `<p class="lbl" style="margin-top:14px">Contratos</p>${p.commitments.map(c => `<div class="small">${esc(c.name)}: ${fm(c.monthly)}/mês de ${nomeMes(c.start)} ${c.end ? 'a ' + nomeMes(c.end) : 'sem fim'}</div>`).join('')}` : ''}
+    </div><div class="mf"><button class="btn pri" onclick="fecharModal()">Fechar</button></div>`, 'wide');
+}
+function exportarCsv() {
+  const ms = mesesAno(), lin = [['time', 'linha', 'categoria', 'tipo', 'iniciativa', 'medida', ...ms].join(';')];
+  for (const { time, l } of linhasTodas()) for (const [k, n] of [['budget', 'orcado'], ['forecast', 'previsto'], ['actual', 'realizado']]) lin.push([time.nome, l.name, catPorId(l.category)?.nome || l.category, l.kind, l.initiative || '', n, ...ms.map(m => ((+l.months?.[m]?.[k] || 0) / 100).toFixed(2).replace('.', ','))].map(x => `"${String(x).replace(/"/g, '""')}"`).join(';'));
+  baixar(`consolidado-${db.grupo.slug}-${db.ano}.csv`, '\ufeff' + lin.join('\r\n'), 'text/csv');
+  toast('CSV baixado sem cifra: trate o arquivo como confidencial.', 5000);
+}
+
+/* --- Ler pasta (prévia antes de aplicar) --- */
+function vRevisar(el) {
+  el.innerHTML = `${raiz ? '' : '<div class="banner warn">Ligue a pasta sincronizada (botão no topo) para ler os planos dos times.</div>'}
+    <div class="card"><div class="row"><p class="lbl" style="margin:0">Planos novos <span class="n">${pendentes.length}</span></p><span class="grow"></span>${pendentes.length > 1 ? '<button class="btn pri sm" id="rTodos">Aplicar todos</button>' : ''}</div>
+    ${pendentes.length ? pendentes.map(x => { const d = diffPlano(db.retratos[x.t.slug]?.payload, x.p), ok = somavel(x.p); return `<div class="al"><span class="dot ${ok ? '' : 'late'}"></span><div class="grow"><b>${esc(x.t.nome)}</b> · revisão ${x.p.revision} · ${esc(x.p.planVersion || '')} · ${fmtDataHora(x.p.generatedAt)} <span class="faint small">${esc(x.de)}</span><br>
+      Previsto no ano ${fm(d.a.previsto)} → <b>${fm(d.b.previsto)}</b> (${d.b.previsto - d.a.previsto >= 0 ? '+' : ''}${fm(d.b.previsto - d.a.previsto)}) · orçado ${fm(d.b.orcado)} · realizado ${fm(d.b.realizado)}
+      ${d.linhas.length ? `<div class="small muted">${d.linhas.slice(0, 8).map(esc).join(' · ')}${d.linhas.length > 8 ? ` · e mais ${d.linhas.length - 8}` : ''}</div>` : ''}${ok ? '' : '<div class="small latec">Ano ou moeda diferente: fica guardado, mas não entra na soma.</div>'}</div>
+      <button class="btn sm" data-ap="${x.t.slug}">Aplicar</button></div>`; }).join('') : '<div class="empty">Nenhum plano novo. A ferramenta confere a pasta a cada minuto e quando você volta para a aba.</div>'}</div>
+    <div class="card"><p class="lbl">Saúde da soma</p>${db.times.length ? db.times.map(t => { const s = saude[t.slug]?.avisos || []; return `<div class="al"><span class="dot ${s.length ? 'late' : ''}"></span><div class="grow"><b>${esc(t.nome)}</b> ${s.length ? '<br><span class="small">' + s.map(esc).join('<br>') + '</span>' : '<span class="small okc">ok</span>'}</div></div>`; }).join('') : '<div class="empty">Cadastre os times na aba Times.</div>'}</div>`;
+  if ($('#rTodos')) $('#rTodos').onclick = () => aplicar();
+  $$('[data-ap]', el).forEach(b => b.onclick = () => aplicar(b.dataset.ap));
+}
+
+/* --- Times --- */
+function vTimes(el) {
+  el.innerHTML = `<div class="bar"><span class="muted">Cada time tem uma chave de finanças própria, diferente da chave de tarefas.</span><span class="grow"></span><button class="btn pri" id="tNovo">+ Time</button></div>
+    ${db.times.map(t => { const c = chaveAtualTexto(t); return `<div class="card"><div class="row"><h3>${esc(t.nome)}</h3><span class="code faint">${esc(t.slug)}</span>${t.prefixo ? `<span class="chip">${esc(t.prefixo)}</span>` : ''}<span class="grow"></span>
+      ${c ? `<span class="chip ok">chave ${esc(c.kid)}</span>` : '<span class="chip late">sem chave</span>'}${t.diretriz.revision ? `<span class="chip">diretriz rev. ${t.diretriz.revision}</span>` : ''}</div>
+      <div class="row" style="margin-top:10px"><button class="btn sm" data-ed="${t.slug}">Teto e diretriz</button>${c ? `<button class="btn sm" data-cp="${t.slug}">Copiar chave</button><button class="btn sm danger" data-rv="${t.slug}">Revogar chave</button>` : `<button class="btn sm pri" data-gk="${t.slug}">Gerar chave</button>`}
+      <button class="btn sm" data-ht="${t.slug}">HTML de finanças do time</button><button class="btn sm" data-pd="${t.slug}" ${c && raiz ? '' : 'disabled'}>Publicar diretriz</button></div></div>`; }).join('') || '<div class="card empty">Nenhum time. Adicione os times que vão publicar plano financeiro.</div>'}`;
+  $('#tNovo').onclick = () => timeDlg(null);
+  $$('[data-ed]', el).forEach(b => b.onclick = () => timeDlg(b.dataset.ed));
+  $$('[data-gk]', el).forEach(b => b.onclick = () => gerarChave(timePorSlug(b.dataset.gk)));
+  $$('[data-cp]', el).forEach(b => b.onclick = async () => { const t = timePorSlug(b.dataset.cp); if (!await avisoCofre('chave')) return; try { await navigator.clipboard.writeText(chaveAtualTexto(t).texto); toast('Chave copiada. Envie por mensagem direta.'); } catch { modal(`<div class="mh"><h2>Chave</h2></div><div class="mb"><input class="sin code" style="width:100%" readonly value="${esc(chaveAtualTexto(t).texto)}"></div><div class="mf"><button class="btn pri" onclick="fecharModal()">Fechar</button></div>`); } });
+  $$('[data-rv]', el).forEach(b => b.onclick = () => revogarChave(timePorSlug(b.dataset.rv)));
+  $$('[data-ht]', el).forEach(b => b.onclick = () => htmlDoTime(timePorSlug(b.dataset.ht)));
+  $$('[data-pd]', el).forEach(b => b.onclick = () => publicarDiretriz(timePorSlug(b.dataset.pd)));
+}
+function timeDlg(slug) {
+  const t = slug ? timePorSlug(slug) : { nome: '', slug: '', prefixo: '', chaves: [], teto: { total: 0, caps: {} }, diretriz: {}, publishBy: '', nota: '' };
+  const v = c => c ? (c / 100).toLocaleString('pt-BR') : '';
+  const d = modal(`<div class="mh"><h2>${slug ? esc(t.nome) : 'Novo time'}</h2></div><div class="mb">
+    <div class="f2"><label class="field"><span>Nome</span><input class="sin" id="mN" value="${esc(t.nome)}"></label><label class="field"><span>Identificador (pasta)</span><input class="sin code" id="mS" value="${esc(t.slug)}" ${slug ? 'disabled' : ''}></label></div>
+    <div class="f2"><label class="field"><span>Prefixo de código (opcional)</span><input class="sin" id="mP" value="${esc(t.prefixo || '')}" maxlength="5"></label><label class="field"><span>Publicar plano até</span><input class="sin" type="date" id="mD" value="${esc(t.publishBy || '')}"></label></div>
+    <p class="lbl">Teto do ano (vai na diretriz)</p>
+    <label class="field"><span>Teto total</span><input class="sin" id="mT" value="${v(t.teto.total)}"></label>
+    <div class="f2">${db.categorias.map(c => `<label class="field"><span>${esc(c.nome)}</span><input class="sin" data-cap="${c.id}" value="${v(t.teto.caps?.[c.id])}"></label>`).join('')}</div>
+    <label class="field"><span>Recado para o time (vai cifrado na diretriz)</span><textarea class="sin" id="mR">${esc(t.nota || '')}</textarea></label></div>
+    <div class="mf">${slug ? '<button class="btn danger" id="mX">Remover</button><span class="grow"></span>' : ''}<button class="btn" id="mNo">Cancelar</button><button class="btn pri" id="mOk">Salvar</button></div>`, 'wide');
+  $('#mN', d).oninput = () => { if (!slug) $('#mS', d).value = slugify($('#mN', d).value); };
+  $('#mNo', d).onclick = fecharModal;
+  if (slug) $('#mX', d).onclick = async () => { fecharModal(); if (await perguntar('Remover time?', '<p>O time sai do consolidado e as chaves dele são apagadas deste arquivo. Os arquivos na pasta não são apagados.</p>', [['no', 'Cancelar'], ['ok', 'Remover', 'danger']]) !== 'ok') return; db.times = db.times.filter(x => x.slug !== slug); delete db.retratos[slug]; agendarSalvar(); };
+  $('#mOk', d).onclick = () => {
+    const nome = clamp($('#mN', d).value.trim(), 80), s = slugify($('#mS', d).value);
+    if (!nome || !s) return toast('Preencha nome e identificador.'); if (!slug && timePorSlug(s)) return toast('Já existe um time com esse identificador.');
+    t.nome = nome; t.prefixo = clamp($('#mP', d).value.trim().toUpperCase(), 5); t.publishBy = $('#mD', d).value; t.nota = clamp($('#mR', d).value.trim(), 500);
+    t.teto.total = parseValor($('#mT', d).value) || 0; t.teto.caps = {}; $$('[data-cap]', d).forEach(i => { const x = parseValor(i.value); if (x) t.teto.caps[i.dataset.cap] = x; });
+    if (!slug) { t.slug = s; db.times.push(t); }
+    fecharModal(); agendarSalvar();
+    if (slug && t.diretriz.revision) toast('Lembre de publicar a diretriz de novo para o time ver o teto atualizado.', 5000);
+  };
+}
+
+/* --- Versões do plano --- */
+function retratoAtual() { const r = {}; for (const t of db.times) { const p = db.retratos[t.slug]?.payload; if (somavel(p)) r[t.slug] = { revision: p.revision, planVersion: p.planVersion, meses: Object.fromEntries(mesesAno().map(m => [m, totaisPlano(p, [m])])) }; } r._grupo = { meses: Object.fromEntries(mesesAno().map(m => [m, totaisItens([m])])) }; return r; }
+const totVersao = (rt, slug) => Object.values(rt[slug]?.meses || {}).reduce((a, b) => soma(a, b), { orcado: 0, previsto: 0, realizado: 0 });
+function vVersoes(el) {
+  const v = db.versoes.find(x => x.id === verVersao), atual = retratoAtual();
+  el.innerHTML = `<div class="bar"><span class="muted">Feche uma versão para guardar o retrato do dia (ex.: "Orçamento original", "Reforecast 1") e comparar depois.</span><span class="grow"></span><button class="btn pri" id="vNova">Fechar versão</button></div>
+    <div class="card"><p class="lbl">Versões</p>${db.versoes.length ? db.versoes.map(x => `<div class="al"><span class="dot"></span><div class="grow"><b>${esc(x.nome)}</b> · ${fmtData(x.em)} · previsto ${fm(Object.keys(x.retratos).reduce((s, k) => s + totVersao(x.retratos, k).previsto, 0))}</div><button class="btn sm ${verVersao === x.id ? 'pri' : ''}" data-vv="${x.id}">Comparar com hoje</button></div>`).join('') : '<div class="empty">Nenhuma versão fechada.</div>'}</div>
+    ${v ? `<div class="card"><p class="lbl">${esc(v.nome)} × hoje</p><div class="scroll"><table class="t"><tr><th>Time</th><th class="n">Previsto em ${esc(v.nome)}</th><th class="n">Previsto hoje</th><th class="n">Diferença</th></tr>
+      ${[...db.times.map(t => [t.slug, t.nome]), ['_grupo', 'Itens do grupo']].map(([s, n]) => { const a = totVersao(v.retratos, s).previsto, b = totVersao(atual, s).previsto; return a || b ? `<tr><td>${esc(n)}</td><td class="n">${fm(a)}</td><td class="n">${fm(b)}</td><td class="n ${b - a > 0 ? 'latec' : 'okc'}">${b - a >= 0 ? '+' : ''}${fm(b - a)}</td></tr>` : ''; }).join('')}</table></div></div>` : ''}`;
+  $('#vNova').onclick = async () => {
+    const r = await perguntar('Fechar versão', `<label class="field"><span>Nome</span><input class="sin" id="vN" value="${esc(db.versaoAtual || 'Orçamento original')}"></label><label class="row"><input type="checkbox" id="vProx" checked> <span>A próxima diretriz pede a versão seguinte aos times</span></label>`, [['no', 'Cancelar'], ['ok', 'Fechar versão', 'pri']]);
+    if (r !== 'ok') return;
+    const nome = clamp(document.getElementById('vN')?.value.trim() || 'Versão', 40);
+    db.versoes.push({ id: uid('V'), nome, em: new Date().toISOString(), retratos: retratoAtual() });
+    if (document.getElementById('vProx')?.checked) { const n = db.versoes.filter(x => /^Reforecast/i.test(x.nome)).length + 1; db.versaoAtual = `Reforecast ${n}`; }
+    agendarSalvar(); toast(`Versão "${nome}" fechada.`);
+  };
+  $$('[data-vv]', el).forEach(b => b.onclick = () => { verVersao = verVersao === b.dataset.vv ? '' : b.dataset.vv; render(); });
+}
+
+/* --- Ajustes --- */
+function vAjustes(el) {
+  const v = c => c ? (c / 100).toLocaleString('pt-BR') : '';
+  el.innerHTML = `<div class="grid g2">
+    <div class="card"><p class="lbl">Grupo</p>
+      <div class="f2"><label class="field"><span>Nome</span><input class="sin" id="gN" value="${esc(db.grupo.nome)}"></label><label class="field"><span>Ano fiscal</span><input class="sin" type="number" id="gA" value="${db.ano}"></label></div>
+      <div class="f2"><label class="field"><span>Orçamento aprovado do grupo (ano)</span><input class="sin" id="gO" value="${v(db.orcamento.total)}"></label><label class="field"><span>Versão pedida aos times</span><input class="sin" id="gV" value="${esc(db.versaoAtual || 'Orçamento original')}"></label></div>
+      <label class="field"><span>Centros de custo (um por linha)</span><textarea class="sin" id="gC">${esc(db.centros.join('\n'))}</textarea></label></div>
+    <div class="card"><p class="lbl">Itens do grupo</p><p class="small muted" style="margin-top:0">Reservas, rateios e custos que não são de nenhum time. Entram no consolidado, nunca no plano de um time.</p>
+      ${db.itens.map(i => `<div class="row" style="margin-bottom:6px"><input class="sin grow" data-in="${i.id}" value="${esc(i.nome)}"><select class="sel" data-ic="${i.id}">${db.categorias.map(c => `<option value="${c.id}" ${c.id === i.cat ? 'selected' : ''}>${esc(c.nome)}</option>`).join('')}</select><input class="sin" style="width:110px" data-iv="${i.id}" value="${v(Object.values(i.orcado || {})[0])}" title="Valor mensal"><button class="btn ghost sm" data-ix="${i.id}">×</button></div>`).join('')}
+      <button class="btn sm" id="gItem">+ Item mensal</button></div>
+    <div class="card"><p class="lbl">Categorias do grupo</p>${db.categorias.map(c => `<div class="row" style="margin-bottom:6px"><input class="sin grow" data-cn="${c.id}" value="${esc(c.nome)}"><select class="sel" data-ct="${c.id}"><option ${c.tipo === 'OPEX' ? 'selected' : ''}>OPEX</option><option ${c.tipo === 'CAPEX' ? 'selected' : ''}>CAPEX</option></select></div>`).join('')}
+      <div class="row"><input class="sin grow" id="gNC" placeholder="Nova categoria"><button class="btn" id="gNCb">Adicionar</button></div><p class="small muted">Linhas dos times com categoria fora desta lista são somadas em "Outras" e aparecem na saúde da soma.</p></div>
+    <div class="card"><p class="lbl">Segurança</p><p class="small">Arquivo <span class="code">${esc(arquivo)}</span> cifrado com a sua senha. As chaves dos times ficam dentro dele.</p>
+      <div class="row"><button class="btn" id="gSenha">Trocar senha</button><button class="btn" id="gBk">Baixar cópia cifrada</button></div>
+      <p class="small muted">A pasta local guarda as 5 últimas versões em <span class="code">backup/</span>; baixe uma cópia cifrada de vez em quando.</p></div></div>`;
+  $('#gN').onchange = e => { db.grupo.nome = clamp(e.target.value.trim(), 80) || db.grupo.nome; agendarSalvar(); };
+  $('#gA').onchange = e => { const a = +e.target.value; if (a > 2000 && a < 2100) { db.ano = a; agendarSalvar(); } };
+  $('#gO').onchange = e => { db.orcamento.total = parseValor(e.target.value) || 0; agendarSalvar(); };
+  $('#gV').onchange = e => { db.versaoAtual = clamp(e.target.value.trim(), 40); agendarSalvar(); };
+  $('#gC').onchange = e => { db.centros = e.target.value.split('\n').map(x => clamp(x.trim(), 40)).filter(Boolean); agendarSalvar(); };
+  $('#gItem').onclick = () => { db.itens.push({ id: uid('I'), nome: 'Reserva do grupo', cat: 'outras', orcado: {} }); agendarSalvar(); };
+  $$('[data-in]', el).forEach(i => i.onchange = () => { db.itens.find(x => x.id === i.dataset.in).nome = clamp(i.value, 80); agendarSalvar(); });
+  $$('[data-ic]', el).forEach(i => i.onchange = () => { db.itens.find(x => x.id === i.dataset.ic).cat = i.value; agendarSalvar(); });
+  $$('[data-iv]', el).forEach(i => i.onchange = () => { const it = db.itens.find(x => x.id === i.dataset.iv), val = parseValor(i.value) || 0; it.orcado = Object.fromEntries(mesesAno().map(m => [m, val])); agendarSalvar(); });
+  $$('[data-ix]', el).forEach(b => b.onclick = () => { db.itens = db.itens.filter(x => x.id !== b.dataset.ix); agendarSalvar(); });
+  $$('[data-cn]', el).forEach(i => i.onchange = () => { catPorId(i.dataset.cn).nome = clamp(i.value.trim(), 60); agendarSalvar(); });
+  $$('[data-ct]', el).forEach(i => i.onchange = () => { catPorId(i.dataset.ct).tipo = i.value; agendarSalvar(); });
+  $('#gNCb').onclick = () => { const n = $('#gNC').value.trim(), id = slugify(n); if (!id || catPorId(id)) return; db.categorias.push({ id, nome: clamp(n, 60), tipo: 'OPEX' }); agendarSalvar(); };
+  $('#gSenha').onclick = async () => { const s = await criarSenhaDlg('Nova senha do arquivo'); if (!s) return; ctx = await novoCtx(s, TOOL); db.seg = { cofreConfirmadoEm: new Date().toISOString() }; await salvar(); toast('Senha trocada.'); };
+  $('#gBk').onclick = async () => baixar(arquivo.replace(/\.json$/, '') + '-copia-' + hojeISO() + '.json', await cifrarLocal(db, ctx));
+}
+
+/* ---------------------------- abertura e criação ---------------------------- */
+function telaInicial(msg = '') {
+  $('#app').innerHTML = `<div class="welcome"><div class="card">
+    <div class="row"><div class="logo" style="margin:0">GRP</div><div><h2 style="margin:0">Finanças do Grupo</h2><div class="small muted">Consolidado dos planos financeiros dos times</div></div></div>
+    ${msg ? `<div class="banner warn" style="margin-top:12px">${esc(msg)}</div>` : ''}
+    <p class="lbl" style="margin-top:20px">É a primeira vez?</p>
+    <button class="opt" id="iNovo"><b>Criar o arquivo do grupo</b><span>Pasta local fora do OneDrive, senha guardada no cofre, depois times e chaves.</span></button>
+    <p class="lbl" style="margin-top:16px">Já tenho o arquivo</p>
+    <button class="opt" id="iAbrir"><b>Abrir a pasta local</b><span>Onde está <span class="code">financas-grupo-&lt;nome&gt;.json</span>.</span></button>
+    ${temFS() ? '' : '<div class="banner warn">Abra no Microsoft Edge ou no Google Chrome.</div>'}
+  </div></div>`;
+  $('#iNovo').onclick = criarDlg; $('#iAbrir').onclick = abrirPasta;
+}
+async function abrirPasta() {
+  let h; try { h = await escolherPasta('fin-local'); } catch (e) { return; }
+  if (!await permissao(h)) return;
+  const cand = [];
+  for await (const [n, f] of h.entries()) if (f.kind === 'file' && /^financas-grupo-.*\.json$/.test(n)) { try { const o = JSON.parse(await (await f.getFile()).text()); if (o.schema === LOCAL_ENC && o.app === TOOL) cand.push(n); } catch {} }
+  if (!cand.length) return telaInicial('Não encontrei um arquivo das Finanças do Grupo nesta pasta.');
+  let nome = cand[0];
+  if (cand.length > 1) { const r = await perguntar('Qual arquivo?', cand.map((n, i) => `<button class="opt" data-r="${i}"><b class="code">${esc(n)}</b></button>`).join(''), [['no', 'Cancelar']]); if (r == null || r === 'no') return; nome = cand[+r]; }
+  await abrirArquivo(h, nome);
+}
+async function abrirArquivo(h, nome) {
+  const texto = await lerTexto(h, nome);
+  for (let i = 0; i < 3 && !db; i++) {
+    const s = await pedirSenhaDlg('Senha das Finanças do Grupo', i > 0); if (s == null) return;
+    try { const r = await decifrarLocal(texto, s); db = normalizar(r.dados); ctx = r.ctx; dirLocal = h; arquivo = nome; } catch (e) { if (e.code !== 'SENHA') return telaInicial(e.message); }
+  }
+  if (!db) return telaInicial('Senha incorreta três vezes.');
+  await aposAbrir();
+}
+async function aposAbrir() {
+  render();
+  if (await lembreteTesteSenha(db.seg, ctx)) agendarSalvar();
+  if (!navigator.webdriver) { const h = await kv.get('fin-grupo-raiz:' + db.grupo.slug); if (h && await permissao(h, false)) await ligarPasta(h, true); }
+}
+async function criarDlg() {
+  const p = PRESET || {};
+  const d = modal(`<div class="mh"><h2>Criar o arquivo do grupo</h2></div><div class="mb">
+    <label class="field"><span>Nome do grupo</span><input class="sin" id="cN" value="${esc(p.grupo?.nome || '')}"></label>
+    <div class="f2"><label class="field"><span>Ano fiscal</span><input class="sin" type="number" id="cA" value="${p.ano || new Date().getFullYear()}"></label><label class="field"><span>Moeda</span><select class="sel" id="cM"><option>BRL</option><option>USD</option><option>EUR</option></select></label></div>
+    <label class="field"><span>Seu nome</span><input class="sin" id="cP" value="${esc(p.pessoa || '')}"></label></div>
+    <div class="mf"><button class="btn" id="cNo">Cancelar</button><button class="btn pri" id="cOk">Escolher pasta local</button></div>`);
+  $('#cNo', d).onclick = fecharModal;
+  $('#cOk', d).onclick = async () => {
+    const nome = $('#cN', d).value.trim(), pessoa = $('#cP', d).value.trim(), ano = +$('#cA', d).value, moeda = $('#cM', d).value;
+    if (!nome || !pessoa) return toast('Preencha o nome do grupo e o seu nome.');
+    fecharModal();
+    if (!await criarArquivo({ nome, pessoa, ano, moeda })) telaInicial();
+  };
+}
+async function escolherPastaLocal() {
+  await perguntar('Pasta local', `<p>Escolha uma pasta <b>deste computador</b> que <b>não</b> esteja no OneDrive.</p><div class="banner warn">Com o backup de pastas do OneDrive ligado, <b>Documentos</b> e <b>Área de Trabalho</b> também sincronizam. Prefira algo como <span class="code">C:\\Users\\voce\\GestaoLocal</span>.</div>`, [['ok', 'Escolher pasta', 'pri']]);
+  let h; try { h = await escolherPasta('fin-local'); } catch { return null; }
+  if (!await permissao(h)) return null;
+  const s = await suspeitaDeSincronizada(h);
+  if (s.length) { if (await perguntar('Esta pasta parece sincronizada', `<div class="cofre">A pasta <b>${esc(h.name)}</b> ${esc(s.join(', '))}.</div>`, [['no', 'Escolher outra'], ['ok', 'Usar mesmo assim']]) !== 'ok') return escolherPastaLocal(); }
+  else if (await perguntar('Confirme', `<p>Você conferiu que <b class="code">${esc(h.name)}</b> não está no OneDrive?</p>`, [['no', 'Escolher outra'], ['ok', 'Conferi, não está', 'pri']]) !== 'ok') return escolherPastaLocal();
+  return h;
+}
+async function criarArquivo({ nome, pessoa, ano, moeda, dir, senha, times = [] }) {
+  const h = dir || await escolherPastaLocal(); if (!h) return false;
+  const nomeArq = `financas-grupo-${slugify(nome)}.json`;
+  if (await lerTexto(h, nomeArq)) { if (await perguntar('Arquivo já existe', `<p>Já existe <span class="code">${esc(nomeArq)}</span>. Abrir?</p>`, [['no', 'Cancelar'], ['ok', 'Abrir', 'pri']]) === 'ok') { await abrirArquivo(h, nomeArq); return true; } return false; }
+  senha ??= await criarSenhaDlg(); if (!senha) return false;
+  db = novoDb({ nome, ano, moeda, pessoa }); db.seg.cofreConfirmadoEm = new Date().toISOString();
+  for (const t of times) db.times.push({ nome: t.nome, slug: t.slug, prefixo: t.prefixo || '', chaves: [], teto: { total: 0, caps: {} }, diretriz: {} });
+  ctx = await novoCtx(senha, TOOL); dirLocal = h; arquivo = nomeArq;
+  await gravarLocal(h, nomeArq, await cifrarLocal(db, ctx));
+  view = 'times'; await aposAbrir();
+  toast('Arquivo do grupo criado e cifrado. Cadastre os times e gere as chaves.', 5000);
+  return true;
+}
+telaInicial();
+</script>
+<script type="text/plain" id="finTimeEmb" data-version="1.0.0" data-sha256="0f8f2f3ac2c12422">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</script>
+</body>
+</html>
