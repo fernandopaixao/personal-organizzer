@@ -28,6 +28,44 @@ a{color:var(--bv)}
 .nv:hover{color:var(--ink)}.nv.on{color:var(--bv);background:var(--bv-soft);font-weight:600}
 .nv .b{position:absolute;top:3px;right:10px;min-width:15px;height:15px;border-radius:8px;background:var(--late);color:#fff;font-size:9.5px;display:grid;place-items:center;padding:0 4px;font-weight:700}
 .main{margin-left:80px;padding:0 clamp(18px,2.6vw,56px) 80px}
+/* 2.0: navegação no topo, quadro em primeiro lugar */
+body.v2 .rail{display:none}body.v2 .main{margin-left:0;padding:0 clamp(14px,1.6vw,28px) 24px}
+.top2{position:sticky;top:0;z-index:12;margin:0 calc(-1 * clamp(14px,1.6vw,28px));padding:10px clamp(14px,1.6vw,28px);background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.top2 .brand{display:flex;align-items:center;gap:10px;min-width:0}.top2 .brand .logo{margin:0;width:32px;height:32px;font-size:11px}.top2 .brand b{font-family:var(--title);font-size:15px;white-space:nowrap}.top2 .brand .code{font-size:11px;color:var(--muted)}
+.tnav{display:flex;gap:2px;align-items:center}.tnav button{padding:7px 11px;border-radius:9px;color:var(--muted);font-size:12.5px;font-weight:550;position:relative}.tnav button:hover{color:var(--ink)}.tnav button.on{background:var(--bv-soft);color:var(--bv)}
+.tnav .b{position:absolute;top:2px;right:2px;width:8px;height:8px;border-radius:50%;background:var(--late)}
+.tmore{position:relative}.tmore>summary{list-style:none;cursor:pointer;padding:7px 11px;border-radius:9px;color:var(--muted);font-weight:700;letter-spacing:.1em}.tmore>summary::-webkit-details-marker{display:none}.tmore[open]>summary,.tmore>summary:hover{background:#f3f4f8;color:var(--ink)}
+.tmore .menu{position:absolute;top:38px;left:0;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 30px rgba(20,30,70,.14);padding:6px;min-width:190px;z-index:30;display:flex;flex-direction:column}
+.tmore .menu button{text-align:left;padding:8px 10px;border-radius:8px;font-size:12.5px;display:flex;gap:8px;align-items:center}.tmore .menu button:hover{background:#f3f4f8}.tmore .menu button.on{color:var(--bv);font-weight:600}
+.top2 .quick{flex:1 1 280px;max-width:420px}.top2 h1{display:none}
+.vtitle{font-family:var(--title);font-size:20px;font-weight:600;letter-spacing:-.02em;margin:18px 0 12px}
+.fbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:12px 0 12px}
+.fchip{height:30px;padding:0 11px;border-radius:99px;border:1px solid var(--line);background:#fff;font-size:12px;display:inline-flex;align-items:center;gap:6px;color:#4a5170;white-space:nowrap}.fchip:hover{border-color:#d6d9e6}.fchip.on{background:var(--bv);border-color:var(--bv);color:#fff}
+.fchip .n{font-weight:700;opacity:.8}.fchip.late:not(.on) .n{color:var(--late)}
+.fppl{display:inline-flex;align-items:center;gap:2px;padding:2px 4px;border:1px solid var(--line);border-radius:99px;background:#fff}.fppl button{border-radius:50%;padding:1px;opacity:.55}.fppl button.on{opacity:1;box-shadow:0 0 0 2px var(--bv)}.fppl button:hover{opacity:1}
+.sprintp{position:relative;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;border-radius:11px;padding:4px 11px;font-size:12px;height:32px;cursor:pointer}.sprintp b{font-weight:650}.sprintp .pb{width:64px}.sprintp select{position:absolute;inset:0;opacity:0;cursor:pointer}
+.segx{display:inline-flex;background:#f0f1f6;border-radius:10px;padding:3px;gap:2px}.segx button{padding:4px 10px;border-radius:8px;font-size:12px;color:var(--muted)}.segx button.on{background:#fff;color:var(--bv);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.board2{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;align-items:flex-start}
+.board2 .col{max-height:calc(100vh - 200px)}
+.board2 .col.dcol{flex:0 0 58px;align-items:center;cursor:pointer;padding:12px 4px;gap:10px;color:var(--muted)}.dcol .vt{writing-mode:vertical-rl;transform:rotate(180deg);font-weight:650;color:var(--ink);font-size:12.5px;white-space:nowrap}.dcol b{font-size:15px;color:var(--ink)}
+.wipb{display:flex;gap:2px;margin:0 4px 4px}.wipb i{flex:1;height:4px;border-radius:2px;background:#dde0ea}.wipb i.f{background:var(--bv-mid)}.wipb i.o{background:var(--late)}
+.col.overw{background:#fbf0ef}.colh .cnt.over b{color:var(--late)}
+.kc{position:relative;padding-left:14px}.kc::before{content:"";position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:0 3px 3px 0;background:var(--ec,#d9dce7)}
+.kc.blk{border-left:1px solid #efc8c4;border-color:#efc8c4;background:#fffafa}.kc.sel{border-color:var(--bv);box-shadow:0 0 0 3px rgba(34,58,210,.12)}
+.age{display:inline-flex;gap:2px;align-items:center}.age i{width:5px;height:5px;border-radius:50%;background:#dde0ea}.age i.on{background:#c8913a}.age i.hot{background:var(--late)}
+body.dense .kc{padding-top:6px;padding-bottom:6px}body.dense .kc .mt{display:none}body.dense .kc .tt{margin:1px 0 3px;font-size:12.5px}body.dense .kc .ft{margin-top:3px}
+.lanes{display:flex;flex-direction:column;gap:10px;overflow-x:auto;padding-bottom:8px}
+.lane{display:flex;gap:12px;align-items:stretch}.lane .lh{flex:0 0 150px;padding:10px 4px;font-size:12.5px;font-weight:650;display:flex;flex-direction:column;gap:4px}.lane .lh small{font-weight:500;color:var(--muted)}
+.lane .col{max-height:none;min-height:70px}.lanehd{display:flex;gap:12px;position:sticky;top:0}.lanehd .lh{flex:0 0 150px}.lanehd .col{min-height:0;padding:8px 10px;background:transparent}
+.pulse{display:flex;align-items:center;gap:20px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 16px;font-size:12px;color:var(--muted);margin-top:10px}
+.pulse b{color:var(--ink);font-weight:650;font-variant-numeric:tabular-nums}.pulse button{color:inherit;font-size:12px}.pulse .warn{color:#8a5a12}.pulse .bad{color:var(--late)}
+.spark{display:inline-flex;align-items:flex-end;gap:2px;height:16px;vertical-align:middle;margin-left:6px}.spark i{width:4px;background:var(--bv-mid);border-radius:1px}
+dialog.side{margin:0 0 0 auto;height:100vh;max-height:100vh;width:min(600px,100vw);border-radius:18px 0 0 18px}
+dialog.side::backdrop{background:rgba(22,26,35,.14)}
+dialog.side .cm-grid{display:flex;flex-direction:column;overflow:auto;flex:1;min-height:0}dialog.side .cm-side{order:-1;background:#fff;border-left:0;border-bottom:1px solid var(--line);overflow:visible;padding:14px 24px}dialog.side .cm-main{overflow:visible}
+dialog.side .cm-side .prop{display:grid;grid-template-columns:120px minmax(0,1fr);gap:10px;align-items:center;margin:0 0 6px}dialog.side .cm-side .prop>.mini{grid-column:2;display:flex;gap:6px;max-width:340px}dialog.side .cm-side .prop>.mini input{flex:1;min-width:0}dialog.side .cm-side .prop>span:first-child{font-size:12px;color:var(--muted)}
+dialog.side .navh{font-size:11px;color:var(--faint);margin-right:8px}
+@media (max-width:720px){.top2 .quick{order:9;max-width:none}.lane .lh,.lanehd .lh{flex-basis:90px}}
 .top{position:sticky;top:0;z-index:10;background:rgba(250,250,252,.95);backdrop-filter:blur(8px);display:flex;align-items:center;gap:14px;padding:14px 0 12px;flex-wrap:wrap}
 .top h1{margin:0;font-family:var(--title);font-size:20px;font-weight:600;letter-spacing:-.02em}
 .top .team{font-size:12px;color:var(--muted)}
@@ -226,7 +264,7 @@ pre.json{background:#f6f7fb;border-radius:10px;padding:12px;font-size:11.5px;max
 @media (max-width:720px){.rail{position:fixed;top:auto;bottom:0;left:0;right:0;width:auto;height:62px;flex-direction:row;justify-content:space-around;padding:4px;border-right:0;border-top:1px solid var(--line)}.logo{display:none}.main{margin-left:0;padding-bottom:90px}.fg{grid-template-columns:1fr}.nv{width:auto;padding:6px 4px}}
 </style>
 </head>
-<body>
+<body class="v2">
 <nav class="rail" id="rail"></nav>
 <main class="main" id="main"></main>
 <dialog id="dlg"></dialog>
@@ -241,7 +279,7 @@ pre.json{background:#f6f7fb;border-radius:10px;padding:12px;font-size:11.5px;max
      gestao-status/1, gestao-metricas/1 dentro de gestao-envelope/1 (AES-256-GCM).
    - Só métricas de time, calculadas a partir da movimentação dos cards.
    ========================================================================= */
-const TOOL = 'quadro_do_time_v1.html', TOOL_VERSION = '1.1.0';
+const TOOL = 'quadro_do_time_v1.html', TOOL_VERSION = '2.0.0';
 /* Pré-configuração gravada pela Central de Gestão (Pessoas › Times › HTML do time).
    No arquivo original fica null; a Central troca o trecho entre os marcadores por um
    objeto quadro-preset/1: { team: { name, slug, prefix, contact }, people: [{ name, role }], key? }.
@@ -365,7 +403,10 @@ let lastMod = 0;            // lastModified conhecido do arquivo de dados
 let dirty = false, saving = false, saveTimer = null, saveState = 'none', saveErr = '';
 let catalog = null, catalogErr = '';  // catálogo decifrado (só em memória)
 let view = 'board';
-const ui = { boardFilter: 'sprint', epicFilter: '', q: '', onlyBlocked: false, showOldDone: false, backlogDone: false, metricsJson: false, centralPreview: '', epicSel: '', epicDone: false, bGroup: 'epic', bFilter: 'open', lq: '' };
+const ui = { lanes: 'none', dense: false, ownerF: '', onlyLate: false, onlyAging: false, doneOpen: false, boardFilter: 'sprint', epicFilter: '', q: '', onlyBlocked: false, showOldDone: false, backlogDone: false, metricsJson: false, centralPreview: '', epicSel: '', epicDone: false, bGroup: 'epic', bFilter: 'open', lq: '' };
+const UI_KEYS = ['lanes', 'dense', 'onlyBlocked', 'onlyLate', 'ownerF', 'doneOpen'];
+function uiSave() { try { localStorage.setItem('quadro-ui', JSON.stringify(Object.fromEntries(UI_KEYS.map(k => [k, ui[k]])))); } catch { } }
+try { const s = JSON.parse(localStorage.getItem('quadro-ui') || 'null'); if (s) UI_KEYS.forEach(k => { if (k in s) ui[k] = s[k]; }); } catch { }
 const pub = { pendingStatus: false, timer: null, busy: false, msg: '', err: '' };
 let keysInfo = { lista: [], atual: null };
 let rootOk = false, rootName = '';
@@ -976,9 +1017,13 @@ function render() {
   try { body = ({ board: vBoard, backlog: vBacklog, sprints: vSprints, epics: vEpics, metrics: vMetrics, central: vCentral, settings: vSettings })[view](); }
   catch (e) { console.error(e); body = `<div class="banner warn">Erro ao desenhar a tela: ${esc(e.message)}</div>`; }
   const sx = $('#main').querySelector('.board')?.scrollLeft;
-  $('#main').innerHTML = `<header class="top"><div><h1>${esc(title)}</h1><div class="team">${esc(db.team.name)}${db.team.slug ? ` · <span class="code">${esc(db.team.slug)}</span>` : ''}</div></div><div class="quick"><span class="pl">+</span><input id="quickCard" autocomplete="off" placeholder="Novo card… @pessoa amanhã #iniciativa" aria-label="Criar card rápido"><button class="btn sm ghost more" data-act="quickMore" title="Abrir o formulário completo">Detalhes</button><div class="qinfo" id="qinfo">Enter cria no ${esc(cols()[0].name)} · @pessoa responsável · hoje, amanhã ou dd/mm · #iniciativa ou #PAG-042 · F2 feature da Central · !bug, !spike, !feature…</div></div><div class="grow"></div><div class="row" id="chrome">${chromeHtml()}</div></header>
+  const alert = (!keysInfo.atual || !SLUG_RE.test(db.team.slug || '') || pub.err) && !db.demo, MAIN = ['board', 'backlog', 'epics', 'metrics'];
+  const nav = `<nav class="tnav">${VIEWS.filter(v => MAIN.includes(v[0])).map(([k, l]) => `<button class="${view === k ? 'on' : ''}" data-act="view" data-v="${k}">${l}</button>`).join('')}
+    <details class="tmore"><summary title="Mais" aria-label="Mais telas">···${alert ? '<span class="b" style="position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:var(--late)"></span>' : ''}</summary><div class="menu">${VIEWS.filter(v => !MAIN.includes(v[0])).map(([k, l]) => `<button class="${view === k ? 'on' : ''}" data-act="view" data-v="${k}">${l}${k === 'central' && alert ? ' <span class="chip late" style="margin-left:auto">!</span>' : ''}</button>`).join('')}</div></details></nav>`;
+  $('#main').innerHTML = `<header class="top top2"><div class="brand"><div class="logo" title="Quadro do Time">${esc(initials(db.team.name) || 'QT')}</div><div style="min-width:0"><b>${esc(db.team.name)}</b>${db.team.slug ? `<div class="code">${esc(db.team.slug)}</div>` : ''}</div></div>${nav}<h1>${esc(title)}</h1><div class="quick"><span class="pl">+</span><input id="quickCard" autocomplete="off" placeholder="Novo card… @pessoa amanhã #iniciativa" aria-label="Criar card rápido"><button class="btn sm ghost more" data-act="quickMore" title="Abrir o formulário completo">Detalhes</button><div class="qinfo" id="qinfo">Enter cria no ${esc(cols()[0].name)} · @pessoa responsável · hoje, amanhã ou dd/mm · #iniciativa ou #PAG-042 · F2 feature da Central · !bug, !spike, !feature…</div></div><div class="grow"></div><div id="ondeEstou"></div><div class="row" id="chrome">${chromeHtml()}</div><button class="btn pri" data-act="newCard">+ Card</button></header>
     ${db.demo ? '<div class="banner">Exemplo com dados fictícios do time Pagamentos. Nada é salvo nem publicado. <button class="btn sm" data-act="home">Voltar ao início</button></div>' : ''}
-    ${body}`;
+    ${view === 'board' ? '' : `<h2 class="vtitle">${esc(title)}</h2>`}${body}`;
+  document.body.classList.toggle('dense', view === 'board' && !!ui.dense);
   if (sx) { const b = $('#main').querySelector('.board'); if (b) b.scrollLeft = sx; }
   wireBoard();
 }
@@ -1018,36 +1063,93 @@ function boardCards() {
     if (ui.boardFilter === 'nosprint' && c.sprintId) return false;
     if (ui.epicFilter && (ui.epicFilter === '-' ? c.epicId : c.epicId !== ui.epicFilter)) return false;
     if (ui.onlyBlocked && !c.blocked) return false;
+    if (ui.onlyLate && !(isYmd(c.due) && c.due < today() && !isDone(c))) return false;
+    if (ui.onlyAging && agingLevel(c) !== 3) return false;
+    if (ui.ownerF && normName(c.owner) !== normName(ui.ownerF)) return false;
     if (q && !(`${c.id} ${c.title} ${c.owner} ${c.featureRef || ''}`.toLowerCase().includes(q))) return false;
     if (isDone(c) && !ui.showOldDone && (doneAt(c) || 0) < lim) return false;
     return true;
   });
 }
+/* 2.0: envelhecimento por coluna (percentis 50 e 85 do tempo que os cards do time passaram em cada coluna) */
+let agingCache = null;
+function agingStats() {
+  if (agingCache && agingCache.at > Date.now() - 60000 && agingCache.n === db.cards.length) return agingCache.m;
+  const per = {};
+  for (const c of db.cards) for (let i = 0; i < c.history.length - 1; i++) { const h = c.history[i], d = (new Date(c.history[i + 1].at) - new Date(h.at)) / DAY; (per[h.col] ||= []).push(d); }
+  const m = {}; for (const k in per) if (per[k].length >= 5) m[k] = { p50: pctl(per[k], .5), p85: pctl(per[k], .85) };
+  agingCache = { at: Date.now(), n: db.cards.length, m }; return m;
+}
+function agingLevel(c) { if (isDone(c) || c.cancelledAt || colIdx(c.col) === 0) return 0; const s = agingStats()[c.col], d = daysInCol(c); if (!s) return d >= 10 ? 3 : d >= 5 ? 2 : 1; return d > s.p85 ? 3 : d > s.p50 ? 2 : 1; }
+const EPIC_TONES = ['#223ad2', '#8e9de9', '#2c5d7c', '#5c3d84', '#2f6b57', '#8a5a2f', '#8c3a4b', '#5a6be0'];
+function epicTone(c) { if (!c.epicId) return ''; const i = epicsLive().findIndex(e => e.id === c.epicId); return i < 0 ? '' : EPIC_TONES[i % EPIC_TONES.length]; }
+function boardCols() { const cs = cols(), ci = colIdx(db.settings.commitCol); return cs.filter((c, i) => !(i === 0 && ci > 0 && !db.settings.showBacklogCol)); }
+function sprintPill(sp) {
+  const opts = [['sprint', sp ? sp.name : 'Sprint atual'], ['all', 'Todos os cards'], ['nosprint', 'Sem sprint']];
+  let info = '';
+  if (ui.boardFilter === 'sprint' && sp && isYmd(sp.start) && isYmd(sp.end)) { const tot = Math.max(1, (parseYmd(sp.end) - parseYmd(sp.start)) / DAY + 1), rest = Math.max(0, Math.round((parseYmd(sp.end) - parseYmd(today())) / DAY)), pct = Math.min(100, Math.max(0, (tot - rest) / tot * 100));
+    info = `<span class="muted">${rest === 0 ? 'último dia' : rest + ' dia' + (rest > 1 ? 's' : '') + ' restante' + (rest > 1 ? 's' : '')}</span><span class="pb"><i style="width:${pct}%"></i></span>`; }
+  return `<label class="sprintp" title="Escolher o que o quadro mostra"><b>${esc(opts.find(o => o[0] === ui.boardFilter)?.[1] || '')}</b>${info}<span class="muted">▾</span><select data-act="bfs" aria-label="Sprint">${opts.map(([k, l]) => `<option value="${k}" ${ui.boardFilter === k ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></label>`;
+}
+function pulseHtml(cs) {
+  const sp = activeSprint(), now = Date.now(), from = ui.boardFilter === 'sprint' && sp && isYmd(sp.start) ? parseYmd(sp.start) : new Date(now - 14 * DAY);
+  const done = activeCards().filter(c => isDone(c) && doneAt(c) >= from), wip = activeCards().filter(isWip);
+  const lt = activeCards().filter(c => isDone(c) && doneAt(c) >= new Date(now - 30 * DAY) && commitAt(c)).map(c => (doneAt(c) - commitAt(c)) / DAY), p85 = pctl(lt, .85);
+  const wk = []; for (let k = 5; k >= 0; k--) { const a = new Date(now - (k + 1) * 7 * DAY), b = new Date(now - k * 7 * DAY); wk.push(activeCards().filter(c => isDone(c) && doneAt(c) >= a && doneAt(c) < b).length); }
+  const mx = Math.max(1, ...wk), aging = activeCards().filter(c => agingLevel(c) === 3).length, over = cols().filter(col => col.wip && activeCards().filter(c => c.col === col.id).length > col.wip);
+  return `<div class="pulse"><span title="Cards entregues ${ui.boardFilter === 'sprint' && sp ? 'nesta sprint' : 'nos últimos 14 dias'}; barras: entregas por semana">Entregues${ui.boardFilter === 'sprint' && sp ? ' na sprint' : ' em 14 dias'} <b>${done.length}</b><span class="spark">${wk.map(v => `<i style="height:${Math.max(2, v / mx * 16)}px" title="${v}"></i>`).join('')}</span></span>
+    <span>Em andamento <b>${wip.length}</b></span><span title="85% dos cards entregues nos últimos 30 dias levaram até este tempo, do compromisso à entrega">Lead time p85 <b>${p85 == null ? '–' : fmtN(p85, p85 < 10 ? 1 : 0) + ' d'}</b></span>
+    ${aging ? `<button class="warn" data-act="fAging" title="Cards parados há mais tempo que 85% dos cards do time nesta coluna">${aging} card${aging > 1 ? 's' : ''} envelhecendo</button>` : '<span>Nenhum card envelhecendo</span>'}
+    ${over.length ? `<span class="bad">${esc(over.map(c => c.name).join(', '))} acima do limite</span>` : ''}<span class="grow"></span><button data-act="view" data-v="metrics">Métricas completas ›</button></div>`;
+}
+function colHead(col, i, total) {
+  const all = cols(), role = col.id === db.settings.commitCol ? 'compromisso' : col.id === db.settings.startCol ? 'início' : i === all.length - 1 ? 'entrega' : '', over = col.wip && total > col.wip;
+  const segs = col.wip ? `<div class="wipb" title="Limite de ${col.wip} cards">${Array.from({ length: Math.max(col.wip, total) }, (_, k) => `<i class="${k < Math.min(total, col.wip) ? 'f' : k < total ? 'o' : ''}"></i>`).join('')}</div>` : '';
+  return `<div class="colh"><span>${esc(col.name)}</span>${role ? `<span class="role">${role}</span>` : ''}<span class="grow"></span><span class="cnt ${over ? 'over' : ''}" title="${col.wip ? 'Limite WIP ' + col.wip : 'Sem limite WIP'}"><b>${total}</b>${col.wip ? ' / ' + col.wip : ''}${over ? ' · acima do limite' : ''}</span></div>${segs}`;
+}
 function vBoard() {
-  const sp = activeSprint(), cs = boardCards();
-  const filt = `<div class="bar">
-    <div class="sg">${[['sprint', sp ? sp.name : 'Sprint atual'], ['all', 'Todos'], ['nosprint', 'Sem sprint']].map(([k, l]) => `<button class="${ui.boardFilter === k ? 'on' : ''}" data-act="bf" data-v="${k}">${esc(l)}</button>`).join('')}</div>
-    <select class="sel" data-act="ef">${epicOpts(ui.epicFilter, 'Todas as iniciativas', true)}</select>
-    <input class="sin" placeholder="Buscar card, pessoa ou feature" value="${esc(ui.q)}" data-act="q" style="width:220px">
-    <label class="row small muted"><input type="checkbox" data-act="ob" ${ui.onlyBlocked ? 'checked' : ''}> Só bloqueados</label>
-    <label class="row small muted"><input type="checkbox" data-act="od" ${ui.showOldDone ? 'checked' : ''}> Concluídos há mais de 14 dias</label>
-    <div class="grow"></div><button class="btn pri" data-act="newCard">+ Card</button></div>
+  const sp = activeSprint(), cs = boardCards(), t = today();
+  const base = activeCards().filter(c => !isDone(c)), nb = base.filter(c => c.blocked).length, nl = base.filter(c => isYmd(c.due) && c.due < t).length, ppl = activePeople();
+  const filt = `<div class="fbar">${sprintPill(sp)}
+    <button class="fchip ${ui.onlyBlocked ? 'on' : ''}" data-act="fBlk">Bloqueados <span class="n">${nb}</span></button>
+    <button class="fchip late ${ui.onlyLate ? 'on' : ''}" data-act="fLate">Atrasados <span class="n">${nl}</span></button>
+    ${ui.onlyAging ? '<button class="fchip on" data-act="fAging">Envelhecendo ✕</button>' : ''}
+    <select class="sel" data-act="ef" style="height:30px;border-radius:99px">${epicOpts(ui.epicFilter, 'Todas as iniciativas', true)}</select>
+    ${ppl.length ? `<span class="fppl" title="Filtrar por responsável">${ppl.slice(0, 10).map(p => `<button class="${normName(ui.ownerF) === normName(p.name) ? 'on' : ''}" data-act="fOwner" data-name="${esc(p.name)}" title="${esc(p.name)}">${avatar(p.name)}</button>`).join('')}</span>` : ''}
+    <input class="sin" placeholder="Buscar" value="${esc(ui.q)}" data-act="q" style="width:120px;height:30px">
+    <div class="grow"></div><span class="small muted" style="margin-left:4px">Raias</span><span class="segx">${[['none', 'Nenhuma'], ['epic', 'Iniciativa'], ['owner', 'Pessoa']].map(([k, l]) => `<button class="${ui.lanes === k ? 'on' : ''}" data-act="lanes" data-v="${k}">${l}</button>`).join('')}</span>
+    <button class="fchip ${ui.dense ? 'on' : ''}" data-act="dense" data-v="${ui.dense ? '' : 1}" title="Cards compactos: só título, responsável e tempo na coluna">Compacto</button></div>
     ${ui.boardFilter === 'sprint' && !sp ? '<div class="banner">Nenhuma sprint em andamento: mostrando todos os cards. Times em fluxo contínuo podem trabalhar sem sprints.</div>' : ''}`;
-  const colsHtml = cols().map((col, i) => {
-    const list = cs.filter(c => c.col === col.id).sort((a, b) => a.order - b.order);
-    const total = activeCards().filter(c => c.col === col.id).length;
-    const role = col.id === db.settings.commitCol ? 'compromisso' : col.id === db.settings.startCol ? 'início' : i === cols().length - 1 ? 'entrega' : '';
-    return `<section class="col" data-col="${col.id}"><div class="colh"><span>${esc(col.name)}</span>${role ? `<span class="role">${role}</span>` : ''}<span class="grow"></span><span class="cnt ${col.wip && total > col.wip ? 'over' : ''}" title="${col.wip ? 'Limite de WIP: ' + col.wip : ''}">${total}${col.wip ? '/' + col.wip : ''}</span></div>
-      <div class="cards">${list.map(kcHtml).join('') || ''}</div>${i === 0 || col.id === db.settings.commitCol ? `<button class="addc" data-act="newCard" data-col="${col.id}">+ Adicionar card</button>` : ''}</section>`;
-  }).join('');
-  return filt + `<div class="board">${colsHtml}</div>`;
+  const bc = boardCols(), last = cols().length - 1;
+  const colBody = (col, list) => `<div class="cards">${list.sort((a, b) => a.order - b.order).map(kcHtml).join('')}</div>${colIdx(col.id) < last ? `<button class="addc" data-act="newCard" data-col="${col.id}">+ Adicionar card</button>` : ''}`;
+  const doneCollapsed = col => `<section class="col dcol" data-col="${col.id}" data-act="doneOpen" title="Mostrar ${esc(col.name)}"><b>${cs.filter(c => c.col === col.id).length}</b><span class="vt">${esc(col.name)} · entrega</span><span>›</span></section>`;
+  const isLast = col => colIdx(col.id) === last;
+  if (ui.lanes === 'none') {
+    const html = bc.map(col => {
+      if (isLast(col) && !ui.doneOpen) return doneCollapsed(col);
+      const total = activeCards().filter(c => c.col === col.id).length, over = col.wip && total > col.wip;
+      return `<section class="col ${over ? 'overw' : ''}" data-col="${col.id}">${colHead(col, colIdx(col.id), total)}${isLast(col) ? `<div class="row small" style="padding:0 4px"><label class="row small muted"><input type="checkbox" data-act="od" ${ui.showOldDone ? 'checked' : ''}> mais de 14 dias</label><span class="grow"></span><button class="btn sm ghost" data-act="doneOpen">Recolher</button></div>` : ''}${colBody(col, cs.filter(c => c.col === col.id))}</section>`;
+    }).join('');
+    return filt + `<div class="board board2">${html}</div>` + pulseHtml(cs);
+  }
+  const lanes = ui.lanes === 'epic' ? [...epicsLive().filter(e => e.status !== 'done').map(e => ({ k: e.id, name: e.name, sub: e.centralRef || 'do time', f: c => c.epicId === e.id })), { k: '-', name: 'Sem iniciativa', f: c => !c.epicId || !epicById(c.epicId) || epicById(c.epicId).deleted }]
+    : [...ppl.map(p => ({ k: p.id, name: p.name, sub: p.role || '', f: c => normName(c.owner) === normName(p.name) })), { k: '-', name: 'Sem responsável', f: c => !c.owner || !ppl.some(p => normName(p.name) === normName(c.owner)) }];
+  const head = `<div class="lanehd"><div class="lh"></div>${bc.map(col => isLast(col) && !ui.doneOpen ? '<div style="flex:0 0 58px"></div>' : `<div class="col" style="flex:0 0 272px">${colHead(col, colIdx(col.id), activeCards().filter(c => c.col === col.id).length)}</div>`).join('')}</div>`;
+  const rows = lanes.map(L => { const lc = cs.filter(L.f); if (!lc.length) return ''; return `<div class="lane"><div class="lh">${esc(L.name)}<small>${lc.length} card(s)${L.sub ? ' · ' + esc(L.sub) : ''}</small></div>${bc.map(col => isLast(col) && !ui.doneOpen ? `<section class="col dcol" data-col="${col.id}" data-act="doneOpen"><b>${lc.filter(c => c.col === col.id).length}</b></section>` : `<section class="col" data-col="${col.id}"><div class="cards">${lc.filter(c => c.col === col.id).sort((a, b) => a.order - b.order).map(kcHtml).join('')}</div></section>`).join('')}</div>`; }).join('');
+  return filt + `<div class="lanes board">${head}${rows || '<div class="muted small">Nenhum card neste filtro.</div>'}</div>` + pulseHtml(cs);
+}
+function cardChips2(c) {
+  const f = c.featureRef ? catFeature(c.featureRef) : null, od = f ? openDeps(f) : [], e = epicById(c.epicId);
+  return `${e && !ui.dense ? `<span class="small muted" title="${esc(e.name)}">${esc(clip(e.name, 24))}</span>` : ''}
+    ${od.length && !isDone(c) ? `<span class="chip late" title="Depende de ${esc(od.map(d => d.ref).join(', '))}, ainda aberta(s) na Central">depende de ${esc(od.map(d => d.ref.split('.')[1]).join(', '))}</span>` : ''}
+    ${c.blocked ? `<span class="chip late" title="${esc(c.blocked.reason || '')}">bloqueado · ${esc(catLabel(c.blocked.cat).toLowerCase())}</span>` : ''}`;
 }
 function kcHtml(c) {
-  const age = daysInCol(c);
-  return `<article class="kc ${c.blocked ? 'blk' : ''}" draggable="true" data-card="${c.id}" data-act="card">
-    <div class="row small muted">${kic(c.kind)}<span class="code">${esc(c.id)}</span><span class="grow"></span>${c.points != null && c.points !== '' ? `<span class="chip line">${esc(c.points)} pt</span>` : ''}</div>
-    <div class="tt">${esc(c.title)}</div><div class="mt">${cardChips(c)}</div>
-    <div class="ft">${c.owner ? avatar(c.owner) : ''}${relDue(c) ? `<span class="due ${relDue(c).cls}" title="Prazo ${fmtD(c.due)}">◷ ${relDue(c).txt}</span>` : ''}<span class="grow"></span>${!isDone(c) && colIdx(c.col) > 0 ? `<span title="Dias nesta coluna">${age}d</span>` : ''}</div></article>`;
+  const lv = agingLevel(c), d = relDue(c), soon = d && !isDone(c) && isYmd(c.due) && c.due <= addDays(today(), 5), ec = epicTone(c);
+  return `<article class="kc ${c.blocked ? 'blk' : ''} ${ui.selCard === c.id ? 'sel' : ''}" draggable="true" data-card="${c.id}" data-act="card" tabindex="0" ${ec ? `style="--ec:${ec}"` : ''}>
+    <div class="row small muted">${kic(c.kind)}<span class="code">${esc(c.id)}</span>${c.featureRef ? `<span class="code bvc" title="${esc(c.featureRef)}">${esc(c.featureRef.split('.').pop())}</span>` : ''}<span class="grow"></span>${soon ? `<span class="due ${d.cls}" title="Prazo ${fmtD(c.due)}">◷ ${d.txt}</span>` : ''}${c.points != null && c.points !== '' && !ui.dense ? `<span class="chip line">${esc(c.points)} pt</span>` : ''}</div>
+    <div class="tt">${esc(c.title)}</div><div class="mt">${cardChips2(c)}</div>
+    <div class="ft">${c.owner ? avatar(c.owner) : ''}<span class="grow"></span>${lv ? `<span class="age" title="${daysInCol(c)} dia(s) nesta coluna${lv === 3 ? ' · mais que 85% dos cards do time' : lv === 2 ? ' · mais que a metade dos cards do time' : ''}"><i class="on"></i><i class="${lv >= 2 ? 'on' : ''}"></i><i class="${lv === 3 ? 'hot' : ''}"></i></span><span>${daysInCol(c)}d</span>` : ''}</div></article>`;
 }
 function wireBoard() {
   const b = $('#main').querySelector('.board'); if (!b) return;
@@ -1101,7 +1203,7 @@ function vBacklog() {
       ${g.cards.length ? g.cards.sort(sortC).map(c => listRow(c, sps)).join('') : '<div class="empty" style="padding:12px 16px">Nada aqui com este filtro.</div>'}</div>`).join('');
   return `<div class="bar"><div class="sgw" style="flex:none">${[['open', 'Abertos'], ['late', 'Atrasados'], ['week', 'Vencem em 7 dias'], ['blocked', 'Bloqueados'], ['noowner', 'Sem responsável'], ['all', 'Todos']].map(([k, l]) => `<button class="${ui.bFilter === k ? 'on' : ''}" data-act="bFilter" data-v="${k}">${l} <span class="faint">${cnt(k)}</span></button>`).join('')}</div>
     <input class="sin" data-act="lq" placeholder="Filtrar cards" value="${esc(ui.lq)}" style="width:180px"><div class="grow"></div>
-    <span class="small muted">Agrupar por</span><div class="sgw" style="flex:none">${[['epic', 'Iniciativa'], ['col', 'Coluna'], ['owner', 'Responsável'], ['sprint', 'Sprint']].map(([k, l]) => `<button class="${ui.bGroup === k ? 'on' : ''}" data-act="bGroup" data-v="${k}">${l}</button>`).join('')}</div>
+    <span class="small muted">Agrupar por</span><div class="sgw" style="flex:none">${[['epic', 'Iniciativa'], ['owner', 'Responsável'], ['sprint', 'Sprint']].map(([k, l]) => `<button class="${ui.bGroup === k ? 'on' : ''}" data-act="bGroup" data-v="${k}">${l}</button>`).join('')}</div>
     <button class="btn" data-act="newEpic">+ Iniciativa do time</button><button class="btn pri" data-act="newCard">+ Card</button></div>
     <div class="stack">${html || '<div class="card flat muted">Nenhum card ainda. Use a barra no topo ou "+ Card".</div>'}</div>`;
 }
@@ -1328,7 +1430,8 @@ function vSettings() {
         <td><input class="sin" data-act="colName" data-i="${i}" value="${esc(x.name)}"></td><td><input class="sin" style="width:70px" type="number" min="0" data-act="colWip" data-i="${i}" value="${x.wip ?? ''}"></td>
         <td><input type="radio" name="cc" data-act="colCommit" data-i="${i}" ${db.settings.commitCol === x.id ? 'checked' : ''} ${i === c.length - 1 ? 'disabled' : ''}></td><td><input type="radio" name="cs" data-act="colStart" data-i="${i}" ${db.settings.startCol === x.id ? 'checked' : ''} ${i === c.length - 1 ? 'disabled' : ''}></td>
         <td style="text-align:right;white-space:nowrap"><button class="btn sm ghost" data-act="colUp" data-i="${i}" ${i ? '' : 'disabled'}>↑</button><button class="btn sm ghost danger" data-act="colDel" data-i="${i}">Remover</button></td></tr>`).join('')}</tbody></table>
-      <button class="btn" style="margin-top:10px" data-act="colAdd">+ Coluna</button></div>
+      <button class="btn" style="margin-top:10px" data-act="colAdd">+ Coluna</button>
+      <label class="row small" style="margin-top:12px"><input type="checkbox" data-act="showBl" ${db.settings.showBacklogCol ? 'checked' : ''}> Mostrar a primeira coluna (${esc(cols()[0].name)}) no quadro <span class="faint">· por padrão ela fica só na aba Backlog</span></label></div>
     <div class="card"><div class="lbl">Arquivo de dados</div>
       <dl class="kv"><dt>Arquivo</dt><dd>${db.demo ? 'exemplo em memória' : esc(fileHandle?.name || '–')}</dd><dt>Senha</dt><dd>${fileKey ? 'protegido por senha' : 'sem senha'}</dd><dt>Cards</dt><dd>${activeCards().length} ativos, ${live().filter(c => c.cancelledAt).length} cancelados</dd></dl>
       <p class="small muted">Guarde o arquivo numa pasta do próprio time (não na pasta da Central). Várias pessoas podem usar o mesmo arquivo: a ferramenta confere a cada 20 s e une as mudanças de cada um.</p>
@@ -1339,7 +1442,13 @@ function vSettings() {
 /* ------------------------------- modais ------------------------------- */
 function modal(html, cls = '') { const d = $('#dlg'); d.className = cls; d.innerHTML = html; if (!d.open) d.showModal(); }
 function closeModal() { const d = $('#dlg'); if (d.open) d.close(); }
-$('#dlg').addEventListener('close', () => { if (db) render(); });
+$('#dlg').addEventListener('close', () => { ui.selCard = ''; if (db) render(); });
+document.addEventListener('keydown', e => {
+  const d = $('#dlg'); if (!d.open || !d.classList.contains('side') || !['ArrowUp', 'ArrowDown'].includes(e.key) || /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName)) return;
+  const ids = view === 'board' ? [...$('#main').querySelectorAll('.kc[data-card]')].map(x => x.dataset.card) : [...$('#main').querySelectorAll('[data-card][data-act=card]')].map(x => x.dataset.card);
+  const i = ids.indexOf(ui.selCard); if (i < 0) return; const nx = ids[i + (e.key === 'ArrowDown' ? 1 : -1)]; if (nx) { e.preventDefault(); cardModal(nx); }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.classList?.contains('kc') && e.target.dataset.card) { e.preventDefault(); cardModal(e.target.dataset.card); } });
 function featureOpts(c) {
   const e = epicById(c.epicId), ci = catInit(e?.centralRef);
   const fs = (ci?.features || []).filter(f => f.status !== 'cancelled' || f.ref === c.featureRef);
@@ -1365,7 +1474,7 @@ function cardModal(id) {
   modal(`<div class="cm-top"><div class="row"><span class="code muted">${esc(c.id)}</span><span class="chip">${KIND_IC[c.kind] || '◧'} ${esc(c.kind)}</span>
       ${e ? `<span class="chip" title="Iniciativa">${esc(clip(e.name, 40))}</span>` : ''}${c.featureRef ? `<span class="chip bv code">${esc(c.featureRef)}</span>` : ''}
       ${c.blocked ? '<span class="chip late">bloqueado</span>' : ''}${c.cancelledAt ? '<span class="chip late">cancelado</span>' : isDone(c) ? '<span class="chip bv">entregue</span>' : ''}
-      <span class="grow"></span><button class="btn ghost" data-act="close" aria-label="Fechar">Fechar</button></div>
+      <span class="grow"></span><span class="navh">↑ ↓ navega · Esc fecha</span><button class="btn ghost" data-act="close" aria-label="Fechar">Fechar</button></div>
     <input class="ttl-in" data-cf="title" value="${esc(c.title)}" maxlength="200" aria-label="Título">
     <div class="flow" role="group" aria-label="Coluna">${cols().map((x, i) => `<button class="${i < k ? 'past' : i === k ? 'cur' : ''}" data-act="cmove" data-card="${c.id}" data-col="${x.id}" title="Mover para ${esc(x.name)}" ${c.cancelledAt ? 'disabled' : ''}>${esc(x.name)}</button>`).join('')}</div></div>
   <div class="cm-grid"><div class="cm-main">
@@ -1397,7 +1506,7 @@ function cardModal(id) {
     <div class="prop"><span>Pontos</span><input class="sin" type="number" min="0" step="0.5" data-cf="points" value="${c.points ?? ''}" placeholder="opcional"></div>
     <div class="prop"><span>Link</span><input class="sin" data-cf="link" value="${esc(c.link)}" placeholder="https://">${c.link && !https(c.link) ? '<span class="hint latec">Só links https vão para a Central.</span>' : ''}</div>
     <div class="row" style="margin-top:8px">${c.cancelledAt ? `<button class="btn sm" data-act="uncancel" data-card="${c.id}">Reativar card</button>` : `<button class="btn sm danger" data-act="cancelCard" data-card="${c.id}">Cancelar card</button>`}<span class="grow"></span><button class="btn pri" data-act="close">Pronto</button></div>
-  </aside></div>`, 'wide');
+  </aside></div>`, 'wide side'); ui.selCard = c.id; document.querySelectorAll('#main .kc').forEach(k => k.classList.toggle('sel', k.dataset.card === c.id)); document.querySelector(`#main .kc[data-card="${c.id}"]`)?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   $('#dlg').querySelectorAll('[data-cf]').forEach(el => el.addEventListener('change', () => {
     const kk = el.dataset.cf; let v = el.type === 'checkbox' ? el.checked : el.value;
     if (kk === 'points') c.points = v === '' ? null : Number(v);
@@ -1597,6 +1706,13 @@ document.addEventListener('click', async e => {
       case 'cancelCard': { const c = cardById(el.dataset.card); if (!confirm('Cancelar este card? Ele sai do quadro e das métricas, e vai para a Central como cancelado.')) return; c.cancelledAt = agoraComFuso(); if (c.blocked) desbloquear(c); c.upd = Date.now(); closeModal(); touch(); break; }
       case 'uncancel': { const c = cardById(el.dataset.card); c.cancelledAt = null; c.upd = Date.now(); touch(); cardModal(c.id); break; }
       case 'bf': ui.boardFilter = el.dataset.v; render(); break;
+      case 'fBlk': ui.onlyBlocked = !ui.onlyBlocked; uiSave(); render(); break;
+      case 'fLate': ui.onlyLate = !ui.onlyLate; uiSave(); render(); break;
+      case 'fAging': ui.onlyAging = !ui.onlyAging; render(); break;
+      case 'fOwner': ui.ownerF = normName(ui.ownerF) === normName(el.dataset.name) ? '' : el.dataset.name; uiSave(); render(); break;
+      case 'lanes': ui.lanes = el.dataset.v; uiSave(); render(); break;
+      case 'dense': ui.dense = !!el.dataset.v; uiSave(); render(); break;
+      case 'doneOpen': ui.doneOpen = !ui.doneOpen; uiSave(); render(); break;
       case 'newEpic': { const n = prompt('Nome da iniciativa (épico) do time'); if (!n?.trim()) return; const ep = novoEpico(clip(n, 200)); ui.epicSel = ep.id; touch(); epicModal(ep.id); break; }
       case 'epicFromCentral': { const ci = catInit(el.dataset.ref); const ep = novoEpico(ci.name); ep.centralRef = ci.ref; ui.epicSel = ep.id; touch(); toast(`Iniciativa ${ci.ref} trazida para o quadro.`); break; }
       case 'epicSel': ui.epicSel = id; render(); break;
@@ -1656,6 +1772,8 @@ document.addEventListener('change', e => {
   const t = Date.now();
   switch (a) {
     case 'ef': ui.epicFilter = el.value; render(); break;
+    case 'bfs': ui.boardFilter = el.value; render(); break;
+    case 'showBl': db.settings.showBacklogCol = el.checked; db.settings.upd = t; touch(false); break;
     case 'ob': ui.onlyBlocked = el.checked; render(); break;
     case 'od': ui.showOldDone = el.checked; render(); break;
     case 'linkFeat': { const c = cardById(el.dataset.card); if (!el.value) return; c.featureRef = el.value; c.upd = t; touch(); toast(`${c.id} ligado a ${el.value}.`); break; }
