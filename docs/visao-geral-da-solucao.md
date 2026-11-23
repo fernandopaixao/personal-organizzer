@@ -1,6 +1,6 @@
 # Visão geral da solução · Central de Gestão, Quadro do Time e integração
 
-*15/11/2026 · estado atual: Central v14 (PRs #3 e #5), Quadro do Time v1 (PRs #4 e #6)*
+*23/11/2026 · estado atual: Central v15 e Quadro do Time 2.0 (detalhes em `docs/plano-v15.md`)*
 
 Este documento explica a solução como um todo: quais ferramentas existem, para quem é cada uma, como os dados circulam entre elas e onde está a documentação detalhada de cada parte. É o ponto de partida para quem chega agora; os detalhes técnicos ficam nos documentos citados em cada seção.
 
@@ -13,7 +13,7 @@ A solução é um pequeno ecossistema de **ferramentas HTML de arquivo único**,
 ```
                          ┌──────────────────────────────────────────────┐
   Agentes do Fernando    │          Central de Gestão (Fernando)         │
-  (reuniões, chats,  ───►│  gestao_pessoal_v14.html + arquivo de dados   │
+  (reuniões, chats,  ───►│  gestao_pessoal_v15.html + arquivo de dados   │
    e-mails)  JSON        │  cifrado com a senha do gestor               │
    gestao-import/3       └───────────────┬──────────────▲───────────────┘
                                          │ catálogo      │ status e métricas
@@ -27,7 +27,7 @@ A solução é um pequeno ecossistema de **ferramentas HTML de arquivo único**,
                                  ▼ lê catálogo   │ publica backlog e métricas
                  ┌────────────────────────────────────────────────────────┐
                  │  Ferramenta de cada time                                │
-                 │  Quadro do Time v1 (pronto) ou ferramenta própria       │
+                 │  Quadro do Time 2.0 (pronto) ou ferramenta própria      │
                  │  adaptada ao contrato                                   │
                  └────────────────────────────────────────────────────────┘
 
@@ -37,8 +37,8 @@ A solução é um pequeno ecossistema de **ferramentas HTML de arquivo único**,
 
 | Peça | O que é | Quem usa | Onde está |
 |---|---|---|---|
-| **Central de Gestão v14** | Gestão pessoal e de portfólio do gestor: tarefas, delegação, iniciativas e features, rituais, pessoas, métricas e integração com os times | Fernando | Repositório: `gestao_pessoal_v14.html`, plano em `docs/plano-v14.md`. Projeto: `gestao-v14/` |
-| **Quadro do Time v1** | Quadro de cards, backlog, sprints, iniciativas ligadas à Central e métricas de fluxo do time | Cada time | Repositório e projeto: `ferramenta-time/` (HTML, guia, telas) |
+| **Central de Gestão v15** | Gestão pessoal e de portfólio do gestor: tarefas, delegação, iniciativas e features, rituais, pessoas, métricas e integração com os times | Fernando | Repositório: `gestao_pessoal_v15.html`, plano em `docs/plano-v15.md`. Projeto: `gestao-v15/` |
+| **Quadro do Time 2.0** | Quadro de cards, backlog, sprints, iniciativas ligadas à Central e métricas de fluxo do time | Cada time | Repositório e projeto: `ferramenta-time/` (HTML, guia, telas) |
 | **Integração** | Pasta SharePoint, contratos JSON versionados, envelope cifrado, chaves por time | Central e ferramentas dos times | Projeto: `integracao-time/` (documentos 00 a 06, `contrato/`, `exemplos/`) |
 | **Agentes do Fernando** | Agentes com acesso a reuniões, chats e e-mails que geram arquivos de importação para a Central | Fernando | Projeto: `integracao-time/06-prompts-para-agentes.md` |
 | **Ferramenta de feedbacks** | Ferramenta separada para registrar feedbacks | Fernando | Fora deste repositório. Sem integração (seção 10) |
@@ -56,27 +56,24 @@ A solução é um pequeno ecossistema de **ferramentas HTML de arquivo único**,
 
 ---
 
-## 3. Central de Gestão (v14)
+## 3. Central de Gestão (v15)
 
-A ferramenta do Fernando. Abre com dois cliques em `gestao_pessoal_v14.html`, pede o arquivo de dados e a senha.
+A ferramenta do Fernando. Abre com dois cliques em `gestao_pessoal_v15.html`, pede o arquivo de dados e a senha.
 
 ### 3.1 Telas
 
-| Grupo | Tela | Para quê |
+| Tecla | Página | Para quê |
 |---|---|---|
-| Meu dia | **Hoje** | Tarefas do dia, atrasos, fóruns dos próximos 7 dias, iniciativas pedindo atenção e o cartão **Dos times** (arquivos novos, alertas, épicos sem vínculo, times sem chave) |
-| | **Demandas** | Lista e quadro de tarefas, ligadas a uma feature, a uma iniciativa ou a nada |
-| | **Delegação** | O que está com quem, prazos, cobranças e aderência |
-| Portfólio | **Iniciativas** | Feito × prazo, fases, próxima feature, atualização; painel com abas (Visão geral, Features, Do time, Tarefas, Ajustes) |
-| | **Roadmap** | Horizontes (agora, próximo, depois, descoberta), linha do tempo com fases sobrepostas e dependências |
-| Rituais | **Fóruns** | Reuniões recorrentes com pautas por data (o que não foi discutido rola para a próxima), decisões e compromissos |
-| | **Staff** | Semana dos times, backlog e pauta da staff |
-| | **Pessoas** | 1:1, anotações de acompanhamento e cadastro dos times (com prefixo de código e pasta de integração) |
-| Times | **Métricas** | Pessoas e tarefas; aba **Times (fluxo)** com as métricas publicadas pelos times |
-| | **Integração** | Pasta e chaves, arquivos recebidos, conciliação e compartilhamento com os times |
-| | **Visão do time** | Backlog do time, features por iniciativa com o downstream do time, reunião de status guiada e folha para colar no Teams |
+| 1 | **Hoje** | Tarefas do dia, atrasos, 1:1 da semana, fóruns dos próximos 7 dias, iniciativas pedindo atenção e o cartão **Dos times** (arquivos novos, alertas, épicos sem vínculo, times sem chave) |
+| 2 | **Tarefas** | Vistas Minhas, Delegadas (o que está com quem, prazos, cobranças e aderência) e Todas; tarefas ligadas a uma feature, a uma iniciativa ou a nada |
+| 3 | **1:1** | Pessoa 360: indicadores, pauta (minha, dos agentes, combinados e sugestões), trabalho, iniciativas, feedback, histórico e perfil; modo Em conversa com resumo para copiar |
+| 4 | **Feedback** | Ciclos de feedback e evidências por pessoa |
+| 5 | **Iniciativas** | Lista (feito × prazo, fases, próxima feature, painel com abas), Semana, Horizonte, Linha do tempo com fases sobrepostas e Dependências |
+| 6 | **Fóruns** | Pautas por data (o que não foi discutido rola para a próxima), Acordos (decisões e compromissos) e Staff (semana dos times) |
+| 7 | **Times** | Cadastro dos times (prefixo de código e pasta de integração), Métricas dos times (fluxo publicado por eles) e visão de cada time com reunião de status guiada e folha para o Teams |
+| 8 | **Integração** | Pasta e chaves, arquivos recebidos, conciliação e compartilhamento com os times |
 
-Teclas 1 a 0 trocam de página. O botão do topo **Importar e agentes** reúne a importação de JSON e os prompts para os agentes.
+Teclas 1 a 8 trocam de página. O botão do topo **Importar e agentes** reúne a importação de JSON e os prompts para os agentes.
 
 ### 3.2 Histórico das versões
 
@@ -86,8 +83,9 @@ Teclas 1 a 0 trocam de página. O botão do topo **Importar e agentes** reúne a
 | v12 | Fóruns recorrentes com pautas por data, acordos compartilháveis (decisões e compromissos que viram tarefas), visão diária de iniciativas, PBKDF2 600 mil |
 | v13 | Visão do time, reunião de status guiada pelo fórum do time, folha para colar no Teams |
 | v14 | Modelo Iniciativa › Feature, integração com os times, métricas dos times, importação `gestao-import/3` com 12 prompts para agentes, menu agrupado, painel da iniciativa redesenhado |
+| v15 | Navegação em 8 páginas sem telas duplicadas, Pessoa 360 no 1:1 com modo Em conversa e sessões registradas, formulários num padrão único |
 
-Detalhes da v14: `docs/plano-v14.md`.
+Detalhes da v15: `docs/plano-v15.md` (e da v14 em `docs/plano-v14.md`).
 
 ---
 
@@ -116,14 +114,14 @@ Documento detalhado: `integracao-time/04-modelo-iniciativa-feature.md`.
 
 ---
 
-## 5. Quadro do Time (v1)
+## 5. Quadro do Time (2.0)
 
 A ferramenta pronta para os times. Também é um HTML único (`ferramenta-time/quadro_do_time_v1.html`), aberto no Edge ou Chrome.
 
 | Tela | Para quê |
 |---|---|
-| **Quadro** | Colunas com limite de WIP, arrastar e soltar, filtros, aviso quando a feature do card depende de outra ainda aberta |
-| **Backlog** | Lista agrupável (iniciativa, coluna, responsável, sprint) com filtros e "+ Card" em cada grupo |
+| **Quadro** | Kanban com raias (iniciativa ou pessoa), barras de WIP, envelhecimento dos cards, entrega recolhida, filtros rápidos, faixa de pulso e card em painel lateral; aviso quando a feature do card depende de outra ainda aberta. A coluna Backlog fica fora do quadro (opção em Ajustes) |
+| **Backlog** | Lista agrupável (iniciativa, responsável, sprint) com filtros e "+ Card" em cada grupo |
 | **Novo card e criação rápida** | Formulário no padrão da tarefa da Central e barra rápida: `Ajustar retry @ana amanhã #PAG-042 F2 !bug` |
 | **Sprints** | Planejar, iniciar, fechar; ao fechar, pergunta se publica as métricas |
 | **Iniciativas** | Ligadas à Central, só do time, da Central ainda sem épico (botão Trazer) e concluídas; detalhe com progresso, bloqueios e previsão |
@@ -283,6 +281,7 @@ Faz parte do ecossistema uma **ferramenta de feedbacks**, usada para registrar e
 | Documento | Conteúdo |
 |---|---|
 | `README.md` (repositório) | Como abrir a Central e lista de telas |
+| `docs/plano-v15.md` (repositório) | O que mudou na v15 e no Quadro 2.0 |
 | `docs/plano-v14.md` (repositório) | O que mudou na v14 |
 | `ferramenta-time/guia-adaptacao-times.md` | Quadro do Time (caminho A) e adaptação de ferramentas próprias (caminho B) |
 | `integracao-time/00-LEIA-ME.md` | Índice da integração e todas as decisões tomadas |
