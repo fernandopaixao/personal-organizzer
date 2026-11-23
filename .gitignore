@@ -222,3 +222,4 @@ __marimo__/
 # Arquivos de dados da Central de Gestão (mesmo criptografados, não versionar)
 gestao-dados*.json
 *.backup-antes-da-v*.json
+financas/testes/saida/

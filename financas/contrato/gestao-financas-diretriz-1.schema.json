@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "gestao-financas-diretriz/1",
+  "title": "Diretriz do grupo para um time (conteúdo decifrado do envelope gestao-envelope/1)",
+  "description": "Arquivo grupo/financas/diretriz-<time>.json, cifrado com a chave de finanças do time. Só a ferramenta Finanças do Grupo escreve. Valores em centavos.",
+  "type": "object",
+  "required": ["schema", "revision", "generatedAt", "source", "fiscalYear", "currency"],
+  "properties": {
+    "schema": { "const": "gestao-financas-diretriz/1" },
+    "revision": { "type": "integer", "minimum": 1 },
+    "generatedAt": { "type": "string" },
+    "hlc": { "type": "string" },
+    "source": { "type": "object", "required": ["team", "writer"], "properties": { "team": { "type": "string" }, "writer": { "type": "string" }, "group": { "type": "string" }, "tool": { "type": "string" } } },
+    "team": { "type": "object", "properties": { "name": { "type": "string" }, "slug": { "type": "string" } } },
+    "fiscalYear": { "type": "integer" },
+    "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+    "categories": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "name": { "type": "string" }, "kind": { "enum": ["OPEX", "CAPEX"] } } } },
+    "costCenters": { "type": "array", "items": { "type": "string" } },
+    "caps": { "type": "object", "description": "Teto anual por categoria (id → centavos).", "additionalProperties": { "type": "integer" } },
+    "capTotal": { "type": "integer" },
+    "planVersion": { "type": "string", "description": "Versão do plano que o grupo pede (ex.: Reforecast 1)." },
+    "publishBy": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "closingDay": { "type": "integer" },
+    "note": { "type": "string", "maxLength": 500 }
+  }
+}

@@ -1,0 +1,1248 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Finanças do Time</title>
+<style>
+:root{
+  --bv:#223ad2; --bv-deep:#002bab; --bv-mid:#8e9de9; --bv-line:#d5dbf7; --bv-soft:#f2f4fd;
+  --ink:#161a23; --muted:#6f7689; --faint:#aab0bf; --line:#eceef4; --bg:#fafafc; --card:#fff; --late:#c4574f; --late-soft:#fbefee;
+  --ok:#2f7d5b; --ok-soft:#eaf5ef;
+  --font:Inter,"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+  --title:"BV Leve",Montserrat,Inter,"Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--font);background:var(--bg);color:var(--ink);font-size:13.5px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;padding:0}
+a{color:var(--bv)}
+.hidden{display:none!important}
+.muted{color:var(--muted)}.faint{color:var(--faint)}.grow{flex:1}.small{font-size:12px}.bvc{color:var(--bv)}.latec{color:var(--late)}.okc{color:var(--ok)}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rail{position:fixed;left:0;top:0;bottom:0;width:84px;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:2px;z-index:20}
+.logo{width:36px;height:36px;border-radius:10px;background:var(--bv);color:#fff;display:grid;place-items:center;font-weight:700;font-family:var(--title);margin-bottom:12px;font-size:11px}
+.nv{width:70px;padding:8px 0 6px;border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);font-size:10.5px;position:relative;text-align:center}
+.nv svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.nv:hover{color:var(--ink)}.nv.on{color:var(--bv);background:var(--bv-soft);font-weight:600}
+.nv .b{position:absolute;top:3px;right:10px;min-width:15px;height:15px;border-radius:8px;background:var(--late);color:#fff;font-size:9.5px;display:grid;place-items:center;padding:0 4px;font-weight:700}
+.main{margin-left:84px;padding:0 clamp(18px,2.6vw,56px) 80px}
+.top{position:sticky;top:0;z-index:10;background:rgba(250,250,252,.95);backdrop-filter:blur(8px);display:flex;align-items:center;gap:12px;padding:14px 0 12px;flex-wrap:wrap}
+.top h1{margin:0;font-family:var(--title);font-size:20px;font-weight:600;letter-spacing:-.02em}
+.top .sub{font-size:12px;color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);padding:4px 10px;border-radius:99px;border:1px solid var(--line);background:#fff;white-space:nowrap}
+.pill .led{width:7px;height:7px;border-radius:50%;background:var(--bv)}.pill .led.wait{background:var(--faint)}.pill .led.err{background:var(--late)}
+button.pill:hover{border-color:#cfd3e0;color:var(--ink)}
+.banner{background:var(--bv-soft);border:1px solid var(--bv-line);color:var(--bv-deep);border-radius:12px;padding:9px 14px;margin:0 0 14px;font-size:12.5px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.banner.warn{background:var(--late-soft);border-color:#f0cfcc;color:#8a2f28}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px 12px;font-weight:550;font-size:12.5px;white-space:nowrap}
+.btn:hover{border-color:#cfd3e0}.btn.pri{background:var(--bv);border-color:var(--bv);color:#fff}.btn.pri:hover{background:var(--bv-deep)}
+.btn.sm{padding:3px 9px;font-size:12px;border-radius:8px}.btn:disabled{opacity:.4;cursor:not-allowed}.btn.danger{color:var(--late)}
+.btn.ghost{border-color:transparent;background:none;color:var(--muted)}.btn.ghost:hover{color:var(--ink);background:#f0f1f6}
+.sg{display:inline-flex;background:#f0f1f6;border-radius:10px;padding:2px;gap:2px;flex-wrap:wrap}
+.sg button{padding:5px 12px;border-radius:8px;color:var(--muted);font-weight:550;font-size:12.5px}
+.sg button.on{background:#fff;color:var(--bv);box-shadow:0 1px 2px rgba(20,30,70,.1)}
+.sel,.sin,textarea.sin{border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px 10px;outline:none;font-size:12.5px;min-width:0}
+.sel:focus,.sin:focus{border-color:var(--bv);box-shadow:0 0 0 3px var(--bv-soft)}
+textarea.sin{width:100%;resize:vertical;min-height:60px}
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:2px 0 16px}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:550;padding:1px 8px;border-radius:99px;background:#f2f3f8;color:var(--muted);white-space:nowrap}
+.chip.bv{background:var(--bv-soft);color:var(--bv)}.chip.late{background:var(--late-soft);color:var(--late)}.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:11.5px;letter-spacing:-.01em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin-bottom:16px}
+.lbl{font-size:11px;font-weight:650;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 10px;display:flex;align-items:center;gap:8px}
+h2{font-family:var(--title);font-size:16px;font-weight:600;margin:0 0 4px;letter-spacing:-.01em}
+h3{font-size:14px;font-weight:650;margin:0}
+.empty{color:var(--faint);padding:14px 0;font-size:12.5px}
+.grid{display:grid;gap:16px}.g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px}.kpi b{display:block;font-family:var(--title);font-size:21px;font-weight:600;letter-spacing:-.02em}.kpi span{font-size:11.5px;color:var(--muted)}
+.kpi.alert b{color:var(--late)}
+table.t{width:100%;border-collapse:collapse;font-size:12.5px}
+table.t th{font-size:11px;font-weight:650;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.t td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.t td.n,table.t th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.t tr.tot td{font-weight:650;background:#f7f8fb}
+table.t tr:hover td{background:#fbfbfe}
+.scroll{overflow-x:auto}
+.cell{width:92px;text-align:right;border:1px solid transparent;background:transparent;border-radius:6px;padding:3px 5px;font-variant-numeric:tabular-nums}
+.cell:hover{border-color:var(--line)}.cell:focus{border-color:var(--bv);background:#fff;outline:none}
+.cell.closed{color:var(--muted)}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 16px;border-radius:10px;font-size:12.5px;z-index:100;max-width:90vw;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+dialog{border:0;border-radius:18px;padding:0;width:min(620px,94vw);max-height:90vh;box-shadow:0 24px 64px rgba(20,30,70,.25)}
+dialog.wide{width:min(900px,96vw)}
+dialog::backdrop{background:rgba(22,26,35,.35)}
+dialog[open]{display:flex;flex-direction:column}dialog>.mb{flex:1;min-height:0}
+.mh{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--line);background:#fff}
+.mb{padding:16px 20px;overflow:auto}
+.mf{display:flex;gap:8px;justify-content:flex-end;padding:12px 20px;border-top:1px solid var(--line);flex-wrap:wrap}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.field>span{font-size:11.5px;font-weight:600;color:var(--muted)}
+.field .sin,.field .sel{width:100%}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.cofre{border:1.5px solid var(--late);background:var(--late-soft);border-radius:14px;padding:12px 14px;color:#6d2620;font-size:12.5px;margin:6px 0 12px}
+.cofre b{color:#8a2f28}
+.quick{position:relative;margin-bottom:16px}
+.quick input{width:100%;padding:10px 14px 10px 36px;border:1px solid var(--line);border-radius:12px;background:#fff;outline:none;font-size:13px}
+.quick input:focus{border-color:var(--bv);box-shadow:0 0 0 3px var(--bv-soft)}
+.quick .pl{position:absolute;left:13px;top:7px;color:var(--bv);font-weight:700;font-size:16px}
+.quick .hint{font-size:11.5px;color:var(--muted);margin-top:4px}
+.al{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--line);font-size:12.5px}.al:last-child{border-bottom:0}
+.al .dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex:none;background:var(--bv)}.al .dot.late{background:var(--late)}
+.welcome{max-width:640px;margin:8vh auto;padding:0 20px}
+.welcome .card{padding:26px 28px}
+.steps{display:flex;gap:6px;margin:0 0 18px;flex-wrap:wrap}.steps i{height:4px;flex:1;min-width:30px;border-radius:2px;background:#e6e8f0}.steps i.on{background:var(--bv)}
+.opt{display:block;width:100%;text-align:left;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:8px;background:#fff}
+.opt:hover{border-color:var(--bv-mid)}.opt.on{border-color:var(--bv);background:var(--bv-soft)}
+.opt b{display:block;font-size:13.5px}.opt span{font-size:12px;color:var(--muted)}
+.map{display:grid;grid-template-columns:1fr 1fr;gap:12px}.map>div{border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:12.5px}
+.map h4{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+svg.ch{width:100%;height:auto;display:block}
+.legend{display:flex;gap:14px;font-size:11.5px;color:var(--muted);flex-wrap:wrap;margin-top:6px}.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+@media (max-width:720px){.rail{position:fixed;top:auto;bottom:0;width:100%;height:62px;flex-direction:row;justify-content:space-around;padding:0;border-right:0;border-top:1px solid var(--line)}.logo{display:none}.main{margin-left:0;padding-bottom:90px}.f2,.map{grid-template-columns:1fr}}
+
+</style>
+</head>
+<body>
+<div id="app"></div>
+<dialog id="dlg"></dialog>
+<script>
+/* ======================================================================
+   nucleo-sync 1.0 · bloco comum das ferramentas da solução
+   (finanças do grupo, finanças do time, assistente inicial)
+   - criptografia: arquivo local com senha (PBKDF2 600k + AES-256-GCM)
+     e envelope gestao-envelope/1 com chave aleatória por time
+   - pasta sincronizada (OneDrive/SharePoint): escrita segura, um dono por
+     arquivo, revisão monotônica, confere-antes-de-gravar, cópias de conflito
+   - aviso de senha e cofre, lembrete de teste da senha, "Onde estou?"
+   Este arquivo é injetado no HTML pelo build (tools/build_financas.py).
+   ====================================================================== */
+const NUCLEO_VERSION = '1.0.0';
+const te = new TextEncoder(), td = new TextDecoder();
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = (p = '') => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const clamp = (s, n) => String(s ?? '').slice(0, n);
+const slugify = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+
+const b64 = {
+  enc: u8 => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); },
+  dec: s => Uint8Array.from(atob(s), c => c.charCodeAt(0)),
+  urlDec: s => b64.dec(s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4)),
+  urlEnc: u8 => b64.enc(u8).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+};
+
+/* ---------------------------- dinheiro e datas ---------------------------- */
+// Valores sempre em centavos inteiros.
+const fmtMoeda = (c, moeda = 'BRL', dec = false) => ((c || 0) / 100).toLocaleString('pt-BR', { style: 'currency', currency: moeda, minimumFractionDigits: dec ? 2 : 0, maximumFractionDigits: dec ? 2 : 0 });
+const fmtCurto = (c) => { const v = (c || 0) / 100, a = Math.abs(v); return a >= 1e6 ? (v / 1e6).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' mi' : a >= 1e3 ? (v / 1e3).toLocaleString('pt-BR', { maximumFractionDigits: 0 }) + ' mil' : v.toLocaleString('pt-BR', { maximumFractionDigits: 0 }); };
+// Aceita "12.400", "12.400,50", "12400.5", "12,4 mil", "1,2 mi", "R$ 3.000", "15k"
+function parseValor(txt) {
+  let s = String(txt ?? '').trim().toLowerCase().replace(/r\$\s*/g, '').replace(/\s+/g, ' ');
+  if (!s) return null;
+  let mult = 1;
+  const m = /^(-?[\d.,]+)\s*(k|mil|mi|milh[oõ]es|milh[aã]o)?$/.exec(s);
+  if (!m) return null;
+  let n = m[1];
+  if (m[2]) mult = m[2] === 'k' || m[2] === 'mil' ? 1e3 : 1e6;
+  if (n.includes(',')) n = n.replace(/\./g, '').replace(',', '.');
+  else if (/^\-?\d{1,3}(\.\d{3})+$/.test(n)) n = n.replace(/\./g, '');
+  const v = Number(n);
+  return Number.isFinite(v) ? Math.round(v * mult * 100) : null;
+}
+const pad2 = n => String(n).padStart(2, '0');
+const hojeISO = () => { const d = new Date(); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; };
+const mesAtual = () => hojeISO().slice(0, 7);
+const mesesDoAno = ano => Array.from({ length: 12 }, (_, i) => `${ano}-${pad2(i + 1)}`);
+const NOMES_MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+const nomeMes = m => NOMES_MES[+m.slice(5, 7) - 1] + (m.slice(0, 4) !== String(new Date().getFullYear()) ? '/' + m.slice(2, 4) : '');
+const somaMeses = (m, k) => { const [a, b] = m.split('-').map(Number); const t = a * 12 + (b - 1) + k; return `${Math.floor(t / 12)}-${pad2(t % 12 + 1)}`; };
+const fmtData = iso => iso ? new Date(iso.length === 10 ? iso + 'T12:00:00' : iso).toLocaleDateString('pt-BR') : '';
+const fmtDataHora = iso => iso ? new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+function isoComFuso(d = new Date()) {
+  const o = -d.getTimezoneOffset(), s = o >= 0 ? '+' : '-', a = Math.abs(o);
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}${s}${pad2(Math.floor(a / 60))}:${pad2(a % 60)}`;
+}
+
+/* ------------------------------ IndexedDB kv ------------------------------ */
+const kv = (() => {
+  let dbp = null;
+  const open = () => dbp ??= new Promise((ok, err) => { const r = indexedDB.open('nucleo-sync', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => ok(r.result); r.onerror = () => err(r.error); });
+  const tx = async (mode, fn) => { const db = await open(); return new Promise((ok, err) => { const t = db.transaction('kv', mode); const st = t.objectStore('kv'); const r = fn(st); t.oncomplete = () => ok(r?.result); t.onerror = () => err(t.error); }); };
+  return { get: k => tx('readonly', s => s.get(k)).catch(() => undefined), set: (k, v) => tx('readwrite', s => s.put(v, k)).catch(() => {}), del: k => tx('readwrite', s => s.delete(k)).catch(() => {}) };
+})();
+
+/* ---------------------- identidade do computador (dispositivo) ---------------------- */
+// Identificador aleatório e curto, guardado no navegador. Junto com a pessoa forma o "dono"
+// de um arquivo comum: ana-k3f9. Nunca usa o nome real do computador.
+function dispositivo() {
+  let d = null;
+  try { d = JSON.parse(localStorage.getItem('nucleo.dispositivo') || 'null'); } catch {}
+  if (!d?.id) { d = { id: Array.from(crypto.getRandomValues(new Uint8Array(3)), x => x.toString(36).padStart(2, '0')).join('').slice(0, 5), nome: '' }; try { localStorage.setItem('nucleo.dispositivo', JSON.stringify(d)); } catch {} }
+  return d;
+}
+function nomearDispositivo(nome) { const d = dispositivo(); d.nome = clamp(nome, 40); try { localStorage.setItem('nucleo.dispositivo', JSON.stringify(d)); } catch {} }
+
+/* ---------------------- relógio lógico híbrido (HLC) ---------------------- */
+// "<ms>.<contador>": cresce sempre, mesmo se o relógio do computador voltar.
+function hlcAgora(visto) {
+  let ult = { t: 0, c: 0 };
+  try { ult = JSON.parse(localStorage.getItem('nucleo.hlc') || '{"t":0,"c":0}'); } catch {}
+  const vis = hlcLer(visto);
+  const fisico = Date.now();
+  const t = Math.max(fisico, ult.t, vis.t);
+  const c = t === ult.t && t === vis.t ? Math.max(ult.c, vis.c) + 1 : t === ult.t ? ult.c + 1 : t === vis.t ? vis.c + 1 : 0;
+  try { localStorage.setItem('nucleo.hlc', JSON.stringify({ t, c })); } catch {}
+  return `${t}.${c}`;
+}
+const hlcLer = h => { const m = /^(\d+)\.(\d+)$/.exec(String(h || '')); return m ? { t: +m[1], c: +m[2] } : { t: 0, c: 0 }; };
+const hlcCmp = (a, b) => { const x = hlcLer(a), y = hlcLer(b); return x.t - y.t || x.c - y.c; };
+
+/* ------------------------ arquivo local cifrado com senha ------------------------ */
+const LOCAL_ENC = 'gestao-local-cifrado/1';
+const PBKDF2_ITER = 600000;
+async function chaveDaSenha(senha, salt, iter = PBKDF2_ITER) {
+  const base = await crypto.subtle.importKey('raw', te.encode(senha), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations: iter }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+// ctx = { key, salt, iter, app }
+async function cifrarLocal(obj, ctx) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv, additionalData: te.encode(LOCAL_ENC + '|' + ctx.app) }, ctx.key, te.encode(JSON.stringify(obj))));
+  return JSON.stringify({ schema: LOCAL_ENC, app: ctx.app, kdf: { name: 'PBKDF2', hash: 'SHA-256', iter: ctx.iter, salt: b64.enc(ctx.salt) }, alg: 'A256GCM', iv: b64.enc(iv), ct: b64.enc(ct) });
+}
+function lerCabecalhoLocal(texto) {
+  let o; try { o = JSON.parse(texto); } catch { throw new Error('O arquivo não é JSON (pode estar incompleto).'); }
+  if (o?.schema !== LOCAL_ENC) throw new Error('Este arquivo não é um arquivo cifrado da solução.');
+  return o;
+}
+async function decifrarLocal(texto, senha) {
+  const o = lerCabecalhoLocal(texto);
+  const salt = b64.dec(o.kdf.salt), iter = o.kdf.iter || PBKDF2_ITER;
+  const key = await chaveDaSenha(senha, salt, iter);
+  let pt;
+  try { pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64.dec(o.iv), additionalData: te.encode(LOCAL_ENC + '|' + o.app) }, key, b64.dec(o.ct)); }
+  catch { const e = new Error('Senha incorreta ou arquivo alterado.'); e.code = 'SENHA'; throw e; }
+  return { dados: JSON.parse(td.decode(pt)), ctx: { key, salt, iter, app: o.app } };
+}
+async function novoCtx(senha, app) { const salt = crypto.getRandomValues(new Uint8Array(16)); return { key: await chaveDaSenha(senha, salt), salt, iter: PBKDF2_ITER, app }; }
+// Confere uma senha digitada contra o contexto aberto, sem reabrir o arquivo.
+async function senhaConfere(senha, ctx) {
+  const k2 = await chaveDaSenha(senha, ctx.salt, ctx.iter), iv = new Uint8Array(12), msg = te.encode('teste-de-senha');
+  const [a, b] = await Promise.all([crypto.subtle.encrypt({ name: 'AES-GCM', iv }, ctx.key, msg), crypto.subtle.encrypt({ name: 'AES-GCM', iv }, k2, msg)]);
+  return b64.enc(new Uint8Array(a)) === b64.enc(new Uint8Array(b));
+}
+function forcaSenha(s) {
+  const tipos = [/[a-z]/, /[A-Z]/, /\d/, /[^A-Za-z0-9]/].filter(r => r.test(s)).length;
+  if (s.length < 12) return { ok: false, msg: 'Use pelo menos 12 caracteres.' };
+  if (tipos < 2 && s.length < 20) return { ok: false, msg: 'Misture letras, números ou símbolos (ou use uma frase com 20+ caracteres).' };
+  return { ok: true, msg: s.length >= 16 ? 'Senha forte.' : 'Senha aceitável.' };
+}
+function gerarSenhaForte() {
+  const pal = 'acima,brisa,cacto,dente,euro,folha,girafa,horta,ilha,janela,kiwi,limao,manga,nuvem,ostra,pedra,quadro,rio,sapo,tigre,uva,vela,xale,zebra,cobre,trilho,farol,lontra,museu,pipoca'.split(',');
+  const r = crypto.getRandomValues(new Uint32Array(5));
+  return [0, 1, 2, 3].map(i => pal[r[i] % pal.length]).join('-') + '-' + (r[4] % 900 + 100);
+}
+
+/* --------------------- envelope gestao-envelope/1 (chave do time) --------------------- */
+const ENVELOPE = 'gestao-envelope/1';
+function lerChaveTexto(txt) {
+  const m = /^GK1\.([a-z0-9]+(?:-[a-z0-9]+)*)\.([A-Za-z0-9_-]{43})$/.exec(String(txt).trim());
+  if (!m) throw new Error('Chave inválida: formato esperado GK1.<id>.<43 caracteres>');
+  const raw = b64.urlDec(m[2]);
+  if (raw.length !== 32) throw new Error('Chave inválida: tamanho');
+  return { kid: m[1], raw };
+}
+const importarChave = raw => crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+const gerarChaveTexto = kid => `GK1.${kid}.${b64.urlEnc(crypto.getRandomValues(new Uint8Array(32)))}`;
+const aadDe = h => te.encode([ENVELOPE, h.content, h.team, h.kid, h.revision, h.generatedAt].join('|'));
+// O cabeçalho ganha "writer" em claro (dono do arquivo). Ele não entra no AAD, para manter
+// compatibilidade com o contrato; depois de decifrar, confere com payload.source.writer.
+async function cifrarEnv(payload, { key, kid, team }) {
+  const h = { schema: ENVELOPE, content: payload.schema, team, kid, revision: payload.revision, generatedAt: payload.generatedAt, alg: 'A256GCM' };
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv, additionalData: aadDe(h) }, key, te.encode(JSON.stringify(payload))));
+  return { ...h, writer: payload.source?.writer || undefined, iv: b64.enc(iv), ct: b64.enc(ct) };
+}
+async function decifrarEnv(env, chaves) {
+  if (env?.schema !== ENVELOPE) throw new Error('Não é um envelope gestao-envelope/1');
+  if (env.alg !== 'A256GCM') throw new Error('Algoritmo não suportado: ' + env.alg);
+  const key = chaves.get(env.kid);
+  if (!key) throw new Error(`Chave "${env.kid}" não cadastrada`);
+  let pt;
+  try { pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64.dec(env.iv), additionalData: aadDe(env) }, key, b64.dec(env.ct)); }
+  catch { throw new Error('Falha ao decifrar: chave errada ou arquivo alterado/incompleto'); }
+  const p = JSON.parse(td.decode(pt));
+  if (p.schema !== env.content || p.revision !== env.revision || p.generatedAt !== env.generatedAt) throw new Error('Cabeçalho do envelope não confere com o conteúdo');
+  if (env.writer && p.source?.writer !== env.writer) throw new Error('Dono no cabeçalho não confere com o conteúdo');
+  return p;
+}
+
+/* ------------------------- pastas e arquivos (File System Access) ------------------------- */
+const temFS = () => typeof window.showDirectoryPicker === 'function';
+async function escolherPasta(id) { return window.showDirectoryPicker({ id, mode: 'readwrite' }); }
+async function permissao(h, pedir = true) {
+  if (!h?.queryPermission) return true;
+  const o = { mode: 'readwrite' };
+  if (await h.queryPermission(o) === 'granted') return true;
+  return pedir ? (await h.requestPermission(o)) === 'granted' : false;
+}
+async function subpasta(raiz, caminho, criar = false) {
+  let d = raiz;
+  for (const p of caminho.filter(Boolean)) { try { d = await d.getDirectoryHandle(p, { create: criar }); } catch (e) { if (!criar && e.name === 'NotFoundError') return null; throw e; } }
+  return d;
+}
+async function lerTexto(dir, nome) {
+  try { const f = await (await dir.getFileHandle(nome)).getFile(); return await f.text(); }
+  catch (e) { if (e.name === 'NotFoundError' || e.name === 'TypeMismatchError') return null; throw e; }
+}
+async function existe(dir, nome) { try { await dir.getFileHandle(nome); return true; } catch { try { await dir.getDirectoryHandle(nome); return true; } catch { return false; } } }
+// Escrita atômica: createWritable grava num arquivo temporário e troca na hora do close().
+// Depois relê e confere o conteúdo, para nunca deixar um arquivo pela metade sem perceber.
+async function gravarSeguro(dir, nome, texto) {
+  const fh = await dir.getFileHandle(nome, { create: true });
+  const w = await fh.createWritable({ keepExistingData: false });
+  try { await w.write(texto); await w.close(); } catch (e) { try { await w.abort(); } catch {} throw e; }
+  const lido = await (await fh.getFile()).text();
+  if (lido !== texto) throw new Error(`A gravação de ${nome} não pôde ser confirmada. Tente de novo.`);
+}
+// Arquivo local: guarda as N últimas versões em backup/ (no máximo uma a cada 30 min).
+async function gravarLocal(dir, nome, texto, manter = 5, intervaloMin = 30) {
+  const atual = await lerTexto(dir, nome);
+  if (atual && atual !== texto) {
+    const bk = await subpasta(dir, ['backup'], true);
+    const base = nome.replace(/\.json$/, '');
+    const nomes = []; for await (const [n] of bk.entries()) if (n.startsWith(base + '.') && n.endsWith('.json')) nomes.push(n);
+    nomes.sort();
+    const ult = nomes.at(-1), ultTxt = ult ? await lerTexto(bk, ult) : null;
+    const mc = ult && /\.(\d{8}T\d{6})\.json$/.exec(ult), ultEm = mc ? Date.parse(mc[1].replace(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/, '$1-$2-$3T$4:$5:$6Z')) : 0;
+    if (ultTxt !== atual && Date.now() - ultEm > intervaloMin * 60000) {
+      const carimbo = new Date().toISOString().replace(/[-:]/g, '').slice(0, 15);
+      await gravarSeguro(bk, `${base}.${carimbo}.json`, atual); nomes.push(`${base}.${carimbo}.json`);
+    }
+    for (const n of nomes.slice(0, Math.max(0, nomes.length - manter))) { try { await bk.removeEntry(n); } catch {} }
+  }
+  await gravarSeguro(dir, nome, texto);
+}
+
+/* -------------------- cópias de conflito do OneDrive / SharePoint -------------------- */
+// O cliente do OneDrive não sobrescreve quando dois computadores gravam o mesmo arquivo:
+// renomeia um deles ("plano-NOTEBOOK01.json", "plano-NOTEBOOK01-2.json", "plano (1).json").
+const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const reCopia = (base, ext = '.json') => new RegExp('^' + escRe(base) + '(?:-[^\\\\/]+?| ?\\(\\d+\\))?' + escRe(ext) + '$', 'i');
+async function arquivosDoNome(dir, base, ext = '.json') {
+  const re = reCopia(base, ext), out = [];
+  for await (const [n, h] of dir.entries()) if (h.kind === 'file' && re.test(n)) out.push({ nome: n, principal: n === base + ext, handle: h });
+  return out.sort((a, b) => (b.principal - a.principal) || a.nome.localeCompare(b.nome));
+}
+// Lê o arquivo e todas as cópias, decifra e escolhe o mais novo (maior revisão; empate: HLC).
+// Arquivos que não decifram, de outro time ou de outro conteúdo são ignorados, sem derrubar nada.
+async function lerEnvelopes(dir, base, chaves, { team, content }) {
+  const res = { melhor: null, validos: [], invalidos: [], copias: [], conflito: false };
+  if (!dir) return res;
+  for (const a of await arquivosDoNome(dir, base)) {
+    let texto = null;
+    try { texto = await (await a.handle.getFile()).text(); } catch {}
+    let env = null, p = null, erro = null;
+    try { env = JSON.parse(texto); p = await decifrarEnv(env, chaves); } catch (e) { erro = e.message; }
+    if (p && (env.team !== team || p.source?.team !== team || p.schema !== content)) { if (!a.principal) continue; erro = 'Arquivo de outro time ou de outro tipo'; p = null; }
+    const item = { nome: a.nome, principal: a.principal, env, payload: p, erro };
+    if (!a.principal) res.copias.push(item);
+    if (p) res.validos.push(item); else res.invalidos.push(item);
+  }
+  res.validos.sort((x, y) => (y.payload.revision - x.payload.revision) || hlcCmp(y.payload.hlc, x.payload.hlc));
+  res.melhor = res.validos[0] || null;
+  res.conflito = res.copias.length > 0;
+  return res;
+}
+// Publica um arquivo de dono único (ex.: plano.json do time, diretriz-<time>.json do grupo).
+// 1) relê tudo (inclusive cópias); 2) recusa se o dono é outra pessoa ou outro computador,
+// a menos que o usuário assuma; 3) revisão = maior revisão vista + 1; 4) grava atômico e confere;
+// 5) apaga cópias de conflito que este mesmo dono pode reescrever (o retrato novo as substitui).
+async function publicarUnico({ dir, base, montar, chave, team, writer, assumir = false, ultimaRevisao = 0 }) {
+  const lido = await lerEnvelopes(dir, base, new Map([[chave.kid, chave.key]]), { team, content: montar.schema });
+  const dono = lido.melhor?.payload.source?.writer;
+  if (dono && dono !== writer && !assumir) {
+    const [pd] = dono.split('~'), [pw] = writer.split('~');
+    const e = new Error(pd === pw ? `Este arquivo foi publicado por você em outro computador (${dono}).` : `Este arquivo pertence a ${dono}.`);
+    e.code = pd === pw ? 'DISPOSITIVO' : 'DONO'; e.dono = dono; throw e;
+  }
+  const maxRev = Math.max(ultimaRevisao, ...lido.validos.map(v => v.payload.revision), ...lido.invalidos.map(v => +v.env?.revision || 0), 0);
+  const payload = montar.payload({ revision: maxRev + 1, generatedAt: isoComFuso(), hlc: hlcAgora(lido.melhor?.payload.hlc) });
+  payload.source = { ...(payload.source || {}), team, writer };
+  const env = await cifrarEnv(payload, { key: chave.key, kid: chave.kid, team });
+  const texto = JSON.stringify(env, null, 1);
+  await gravarSeguro(dir, base + '.json', texto);
+  const conf = await decifrarEnv(JSON.parse(await lerTexto(dir, base + '.json')), new Map([[chave.kid, chave.key]]));
+  if (conf.revision !== payload.revision) throw new Error('Outro computador gravou ao mesmo tempo. Leia a pasta e publique de novo.');
+  const removidas = [];
+  for (const c of lido.copias) {
+    const cd = c.payload?.source?.writer;
+    if (cd === writer || (assumir && c.payload && c.payload.revision <= payload.revision) || (!c.payload && c.erro && !c.env?.ct)) {
+      try { await dir.removeEntry(c.nome); removidas.push(c.nome); } catch {}
+    }
+  }
+  return { revision: payload.revision, generatedAt: payload.generatedAt, removidas, conflitos: lido.copias.length, payload };
+}
+// Aviso de "aberto em outro computador": arquivo pequeno renovado a cada minuto.
+// É só aviso (o atraso do OneDrive torna trava pouco confiável). Só ids e horário, sem dados.
+async function marcarAberto(dir, writer, ferramenta) {
+  if (!dir) return;
+  try { await gravarSeguro(dir, `.aberto-${writer.replace('~', '-')}.json`, JSON.stringify({ writer, ferramenta, ate: Date.now() + 3 * 60000 })); } catch {}
+}
+async function abertosEmOutros(dir, writer) {
+  const out = []; if (!dir) return out;
+  try {
+    for await (const [n, h] of dir.entries()) {
+      if (h.kind !== 'file' || !/^\.aberto-.*\.json$/.test(n)) continue;
+      try { const o = JSON.parse(await (await h.getFile()).text()); if (o.writer !== writer && o.ate > Date.now()) out.push(o); } catch {}
+    }
+  } catch {}
+  return out;
+}
+async function desmarcarAberto(dir, writer) { try { await dir?.removeEntry(`.aberto-${writer.replace('~', '-')}.json`); } catch {} }
+
+/* ------------------------------- interface comum ------------------------------- */
+function toast(msg, ms = 3400) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), ms); }
+function dlg() { let d = $('#dlg'); if (!d) { d = document.createElement('dialog'); d.id = 'dlg'; document.body.appendChild(d); } return d; }
+function modal(html, cls = '') { const d = dlg(); d.className = cls; d.innerHTML = html; if (!d.open) d.showModal(); return d; }
+function fecharModal() { const d = dlg(); if (d.open) d.close(); }
+// O evento "close" chega depois, numa tarefa separada: se outro diálogo já abriu no lugar,
+// o evento antigo é ignorado (d.open de novo verdadeiro).
+function aoFechar(d, fn) { d.addEventListener('close', function h() { if (d.open) return; d.removeEventListener('close', h); fn(); }); }
+function perguntar(titulo, html, botoes = [['ok', 'OK', 'pri']], cls = '') {
+  return new Promise(ok => {
+    const d = modal(`<div class="mh"><h2>${esc(titulo)}</h2></div><div class="mb">${html}</div><div class="mf">${botoes.map(([v, t, c]) => `<button class="btn ${c || ''}" data-r="${v}">${esc(t)}</button>`).join('')}</div>`, cls);
+    let feito = false;
+    const fim = v => { feito = true; fecharModal(); ok(v); };
+    aoFechar(d, () => { if (!feito) ok(null); });
+    $$('[data-r]', d).forEach(b => b.onclick = () => { const v = b.dataset.r; if (v !== 'no' && d._validar && !d._validar(v)) return; fim(v); });
+  });
+}
+
+// Aviso de senha e cofre. tipo: 'senha' (arquivo local) | 'chave' (chave de time) | 'html' (HTML gerado com chave)
+const TEXTO_COFRE = {
+  senha: '<b>Esta senha é a única forma de abrir seus dados.</b> Ela não fica guardada em lugar nenhum e ninguém, nem quem fez a ferramenta, consegue recuperá-la. Se você esquecer, os dados se perdem.<br><br><b>Guarde agora num cofre de senhas</b> (por exemplo, o gerenciador de senhas da empresa) antes de continuar.',
+  chave: '<b>Esta chave abre os arquivos do time na pasta compartilhada.</b> Quem tiver a chave lê e publica em nome do time.<br><br><b>Guarde no cofre de senhas</b> e envie ao responsável do time só por mensagem direta no Teams ou por e-mail. <b>Nunca</b> coloque a chave na pasta compartilhada.',
+  html: '<b>Este HTML leva a chave do time embutida.</b> Trate o arquivo como uma senha: envie só ao responsável do time, por mensagem direta ou e-mail, e nunca o deixe na pasta compartilhada.<br><br>Peça para a pessoa <b>guardar a chave no cofre de senhas</b> ao abrir a ferramenta pela primeira vez.'
+};
+async function avisoCofre(tipo = 'senha', extra = '') {
+  const d = modal(`<div class="mh"><h2>Guarde no cofre antes de seguir</h2></div><div class="mb">
+    <div class="cofre">${TEXTO_COFRE[tipo]}</div>${extra}
+    <label class="row" style="margin-top:10px"><input type="checkbox" id="cofreOk"> <span>Já guardei no cofre de senhas</span></label></div>
+    <div class="mf"><button class="btn" data-r="no">Voltar</button><button class="btn pri" data-r="ok" disabled id="cofreBtn">Continuar</button></div>`);
+  $('#cofreOk', d).onchange = e => $('#cofreBtn', d).disabled = !e.target.checked;
+  return new Promise(ok => { $$('[data-r]', d).forEach(b => b.onclick = () => { fecharModal(); ok(b.dataset.r === 'ok'); }); aoFechar(d, () => ok(false)); });
+}
+// Cria a senha do arquivo local: força mínima, confirmação, gerador e aviso do cofre.
+function criarSenhaDlg(titulo = 'Crie a senha do arquivo') {
+  return new Promise(ok => {
+    const d = modal(`<div class="mh"><h2>${esc(titulo)}</h2></div><div class="mb">
+      <p class="muted small" style="margin-top:0">Todos os dados ficam cifrados com esta senha. Não existe arquivo sem senha.</p>
+      <label class="field"><span>Senha</span><input class="sin" type="password" id="s1" autocomplete="new-password"></label>
+      <label class="field"><span>Repita a senha</span><input class="sin" type="password" id="s2" autocomplete="new-password"></label>
+      <div class="row"><button class="btn sm" id="sGer">Gerar senha forte</button><span class="small muted" id="sMsg"></span></div>
+      <div class="small code" id="sMostra" style="margin-top:8px"></div></div>
+      <div class="mf"><button class="btn" id="sNo">Cancelar</button><button class="btn pri" id="sOk">Continuar</button></div>`);
+    const msg = t => $('#sMsg', d).innerHTML = t;
+    $('#s1', d).oninput = () => { const f = forcaSenha($('#s1', d).value); msg(`<span class="${f.ok ? 'okc' : 'latec'}">${f.msg}</span>`); };
+    $('#sGer', d).onclick = () => { const s = gerarSenhaForte(); $('#s1', d).value = $('#s2', d).value = s; $('#sMostra', d).textContent = 'Senha gerada: ' + s; msg('<span class="okc">Copie para o cofre agora.</span>'); };
+    let fim = false;
+    $('#sNo', d).onclick = () => { fim = true; fecharModal(); ok(null); };
+    $('#sOk', d).onclick = async () => {
+      const a = $('#s1', d).value, b = $('#s2', d).value, f = forcaSenha(a);
+      if (!f.ok) return msg(`<span class="latec">${f.msg}</span>`);
+      if (a !== b) return msg('<span class="latec">As duas senhas não são iguais.</span>');
+      fim = true; fecharModal();
+      ok(await avisoCofre('senha') ? a : null);
+    };
+    aoFechar(d, () => { if (!fim) ok(null); });
+  });
+}
+function pedirSenhaDlg(titulo, errou) {
+  return new Promise(ok => {
+    const d = modal(`<div class="mh"><h2>${esc(titulo)}</h2></div><div class="mb">${errou ? '<p class="latec small" style="margin-top:0">Senha incorreta.</p>' : ''}
+      <label class="field"><span>Senha</span><input class="sin" type="password" id="pw" autocomplete="current-password"></label>
+      <p class="small muted">Esqueceu? A senha está no seu cofre de senhas. Sem ela não há como abrir o arquivo.</p></div>
+      <div class="mf"><button class="btn" data-r="no">Cancelar</button><button class="btn pri" data-r="ok">Abrir</button></div>`);
+    let fim = false;
+    const go = v => { fim = true; const s = $('#pw', d).value; fecharModal(); ok(v === 'ok' ? s : null); };
+    $$('[data-r]', d).forEach(b => b.onclick = () => go(b.dataset.r));
+    $('#pw', d).onkeydown = e => { if (e.key === 'Enter') go('ok'); };
+    setTimeout(() => $('#pw', d)?.focus(), 30);
+    aoFechar(d, () => { if (!fim) ok(null); });
+  });
+}
+// Lembrete periódico: 30 dias após criar e depois a cada 90, pede a senha uma vez.
+// seg = { cofreConfirmadoEm, ultimoTesteEm }. Retorna true se o estado mudou.
+async function lembreteTesteSenha(seg, ctx) {
+  const base = seg.ultimoTesteEm || seg.cofreConfirmadoEm; if (!base) return false;
+  const dias = (Date.now() - new Date(base).getTime()) / 864e5, limite = seg.ultimoTesteEm ? 90 : 30;
+  if (dias < limite) return false;
+  for (let i = 0; i < 2; i++) {
+    const s = await pedirSenhaDlg('Confirme que a senha está no cofre', i > 0);
+    if (s == null) { toast('Lembrete adiado para amanhã.'); seg.ultimoTesteEm = new Date(Date.now() - (limite - 1) * 864e5).toISOString(); return true; }
+    if (await senhaConfere(s, ctx)) { seg.ultimoTesteEm = new Date().toISOString(); toast('Senha confirmada. Próximo lembrete em 90 dias.'); return true; }
+  }
+  await perguntar('Senha não confere', '<div class="cofre">Você não lembrou a senha. Enquanto o arquivo ainda está aberto, <b>troque a senha</b> (Ajustes › Trocar senha) e guarde a nova no cofre.</div>');
+  return false;
+}
+
+// "Onde estou?": qual ferramenta é esta, qual arquivo está aberto, o que é local e o que é comum.
+const FERRAMENTAS = [
+  ['Início da solução', 'inicio.html', 'Assistente: pergunta o uso, cria o primeiro arquivo e gera os HTMLs.'],
+  ['Finanças do Grupo', 'financas_grupo.html', 'Consolidado: soma os planos publicados pelos times. Uso do gestor.'],
+  ['Finanças do Time', 'financas_<time>.html', 'Dia a dia e futuro das finanças de um time. Publica o plano para o grupo.'],
+  ['Central de Gestão', 'gestao_pessoal_vNN.html', 'Tarefas consolidado: gestão do gestor, iniciativas e times.'],
+  ['Quadro do Time', 'quadro_<time>.html', 'Tarefas de um time: quadro, backlog, sprints e métricas.']
+];
+function ondeEstou(info) {
+  const lin = (k, v) => `<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line);padding:6px 0"><span class="muted">${k}</span><b style="text-align:right">${v}</b></div>`;
+  modal(`<div class="mh"><h2>Onde estou?</h2></div><div class="mb">
+    ${lin('Ferramenta', esc(info.ferramenta) + ` <span class="faint small">${esc(info.versao)}</span>`)}
+    ${lin('Arquivo aberto (local)', info.arquivo ? `<span class="code">${esc(info.arquivo)}</span>` : '<span class="faint">nenhum</span>')}
+    ${lin('Pasta local', info.pastaLocal ? `<span class="code">${esc(info.pastaLocal)}</span>` : '<span class="faint">não escolhida</span>')}
+    ${lin('Pasta sincronizada (OneDrive)', info.pastaComum ? `<span class="code">${esc(info.pastaComum)}</span>` : '<span class="faint">não ligada</span>')}
+    ${lin('Você neste computador', `<span class="code">${esc(info.writer || '')}</span>`)}
+    <div class="map" style="margin-top:14px">
+      <div><h4>Fica só neste computador</h4>${info.local.map(x => '• ' + esc(x)).join('<br>')}</div>
+      <div><h4>Vai para a pasta sincronizada</h4>${info.comum.map(x => '• ' + esc(x)).join('<br>')}</div>
+    </div>
+    <p class="lbl" style="margin-top:16px">Ferramentas da solução</p>
+    ${FERRAMENTAS.map(([n, a, d]) => `<div class="al"><span class="dot ${n === info.ferramenta ? '' : 'late'}" style="${n === info.ferramenta ? '' : 'background:var(--faint)'}"></span><div><b>${esc(n)}</b> <span class="code faint">${esc(a)}</span>${n === info.ferramenta ? ' <span class="chip bv">você está aqui</span>' : ''}<br><span class="muted">${esc(d)}</span></div></div>`).join('')}
+    <p class="small muted">Os HTMLs não guardam dados: podem ser trocados por versões novas. Os dados ficam nos arquivos cifrados.</p>
+    </div><div class="mf"><button class="btn pri" onclick="fecharModal()">Fechar</button></div>`, 'wide');
+}
+
+/* ----------------------- HTML embutido e pré-configuração ----------------------- */
+async function lerEmbutido(id) {
+  const el = document.getElementById(id); if (!el) throw new Error('HTML embutido não encontrado: ' + id);
+  const bytes = b64.dec(el.textContent.trim());
+  const s = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+  return await new Response(s).text();
+}
+// Troca o bloco entre /*<MARCA>*/ e /*FIM-<MARCA>*/ por um JSON (escapado para <script>).
+function aplicarPreset(html, marca, obj) {
+  const ini = `/*${marca}*/`, fim = `/*FIM-${marca}*/`, i = html.indexOf(ini), j = html.indexOf(fim);
+  if (i < 0 || j < i) throw new Error('O HTML não tem o marcador de pré-configuração ' + marca);
+  const json = JSON.stringify(obj).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+  return html.slice(0, i + ini.length) + json + html.slice(j);
+}
+function baixar(nome, texto, tipo = 'application/json') {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([texto], { type: tipo })); a.download = nome; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+}
+// Nome sugerido da pasta comum (aceita o nome antigo durante a transição)
+const PASTA_COMUM = 'Gestao-Compartilhado', PASTA_COMUM_ANTIGA = 'Gestao-Integracao';
+async function validarPastaComum(raiz) {
+  const tem = await existe(raiz, 'times') || await existe(raiz, 'grupo') || await existe(raiz, 'central');
+  const nomeOk = [PASTA_COMUM, PASTA_COMUM_ANTIGA].includes(raiz.name);
+  return { tem, nomeOk };
+}
+// Checagens indiretas de que a pasta "local" não está sincronizada (o navegador não mostra o caminho).
+async function suspeitaDeSincronizada(dir) {
+  const sinais = [];
+  if ([PASTA_COMUM, PASTA_COMUM_ANTIGA].includes(dir.name)) sinais.push('tem o nome da pasta compartilhada');
+  if (/onedrive|sharepoint/i.test(dir.name)) sinais.push('o nome lembra OneDrive/SharePoint');
+  try { for await (const [n] of dir.entries()) { if (/^desktop\.ini$/i.test(n)) sinais.push('tem desktop.ini'); if (n === 'times' || n === 'grupo') sinais.push('tem a estrutura da pasta compartilhada'); } } catch {}
+  return [...new Set(sinais)];
+}
+
+</script>
+<script>
+/* =====================================================================
+   Finanças do Time · apoio do dia a dia e do futuro das finanças de um time
+   Dados individuais (lançamentos, notas, cenários) ficam no arquivo local cifrado.
+   Só o plano agregado vai para a pasta sincronizada: times/<time>/financas/plano.json
+   ===================================================================== */
+const TOOL = 'financas-time', TOOL_NOME = 'Finanças do Time', TOOL_VERSION = '1.0.0';
+const LOCAL_SCHEMA = 'gestao-financas-local/1', PLANO_SCHEMA = 'gestao-financas-plano/1', DIRETRIZ_SCHEMA = 'gestao-financas-diretriz/1';
+const PRESET = /*FIN-PRESET*/null/*FIM-FIN-PRESET*/;
+const CATS_PADRAO = [
+  ['pessoas', 'Pessoas', 'OPEX'], ['terceiros', 'Terceiros e consultoria', 'OPEX'], ['licencas', 'Licenças e software', 'OPEX'],
+  ['nuvem', 'Nuvem e infraestrutura', 'OPEX'], ['viagens', 'Viagens e eventos', 'OPEX'], ['treinamento', 'Treinamento', 'OPEX'],
+  ['equipamentos', 'Equipamentos', 'CAPEX'], ['desenvolvimento', 'Desenvolvimento capitalizável', 'CAPEX'], ['outras', 'Outras', 'OPEX']
+].map(([id, nome, tipo]) => ({ id, nome, tipo }));
+
+let db = null, ctx = null, dirLocal = null, arquivo = '', raiz = null, chaves = new Map();
+let view = 'resumo', modoPlano = 'previsto', anoVista = null, diretriz = null, situacao = { lida: null, conflitos: [], outros: [], erro: '' };
+let salvarT = null, salvando = false, sujo = false;
+
+/* ------------------------------- modelo ------------------------------- */
+function novoDb({ nome, slug, ano, moeda, pessoa }) {
+  return {
+    schema: LOCAL_SCHEMA, version: 1, tool: TOOL, criadoEm: new Date().toISOString(),
+    team: { nome, slug, prefixo: '' }, ano: +ano, moeda: moeda || 'BRL',
+    pessoa: { nome: pessoa, slug: slugify(pessoa).split('-')[0] || 'eu' },
+    categorias: CATS_PADRAO.map(c => ({ ...c })), centros: [],
+    linhas: [], compromissos: [], lancamentos: [], fechados: [], cenarios: [],
+    versaoPlano: 'Orçamento original', chaves: [],
+    publicacao: { revision: 0, em: null, assinatura: '' }, diretriz: null,
+    seg: { cofreConfirmadoEm: null, ultimoTesteEm: null }
+  };
+}
+function normalizar(d) {
+  if (d?.schema !== LOCAL_SCHEMA || d.tool !== TOOL) throw new Error('Este arquivo não é das Finanças do Time.');
+  d.categorias ??= CATS_PADRAO.map(c => ({ ...c })); d.centros ??= []; d.linhas ??= []; d.compromissos ??= []; d.lancamentos ??= [];
+  d.fechados ??= []; d.cenarios ??= []; d.chaves ??= []; d.publicacao ??= { revision: 0 }; d.seg ??= {}; d.versaoPlano ??= 'Orçamento original';
+  for (const l of d.linhas) { l.orcado ??= {}; l.previsto ??= {}; }
+  return d;
+}
+const writer = () => `${db.pessoa.slug}~${dispositivo().id}`;
+const catPorId = id => db.categorias.find(c => c.id === id);
+const linhaPorId = id => db.linhas.find(l => l.id === id);
+const mesesAno = () => mesesDoAno(db.ano);
+const fechado = m => db.fechados.includes(m);
+function realizado(lid, m) { let s = 0; for (const x of db.lancamentos) if (x.linha === lid && x.data.slice(0, 7) === m) s += x.valor; return s; }
+function comprometido(lid, m) { let s = 0; for (const c of db.compromissos) if (c.linha === lid && c.inicio <= m && (!c.fim || m <= c.fim)) s += c.valor; return s; }
+function previsto(l, m) {
+  const r = realizado(l.id, m);
+  if (fechado(m)) return r;
+  if (l.previsto[m] != null) return Math.max(l.previsto[m], r);
+  const c = comprometido(l.id, m);
+  return Math.max(c > 0 ? c : (l.orcado[m] || 0), r);
+}
+const orcado = (l, m) => l.orcado[m] || 0;
+function totais(meses = mesesAno(), filtro = () => true) {
+  const t = { orcado: 0, previsto: 0, realizado: 0 };
+  for (const l of db.linhas.filter(filtro)) for (const m of meses) { t.orcado += orcado(l, m); t.previsto += previsto(l, m); t.realizado += realizado(l.id, m); }
+  return t;
+}
+const fm = c => fmtMoeda(c, db.moeda);
+
+/* ----------------------------- plano publicado ----------------------------- */
+function montarPlano(meta) {
+  const ms = mesesAno(), prox = Array.from({ length: 12 }, (_, i) => somaMeses(`${db.ano}-12`, i + 1));
+  const lines = db.linhas.map(l => {
+    const c = catPorId(l.cat) || { id: l.cat, tipo: 'OPEX' };
+    const months = {};
+    for (const m of [...ms, ...prox]) {
+      const v = { budget: orcado(l, m), forecast: previsto(l, m), actual: realizado(l.id, m) };
+      if (v.budget || v.forecast || v.actual) months[m] = v;
+    }
+    return { id: l.id, name: clamp(l.nome, 120), category: c.id, kind: c.tipo, costCenter: l.centro || undefined, initiative: l.iniciativa || undefined, supplier: l.fornecedor || undefined, months };
+  });
+  const t = totais();
+  return {
+    schema: PLANO_SCHEMA, ...meta,
+    source: { team: db.team.slug, tool: TOOL, toolVersion: TOOL_VERSION },
+    team: { name: db.team.nome, slug: db.team.slug },
+    fiscalYear: db.ano, currency: db.moeda, planVersion: db.versaoPlano, closedMonths: [...db.fechados].sort(),
+    categories: db.categorias.map(c => ({ id: c.id, name: c.nome, kind: c.tipo })),
+    lines,
+    commitments: db.compromissos.map(c => ({ name: clamp(c.nome, 120), line: c.linha, monthly: c.valor, start: c.inicio, end: c.fim || undefined })),
+    totals: { budget: t.orcado, forecast: t.previsto, actual: t.realizado },
+    directiveRevision: db.diretriz?.revision || undefined
+  };
+}
+const assinaturaPlano = () => JSON.stringify(montarPlano({ revision: 0, generatedAt: '', hlc: '' }));
+
+/* -------------------------------- arquivo -------------------------------- */
+function agendarSalvar() { sujo = true; clearTimeout(salvarT); salvarT = setTimeout(salvar, 1200); render(); }
+async function salvar() {
+  if (!db || !ctx || !dirLocal || salvando) return;
+  salvando = true;
+  try { await gravarLocal(dirLocal, arquivo, await cifrarLocal(db, ctx)); sujo = false; }
+  catch (e) { toast('Não foi possível salvar: ' + e.message, 6000); }
+  finally { salvando = false; renderTopo(); }
+}
+window.addEventListener('beforeunload', e => { if (!db) return; if (sujo) { salvar(); e.preventDefault(); e.returnValue = ''; } desmarcarAberto(dirPlano, writer()); });
+async function carregarChaves() {
+  chaves = new Map();
+  for (const c of db.chaves) { try { const k = lerChaveTexto(c.texto); chaves.set(k.kid, await importarChave(k.raw)); } catch {} }
+}
+const chaveAtual = () => { const c = db.chaves.filter(x => !x.revogada).at(-1); return c && chaves.has(c.kid) ? { kid: c.kid, key: chaves.get(c.kid) } : null; };
+async function cadastrarChave(texto, origem = 'colada') {
+  const k = lerChaveTexto(texto);
+  if (!db.chaves.some(c => c.kid === k.kid)) db.chaves.push({ kid: k.kid, texto: texto.trim(), em: new Date().toISOString(), origem });
+  await carregarChaves(); agendarSalvar();
+  return k.kid;
+}
+
+/* --------------------------- pasta sincronizada --------------------------- */
+let dirPlano = null, dirDiretriz = null, pollT = null, abertoT = null;
+async function ligarPasta(h, silencioso = false) {
+  if (!await permissao(h, !silencioso)) { if (!silencioso) toast('Sem permissão na pasta.'); return false; }
+  const v = await validarPastaComum(h);
+  if (!v.tem && !silencioso) {
+    const r = await perguntar('Esta é a pasta compartilhada?', `<p>A pasta <b class="code">${esc(h.name)}</b> ainda não tem a estrutura da solução (pastas <span class="code">times/</span> e <span class="code">grupo/</span>).</p>
+      <p class="muted small">Escolha a pasta raiz sincronizada pelo OneDrive (normalmente <span class="code">${PASTA_COMUM}</span>, de uma biblioteca do SharePoint). Se for esta mesma, a ferramenta cria só <span class="code">times/${esc(db.team.slug)}/financas/</span>.</p>`, [['no', 'Escolher outra'], ['ok', 'É esta, criar', 'pri']]);
+    if (r !== 'ok') return false;
+  }
+  raiz = h;
+  dirPlano = await subpasta(raiz, ['times', db.team.slug, 'financas'], true);
+  dirDiretriz = await subpasta(raiz, ['grupo', 'financas'], false);
+  db.pastaComum = h.name; agendarSalvar();
+  if (!navigator.webdriver) kv.set('fin-time-raiz:' + db.team.slug, h);
+  await lerPasta(); iniciarPolling();
+  return true;
+}
+function iniciarPolling() {
+  clearInterval(pollT); clearInterval(abertoT);
+  pollT = setInterval(() => lerPasta(true), 45000);
+  marcarAberto(dirPlano, writer(), TOOL); abertoT = setInterval(() => marcarAberto(dirPlano, writer(), TOOL), 60000);
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden && raiz) lerPasta(true); });
+async function lerPasta(silencioso = false) {
+  if (!raiz) return;
+  situacao.erro = '';
+  try {
+    dirDiretriz ??= await subpasta(raiz, ['grupo', 'financas'], false);
+    const dlida = await lerEnvelopes(dirDiretriz, `diretriz-${db.team.slug}`, chaves, { team: db.team.slug, content: DIRETRIZ_SCHEMA });
+    if (dlida.melhor) {
+      const p = dlida.melhor.payload;
+      if (!db.diretriz || p.revision > db.diretriz.revision) {
+        db.diretriz = p; agendarSalvar();
+        if (!silencioso) toast(`Diretriz do grupo lida (revisão ${p.revision}).`);
+        aplicarCategoriasDiretriz();
+      }
+    }
+    const plido = await lerEnvelopes(dirPlano, 'plano', chaves, { team: db.team.slug, content: PLANO_SCHEMA });
+    situacao.lida = plido.melhor?.payload || null;
+    situacao.conflitos = plido.copias;
+    situacao.invalidos = plido.invalidos.filter(x => x.principal);
+    situacao.outros = await abertosEmOutros(dirPlano, writer());
+    situacao.diretrizInvalida = dlida.invalidos.length && !dlida.melhor ? dlida.invalidos[0].erro : '';
+  } catch (e) { situacao.erro = e.message; }
+  render();
+}
+function aplicarCategoriasDiretriz() {
+  const cs = db.diretriz?.categories; if (!Array.isArray(cs) || !cs.length) return;
+  for (const c of cs) {
+    const id = slugify(c.id || c.name); if (!id) continue;
+    const ex = catPorId(id);
+    if (ex) { ex.nome = clamp(c.name, 60) || ex.nome; ex.tipo = c.kind === 'CAPEX' ? 'CAPEX' : 'OPEX'; ex.doGrupo = true; }
+    else db.categorias.push({ id, nome: clamp(c.name, 60), tipo: c.kind === 'CAPEX' ? 'CAPEX' : 'OPEX', doGrupo: true });
+  }
+  if (Array.isArray(db.diretriz.costCenters)) db.centros = [...new Set([...db.centros, ...db.diretriz.costCenters.map(x => clamp(x, 40))])];
+}
+async function publicar(assumir = false) {
+  const ch = chaveAtual();
+  if (!ch) return toast('Cadastre a chave de finanças do time (aba Grupo) antes de publicar.', 5000);
+  if (!raiz) return toast('Ligue a pasta sincronizada antes de publicar.', 5000);
+  try {
+    const r = await publicarUnico({ dir: dirPlano, base: 'plano', chave: ch, team: db.team.slug, writer: writer(), assumir, ultimaRevisao: db.publicacao.revision || 0,
+      montar: { schema: PLANO_SCHEMA, payload: meta => montarPlano(meta) } });
+    db.publicacao = { revision: r.revision, em: r.generatedAt, assinatura: assinaturaPlano(), dono: writer() };
+    agendarSalvar(); await lerPasta(true);
+    toast(`Plano publicado (revisão ${r.revision})${r.removidas.length ? ` · ${r.removidas.length} cópia(s) de conflito resolvida(s)` : ''}.`, 5000);
+  } catch (e) {
+    if (e.code === 'DONO' || e.code === 'DISPOSITIVO') {
+      const r = await perguntar('Assumir a publicação?', `<p>${esc(e.message)}</p><p class="muted small">Cada arquivo comum tem um único dono para evitar conflitos do OneDrive. ${e.code === 'DISPOSITIVO' ? 'Se você trocou de computador, assuma a publicação aqui e pare de publicar do outro.' : 'Combine com essa pessoa antes: depois de assumir, só você publica o plano do time.'}</p>`, [['no', 'Cancelar'], ['ok', 'Assumir e publicar', 'pri']]);
+      if (r === 'ok') return publicar(true);
+    } else toast('Não foi possível publicar: ' + e.message, 7000);
+  }
+}
+
+/* -------------------------------- alertas -------------------------------- */
+function alertas() {
+  const out = [], hoje = hojeISO(), m = mesAtual(), ms = mesesAno();
+  const ant = somaMeses(m, -1);
+  if (ms.includes(ant) && !fechado(ant)) out.push(['late', `${nomeMes(ant)} ainda não foi fechado.`, 'fechar']);
+  if (ms.includes(m) && +hoje.slice(8) > 10 && !db.lancamentos.some(x => x.data.startsWith(m))) out.push(['', `Nenhum lançamento em ${nomeMes(m)} até agora.`]);
+  const t = totais();
+  if (t.orcado && t.previsto > t.orcado * 1.05) out.push(['late', `Previsto do ano ${fm(t.previsto)} está ${Math.round((t.previsto / t.orcado - 1) * 100)}% acima do orçado (${fm(t.orcado)}).`]);
+  const caps = db.diretriz?.caps || {};
+  for (const [cat, teto] of Object.entries(caps)) {
+    const v = totais(ms, l => l.cat === cat).previsto;
+    if (teto && v > teto) out.push(['late', `${catPorId(cat)?.nome || cat}: previsto ${fm(v)} acima do teto do grupo (${fm(teto)}).`]);
+  }
+  if (db.diretriz?.capTotal && t.previsto > db.diretriz.capTotal) out.push(['late', `Previsto total acima do teto do grupo (${fm(db.diretriz.capTotal)}).`]);
+  for (const c of db.compromissos) if (c.fim && c.fim >= m && c.fim <= somaMeses(m, 2)) out.push(['', `Contrato "${c.nome}" termina em ${nomeMes(c.fim)}: renovar ou encerrar?`]);
+  for (const l of db.linhas) for (const mm of ms.filter(fechado)) { const o = orcado(l, mm), r = realizado(l.id, mm); if (o && r > o * 1.1) { out.push(['', `${l.nome}: realizado de ${nomeMes(mm)} ${Math.round((r / o - 1) * 100)}% acima do orçado.`]); break; } }
+  if (db.publicacao.revision && db.publicacao.assinatura !== assinaturaPlano()) out.push(['', 'Há mudanças no plano ainda não publicadas para o grupo.', 'publicar']);
+  if (!db.publicacao.revision && db.linhas.length) out.push(['', 'O plano ainda não foi publicado para o grupo.', 'publicar']);
+  if (situacao.conflitos.length) out.push(['late', `${situacao.conflitos.length} cópia(s) de conflito do OneDrive na pasta do plano. Publicar de novo resolve.`, 'publicar']);
+  for (const o of situacao.outros) out.push(['late', `As Finanças do time estão abertas em outro computador (${o.writer}). Evite publicar dos dois.`]);
+  if (db.diretriz?.publishBy && db.diretriz.publishBy >= hoje && db.publicacao.assinatura !== assinaturaPlano()) out.push(['', `O grupo pediu o plano até ${fmtData(db.diretriz.publishBy)}.`, 'publicar']);
+  return out;
+}
+
+/* ------------------------------- interface ------------------------------- */
+const ICONES = {
+  resumo: '<svg viewBox="0 0 24 24"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>',
+  lancamentos: '<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>',
+  plano: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg>',
+  compromissos: '<svg viewBox="0 0 24 24"><path d="M7 3v4M17 3v4M4 9h16M5 5h14v16H5z"/></svg>',
+  futuro: '<svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>',
+  grupo: '<svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>',
+  ajustes: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.6-2-3.4-2.4 1a7 7 0 0 0-1.7-1L14.5 3h-4l-.4 2.6a7 7 0 0 0-1.7 1L6 5.6l-2 3.4L6 10.6a7 7 0 0 0 0 2.8L4 15l2 3.4 2.4-1a7 7 0 0 0 1.7 1l.4 2.6h4l.4-2.6a7 7 0 0 0 1.7-1l2.4 1 2-3.4-2-1.6c.1-.3.1-.7.1-1z"/></svg>'
+};
+const NAV = [['resumo', 'Resumo'], ['lancamentos', 'Lança-mentos'], ['plano', 'Plano'], ['compromissos', 'Contratos'], ['futuro', 'Futuro'], ['grupo', 'Grupo'], ['ajustes', 'Ajustes']];
+function render() {
+  if (!db) return;
+  const nAl = alertas().filter(a => a[0] === 'late').length;
+  $('#app').innerHTML = `<nav class="rail"><div class="logo">FIN</div>${NAV.map(([k, n]) => `<button class="nv ${view === k ? 'on' : ''}" data-v="${k}">${ICONES[k]}${n}${k === 'resumo' && nAl ? `<span class="b">${nAl}</span>` : ''}</button>`).join('')}</nav>
+    <main class="main"><header class="top" id="topo"></header><div id="pg"></div></main>`;
+  $$('.nv').forEach(b => b.onclick = () => { view = b.dataset.v; render(); });
+  renderTopo();
+  ({ resumo: vResumo, lancamentos: vLanc, plano: vPlano, compromissos: vComp, futuro: vFuturo, grupo: vGrupo, ajustes: vAjustes })[view]($('#pg'));
+}
+function renderTopo() {
+  const t = $('#topo'); if (!t) return;
+  const pend = db.publicacao.assinatura !== assinaturaPlano();
+  t.innerHTML = `<div><h1>${esc(NAV.find(n => n[0] === view)[1].replace('-', ''))}</h1><div class="sub">${esc(db.team.nome)} · ${db.ano} · ${esc(db.moeda)}</div></div><span class="grow"></span>
+    <span class="pill"><span class="led ${sujo || salvando ? 'wait' : ''}"></span>${sujo || salvando ? 'Salvando…' : 'Salvo e cifrado'}</span>
+    <button class="pill" id="tPasta"><span class="led ${raiz ? (situacao.erro || situacao.conflitos.length ? 'err' : '') : 'wait'}"></span>${raiz ? 'Pasta ligada' : 'Pasta não ligada'}</button>
+    <button class="btn ${pend ? 'pri' : ''}" id="tPub">${pend ? 'Publicar para o grupo' : 'Publicado'}</button>
+    <button class="btn ghost" id="tOnde">Onde estou?</button>`;
+  $('#tPasta').onclick = () => { view = 'grupo'; render(); };
+  $('#tPub').onclick = () => publicar();
+  $('#tOnde').onclick = () => ondeEstou({ ferramenta: TOOL_NOME, versao: TOOL_VERSION, arquivo, pastaLocal: dirLocal?.name, pastaComum: raiz ? `${raiz.name}/times/${db.team.slug}/financas/` : '', writer: writer(),
+    local: ['Lançamentos detalhados e observações', 'Cenários "e se" não aplicados', 'Chaves do time (dentro do arquivo cifrado)', 'Cópias de segurança em backup/'],
+    comum: ['plano.json: plano agregado por mês e linha (orçado, previsto, realizado)', 'Leitura da diretriz do grupo (tetos e categorias)'] });
+}
+function kpi(rot, val, cls = '') { return `<div class="kpi ${cls}"><span>${rot}</span><b>${val}</b></div>`; }
+
+/* --- Resumo --- */
+function vResumo(el) {
+  const t = totais(), m = mesAtual(), ms = mesesAno(), ate = ms.filter(x => x <= m);
+  const ytd = totais(ate), mm = ms.includes(m) ? totais([m]) : null;
+  const al = alertas();
+  el.innerHTML = `${barraRapida()}
+    <div class="kpis">${kpi('Orçado no ano', fm(t.orcado))}${kpi('Previsto no ano', fm(t.previsto), t.orcado && t.previsto > t.orcado ? 'alert' : '')}
+      ${kpi('Realizado até ' + nomeMes(m), fm(ytd.realizado))}${kpi('Saldo previsto', fm(t.orcado - t.previsto), t.orcado - t.previsto < 0 ? 'alert' : '')}
+      ${mm ? kpi(`${nomeMes(m)}: realizado / previsto`, `${fmtCurto(mm.realizado)} / ${fmtCurto(mm.previsto)}`) : ''}</div>
+    <div class="grid g2">
+      <div class="card"><p class="lbl">Pedindo atenção <span class="n">${al.length}</span></p>${al.length ? al.map(([c, txt, acao]) => `<div class="al"><span class="dot ${c}"></span><div class="grow">${esc(txt)}</div>${acao ? `<button class="btn sm" data-ac="${acao}">${acao === 'fechar' ? 'Fechar mês' : 'Publicar'}</button>` : ''}</div>`).join('') : '<div class="empty">Tudo em ordem.</div>'}</div>
+      <div class="card"><p class="lbl">Por categoria no ano</p>${tabelaCategorias()}</div>
+    </div>
+    <div class="card"><p class="lbl">Ano mês a mês</p>${grafico(ms)}</div>
+    <div class="card"><p class="lbl">Últimos lançamentos</p>${tabelaLanc(db.lancamentos.slice().sort((a, b) => b.data.localeCompare(a.data)).slice(0, 8))}</div>`;
+  ligarBarraRapida(el);
+  $$('[data-ac]', el).forEach(b => b.onclick = () => b.dataset.ac === 'fechar' ? fecharMesDlg() : publicar());
+  ligarTabelaLanc(el);
+}
+function tabelaCategorias() {
+  const ms = mesesAno(), caps = db.diretriz?.caps || {};
+  const linhas = db.categorias.map(c => ({ c, t: totais(ms, l => l.cat === c.id) })).filter(x => x.t.orcado || x.t.previsto || x.t.realizado || caps[x.c.id]);
+  if (!linhas.length) return '<div class="empty">Crie as linhas do plano na aba Plano.</div>';
+  return `<div class="scroll"><table class="t"><tr><th>Categoria</th><th class="n">Orçado</th><th class="n">Previsto</th><th class="n">Realizado</th>${Object.keys(caps).length ? '<th class="n">Teto do grupo</th>' : ''}</tr>
+    ${linhas.map(({ c, t }) => `<tr><td>${esc(c.nome)} <span class="chip">${c.tipo}</span></td><td class="n">${fm(t.orcado)}</td><td class="n ${t.previsto > t.orcado ? 'latec' : ''}">${fm(t.previsto)}</td><td class="n">${fm(t.realizado)}</td>${Object.keys(caps).length ? `<td class="n ${caps[c.id] && t.previsto > caps[c.id] ? 'latec' : ''}">${caps[c.id] ? fm(caps[c.id]) : '—'}</td>` : ''}</tr>`).join('')}</table></div>`;
+}
+function grafico(ms, extras = {}) {
+  const dados = ms.map(m => { let o = 0, p = 0, r = 0; for (const l of db.linhas) { o += orcado(l, m); p += previsto(l, m) + (extras[m] || 0); r += realizado(l.id, m); } return { m, o, p, r }; });
+  const max = Math.max(1, ...dados.map(d => Math.max(d.o, d.p, d.r)));
+  const W = 760, H = 200, pl = 8, bw = (W - pl * 2) / dados.length, y = v => H - 24 - (v / max) * (H - 40);
+  const bars = dados.map((d, i) => {
+    const x = pl + i * bw + bw * 0.18, w = bw * 0.64, f = fechado(d.m);
+    return `<rect x="${x}" y="${y(d.p)}" width="${w}" height="${H - 24 - y(d.p)}" rx="3" fill="${f ? 'var(--bv)' : 'var(--bv-mid)'}"><title>${nomeMes(d.m)}: previsto ${fm(d.p)} · realizado ${fm(d.r)} · orçado ${fm(d.o)}</title></rect>
+      ${d.o ? `<line x1="${x - 3}" x2="${x + w + 3}" y1="${y(d.o)}" y2="${y(d.o)}" stroke="var(--ink)" stroke-width="2"/>` : ''}
+      <text x="${x + w / 2}" y="${H - 8}" text-anchor="middle" font-size="10.5" fill="var(--muted)">${nomeMes(d.m)}</text>`;
+  }).join('');
+  return `<svg class="ch" viewBox="0 0 ${W} ${H}" role="img" aria-label="Previsto e orçado por mês">${bars}</svg>
+    <div class="legend"><span><i style="background:var(--bv)"></i>Realizado (mês fechado)</span><span><i style="background:var(--bv-mid)"></i>Previsto</span><span><i style="background:var(--ink);height:2px"></i>Orçado</span></div>`;
+}
+
+/* --- Lançamentos --- */
+function barraRapida() {
+  return `<div class="quick"><span class="pl">+</span><input id="qk" placeholder="Novo lançamento: Licença Datadog 12.400 #licencas 05/03 PAG-042"><div class="hint">Valor em reais, <b>#linha</b> ou <b>#categoria</b>, data dd/mm (padrão hoje) e código de iniciativa. Enter abre a confirmação.</div></div>`;
+}
+function ligarBarraRapida(el) { const i = $('#qk', el); if (i) i.onkeydown = e => { if (e.key === 'Enter' && i.value.trim()) { lancDlg(null, interpretar(i.value)); i.value = ''; } }; }
+function interpretar(txt) {
+  let s = ' ' + txt + ' ', o = { descricao: '', valor: null, linha: '', data: hojeISO(), iniciativa: '' };
+  s = s.replace(/\s#([\wÀ-ú-]+)/g, (_, t) => { const k = slugify(t); const l = db.linhas.find(x => slugify(x.nome).startsWith(k)) || db.linhas.find(x => x.cat === k || slugify(catPorId(x.cat)?.nome || '').startsWith(k)); if (l) o.linha = l.id; return ' '; });
+  s = s.replace(/\s([A-Z]{2,5}-\d{1,4})(?=\s)/g, (_, c) => { o.iniciativa = c; return ' '; });
+  s = s.replace(/\s(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?(?=\s)/g, (_, d, m, a) => { const ano = a ? (a.length === 2 ? '20' + a : a) : db.ano; o.data = `${ano}-${pad2(m)}-${pad2(d)}`; return ' '; });
+  s = s.replace(/\s(?:hoje)(?=\s)/gi, ' ').replace(/\s(ontem)(?=\s)/gi, () => { const d = new Date(Date.now() - 864e5); o.data = `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; return ' '; });
+  const vals = [...s.matchAll(/\s(?:R\$\s*)?(-?\d[\d.,]*(?:\s?(?:k|mil|mi)(?=\s))?)(?=\s)/gi)];
+  for (const mv of vals.reverse()) { const c = parseValor(mv[1]); if (c != null) { o.valor = c; s = s.slice(0, mv.index) + ' ' + s.slice(mv.index + mv[0].length); break; } }
+  o.descricao = s.replace(/\s+/g, ' ').trim();
+  return o;
+}
+function opcoesLinhas(sel) {
+  return db.categorias.map(c => { const ls = db.linhas.filter(l => l.cat === c.id); return ls.length ? `<optgroup label="${esc(c.nome)}">${ls.map(l => `<option value="${l.id}" ${l.id === sel ? 'selected' : ''}>${esc(l.nome)}</option>`).join('')}</optgroup>` : ''; }).join('');
+}
+function lancDlg(id, pre = {}) {
+  if (!db.linhas.length) return perguntar('Crie uma linha primeiro', '<p>Os lançamentos são registrados numa linha do plano (ex.: "Licenças de observabilidade"). Crie a primeira linha na aba Plano.</p>').then(() => { view = 'plano'; render(); });
+  const x = id ? db.lancamentos.find(y => y.id === id) : { descricao: '', valor: null, linha: '', data: hojeISO(), iniciativa: '', fornecedor: '', ...pre };
+  const d = modal(`<div class="mh"><h2>${id ? 'Editar lançamento' : 'Novo lançamento'}</h2></div><div class="mb">
+    <label class="field"><span>Descrição</span><input class="sin" id="lD" value="${esc(x.descricao)}"></label>
+    <div class="f2"><label class="field"><span>Valor (R$)</span><input class="sin" id="lV" value="${x.valor != null ? (x.valor / 100).toLocaleString('pt-BR') : ''}" placeholder="12.400,00"></label>
+    <label class="field"><span>Data</span><input class="sin" type="date" id="lDt" value="${esc(x.data)}"></label></div>
+    <label class="field"><span>Linha do plano</span><select class="sel" id="lL"><option value="">Escolha…</option>${opcoesLinhas(x.linha)}</select></label>
+    <div class="f2"><label class="field"><span>Fornecedor (opcional)</span><input class="sin" id="lF" value="${esc(x.fornecedor || '')}"></label>
+    <label class="field"><span>Iniciativa (opcional)</span><input class="sin" id="lI" value="${esc(x.iniciativa || '')}" placeholder="PAG-042"></label></div>
+    ${fechado((x.data || '').slice(0, 7)) ? '<div class="banner warn">Este mês já foi fechado. O lançamento muda o realizado do mês fechado.</div>' : ''}
+    <p class="small muted">O lançamento fica só neste computador. O grupo recebe apenas o total do mês na linha.</p></div>
+    <div class="mf">${id ? '<button class="btn danger" id="lX">Excluir</button><span class="grow"></span>' : ''}<button class="btn" id="lNo">Cancelar</button><button class="btn pri" id="lOk">${id ? 'Salvar' : 'Lançar'}</button></div>`);
+  $('#lNo', d).onclick = fecharModal;
+  if (id) $('#lX', d).onclick = () => { db.lancamentos = db.lancamentos.filter(y => y.id !== id); fecharModal(); agendarSalvar(); };
+  $('#lOk', d).onclick = () => {
+    const v = parseValor($('#lV', d).value), lin = $('#lL', d).value, dt = $('#lDt', d).value;
+    if (v == null) return toast('Informe um valor válido.'); if (!lin) return toast('Escolha a linha do plano.'); if (!/^\d{4}-\d{2}-\d{2}$/.test(dt)) return toast('Data inválida.');
+    const o = { descricao: clamp($('#lD', d).value.trim(), 200), valor: v, linha: lin, data: dt, fornecedor: clamp($('#lF', d).value.trim(), 80), iniciativa: clamp($('#lI', d).value.trim().toUpperCase(), 20) };
+    if (id) Object.assign(x, o); else db.lancamentos.push({ id: uid('L'), criadoEm: new Date().toISOString(), ...o });
+    fecharModal(); agendarSalvar(); toast(id ? 'Lançamento salvo.' : `Lançado: ${fm(v)}.`);
+  };
+}
+let filtroLanc = { mes: '', linha: '', q: '' };
+function vLanc(el) {
+  const ms = [...new Set(db.lancamentos.map(x => x.data.slice(0, 7)))].sort().reverse();
+  let ls = db.lancamentos.filter(x => (!filtroLanc.mes || x.data.startsWith(filtroLanc.mes)) && (!filtroLanc.linha || x.linha === filtroLanc.linha) && (!filtroLanc.q || (x.descricao + ' ' + x.fornecedor + ' ' + x.iniciativa).toLowerCase().includes(filtroLanc.q.toLowerCase())));
+  ls.sort((a, b) => b.data.localeCompare(a.data));
+  const tot = ls.reduce((s, x) => s + x.valor, 0);
+  el.innerHTML = `${barraRapida()}<div class="bar"><select class="sel" id="fM"><option value="">Todos os meses</option>${ms.map(m => `<option value="${m}" ${filtroLanc.mes === m ? 'selected' : ''}>${nomeMes(m)} ${m.slice(0, 4)}${fechado(m) ? ' · fechado' : ''}</option>`).join('')}</select>
+    <select class="sel" id="fL"><option value="">Todas as linhas</option>${opcoesLinhas(filtroLanc.linha)}</select><input class="sin" id="fQ" placeholder="Buscar" value="${esc(filtroLanc.q)}"><span class="grow"></span><span class="muted">${ls.length} lançamento(s) · <b>${fm(tot)}</b></span>
+    <button class="btn" id="fImp">Importar CSV</button><button class="btn pri" id="fNovo">+ Lançamento</button></div>
+    <div class="card">${tabelaLanc(ls)}</div>`;
+  ligarBarraRapida(el);
+  $('#fM').onchange = e => { filtroLanc.mes = e.target.value; render(); };
+  $('#fL').onchange = e => { filtroLanc.linha = e.target.value; render(); };
+  $('#fQ').oninput = e => { filtroLanc.q = e.target.value; clearTimeout(vLanc.t); vLanc.t = setTimeout(() => { render(); $('#fQ')?.focus(); const i = $('#fQ'); i && i.setSelectionRange(i.value.length, i.value.length); }, 300); };
+  $('#fNovo').onclick = () => lancDlg(null);
+  $('#fImp').onclick = importarCsvDlg;
+  ligarTabelaLanc(el);
+}
+function tabelaLanc(ls) {
+  if (!ls.length) return '<div class="empty">Nenhum lançamento.</div>';
+  return `<div class="scroll"><table class="t"><tr><th>Data</th><th>Descrição</th><th>Linha</th><th>Iniciativa</th><th class="n">Valor</th></tr>
+    ${ls.map(x => `<tr data-l="${x.id}" style="cursor:pointer"><td>${fmtData(x.data)}</td><td>${esc(x.descricao)}${x.fornecedor ? ` <span class="faint small">${esc(x.fornecedor)}</span>` : ''}</td><td>${esc(linhaPorId(x.linha)?.nome || '—')}</td><td class="code">${esc(x.iniciativa || '')}</td><td class="n">${fm(x.valor)}</td></tr>`).join('')}</table></div>`;
+}
+function ligarTabelaLanc(el) { $$('[data-l]', el).forEach(r => r.onclick = () => lancDlg(r.dataset.l)); }
+function importarCsvDlg() {
+  const d = modal(`<div class="mh"><h2>Importar lançamentos (CSV)</h2></div><div class="mb">
+    <p class="small muted" style="margin-top:0">Cole linhas no formato <span class="code">data;descrição;valor;linha</span> (data dd/mm/aaaa; linha pelo nome). Separador ; ou tab. Nada vai para a pasta compartilhada.</p>
+    <textarea class="sin" id="csv" style="min-height:180px" placeholder="05/03/2026;Licença Datadog;12.400,00;Licenças de observabilidade"></textarea><div id="csvMsg" class="small"></div></div>
+    <div class="mf"><button class="btn" id="cNo">Cancelar</button><button class="btn pri" id="cOk">Importar</button></div>`);
+  $('#cNo', d).onclick = fecharModal;
+  $('#cOk', d).onclick = () => {
+    const ok = [], err = [];
+    $('#csv', d).value.split(/\r?\n/).filter(x => x.trim()).forEach((ln, i) => {
+      const [dt, desc, val, lin] = ln.split(/;|\t/).map(x => (x || '').trim());
+      const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(dt), v = parseValor(val), l = db.linhas.find(x => slugify(x.nome) === slugify(lin));
+      if (!m || v == null || !l) return err.push(i + 1);
+      ok.push({ id: uid('L'), criadoEm: new Date().toISOString(), data: `${m[3]}-${pad2(m[2])}-${pad2(m[1])}`, descricao: clamp(desc, 200), valor: v, linha: l.id, fornecedor: '', iniciativa: '' });
+    });
+    if (err.length && !ok.length) return $('#csvMsg', d).innerHTML = `<span class="latec">Nenhuma linha válida. Verifique as linhas ${err.slice(0, 10).join(', ')}.</span>`;
+    db.lancamentos.push(...ok); fecharModal(); agendarSalvar(); toast(`${ok.length} lançamento(s) importado(s)${err.length ? `, ${err.length} ignorado(s) (linhas ${err.slice(0, 6).join(', ')})` : ''}.`, 6000);
+  };
+}
+
+/* --- Plano --- */
+function vPlano(el) {
+  const ms = mesesAno(), cap = { orcado: 'Orçado', previsto: 'Previsto', realizado: 'Realizado', desvio: 'Previsto − orçado' };
+  const editavel = modoPlano === 'orcado' || modoPlano === 'previsto';
+  const val = (l, m) => modoPlano === 'orcado' ? orcado(l, m) : modoPlano === 'previsto' ? previsto(l, m) : modoPlano === 'realizado' ? realizado(l.id, m) : previsto(l, m) - orcado(l, m);
+  const cel = (l, m) => {
+    const v = val(l, m);
+    if (!editavel || (modoPlano === 'previsto' && fechado(m))) return `<td class="n ${modoPlano === 'desvio' && v > 0 ? 'latec' : ''} ${fechado(m) ? 'faint' : ''}">${v ? fmtCurto(v) : '—'}</td>`;
+    const manual = modoPlano === 'previsto' && l.previsto[m] != null;
+    return `<td class="n"><input class="cell ${manual ? '' : 'faint'}" data-c="${l.id}|${m}" value="${v ? (v / 100).toLocaleString('pt-BR', { maximumFractionDigits: 2 }) : ''}" title="${manual ? 'Previsto ajustado à mão' : modoPlano === 'previsto' ? 'Automático: contratos ou orçado. Digite para ajustar.' : ''}"></td>`;
+  };
+  const tot = ms.map(m => db.linhas.reduce((s, l) => s + val(l, m), 0));
+  el.innerHTML = `<div class="bar"><div class="sg">${Object.entries(cap).map(([k, n]) => `<button class="${modoPlano === k ? 'on' : ''}" data-m="${k}">${n}</button>`).join('')}</div>
+    <span class="chip">${esc(db.versaoPlano)}</span><span class="grow"></span><button class="btn" id="pFech">Fechar mês</button><button class="btn pri" id="pNova">+ Linha</button></div>
+    ${modoPlano === 'previsto' ? '<div class="banner">Previsto automático: mês fechado = realizado; mês aberto = valor digitado, senão contratos, senão orçado (nunca menos que o já realizado). Valores em cinza são automáticos.</div>' : ''}
+    <div class="card scroll"><table class="t"><tr><th>Linha</th>${ms.map(m => `<th class="n">${nomeMes(m)}${fechado(m) ? ' ✓' : ''}</th>`).join('')}<th class="n">Ano</th></tr>
+    ${db.categorias.map(c => { const ls = db.linhas.filter(l => l.cat === c.id); if (!ls.length) return ''; return `<tr><td colspan="${ms.length + 2}" class="lbl" style="padding-top:14px;margin:0">${esc(c.nome)} · ${c.tipo}</td></tr>` + ls.map(l => `<tr><td><button class="bvc" data-e="${l.id}" style="text-align:left">${esc(l.nome)}</button>${l.iniciativa ? ` <span class="code faint">${esc(l.iniciativa)}</span>` : ''}</td>${ms.map(m => cel(l, m)).join('')}<td class="n"><b>${fmtCurto(ms.reduce((s, m) => s + val(l, m), 0))}</b></td></tr>`).join(''); }).join('')}
+    ${db.linhas.length ? `<tr class="tot"><td>Total</td>${tot.map(v => `<td class="n">${fmtCurto(v)}</td>`).join('')}<td class="n">${fmtCurto(tot.reduce((a, b) => a + b, 0))}</td></tr>` : `<tr><td colspan="14" class="empty">Nenhuma linha ainda. Uma linha é um item do orçamento, como "Squad terceirizado" ou "Licenças de observabilidade".</td></tr>`}
+    </table></div><p class="small muted">Digite valores em reais (aceita 12.400, 12,4 mil, 15k). Enter ou Tab grava. Cada linha pode ter um orçado diferente por mês; use "Repetir" na linha para preencher o ano.</p>`;
+  $$('[data-m]', el).forEach(b => b.onclick = () => { modoPlano = b.dataset.m; render(); });
+  $('#pNova').onclick = () => linhaDlg(null);
+  $('#pFech').onclick = fecharMesDlg;
+  $$('[data-e]', el).forEach(b => b.onclick = () => linhaDlg(b.dataset.e));
+  $$('[data-c]', el).forEach(i => i.onchange = () => {
+    const [lid, m] = i.dataset.c.split('|'), l = linhaPorId(lid), txt = i.value.trim();
+    const alvo = modoPlano === 'orcado' ? l.orcado : l.previsto;
+    if (!txt) delete alvo[m]; else { const v = parseValor(txt); if (v == null) { toast('Valor inválido: ' + txt); return render(); } alvo[m] = v; }
+    agendarSalvar();
+  });
+}
+function linhaDlg(id) {
+  const l = id ? linhaPorId(id) : { nome: '', cat: db.categorias[0]?.id, centro: '', iniciativa: '', fornecedor: '', orcado: {}, previsto: {} };
+  const d = modal(`<div class="mh"><h2>${id ? 'Linha do plano' : 'Nova linha do plano'}</h2></div><div class="mb">
+    <label class="field"><span>Nome</span><input class="sin" id="nN" value="${esc(l.nome)}" placeholder="Ex.: Licenças de observabilidade"></label>
+    <div class="f2"><label class="field"><span>Categoria</span><select class="sel" id="nC">${db.categorias.map(c => `<option value="${c.id}" ${c.id === l.cat ? 'selected' : ''}>${esc(c.nome)} (${c.tipo})</option>`).join('')}</select></label>
+    <label class="field"><span>Centro de custo</span><input class="sin" id="nCC" list="ccs" value="${esc(l.centro || '')}"><datalist id="ccs">${db.centros.map(c => `<option value="${esc(c)}">`).join('')}</datalist></label></div>
+    <div class="f2"><label class="field"><span>Iniciativa (opcional)</span><input class="sin" id="nI" value="${esc(l.iniciativa || '')}" placeholder="PAG-042"></label>
+    <label class="field"><span>Fornecedor (opcional)</span><input class="sin" id="nF" value="${esc(l.fornecedor || '')}"></label></div>
+    <div class="f2"><label class="field"><span>Orçado mensal (preenche o ano)</span><input class="sin" id="nOM" placeholder="Deixe vazio para manter"></label>
+    <label class="field"><span>A partir de</span><select class="sel" id="nOD">${mesesAno().map(m => `<option value="${m}">${nomeMes(m)}</option>`).join('')}</select></label></div></div>
+    <div class="mf">${id ? '<button class="btn danger" id="nX">Excluir linha</button><span class="grow"></span>' : ''}<button class="btn" id="nNo">Cancelar</button><button class="btn pri" id="nOk">Salvar</button></div>`);
+  $('#nNo', d).onclick = fecharModal;
+  if (id) $('#nX', d).onclick = async () => {
+    const n = db.lancamentos.filter(x => x.linha === id).length + db.compromissos.filter(x => x.linha === id).length;
+    fecharModal();
+    if (n && await perguntar('Excluir linha?', `<p>A linha tem ${n} lançamento(s) ou contrato(s), que também serão excluídos.</p>`, [['no', 'Cancelar'], ['ok', 'Excluir', 'danger']]) !== 'ok') return;
+    db.linhas = db.linhas.filter(x => x.id !== id); db.lancamentos = db.lancamentos.filter(x => x.linha !== id); db.compromissos = db.compromissos.filter(x => x.linha !== id); agendarSalvar();
+  };
+  $('#nOk', d).onclick = () => {
+    const nome = clamp($('#nN', d).value.trim(), 120); if (!nome) return toast('Dê um nome à linha.');
+    Object.assign(l, { nome, cat: $('#nC', d).value, centro: clamp($('#nCC', d).value.trim(), 40), iniciativa: clamp($('#nI', d).value.trim().toUpperCase(), 20), fornecedor: clamp($('#nF', d).value.trim(), 80) });
+    if (l.centro && !db.centros.includes(l.centro)) db.centros.push(l.centro);
+    const om = $('#nOM', d).value.trim();
+    if (om) { const v = parseValor(om); if (v == null) return toast('Orçado mensal inválido.'); for (const m of mesesAno()) if (m >= $('#nOD', d).value) l.orcado[m] = v; }
+    if (!id) db.linhas.push({ id: uid('N'), ...l });
+    fecharModal(); agendarSalvar();
+  };
+}
+async function fecharMesDlg() {
+  const abertos = mesesAno().filter(m => m < mesAtual() && !fechado(m));
+  const prox = abertos[0] || mesesAno().find(m => !fechado(m));
+  if (!prox) return toast('Todos os meses do ano estão fechados.');
+  const t = totais([prox]);
+  const r = await perguntar(`Fechar ${nomeMes(prox)}?`, `<p>Ao fechar, o previsto de ${nomeMes(prox)} passa a ser o realizado e o mês sai da previsão.</p>
+    <div class="kpis">${kpi('Orçado', fm(t.orcado))}${kpi('Previsto', fm(t.previsto))}${kpi('Realizado', fm(t.realizado))}</div>
+    <p class="small muted">Confira se todos os lançamentos do mês estão registrados. Dá para reabrir depois em Ajustes.</p>`, [['no', 'Cancelar'], ['so', 'Fechar'], ['pub', 'Fechar e publicar', 'pri']]);
+  if (!r || r === 'no') return;
+  db.fechados.push(prox); db.fechados.sort(); agendarSalvar();
+  if (r === 'pub') await publicar(); else toast(`${nomeMes(prox)} fechado.`);
+}
+
+/* --- Contratos (compromissos recorrentes) --- */
+function vComp(el) {
+  const m = mesAtual();
+  el.innerHTML = `<div class="bar"><span class="muted">Contratos e custos recorrentes geram o previsto dos meses seguintes sozinhos.</span><span class="grow"></span><button class="btn pri" id="cNovo">+ Contrato</button></div>
+    <div class="card">${db.compromissos.length ? `<div class="scroll"><table class="t"><tr><th>Contrato</th><th>Linha</th><th class="n">Mensal</th><th>Início</th><th>Fim</th><th class="n">Restante no ano</th></tr>
+    ${db.compromissos.map(c => { const rest = mesesAno().filter(x => x >= m && x >= c.inicio && (!c.fim || x <= c.fim)).length * c.valor; return `<tr data-k="${c.id}" style="cursor:pointer"><td>${esc(c.nome)}${c.fim && c.fim <= somaMeses(m, 2) && c.fim >= m ? ' <span class="chip late">vence logo</span>' : ''}</td><td>${esc(linhaPorId(c.linha)?.nome || '—')}</td><td class="n">${fm(c.valor)}</td><td>${nomeMes(c.inicio)} ${c.inicio.slice(0, 4)}</td><td>${c.fim ? nomeMes(c.fim) + ' ' + c.fim.slice(0, 4) : 'sem fim'}</td><td class="n">${fm(rest)}</td></tr>`; }).join('')}</table></div>` : '<div class="empty">Nenhum contrato. Exemplos: squad terceirizado, licenças anuais pagas por mês, aluguel de ambiente.</div>'}</div>`;
+  $('#cNovo').onclick = () => compDlg(null);
+  $$('[data-k]', el).forEach(r => r.onclick = () => compDlg(r.dataset.k));
+}
+function compDlg(id) {
+  if (!db.linhas.length) return toast('Crie uma linha do plano primeiro (aba Plano).');
+  const c = id ? db.compromissos.find(x => x.id === id) : { nome: '', linha: '', valor: null, inicio: mesAtual(), fim: `${db.ano}-12` };
+  const d = modal(`<div class="mh"><h2>${id ? 'Contrato' : 'Novo contrato'}</h2></div><div class="mb">
+    <label class="field"><span>Nome</span><input class="sin" id="kN" value="${esc(c.nome)}"></label>
+    <div class="f2"><label class="field"><span>Valor mensal</span><input class="sin" id="kV" value="${c.valor != null ? (c.valor / 100).toLocaleString('pt-BR') : ''}"></label>
+    <label class="field"><span>Linha do plano</span><select class="sel" id="kL">${opcoesLinhas(c.linha)}</select></label></div>
+    <div class="f2"><label class="field"><span>Início</span><input class="sin" type="month" id="kI" value="${c.inicio}"></label>
+    <label class="field"><span>Fim (vazio = sem fim)</span><input class="sin" type="month" id="kF" value="${c.fim || ''}"></label></div></div>
+    <div class="mf">${id ? '<button class="btn danger" id="kX">Excluir</button><span class="grow"></span>' : ''}<button class="btn" id="kNo">Cancelar</button><button class="btn pri" id="kOk">Salvar</button></div>`);
+  $('#kNo', d).onclick = fecharModal;
+  if (id) $('#kX', d).onclick = () => { db.compromissos = db.compromissos.filter(x => x.id !== id); fecharModal(); agendarSalvar(); };
+  $('#kOk', d).onclick = () => {
+    const v = parseValor($('#kV', d).value), nome = clamp($('#kN', d).value.trim(), 120), ini = $('#kI', d).value, fim = $('#kF', d).value;
+    if (!nome || v == null || !/^\d{4}-\d{2}$/.test(ini)) return toast('Preencha nome, valor e início.');
+    if (fim && fim < ini) return toast('O fim é antes do início.');
+    Object.assign(c, { nome, valor: v, linha: $('#kL', d).value, inicio: ini, fim: fim || '' });
+    if (!id) db.compromissos.push({ id: uid('K'), ...c });
+    fecharModal(); agendarSalvar();
+  };
+}
+
+/* --- Futuro: previsão rolante e cenários --- */
+let cenarioSel = '';
+function ajustesCenario(cen) {
+  const out = {}; if (!cen) return out;
+  for (const a of cen.ajustes) for (let m = a.de; m <= (a.ate || a.de); m = somaMeses(m, 1)) if (!fechado(m)) out[m] = (out[m] || 0) + a.valor;
+  return out;
+}
+function vFuturo(el) {
+  const m = mesAtual(), base = mesesAno(), horizonte = Array.from({ length: 12 }, (_, i) => somaMeses(m, i));
+  const cen = db.cenarios.find(c => c.id === cenarioSel), ex = ajustesCenario(cen);
+  const restAno = base.filter(x => x >= m), t = totais(), tr = totais(restAno);
+  const delta = Object.entries(ex).filter(([k]) => base.includes(k)).reduce((s, [, v]) => s + v, 0);
+  el.innerHTML = `<div class="kpis">${kpi('Previsto até o fim do ano', fm(tr.previsto))}${kpi('Previsto no ano (realizado + previsto)', fm(t.previsto))}${kpi('Orçado no ano', fm(t.orcado))}
+    ${cen ? kpi(`Com o cenário "${esc(cen.nome)}"`, fm(t.previsto + delta), t.previsto + delta > t.orcado ? 'alert' : '') : ''}</div>
+    <div class="card"><div class="row"><p class="lbl" style="margin:0">Próximos 12 meses</p><span class="grow"></span>
+      <select class="sel" id="fC"><option value="">Sem cenário</option>${db.cenarios.map(c => `<option value="${c.id}" ${c.id === cenarioSel ? 'selected' : ''}>${esc(c.nome)}</option>`).join('')}</select></div>${grafico(horizonte, ex)}
+      <p class="small muted">Meses do próximo ano usam contratos e valores digitados no plano daquele ano (se houver).</p></div>
+    <div class="card"><div class="row"><p class="lbl" style="margin:0">Cenários "e se"</p><span class="grow"></span><button class="btn pri sm" id="fNovo">+ Cenário</button></div>
+    <p class="small muted">Cenários ficam só neste computador. "Aplicar ao previsto" soma os ajustes no previsto dos meses abertos, e aí entram na próxima publicação.</p>
+    ${db.cenarios.length ? db.cenarios.map(c => { const d2 = Object.entries(ajustesCenario(c)).filter(([k]) => base.includes(k)).reduce((s, [, v]) => s + v, 0); return `<div class="al"><span class="dot"></span><div class="grow"><b>${esc(c.nome)}</b> · ${c.ajustes.length} ajuste(s) · efeito no ano <b class="${d2 > 0 ? 'latec' : 'okc'}">${d2 > 0 ? '+' : ''}${fm(d2)}</b><br><span class="small muted">${c.ajustes.map(a => `${esc(linhaPorId(a.linha)?.nome || '?')}: ${a.valor > 0 ? '+' : ''}${fm(a.valor)}/mês de ${nomeMes(a.de)} a ${nomeMes(a.ate || a.de)}`).join(' · ')}</span></div><button class="btn sm" data-ce="${c.id}">Editar</button><button class="btn sm" data-ca="${c.id}">Aplicar ao previsto</button></div>`; }).join('') : '<div class="empty">Ex.: "Contratar 2 pessoas em março", "Cortar licença X em julho".</div>'}</div>`;
+  $('#fC').onchange = e => { cenarioSel = e.target.value; render(); };
+  $('#fNovo').onclick = () => cenarioDlg(null);
+  $$('[data-ce]', el).forEach(b => b.onclick = () => cenarioDlg(b.dataset.ce));
+  $$('[data-ca]', el).forEach(b => b.onclick = async () => {
+    const c = db.cenarios.find(x => x.id === b.dataset.ca);
+    if (await perguntar('Aplicar cenário ao previsto?', `<p>Os ajustes de "${esc(c.nome)}" serão somados ao previsto dos meses abertos. O cenário continua salvo.</p>`, [['no', 'Cancelar'], ['ok', 'Aplicar', 'pri']]) !== 'ok') return;
+    for (const a of c.ajustes) { const l = linhaPorId(a.linha); if (!l) continue; for (let m = a.de; m <= (a.ate || a.de); m = somaMeses(m, 1)) if (!fechado(m)) l.previsto[m] = previsto(l, m) + a.valor; }
+    agendarSalvar(); toast('Cenário aplicado ao previsto.');
+  });
+}
+function cenarioDlg(id) {
+  if (!db.linhas.length) return toast('Crie linhas do plano primeiro.');
+  const c = id ? JSON.parse(JSON.stringify(db.cenarios.find(x => x.id === id))) : { nome: '', ajustes: [{ linha: db.linhas[0].id, valor: 0, de: mesAtual(), ate: `${db.ano}-12` }] };
+  const desenhar = () => {
+    const d = modal(`<div class="mh"><h2>${id ? 'Editar cenário' : 'Novo cenário'}</h2></div><div class="mb">
+      <label class="field"><span>Nome</span><input class="sin" id="eN" value="${esc(c.nome)}" placeholder="Contratar 2 pessoas em março"></label>
+      ${c.ajustes.map((a, i) => `<div class="row" style="margin-bottom:8px"><select class="sel" data-a="${i}|linha">${opcoesLinhas(a.linha)}</select>
+        <input class="sin" style="width:120px" data-a="${i}|valor" value="${a.valor ? (a.valor / 100).toLocaleString('pt-BR') : ''}" placeholder="+18.000 ou -5.000">
+        <span class="small muted">por mês de</span><input class="sin" type="month" data-a="${i}|de" value="${a.de}"><span class="small muted">a</span><input class="sin" type="month" data-a="${i}|ate" value="${a.ate || ''}">
+        <button class="btn ghost sm" data-rm="${i}">×</button></div>`).join('')}
+      <button class="btn sm" id="eAdd">+ Ajuste</button></div>
+      <div class="mf">${id ? '<button class="btn danger" id="eX">Excluir</button><span class="grow"></span>' : ''}<button class="btn" id="eNo">Cancelar</button><button class="btn pri" id="eOk">Salvar</button></div>`, 'wide');
+    const ler = () => { c.nome = $('#eN', d).value; $$('[data-a]', d).forEach(i => { const [k, f] = i.dataset.a.split('|'); c.ajustes[k][f] = f === 'valor' ? (parseValor(i.value) ?? 0) : i.value; }); };
+    $('#eAdd', d).onclick = () => { ler(); c.ajustes.push({ linha: db.linhas[0].id, valor: 0, de: mesAtual(), ate: `${db.ano}-12` }); desenhar(); };
+    $$('[data-rm]', d).forEach(b => b.onclick = () => { ler(); c.ajustes.splice(+b.dataset.rm, 1); desenhar(); });
+    $('#eNo', d).onclick = fecharModal;
+    if (id) $('#eX', d).onclick = () => { db.cenarios = db.cenarios.filter(x => x.id !== id); if (cenarioSel === id) cenarioSel = ''; fecharModal(); agendarSalvar(); };
+    $('#eOk', d).onclick = () => {
+      ler(); c.nome = clamp(c.nome.trim(), 80); c.ajustes = c.ajustes.filter(a => a.valor && /^\d{4}-\d{2}$/.test(a.de));
+      if (!c.nome || !c.ajustes.length) return toast('Dê um nome e pelo menos um ajuste com valor.');
+      if (id) db.cenarios = db.cenarios.map(x => x.id === id ? c : x); else { c.id = uid('C'); db.cenarios.push(c); cenarioSel = c.id; }
+      fecharModal(); agendarSalvar();
+    };
+  };
+  desenhar();
+}
+
+/* --- Grupo: pasta sincronizada, chave, diretriz e publicação --- */
+function vGrupo(el) {
+  const ch = chaveAtual(), dir = db.diretriz, lida = situacao.lida, pend = db.publicacao.assinatura !== assinaturaPlano();
+  el.innerHTML = `<div class="grid g2">
+    <div class="card"><p class="lbl">1 · Pasta sincronizada (OneDrive)</p>
+      ${raiz ? `<p>Ligada: <span class="code">${esc(raiz.name)}/times/${esc(db.team.slug)}/financas/</span></p>` : '<p class="muted">Escolha a pasta raiz compartilhada, sincronizada no seu computador pelo OneDrive (normalmente <span class="code">' + PASTA_COMUM + '</span>).</p>'}
+      <div class="row"><button class="btn ${raiz ? '' : 'pri'}" id="gPasta">${raiz ? 'Trocar pasta' : 'Ligar pasta'}</button>${raiz ? '<button class="btn" id="gLer">Ler agora</button>' : ''}</div>
+      ${situacao.erro ? `<div class="banner warn" style="margin-top:10px">${esc(situacao.erro)}</div>` : ''}
+      <p class="small muted">Só o plano agregado vai para lá. Lançamentos, notas e cenários ficam no seu arquivo local.</p></div>
+    <div class="card"><p class="lbl">2 · Chave de finanças do time</p>
+      ${ch ? `<p>Cadastrada: <span class="code">${esc(ch.kid)}</span></p>` : '<p class="muted">O gestor envia a chave (GK1.…) por mensagem direta ou e-mail. Cole aqui uma vez.</p>'}
+      <div class="row"><input class="sin grow" id="gCh" placeholder="GK1.${esc(db.team.slug)}-fin-…" type="password"><button class="btn" id="gChOk">Cadastrar</button></div>
+      <p class="small muted">A chave fica dentro do seu arquivo cifrado. Guarde-a também no cofre de senhas.</p></div>
+    <div class="card"><p class="lbl">3 · Diretriz do grupo</p>
+      ${dir ? `<p>Revisão ${dir.revision} de ${fmtDataHora(dir.generatedAt)} · ${esc(dir.planVersion || '')}</p>
+        <div class="small">${dir.capTotal ? `Teto total: <b>${fm(dir.capTotal)}</b><br>` : ''}${Object.entries(dir.caps || {}).map(([k, v]) => `${esc(catPorId(k)?.nome || k)}: ${fm(v)}`).join(' · ')}${dir.publishBy ? `<br>Publicar até ${fmtData(dir.publishBy)}` : ''}${dir.note ? `<br><span class="muted">${esc(dir.note)}</span>` : ''}</div>`
+        : `<p class="muted">${situacao.diretrizInvalida ? 'Diretriz encontrada, mas não abriu: ' + esc(situacao.diretrizInvalida) : 'Nenhuma diretriz do grupo ainda. Quando o gestor publicar, ela aparece aqui com tetos e categorias.'}</p>`}</div>
+    <div class="card"><p class="lbl">4 · Publicação do plano</p>
+      <p>${db.publicacao.revision ? `Última publicação: revisão ${db.publicacao.revision}, ${fmtDataHora(db.publicacao.em)}` : 'Ainda não publicado.'} ${pend ? '<span class="chip late">mudanças não publicadas</span>' : db.publicacao.revision ? '<span class="chip ok">em dia</span>' : ''}</p>
+      ${lida ? `<p class="small muted">Na pasta: revisão ${lida.revision}, publicada por <span class="code">${esc(lida.source?.writer || '?')}</span>${lida.source?.writer !== writer() ? ' <b class="latec">(outro dono)</b>' : ''}.</p>` : ''}
+      ${situacao.conflitos.length ? `<div class="banner warn">Cópias de conflito do OneDrive encontradas: ${situacao.conflitos.map(c => `<span class="code">${esc(c.nome)}</span>`).join(', ')}. A mais nova vale; publicar de novo apaga as suas.</div>` : ''}
+      ${situacao.outros.length ? `<div class="banner warn">Aberto também em: ${situacao.outros.map(o => esc(o.writer)).join(', ')}.</div>` : ''}
+      <label class="field"><span>Versão do plano</span><input class="sin" id="gVer" value="${esc(db.versaoPlano)}" list="vers"><datalist id="vers"><option value="Orçamento original"><option value="Reforecast 1"><option value="Reforecast 2"><option value="Reforecast 3"></datalist></label>
+      <div class="row"><button class="btn pri" id="gPub" ${ch && raiz ? '' : 'disabled'}>Publicar plano</button><button class="btn" id="gVer2">Ver o que vai</button></div>
+      <p class="small muted">Você é <span class="code">${esc(writer())}</span>. Só um dono publica o plano do time, para o OneDrive nunca ter duas versões.</p></div>
+  </div>`;
+  $('#gPasta').onclick = async () => { try { const h = await escolherPasta('fin-comum'); await ligarPasta(h); } catch (e) { if (e.name !== 'AbortError') toast(e.message); } };
+  if ($('#gLer')) $('#gLer').onclick = () => lerPasta();
+  $('#gChOk').onclick = async () => {
+    const v = $('#gCh').value.trim(); if (!v) return;
+    try { lerChaveTexto(v); } catch (e) { return toast(e.message, 5000); }
+    if (!await avisoCofre('chave')) return;
+    try { const kid = await cadastrarChave(v); toast('Chave cadastrada: ' + kid); await lerPasta(); } catch (e) { toast(e.message, 5000); }
+  };
+  $('#gVer').onchange = e => { db.versaoPlano = clamp(e.target.value.trim(), 40) || 'Orçamento original'; agendarSalvar(); };
+  $('#gPub').onclick = () => publicar();
+  $('#gVer2').onclick = () => modal(`<div class="mh"><h2>O que vai para a pasta</h2></div><div class="mb"><p class="small muted" style="margin-top:0">Conteúdo que será cifrado com a chave do time. Lançamentos individuais não vão.</p><pre class="code" style="white-space:pre-wrap;max-height:60vh;overflow:auto">${esc(JSON.stringify(montarPlano({ revision: (db.publicacao.revision || 0) + 1, generatedAt: isoComFuso(), hlc: '' }), null, 2))}</pre></div><div class="mf"><button class="btn pri" onclick="fecharModal()">Fechar</button></div>`, 'wide');
+}
+
+/* --- Ajustes --- */
+function vAjustes(el) {
+  el.innerHTML = `<div class="grid g2">
+    <div class="card"><p class="lbl">Time e ano</p>
+      <label class="field"><span>Nome do time</span><input class="sin" id="aN" value="${esc(db.team.nome)}"></label>
+      <div class="f2"><label class="field"><span>Identificador (slug)</span><input class="sin code" value="${esc(db.team.slug)}" disabled></label><label class="field"><span>Ano fiscal</span><input class="sin" type="number" id="aA" value="${db.ano}"></label></div>
+      <div class="f2"><label class="field"><span>Seu nome</span><input class="sin" id="aP" value="${esc(db.pessoa.nome)}"></label><label class="field"><span>Este computador</span><input class="sin" id="aD" value="${esc(dispositivo().nome)}" placeholder="Ex.: notebook do trabalho"></label></div>
+      <p class="small muted">Trocar o ano mostra outro ano do mesmo arquivo; nada é apagado.</p></div>
+    <div class="card"><p class="lbl">Categorias</p>
+      ${db.categorias.map(c => `<div class="row" style="margin-bottom:6px"><input class="sin grow" data-cn="${c.id}" value="${esc(c.nome)}" ${c.doGrupo ? 'disabled title="Definida pelo grupo"' : ''}><select class="sel" data-ct="${c.id}" ${c.doGrupo ? 'disabled' : ''}><option ${c.tipo === 'OPEX' ? 'selected' : ''}>OPEX</option><option ${c.tipo === 'CAPEX' ? 'selected' : ''}>CAPEX</option></select>${c.doGrupo ? '<span class="chip bv">grupo</span>' : ''}</div>`).join('')}
+      <div class="row"><input class="sin grow" id="aNC" placeholder="Nova categoria"><button class="btn" id="aNCb">Adicionar</button></div></div>
+    <div class="card"><p class="lbl">Segurança</p>
+      <p class="small">Arquivo <span class="code">${esc(arquivo)}</span> cifrado com AES-256 (senha, PBKDF2 600 mil). ${db.seg.cofreConfirmadoEm ? `Senha guardada no cofre em ${fmtData(db.seg.cofreConfirmadoEm)}.` : ''}</p>
+      <div class="row"><button class="btn" id="aSenha">Trocar senha</button><button class="btn" id="aBk">Baixar cópia cifrada</button><button class="btn" id="aTeste">Testar minha senha</button></div>
+      <p class="small muted">A pasta local guarda as 5 últimas versões em <span class="code">backup/</span>. Como ela não vai para a nuvem, baixe uma cópia cifrada de vez em quando e guarde onde preferir.</p></div>
+    <div class="card"><p class="lbl">Meses fechados</p>
+      ${db.fechados.length ? db.fechados.map(m => `<span class="chip">${nomeMes(m)} ${m.slice(0, 4)} <button data-rf="${m}" title="Reabrir">×</button></span>`).join(' ') : '<div class="empty">Nenhum.</div>'}</div>
+  </div>`;
+  $('#aN').onchange = e => { db.team.nome = clamp(e.target.value.trim(), 80) || db.team.nome; agendarSalvar(); };
+  $('#aA').onchange = e => { const a = +e.target.value; if (a > 2000 && a < 2100) { db.ano = a; agendarSalvar(); } };
+  $('#aP').onchange = e => { db.pessoa.nome = clamp(e.target.value.trim(), 80); agendarSalvar(); };
+  $('#aD').onchange = e => { nomearDispositivo(e.target.value.trim()); };
+  $$('[data-cn]', el).forEach(i => i.onchange = () => { catPorId(i.dataset.cn).nome = clamp(i.value.trim(), 60); agendarSalvar(); });
+  $$('[data-ct]', el).forEach(i => i.onchange = () => { catPorId(i.dataset.ct).tipo = i.value; agendarSalvar(); });
+  $('#aNCb').onclick = () => { const n = $('#aNC').value.trim(), id = slugify(n); if (!id || catPorId(id)) return; db.categorias.push({ id, nome: clamp(n, 60), tipo: 'OPEX' }); agendarSalvar(); };
+  $$('[data-rf]', el).forEach(b => b.onclick = () => { db.fechados = db.fechados.filter(m => m !== b.dataset.rf); agendarSalvar(); });
+  $('#aSenha').onclick = async () => { const s = await criarSenhaDlg('Nova senha do arquivo'); if (!s) return; ctx = await novoCtx(s, TOOL); db.seg = { cofreConfirmadoEm: new Date().toISOString(), ultimoTesteEm: null }; await salvar(); toast('Senha trocada. Use a nova a partir de agora.'); render(); };
+  $('#aBk').onclick = async () => baixar(arquivo.replace(/\.json$/, '') + '-copia-' + hojeISO() + '.json', await cifrarLocal(db, ctx));
+  $('#aTeste').onclick = async () => { const s = await pedirSenhaDlg('Testar minha senha'); if (s == null) return; if (await senhaConfere(s, ctx)) { db.seg.ultimoTesteEm = new Date().toISOString(); agendarSalvar(); toast('Senha correta.'); } else toast('Senha não confere. Troque a senha enquanto o arquivo está aberto.', 6000); };
+}
+
+/* ---------------------------- abertura e criação ---------------------------- */
+function telaInicial(msg = '') {
+  $('#app').innerHTML = `<div class="welcome"><div class="card">
+    <div class="row"><div class="logo" style="margin:0">FIN</div><div><h2 style="margin:0">Finanças do Time</h2><div class="small muted">Acompanhamento do dia a dia e planejamento do futuro</div></div></div>
+    ${PRESET ? `<div class="banner" style="margin-top:16px">Pré-configurado pelo gestor para o time <b>${esc(PRESET.team?.nome)}</b>.${PRESET.chave ? ' A chave do time vem junto: você vai guardá-la no cofre no primeiro uso.' : ''}</div>` : ''}
+    ${msg ? `<div class="banner warn" style="margin-top:12px">${esc(msg)}</div>` : ''}
+    <p class="lbl" style="margin-top:20px">É a primeira vez?</p>
+    <button class="opt" id="iNovo"><b>Criar o arquivo do time</b><span>Passo a passo: pasta local, senha guardada no cofre e o primeiro plano.</span></button>
+    <p class="lbl" style="margin-top:16px">Já tenho o arquivo</p>
+    <button class="opt" id="iAbrir"><b>Abrir a pasta local</b><span>Escolha a pasta deste computador onde está o arquivo <span class="code">financas-&lt;time&gt;.json</span>.</span></button>
+    ${temFS() ? '' : '<div class="banner warn">Abra no Microsoft Edge ou no Google Chrome: esta ferramenta precisa ler e gravar arquivos.</div>'}
+    <p class="small muted" style="margin-top:16px">Seus dados ficam num arquivo cifrado neste computador. Só o plano agregado vai para a pasta sincronizada pelo OneDrive.</p>
+  </div></div>`;
+  $('#iNovo').onclick = criarDlg;
+  $('#iAbrir').onclick = abrirPasta;
+}
+async function abrirPasta() {
+  let h; try { h = await escolherPasta('fin-local'); } catch (e) { if (e.name !== 'AbortError') toast(e.message); return; }
+  if (!await permissao(h)) return;
+  const cand = [];
+  for await (const [n, f] of h.entries()) if (f.kind === 'file' && /^financas-.*\.json$/.test(n)) { try { const o = JSON.parse(await (await f.getFile()).text()); if (o.schema === LOCAL_ENC && o.app === TOOL) cand.push(n); } catch {} }
+  if (!cand.length) return telaInicial('Não encontrei um arquivo das Finanças do Time nesta pasta.');
+  let nome = cand[0];
+  if (cand.length > 1) { const r = await perguntar('Qual arquivo?', cand.map((n, i) => `<button class="opt" data-r="${i}"><b class="code">${esc(n)}</b></button>`).join(''), [['no', 'Cancelar']]); if (r == null || r === 'no') return; nome = cand[+r]; }
+  await abrirArquivo(h, nome);
+}
+async function abrirArquivo(h, nome) {
+  const texto = await lerTexto(h, nome);
+  for (let i = 0; i < 3; i++) {
+    const s = await pedirSenhaDlg('Senha das Finanças do Time', i > 0); if (s == null) return;
+    try { const r = await decifrarLocal(texto, s); db = normalizar(r.dados); ctx = r.ctx; dirLocal = h; arquivo = nome; break; }
+    catch (e) { if (e.code !== 'SENHA') return telaInicial(e.message); }
+  }
+  if (!db) return telaInicial('Senha incorreta três vezes.');
+  await aposAbrir();
+}
+async function aposAbrir() {
+  await carregarChaves();
+  render();
+  if (await lembreteTesteSenha(db.seg, ctx)) agendarSalvar();
+  if (!navigator.webdriver) { const h = await kv.get('fin-time-raiz:' + db.team.slug); if (h && await permissao(h, false)) await ligarPasta(h, true); }
+}
+async function criarDlg() {
+  if (!temFS()) return toast('Abra no Edge ou no Chrome.');
+  const p = PRESET || {};
+  const d = modal(`<div class="mh"><h2>Criar o arquivo do time</h2></div><div class="mb">
+    <div class="steps"><i class="on"></i><i></i><i></i></div>
+    <label class="field"><span>Nome do time</span><input class="sin" id="cN" value="${esc(p.team?.nome || '')}" ${p.team ? 'disabled' : ''}></label>
+    <div class="f2"><label class="field"><span>Identificador (usado nas pastas)</span><input class="sin code" id="cS" value="${esc(p.team?.slug || '')}" ${p.team ? 'disabled' : ''}></label>
+    <label class="field"><span>Ano fiscal</span><input class="sin" type="number" id="cA" value="${p.ano || new Date().getFullYear()}"></label></div>
+    <div class="f2"><label class="field"><span>Seu nome</span><input class="sin" id="cP"></label><label class="field"><span>Moeda</span><select class="sel" id="cM"><option>BRL</option><option>USD</option><option>EUR</option></select></label></div>
+    <p class="small muted">Depois você escolhe a pasta local (fora do OneDrive) e cria a senha.</p></div>
+    <div class="mf"><button class="btn" id="cNo">Cancelar</button><button class="btn pri" id="cOk">Escolher pasta local</button></div>`);
+  $('#cN', d).oninput = () => { if (!p.team) $('#cS', d).value = slugify($('#cN', d).value); };
+  if (p.moeda) $('#cM', d).value = p.moeda;
+  $('#cNo', d).onclick = fecharModal;
+  $('#cOk', d).onclick = async () => {
+    const nome = $('#cN', d).value.trim(), slug = slugify($('#cS', d).value), pessoa = $('#cP', d).value.trim(), ano = +$('#cA', d).value, moeda = $('#cM', d).value;
+    if (!nome || !slug || !pessoa) return toast('Preencha nome do time, identificador e seu nome.');
+    fecharModal();
+    const r = await criarArquivo({ nome, slug, pessoa, ano, moeda });
+    if (!r) telaInicial();
+  };
+}
+// Usado também pelo assistente (inicio.html) com a mesma lógica.
+async function escolherPastaLocal() {
+  await perguntar('Pasta local', `<p>Escolha uma pasta <b>deste computador</b> que <b>não</b> esteja no OneDrive. Ela guarda seus dados individuais cifrados.</p>
+    <div class="banner warn">Atenção: com o backup de pastas do OneDrive ligado, <b>Documentos</b> e <b>Área de Trabalho</b> também sincronizam. Prefira algo como <span class="code">C:\\Users\\voce\\GestaoLocal</span> e confira no Explorador de Arquivos que a pasta não tem o ícone de nuvem.</div>`, [['ok', 'Escolher pasta', 'pri']]);
+  let h; try { h = await escolherPasta('fin-local'); } catch { return null; }
+  if (!await permissao(h)) return null;
+  const s = await suspeitaDeSincronizada(h);
+  if (s.length) { const r = await perguntar('Esta pasta parece sincronizada', `<div class="cofre">A pasta <b>${esc(h.name)}</b> ${esc(s.join(', '))}. Dados individuais devem ficar fora do OneDrive.</div>`, [['no', 'Escolher outra'], ['ok', 'Usar mesmo assim']]); if (r !== 'ok') return escolherPastaLocal(); }
+  else if (await perguntar('Confirme', `<p>Você conferiu que <b class="code">${esc(h.name)}</b> não está no OneDrive?</p>`, [['no', 'Escolher outra'], ['ok', 'Conferi, não está', 'pri']]) !== 'ok') return escolherPastaLocal();
+  return h;
+}
+async function criarArquivo({ nome, slug, pessoa, ano, moeda }) {
+  const h = await escolherPastaLocal(); if (!h) return false;
+  const nomeArq = `financas-${slug}.json`;
+  if (await lerTexto(h, nomeArq)) { const r = await perguntar('Arquivo já existe', `<p>Já existe <span class="code">${esc(nomeArq)}</span> nesta pasta. Abrir o existente?</p>`, [['no', 'Cancelar'], ['ok', 'Abrir', 'pri']]); if (r === 'ok') { await abrirArquivo(h, nomeArq); return true; } return false; }
+  const senha = await criarSenhaDlg(); if (!senha) return false;
+  db = novoDb({ nome, slug, ano, moeda, pessoa });
+  db.seg.cofreConfirmadoEm = new Date().toISOString();
+  if (PRESET) {
+    if (Array.isArray(PRESET.categorias) && PRESET.categorias.length) { db.categorias = PRESET.categorias.map(c => ({ id: slugify(c.id || c.nome), nome: clamp(c.nome, 60), tipo: c.tipo === 'CAPEX' ? 'CAPEX' : 'OPEX', doGrupo: true })); }
+    if (Array.isArray(PRESET.centros)) db.centros = PRESET.centros.map(x => clamp(x, 40));
+    db.team.prefixo = clamp(PRESET.team?.prefixo || '', 5);
+    if (PRESET.chave) { if (await avisoCofre('chave', `<p class="small">Chave do time: <span class="code">${esc(lerChaveTexto(PRESET.chave).kid)}</span>. Copie-a para o cofre:</p><input class="sin code" style="width:100%" readonly value="${esc(PRESET.chave)}" onclick="this.select()">`)) db.chaves.push({ kid: lerChaveTexto(PRESET.chave).kid, texto: PRESET.chave, em: new Date().toISOString(), origem: 'preset' }); }
+  }
+  ctx = await novoCtx(senha, TOOL); dirLocal = h; arquivo = nomeArq;
+  await gravarLocal(h, nomeArq, await cifrarLocal(db, ctx));
+  view = 'plano'; await aposAbrir();
+  toast('Arquivo criado e cifrado. Agora crie as linhas do plano.', 5000);
+  return true;
+}
+telaInicial();
+</script>
+</body>
+</html>
