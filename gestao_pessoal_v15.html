@@ -366,6 +366,11 @@ dialog.wide{width:min(780px,calc(100% - 24px))}dialog.xl{width:min(880px,calc(10
 .fx-rows{display:grid;gap:6px;margin-top:8px}.fx-rows:empty::before{content:'Sem fases. Use fases para agrupar as features no tempo (ex.: MVP, Piloto, Escala).';font-size:12px;color:var(--faint)}
 .fx-rows .r-ph{background:#f8f9fc;border-radius:10px;padding:6px 6px 6px 8px}.fx-rows .r-ph input:not([type=checkbox]){background:#fff}
 .fx .macts{position:sticky;bottom:0;background:#fff;margin:14px -28px 0;padding:14px 28px;border-top:1px solid var(--line)}
+.fx-pills{display:flex;gap:6px;flex-wrap:wrap;min-height:36px;align-items:center}.fx-pills button{height:30px;padding:0 12px;border-radius:99px;border:1px solid var(--line);background:#fff;font-size:12.5px;color:var(--muted);font-weight:550}.fx-pills button:hover{color:var(--ink)}.fx-pills button.on{border-color:var(--bv);background:var(--bv-soft);color:var(--bv);font-weight:650}
+.chkgrid.pills{border:0;padding:0;background:none;display:flex;flex-wrap:wrap;gap:6px;min-height:36px;align-items:center}.chkgrid.pills .chkl{border:1px solid var(--line);border-radius:99px;padding:4px 11px 4px 8px;background:#fff;font-size:12.5px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}.chkgrid.pills .chkl:has(input:checked){border-color:var(--bv);background:var(--bv-soft);color:var(--bv)}.chkgrid.pills .chkl input{position:absolute;opacity:0;pointer-events:none}.chkgrid.pills .chkl:has(input:focus-visible){box-shadow:0 0 0 3px var(--bv-soft)}
+.fx-c.fx-in>input[type=time],.fx-c.fx-in>input[type=number]{flex:0 0 auto;min-width:0}
+.fx-note{width:100%;border:0;outline:none;resize:vertical;font:inherit;font-size:15px;line-height:1.5;padding:8px 0 12px;min-height:96px;color:var(--ink)}.fx-note::placeholder{color:var(--faint)}
+.fx-err{font-size:12px;color:var(--late);min-height:0;margin-top:6px}.fx-err:empty{display:none}.fx .macts .fx-kb{margin-right:auto;font-size:11px;color:var(--faint)}.fx .macts .btn.danger{margin-right:8px}.fx button[data-pri]:disabled{opacity:.45;cursor:not-allowed}
 .fx .chips{margin-top:6px}.fx-c>.tgl{min-height:36px}.fx-sec .btn{white-space:nowrap}
 @media (max-width:640px){.fx{padding:20px 18px 0}.fx .macts{margin:14px -18px 0;padding:12px 18px}.fx-p{grid-template-columns:1fr;gap:2px}.fx-l{min-height:0}.fx-top{flex-wrap:wrap}.fx-rows .r-ph{grid-template-columns:1fr 1fr;}.fx-rows .r-ph input[data-f=name]{grid-column:1/-1}.fx-sec .muted{display:none}}
 .tform{padding:0}.tf-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:0;min-height:400px}.tform .macts{margin:0;padding:14px 24px;border-top:1px solid var(--line)}
@@ -656,25 +661,19 @@ textarea.paste:focus{border-color:var(--bv)}
   <div class="macts"><button type="button" class="btn" data-close>Cancelar</button><button class="btn pri" id="iSave">Salvar</button></div>
 </form></dialog>
 
-<dialog id="personDialog"><form class="modal" id="personForm">
-  <h2 id="personDlgTitle">Pessoa</h2><input type="hidden" name="id">
-  <div class="form">
-    <div class="field"><label>Nome</label><input name="name" required></div>
-    <div class="field"><label>Papel</label><input name="role"></div>
-    <div class="field"><label>1:1 a cada</label><select name="cadence"><option value="7">7 dias</option><option value="14">14 dias</option><option value="21">21 dias</option><option value="30">30 dias</option></select></div>
-    <div class="field"><label>ou novo time</label><input name="newTeam" placeholder="Opcional"></div>
-    <div class="field full"><label>Times</label><div class="chkgrid" id="personTeams"></div></div>
-  </div>
-  <div class="macts"><button type="button" class="btn" data-close>Cancelar</button><button class="btn pri">Salvar</button></div>
+<dialog id="personDialog" class="fxd"><form class="modal fx" id="personForm" data-val><input type="hidden" name="id">
+  <div class="fx-top"><span class="fx-kick" id="personDlgTitle">Nova pessoa</span></div>
+  <input class="fx-title" name="name" required placeholder="Nome da pessoa" autocomplete="off">
+  <div class="fx-props"><div class="fx-p"><span class="fx-l"><i data-ic="star"></i>Papel</span><div class="fx-c "><input name="role" placeholder="Ex.: Tech Lead"></div></div><div class="fx-p"><span class="fx-l"><i data-ic="users"></i>Times</span><div class="fx-c "><div class="chkgrid pills" id="personTeams"></div></div></div><div class="fx-p"><span class="fx-l"><i data-ic="chat"></i>1:1 a cada</span><div class="fx-c "><select name="cadence" id="pCad" hidden><option value="7">7</option><option value="14">14</option><option value="21">21</option><option value="30">30</option></select><div class="fx-pills" data-for="pCad"><button type="button" data-v="7">Semanal</button><button type="button" data-v="14">Quinzenal</button><button type="button" data-v="21">3 semanas</button><button type="button" data-v="30">Mensal</button></div></div></div></div>
+  <details class="fx-more" id="pMore"><summary><i data-ic="chevr"></i>Mais detalhes<span class="fx-sum">e-mail, data de entrada, novo time</span></summary><div class="fx-props"><div class="fx-p"><span class="fx-l"><i data-ic="mail"></i>E-mail</span><div class="fx-c "><input name="email" type="email" placeholder="opcional"></div></div><div class="fx-p"><span class="fx-l"><i data-ic="cal"></i>No time desde</span><div class="fx-c "><input name="since" type="date"></div></div><div class="fx-p"><span class="fx-l"><i data-ic="plus"></i>Novo time</span><div class="fx-c "><input name="newTeam" placeholder="Cria um time e coloca a pessoa nele"></div></div></div></details>
+  <div class="macts"><span class="fx-kb">Ctrl+Enter salva</span><button type="button" class="btn" data-close>Cancelar</button><button class="btn pri" data-pri>Salvar</button></div>
 </form></dialog>
 
-<dialog id="teamDialog"><form class="modal" id="teamForm">
-  <h2 id="teamDlgTitle">Time</h2><input type="hidden" name="id">
-  <div class="form"><div class="field full"><label>Nome</label><input name="name" required></div>
-    <div class="field"><label>Prefixo dos códigos</label><input name="prefix" id="tmPrefix" maxlength="5" placeholder="Ex.: PAG" style="text-transform:uppercase"><div class="hint" id="tmPrefixHint"></div></div>
-    <div class="field"><label>Pasta na integração</label><input name="slug" id="tmSlug" placeholder="ex.: pagamentos"><div class="hint">Nome da pasta do time em times/ (minúsculas, sem acento, hífens)</div></div>
-    <div class="field full"><label>Pessoas</label><div class="chkgrid" id="teamPeople"></div></div></div>
-  <div class="macts"><button type="button" class="btn" data-close>Cancelar</button><button class="btn pri">Salvar</button></div>
+<dialog id="teamDialog" class="fxd"><form class="modal fx" id="teamForm" data-val><input type="hidden" name="id">
+  <div class="fx-top"><span class="fx-kick" id="teamDlgTitle">Novo time</span></div>
+  <input class="fx-title" name="name" required placeholder="Nome do time" autocomplete="off">
+  <div class="fx-props"><div class="fx-p"><span class="fx-l"><i data-ic="layers"></i>Prefixo</span><div class="fx-c "><input name="prefix" id="tmPrefix" maxlength="5" placeholder="Ex.: PAG" style="text-transform:uppercase"><div class="hint" id="tmPrefixHint"></div></div></div><div class="fx-p"><span class="fx-l"><i data-ic="share"></i>Pasta</span><div class="fx-c "><input name="slug" id="tmSlug" placeholder="ex.: pagamentos"><div class="hint">Pasta do time em times/ (minúsculas, sem acento, hífens).</div></div></div><div class="fx-p"><span class="fx-l"><i data-ic="users"></i>Pessoas</span><div class="fx-c "><div class="chkgrid pills" id="teamPeople"></div></div></div></div>
+  <div class="macts"><span class="fx-kb">Ctrl+Enter salva</span><button type="button" class="btn" data-close>Cancelar</button><button class="btn pri" data-pri>Salvar</button></div>
 </form></dialog>
 
 <dialog id="qtDialog"><form class="modal" id="qtForm">
@@ -685,39 +684,26 @@ textarea.paste:focus{border-color:var(--bv)}
   <div class="macts"><button type="button" class="btn" data-close>Cancelar</button><button class="btn pri" id="qtGo">Baixar HTML</button></div>
 </form></dialog>
 
-<dialog id="noteDialog"><form class="modal" id="noteForm">
-  <h2 id="noteDlgTitle">Anotação</h2><input type="hidden" name="id"><input type="hidden" name="taskId">
-  <div class="form">
-    <div class="field"><label>Pessoa</label><select name="personId" id="notePerson" required></select></div>
-    <div class="field"><label>Data</label><input type="date" name="date" required></div>
-    <div class="field full fb-only"><label>Tipo</label><select name="kind"><option value="geral">Geral</option><option value="forte">Ponto forte</option><option value="desenv">Desenvolvimento</option></select></div>
-    <div class="field full"><label>Anotação</label><textarea name="text" rows="5" required></textarea></div>
-    <div class="field full chk fb-only"><input type="checkbox" name="eligible" id="noteEligible"><label for="noteEligible">Evidência para feedback</label></div>
-  </div>
-  <div class="macts"><button type="button" class="btn" data-close>Cancelar</button><button class="btn pri">Salvar</button></div>
+<dialog id="noteDialog" class="fxd"><form class="modal fx" id="noteForm" data-val><input type="hidden" name="id"><input type="hidden" name="taskId">
+  <div class="fx-top"><span class="fx-kick" id="noteDlgTitle">Nova anotação</span></div>
+  <textarea class="fx-note" name="text" rows="4" required placeholder="O que aconteceu? Seja factual: o que a pessoa fez e qual foi o efeito."></textarea>
+  <div class="fx-props"><div class="fx-p"><span class="fx-l"><i data-ic="user"></i>Pessoa</span><div class="fx-c "><select name="personId" id="notePerson" required></select></div></div><div class="fx-p"><span class="fx-l"><i data-ic="cal"></i>Data</span><div class="fx-c "><input type="date" name="date" required></div></div><div class="fx-p fb-only"><span class="fx-l"><i data-ic="layers"></i>Tipo</span><div class="fx-c"><select name="kind" id="nKind" hidden><option value="geral">Geral</option><option value="forte">Ponto forte</option><option value="desenv">Desenvolvimento</option></select><div class="fx-pills" data-for="nKind"><button type="button" data-v="geral">1:1</button><button type="button" data-v="forte">Ponto forte</button><button type="button" data-v="desenv">Desenvolvimento</button></div></div></div><div class="fx-p fb-only"><span class="fx-l"><i data-ic="star"></i>Feedback</span><div class="fx-c"><label class="tgl"><input type="checkbox" name="eligible" id="noteEligible"><span>Usar como evidência de feedback</span></label></div></div></div>
+  <div class="macts"><span class="fx-kb">Ctrl+Enter salva</span><button type="button" class="btn" data-close>Cancelar</button><button class="btn pri" data-pri>Salvar anotação</button></div>
 </form></dialog>
 
-<dialog id="forumDialog"><form class="modal" id="forumForm">
-  <h2 id="forumDlgTitle">Novo fórum</h2><input type="hidden" name="id">
-  <div class="form">
-    <div class="field full"><label>Nome</label><input name="name" required placeholder="Ex.: Comitê de produto"></div>
-    <div class="field"><label>Cadência</label><select name="cadence"><option value="weekly">Semanal</option><option value="biweekly">Quinzenal</option><option value="monthly">Mensal (mesmo dia da semana)</option></select></div>
-    <div class="field"><label>Próxima reunião</label><input type="date" name="anchor" required></div>
-    <div class="field"><label>Horário</label><input type="time" name="time"></div>
-    <div class="field"><label>Duração (min)</label><input type="number" name="duration" min="15" max="480" step="15"></div>
-    <div class="field"><label>Time</label><select name="teamId" id="fTeam"></select></div>
-    <div class="field"><label>Objetivo</label><input name="purpose" placeholder="Para que serve este fórum"></div>
-    <div class="field full"><label>Participantes</label><div class="chkgrid" id="fPeople"></div></div>
-    <div class="field full chk"><input type="checkbox" name="archived" id="fArch"><label for="fArch">Arquivado (não aparece nas próximas reuniões)</label></div>
-  </div>
-  <div class="macts"><button type="button" class="btn danger hidden" id="forumDel" data-act="del-forum">Excluir</button><button type="button" class="btn" data-close>Cancelar</button><button class="btn pri">Salvar</button></div>
+<dialog id="forumDialog" class="fxd"><form class="modal fx" id="forumForm" data-val><input type="hidden" name="id">
+  <div class="fx-top"><span class="fx-kick" id="forumDlgTitle">Novo fórum</span></div>
+  <input class="fx-title" name="name" required placeholder="Nome do fórum (ex.: Comitê de produto)" autocomplete="off">
+  <div class="fx-props"><div class="fx-p"><span class="fx-l"><i data-ic="clock"></i>Cadência</span><div class="fx-c "><select name="cadence" id="fCad" hidden><option value="weekly">Semanal</option><option value="biweekly">Quinzenal</option><option value="monthly">Mensal</option></select><div class="fx-pills" data-for="fCad"><button type="button" data-v="weekly">Semanal</button><button type="button" data-v="biweekly">Quinzenal</button><button type="button" data-v="monthly">Mensal</button></div></div></div><div class="fx-p"><span class="fx-l"><i data-ic="cal"></i>Próxima</span><div class="fx-c fx-in"><input type="date" name="anchor" required aria-label="Próxima reunião"><input type="time" name="time" aria-label="Horário" style="max-width:120px"><span class="fx-to">por</span><input type="number" name="duration" min="15" max="480" step="15" aria-label="Duração em minutos" style="max-width:90px"><span class="fx-to">min</span></div></div><div class="fx-p"><span class="fx-l"><i data-ic="users"></i>Participantes</span><div class="fx-c "><div class="chkgrid pills" id="fPeople"></div></div></div><div class="fx-p"><span class="fx-l"><i data-ic="board"></i>Time</span><div class="fx-c "><select name="teamId" id="fTeam"></select></div></div></div>
+  <details class="fx-more" id="fMore"><summary><i data-ic="chevr"></i>Mais detalhes<span class="fx-sum">objetivo, arquivar</span></summary><div class="fx-props"><div class="fx-p"><span class="fx-l"><i data-ic="target"></i>Objetivo</span><div class="fx-c "><input name="purpose" placeholder="Para que serve este fórum"></div></div><div class="fx-p"><span class="fx-l"><i data-ic="eyeoff"></i>Arquivado</span><div class="fx-c "><label class="tgl"><input type="checkbox" name="archived" id="fArch"><span>Não aparece nas próximas reuniões</span></label></div></div></div></details>
+  <div class="macts"><button type="button" class="btn danger hidden" id="forumDel" data-act="del-forum">Excluir</button><span class="fx-kb">Ctrl+Enter salva</span><button type="button" class="btn" data-close>Cancelar</button><button class="btn pri" data-pri>Salvar</button></div>
 </form></dialog>
 
-<dialog id="cycleDialog"><form class="modal" id="cycleForm">
-  <h2>Ciclo de performance</h2><input type="hidden" name="id">
-  <div class="form"><div class="field full"><label>Nome</label><input name="name" required placeholder="Ex.: 2026 S2"></div>
-    <div class="field"><label>Início</label><input type="date" name="start" required></div><div class="field"><label>Fim</label><input type="date" name="end" required></div></div>
-  <div class="macts"><button type="button" class="btn danger hidden" id="cycleDel" data-act="del-cycle">Excluir</button><button type="button" class="btn" data-close>Cancelar</button><button class="btn pri">Salvar</button></div>
+<dialog id="cycleDialog" class="fxd"><form class="modal fx" id="cycleForm" data-val><input type="hidden" name="id">
+  <div class="fx-top"><span class="fx-kick">Ciclo de performance</span></div>
+  <input class="fx-title" name="name" required placeholder="Nome do ciclo (ex.: 2026 S2)" autocomplete="off">
+  <div class="fx-props"><div class="fx-p"><span class="fx-l"><i data-ic="cal"></i>Período</span><div class="fx-c fx-in"><input type="date" name="start" required aria-label="Início"><span class="fx-to">até</span><input type="date" name="end" required aria-label="Fim"></div></div></div>
+  <div class="macts"><button type="button" class="btn danger hidden" id="cycleDel" data-act="del-cycle">Excluir</button><span class="fx-kb">Ctrl+Enter salva</span><button type="button" class="btn" data-close>Cancelar</button><button class="btn pri" data-pri>Salvar</button></div>
 </form></dialog>
 
 <dialog id="importDialog" class="wide"><div class="modal">
@@ -1664,7 +1650,7 @@ function openForum(f){
   const v=Object.assign({cadence:'weekly',anchor:nb,duration:60,time:'',teamId:'',participants:[ME]},f||{});
   if(f)v.anchor=occFrom(f,today());
   $('#fPeople').innerHTML=[{id:ME,name:db.settings.selfName&&db.settings.selfName!=='Eu'?db.settings.selfName+' (eu)':'Eu'}].concat(db.people).map(p=>`<label class="chkl"><input type="checkbox" data-fp="${p.id}" ${(v.participants||[]).includes(p.id)?'checked':''}><span>${esc(p.name)}</span></label>`).join('');
-  $('#forumForm').reset();fillForm($('#forumForm'),v);$('#forumDel').classList.toggle('hidden',!f);$('#forumDlgTitle').textContent=f?'Editar fórum':'Novo fórum';$('#forumDialog').showModal();
+  $('#forumForm').reset();fillForm($('#forumForm'),v);$('#forumDel').classList.toggle('hidden',!f);$('#forumDlgTitle').textContent=f?'Editar fórum':'Novo fórum';fxOpen('#forumForm',f?'Salvar':'Criar fórum',!!(f&&(f.purpose||f.archived)));$('#forumDialog').showModal();
 }
 $('#forumForm').onsubmit=e=>{e.preventDefault();const v=readForm(e.target);v.name=v.name.trim();if(!v.name)return;
   v.participants=$$('#fPeople input[data-fp]').filter(x=>x.checked).map(x=>x.dataset.fp);v.duration=Math.max(15,Math.min(480,+v.duration||60));if(!okDate(v.anchor))v.anchor=today();
@@ -2499,7 +2485,7 @@ $('#initForm').onsubmit=e=>{e.preventDefault();const v=readForm(e.target);
 /* ---- Pessoa, time, nota, ciclo ---- */
 function openPerson(p){
   $('#personTeams').innerHTML=sortedTeams().map(t=>`<label class="chkl"><input type="checkbox" data-tm="${t.id}" ${p&&(p.teamIds||[]).includes(t.id)?'checked':''}><span>${esc(t.name)}</span></label>`).join('')||'<span class="muted small">Nenhum time ainda.</span>';
-  $('#personForm').reset();fillForm($('#personForm'),Object.assign({cadence:14},p||{}));$('#personDlgTitle').textContent=p?'Editar pessoa':'Nova pessoa';$('#personDialog').showModal();
+  $('#personForm').reset();fillForm($('#personForm'),Object.assign({cadence:14},p||{}));$('#personDlgTitle').textContent=p?'Editar pessoa':'Nova pessoa';fxOpen('#personForm',p?'Salvar':'Criar pessoa',!!(p&&(p.email||p.since)));$('#personDialog').showModal();
 }
 $('#personForm').onsubmit=e=>{e.preventDefault();const v=readForm(e.target),teamIds=$$('#personTeams input[data-tm]').filter(x=>x.checked).map(x=>x.dataset.tm);
   if((v.newTeam||'').trim()){const id=ensureTeam(v.newTeam);if(!teamIds.includes(id))teamIds.push(id)}delete v.newTeam;v.teamIds=teamIds;v.cadence=+v.cadence||14;v.name=v.name.trim();
@@ -2512,7 +2498,7 @@ function openTeam(t){
   if(!t){$('#tmPrefix').value='';$('#tmSlug').value=''}
   const sl=$('#tmSlug');delete sl.dataset.touched;if(t&&t.slug)sl.dataset.touched=1;
   sl.oninput=()=>{sl.dataset.touched=1};$('#teamForm [name=name]').oninput=e=>{if(!sl.dataset.touched)sl.value=igSlugify(e.target.value)};
-  $('#teamDlgTitle').textContent=t?'Editar time':'Novo time';$('#teamDialog').showModal();
+  $('#teamDlgTitle').textContent=t?'Editar time':'Novo time';fxOpen('#teamForm',t?'Salvar':'Criar time');$('#teamDialog').showModal();
 }
 $('#teamForm').onsubmit=e=>{e.preventDefault();const v=readForm(e.target),name=v.name.trim();
   if(db.teams.some(t=>t.id!==v.id&&plain(t.name)===plain(name))){toast('Já existe um time com esse nome.');return}
@@ -2576,17 +2562,26 @@ function openNote(note,defaults={}){
   if(!db.people.length){toast('Cadastre uma pessoa antes.');return}
   $('#notePerson').innerHTML=db.people.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');$('#noteForm').reset();
   fillForm($('#noteForm'),Object.assign({date:today(),kind:'geral',personId:selectedPerson||db.people[0].id},defaults,note||{}));
-  $$('#noteForm .fb-only').forEach(e=>e.classList.toggle('hidden',hideFb()));$('#noteDlgTitle').textContent=note?'Editar anotação':'Nova anotação';$('#noteDialog').showModal();
+  $$('#noteForm .fb-only').forEach(e=>e.classList.toggle('hidden',hideFb()));$('#noteDlgTitle').textContent=(note?'Editar anotação':'Nova anotação')+(person($('#notePerson').value)?' · '+person($('#notePerson').value).name:'');fxOpen('#noteForm',note?'Salvar':'Salvar anotação');$('#noteDialog').showModal();
 }
 $('#noteForm').onsubmit=e=>{e.preventDefault();const v=readForm(e.target);const old=v.id?db.notes.find(x=>x.id===v.id):null;if(old)Object.assign(old,v);else{v.id=uid();v.createdAt=Date.now();db.notes.push(v)}$('#noteDialog').close();changed()};
 function openCycle(c){
   $('#cycleForm').reset();
   let d=c;if(!c){const last=db.cycles.map(x=>x.end).filter(okDate).sort().pop(),s=last&&last>=today()?addD(last,1):today(),e=parseD(s);e.setMonth(e.getMonth()+6);e.setDate(e.getDate()-1);d={start:s,end:iso(e)}}
-  fillForm($('#cycleForm'),d);$('#cycleDel').classList.toggle('hidden',!c||db.cycles.length<2);$('#cycleDialog').showModal();
+  fillForm($('#cycleForm'),d);$('#cycleDel').classList.toggle('hidden',!c||db.cycles.length<2);fxOpen('#cycleForm',c?'Salvar':'Criar ciclo');$('#cycleDialog').showModal();
 }
 $('#cycleForm').onsubmit=e=>{e.preventDefault();const v=readForm(e.target);if(v.end<v.start)[v.start,v.end]=[v.end,v.start];
   const old=db.cycles.find(x=>x.id===v.id);if(old)Object.assign(old,v);else{v.id=uid();db.cycles.push(v);cycleSel=v.id}$('#cycleDialog').close();changed()};
 document.addEventListener('click',e=>{if(e.target.matches('[data-close]'))e.target.closest('dialog').close()});
+/* v15: padrão único de formulário: pílulas para escolhas curtas, validação no lugar e Ctrl+Enter */
+function fxPills(root){$$('.fx-pills[data-for]',root).forEach(g=>{const s=document.getElementById(g.dataset.for);g.querySelectorAll('button').forEach(b=>b.classList.toggle('on',!!s&&b.dataset.v===String(s.value)))})}
+function fxValidate(f){if(!f||!f.matches('[data-val]'))return;const b=f.querySelector('[data-pri]');let msg='';
+  for(const el of f.querySelectorAll('[required]')){if(!String(el.value||'').trim()){msg=el.classList.contains('fx-title')||el.classList.contains('fx-note')?'Preencha '+(el.placeholder||'o campo').split(' (')[0].toLowerCase()+' para salvar.':'Preencha os campos obrigatórios.';break}}
+  if(b)b.disabled=!!msg;let m=f.querySelector('.fx-err');if(!m){m=document.createElement('div');m.className='fx-err';f.querySelector('.macts').before(m)}m.textContent=f.dataset.touched?msg:''}
+function fxOpen(sel,label,more){const f=$(sel);delete f.dataset.touched;const b=f.querySelector('[data-pri]');if(b)b.textContent=label;fxPills(f);const d=f.querySelector('.fx-more');if(d&&more!==undefined)d.open=!!more;fxValidate(f);setTimeout(()=>f.querySelector('.fx-title,.fx-note')?.focus(),30)}
+document.addEventListener('click',e=>{const b=e.target.closest('.fx-pills button');if(!b)return;const g=b.parentElement,s=document.getElementById(g.dataset.for);if(s){s.value=b.dataset.v;s.dispatchEvent(new Event('change',{bubbles:true}))}fxPills(g.parentElement)});
+document.addEventListener('input',e=>{const f=e.target.closest?.('form[data-val]');if(f){f.dataset.touched=1;fxValidate(f)}});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){const f=e.target.closest?.('dialog[open] form');if(f){e.preventDefault();const b=f.querySelector('[data-pri],#tSave,#iSave,button.pri:not([type=button])');if(b&&!b.disabled)f.requestSubmit()}}},true);
 /* ============ Importação em massa (gestao-import/2) ============ */
 const RES=['teams','people','initiatives','features','tasks','updates','agreements','notes','cycles','staffTopics','forums','calendarSeries','agenda','teamLinks'];
 function parseImport(text){
