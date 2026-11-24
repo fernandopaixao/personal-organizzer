@@ -4,7 +4,7 @@ Pré-configuração gravada entre `/*FIN-PRESET*/` e `/*FIM-FIN-PRESET*/` no HTM
 
 ```json
 { "schema": "financas-preset/1", "team": { "nome": "Pagamentos", "slug": "pagamentos", "prefixo": "PAG" },
-  "ano": 2026, "moeda": "BRL", "categorias": [{ "id": "pessoas", "nome": "Pessoas", "tipo": "OPEX" }],
+  "ano": 2026, "anos": [2026, 2027], "moeda": "BRL", "categorias": [{ "id": "pessoas", "nome": "Pessoas", "tipo": "OPEX" }],
   "centros": ["CC-1020"], "pasta": "Gestao-Compartilhado", "contato": "Fernando",
   "chave": "GK1.pagamentos-fin-2611.<43 caracteres> (opcional, desmarcado por padrão)", "geradoEm": "…" }
 ```

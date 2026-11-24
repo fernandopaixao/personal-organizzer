@@ -21,7 +21,7 @@
    compara com o orçamento do grupo e publica diretrizes grupo/financas/diretriz-<time>.json.
    Orçamento aprovado, itens do grupo, chaves e versões ficam no arquivo local cifrado.
    ===================================================================== */
-const TOOL = 'financas-grupo', TOOL_NOME = 'Finanças do Grupo', TOOL_VERSION = '1.0.0';
+const TOOL = 'financas-grupo', TOOL_NOME = 'Finanças do Grupo', TOOL_VERSION = '1.1.0';
 const LOCAL_SCHEMA = 'gestao-financas-local/1', PLANO_SCHEMA = 'gestao-financas-plano/1', DIRETRIZ_SCHEMA = 'gestao-financas-diretriz/1';
 const PRESET = /*FING-PRESET*/null/*FIM-FING-PRESET*/;
 const CATS_PADRAO = [
@@ -31,29 +31,41 @@ const CATS_PADRAO = [
 ].map(([id, nome, tipo]) => ({ id, nome, tipo }));
 
 let db = null, ctx = null, dirLocal = null, arquivo = '', raiz = null;
-let view = 'consolidado', pendentes = [], saude = {}, salvarT = null, salvando = false, sujo = false, verVersao = '', agrupar = 'time';
+let view = 'consolidado', anoVista = null, pendentes = [], saude = {}, salvarT = null, salvando = false, sujo = false, verVersao = '', agrupar = 'time';
 
 function novoDb({ nome, ano, moeda, pessoa }) {
-  return { schema: LOCAL_SCHEMA, version: 1, tool: TOOL, criadoEm: new Date().toISOString(), grupo: { nome, slug: slugify(nome) }, ano: +ano, moeda,
+  return { schema: LOCAL_SCHEMA, version: 1, tool: TOOL, criadoEm: new Date().toISOString(), grupo: { nome, slug: slugify(nome) }, ano: +ano, anos: [+ano], moeda,
     pessoa: { nome: pessoa, slug: slugify(pessoa).split('-')[0] || 'gestor' }, categorias: CATS_PADRAO.map(c => ({ ...c })), centros: [],
-    orcamento: { total: 0, nota: '' }, itens: [], times: [], retratos: {}, versoes: [], seg: {} };
+    orcamento: { total: 0, porAno: {}, nota: '' }, itens: [], times: [], retratos: {}, versoes: [], seg: {} };
 }
 function normalizar(d) {
   if (d?.schema !== LOCAL_SCHEMA || d.tool !== TOOL) throw new Error('Este arquivo não é das Finanças do Grupo.');
   d.categorias ??= CATS_PADRAO.map(c => ({ ...c })); d.centros ??= []; d.orcamento ??= { total: 0 }; d.itens ??= []; d.times ??= []; d.retratos ??= {}; d.versoes ??= []; d.seg ??= {};
   for (const t of d.times) { t.chaves ??= []; t.teto ??= { total: 0, caps: {} }; t.diretriz ??= {}; }
+  // Planejamento multianual (1.1): "ano" é o ano base; "anos" é o horizonte; orçamento e tetos passam a ser por ano.
+  // Arquivos 1.0 tinham um ano só: o orçamento e o teto antigos viram os do ano base.
+  d.anos = [...new Set([...(Array.isArray(d.anos) ? d.anos : []), d.ano].map(Number).filter(a => a > 2000 && a < 2100))].sort();
+  d.orcamento.porAno ??= {}; if (d.orcamento.total && d.orcamento.porAno[d.ano] == null) d.orcamento.porAno[d.ano] = d.orcamento.total;
+  for (const t of d.times) { t.tetos ??= {}; if ((t.teto.total || Object.keys(t.teto.caps || {}).length) && !t.tetos[d.ano]) t.tetos[d.ano] = structuredClone(t.teto); }
   return d;
 }
 const writer = () => `${db.pessoa.slug}~${dispositivo().id}`;
 const fm = c => fmtMoeda(c, db.moeda);
 const catPorId = id => db.categorias.find(c => c.id === id);
 const timePorSlug = s => db.times.find(t => t.slug === s);
-const mesesAno = () => mesesDoAno(db.ano);
+// Anos que o grupo enxerga: o horizonte do grupo mais os anos publicados pelos times.
+const anosPlano = p => (Array.isArray(p?.fiscalYears) && p.fiscalYears.length ? p.fiscalYears : p?.fiscalYear ? [p.fiscalYear] : []).map(Number);
+const anosG = () => [...new Set([...db.anos, ...Object.values(db.retratos).flatMap(r => anosPlano(r.payload))])].sort();
+const anoV = () => (anoVista && anosG().includes(anoVista)) ? anoVista : db.ano;
+const mesesAno = (ano = anoV()) => mesesDoAno(ano);
+const orcAno = (a = anoV()) => db.orcamento.porAno?.[a] || 0;
+const tetoAno = (t, a = anoV()) => (t.tetos ??= {})[a] ?? { total: 0, caps: {} };
+const tetoEditavel = (t, a = anoV()) => (t.tetos ??= {})[a] ??= { total: 0, caps: {} };
 const ytd = () => mesesAno().filter(m => m <= mesAtual());
 
 /* --------------------------- soma dos planos --------------------------- */
-// Um retrato só entra na soma se for do mesmo ano fiscal e da mesma moeda do grupo.
-function somavel(p) { return p && p.fiscalYear === db.ano && p.currency === db.moeda; }
+// Um retrato entra na soma se for da mesma moeda do grupo. Cada ano soma os meses daquele ano (planos multianuais somam ano a ano).
+function somavel(p) { return !!p && p.currency === db.moeda; }
 function totaisPlano(p, meses = mesesAno(), filtro = () => true) {
   const t = { orcado: 0, previsto: 0, realizado: 0 };
   if (!p) return t;
@@ -129,7 +141,6 @@ async function lerPasta(silencioso = false) {
     const p = r.melhor.payload, atual = db.retratos[t.slug]?.payload;
     if (atual && p.revision < atual.revision) { s.avisos.push(`arquivo na pasta (rev. ${p.revision}) é mais antigo que o já lido (rev. ${atual.revision}): ignorado`); continue; }
     if (atual && p.revision === atual.revision && p.generatedAt === atual.generatedAt) continue;
-    if (p.fiscalYear !== db.ano) s.avisos.push(`plano do ano ${p.fiscalYear} (grupo está em ${db.ano}): não entra na soma`);
     if (p.currency !== db.moeda) s.avisos.push(`moeda ${p.currency} diferente de ${db.moeda}: não entra na soma`);
     pendentes.push({ t, p, de: r.melhor.nome });
   }
@@ -164,11 +175,13 @@ function aplicar(slug) {
 }
 
 /* -------------------------- diretrizes e chaves -------------------------- */
+const capsDe = x => Object.fromEntries(Object.entries(x?.caps || {}).filter(([, v]) => v > 0));
 function montarDiretriz(t, meta) {
   return { schema: DIRETRIZ_SCHEMA, ...meta, source: { group: db.grupo.slug, tool: TOOL, toolVersion: TOOL_VERSION },
     team: { name: t.nome, slug: t.slug }, fiscalYear: db.ano, currency: db.moeda,
     categories: db.categorias.map(c => ({ id: c.id, name: c.nome, kind: c.tipo })), costCenters: db.centros,
-    caps: Object.fromEntries(Object.entries(t.teto.caps || {}).filter(([, v]) => v > 0)), capTotal: t.teto.total || undefined,
+    caps: capsDe(tetoAno(t, db.ano)), capTotal: tetoAno(t, db.ano).total || undefined, fiscalYears: [...db.anos],
+    byYear: Object.fromEntries(db.anos.map(a => [a, tetoAno(t, a)]).filter(([, x]) => x.total || Object.keys(capsDe(x)).length).map(([a, x]) => [a, { caps: capsDe(x), capTotal: x.total || undefined }])),
     planVersion: db.versaoAtual || 'Orçamento original', publishBy: t.publishBy || undefined, closingDay: db.diaFechamento || undefined, note: t.nota ? clamp(t.nota, 500) : undefined };
 }
 async function publicarDiretriz(t, assumir = false) {
@@ -210,7 +223,7 @@ async function htmlDoTime(t) {
 async function gerarHtmlTime(t, comChave) {
   if (comChave && !await avisoCofre('html')) return;
   const c = chaveAtualTexto(t);
-  const preset = { schema: 'financas-preset/1', team: { nome: t.nome, slug: t.slug, prefixo: t.prefixo || '' }, ano: db.ano, moeda: db.moeda,
+  const preset = { schema: 'financas-preset/1', team: { nome: t.nome, slug: t.slug, prefixo: t.prefixo || '' }, ano: db.ano, anos: [...db.anos], moeda: db.moeda,
     categorias: db.categorias.map(x => ({ id: x.id, nome: x.nome, tipo: x.tipo })), centros: db.centros, pasta: db.pastaComum || PASTA_COMUM, chave: comChave && c ? c.texto : undefined, contato: db.pessoa.nome, geradoEm: new Date().toISOString() };
   let html; try { html = aplicarPreset(await lerEmbutido('finTimeEmb'), 'FIN-PRESET', preset); } catch (e) { return toast(e.message, 6000); }
   baixar(`financas_${t.slug}.html`, html, 'text/html');
@@ -236,13 +249,14 @@ function render() {
 }
 function renderTopo() {
   const t = $('#topo'); if (!t) return;
-  t.innerHTML = `<div><h1>${esc(NAV.find(n => n[0] === view)[1])}</h1><div class="sub">${esc(db.grupo.nome)} · ${db.ano} · ${esc(db.moeda)}</div></div><span class="grow"></span>
+  t.innerHTML = `<div><h1>${esc(NAV.find(n => n[0] === view)[1])}</h1><div class="sub">${esc(db.grupo.nome)} · ${esc(db.moeda)}</div></div>${['consolidado', 'revisar', 'times', 'versoes'].includes(view) ? `<select class="sel" id="tAno" title="Ano em exibição">${anosG().map(a => `<option value="${a}" ${a === anoV() ? 'selected' : ''}>${a}${a === db.ano ? ' (base)' : ''}</option>`).join('')}</select>` : ''}<span class="grow"></span>
     <span class="pill"><span class="led ${sujo || salvando ? 'wait' : ''}"></span>${sujo || salvando ? 'Salvando…' : 'Salvo e cifrado'}</span>
     <button class="pill" id="tPasta"><span class="led ${raiz ? '' : 'wait'}"></span>${raiz ? 'Pasta ligada' : 'Ligar pasta'}</button>
     ${raiz ? '<button class="btn" id="tLer">Ler pasta</button>' : ''}<button class="btn ghost" id="tHub" title="Voltar ao Hub da solução">← Hub</button><button class="btn ghost" id="tOnde">Onde estou?</button>`;
   $('#tPasta').onclick = async () => { try { await ligarPasta(await escolherPasta('fin-comum')); } catch (e) { if (e.name !== 'AbortError') toast(e.message); } };
   if ($('#tLer')) $('#tLer').onclick = () => lerPasta();
   $('#tHub').onclick = voltarAoHub;
+  if ($('#tAno')) $('#tAno').onchange = e => { anoVista = +e.target.value; render(); };
   $('#tOnde').onclick = () => ondeEstou({ ferramenta: TOOL_NOME, versao: TOOL_VERSION, arquivo, pastaLocal: dirLocal?.name, pastaComum: raiz?.name, writer: writer(),
     local: ['Orçamento aprovado do grupo e itens do grupo', 'Chaves de finanças de cada time', 'Retratos lidos dos times e versões do plano', 'Cópias de segurança em backup/'],
     comum: ['grupo/financas/diretriz-<time>.json (tetos, categorias, prazos)', 'Leitura de times/<time>/financas/plano.json'] });
@@ -251,13 +265,13 @@ const kpi = (r, v, c = '') => `<div class="kpi ${c}"><span>${r}</span><b>${v}</b
 
 /* --- Consolidado --- */
 function vCons(el) {
-  const c = consolidado(), y = consolidado(ytd()), orc = db.orcamento.total || 0;
+  const c = consolidado(), y = consolidado(ytd()), orc = orcAno(), a = anoV();
   const semPlano = db.times.filter(t => !db.retratos[t.slug]);
-  const dims = { time: 'Por time', categoria: 'Por categoria', iniciativa: 'Por iniciativa', tipo: 'OPEX × CAPEX' };
+  const dims = { time: 'Por time', categoria: 'Por categoria', iniciativa: 'Por iniciativa', tipo: 'OPEX × CAPEX', anos: 'Por ano' };
   el.innerHTML = `${pendentes.length ? `<div class="banner">${pendentes.length} plano(s) novo(s) na pasta. <button class="btn sm pri" id="cRev">Revisar</button></div>` : ''}
     ${semPlano.length && db.times.length ? `<div class="banner warn">Sem plano: ${semPlano.map(t => esc(t.nome)).join(', ')}.</div>` : ''}
-    <div class="kpis">${kpi('Orçamento aprovado do grupo', orc ? fm(orc) : '<span class="faint">definir</span>')}${kpi('Orçado (times + grupo)', fm(c.total.orcado), orc && c.total.orcado > orc ? 'alert' : '')}
-      ${kpi('Previsto no ano', fm(c.total.previsto), orc && c.total.previsto > orc ? 'alert' : '')}${kpi('Realizado até ' + nomeMes(mesAtual()), fm(y.total.realizado))}
+    <div class="kpis">${kpi(`Orçamento aprovado ${a}`, orc ? fm(orc) : '<span class="faint">definir</span>')}${kpi('Orçado (times + grupo)', fm(c.total.orcado), orc && c.total.orcado > orc ? 'alert' : '')}
+      ${kpi(`Previsto em ${a}`, fm(c.total.previsto), orc && c.total.previsto > orc ? 'alert' : '')}${kpi('Realizado até ' + nomeMes(mesAtual()), fm(y.total.realizado))}
       ${kpi('Saldo previsto', orc ? fm(orc - c.total.previsto) : '—', orc && orc - c.total.previsto < 0 ? 'alert' : '')}</div>
     <div class="card"><div class="row"><div class="sg">${Object.entries(dims).map(([k, n]) => `<button class="${agrupar === k ? 'on' : ''}" data-g="${k}">${n}</button>`).join('')}</div><span class="grow"></span><button class="btn sm" id="cCsv">Exportar CSV</button></div>
       <div style="margin-top:12px">${tabelaAgrupada(agrupar)}</div></div>
@@ -271,10 +285,11 @@ function tabelaAgrupada(dim) {
   const ms = mesesAno(), ys = ytd(), cab = `<tr><th>${{ time: 'Time', categoria: 'Categoria', iniciativa: 'Iniciativa', tipo: 'Tipo' }[dim]}</th><th class="n">Orçado</th><th class="n">Previsto</th><th class="n">Realizado (ano)</th><th class="n">Previsto − orçado</th>${dim === 'time' ? '<th class="n">Teto</th><th>Situação</th>' : ''}</tr>`;
   const lin = (nome, t, extra = '') => `<tr><td>${nome}</td><td class="n">${fm(t.orcado)}</td><td class="n">${fm(t.previsto)}</td><td class="n">${fm(t.realizado)}</td><td class="n ${t.previsto - t.orcado > 0 ? 'latec' : ''}">${fm(t.previsto - t.orcado)}</td>${extra}</tr>`;
   let rows = [];
+  if (dim === 'anos') return tabelaAnos();
   if (dim === 'time') {
     const c = consolidado();
     rows = c.porTime.map(({ t, r, ok, tot }) => {
-      const s = saude[t.slug]?.avisos || [], teto = t.teto.total;
+      const s = saude[t.slug]?.avisos || [], teto = tetoAno(t).total;
       const sit = !r ? '<span class="chip late">sem plano</span>' : !ok ? '<span class="chip late">não somado</span>' : `<span class="chip ${s.length ? 'late' : 'ok'}" title="${esc(s.join('; '))}">rev. ${r.payload.revision} · ${fmtData(r.payload.generatedAt)}</span> <span class="small faint">${esc(r.payload.planVersion || '')}</span>`;
       return lin(`<button class="bvc" data-tm="${t.slug}">${esc(t.nome)}</button>`, tot, `<td class="n ${teto && tot.previsto > teto ? 'latec' : ''}">${teto ? fm(teto) : '—'}</td><td>${sit}</td>`);
     });
@@ -293,21 +308,33 @@ function tabelaAgrupada(dim) {
   }
   return rows.length ? `<div class="scroll"><table class="t">${cab}${rows.join('')}</table></div>` : '<div class="empty">Nada para somar ainda. Cadastre os times, gere as chaves e leia a pasta.</div>';
 }
+// Soma ano a ano: times (cada um com os anos que publicou) + itens do grupo, contra o orçamento de cada ano.
+function tabelaAnos() {
+  const anos = anosG(), por = anos.map(a => consolidado(mesesAno(a)));
+  const cel = (t, teto) => `<td class="n ${teto && t.previsto > teto ? 'latec' : ''}" title="orçado ${fm(t.orcado)} · realizado ${fm(t.realizado)}">${t.previsto || t.orcado ? fm(t.previsto) : '<span class="faint">—</span>'}</td>`;
+  const rows = db.times.map((t, i) => `<tr><td><button class="bvc" data-tm="${t.slug}">${esc(t.nome)}</button></td>${anos.map((a, j) => cel(por[j].porTime[i].tot, tetoAno(t, a).total)).join('')}</tr>`);
+  if (db.itens.length) rows.push(`<tr><td><i>Itens do grupo</i></td>${por.map(c => cel(c.itens)).join('')}</tr>`);
+  rows.push(`<tr class="tot"><td>Previsto total</td>${por.map(c => `<td class="n">${fm(c.total.previsto)}</td>`).join('')}</tr>`);
+  rows.push(`<tr><td>Orçado total</td>${por.map(c => `<td class="n">${fm(c.total.orcado)}</td>`).join('')}</tr>`);
+  rows.push(`<tr><td>Orçamento aprovado</td>${anos.map(a => `<td class="n">${orcAno(a) ? fm(orcAno(a)) : '<span class="faint">definir</span>'}</td>`).join('')}</tr>`);
+  rows.push(`<tr><td>Saldo previsto</td>${anos.map((a, j) => orcAno(a) ? `<td class="n ${orcAno(a) - por[j].total.previsto < 0 ? 'latec' : 'okc'}">${fm(orcAno(a) - por[j].total.previsto)}</td>` : '<td class="n faint">—</td>').join('')}</tr>`);
+  return `<div class="scroll"><table class="t"><tr><th>Previsto por ano</th>${anos.map(a => `<th class="n">${a}${a === db.ano ? ' <span class="faint">base</span>' : ''}</th>`).join('')}</tr>${rows.join('')}</table></div><p class="small muted">Cada time entra com os anos que publicou. Passe o mouse sobre um valor para ver orçado e realizado.</p>`;
+}
 function graficoTimes() {
   const ms = mesesAno(), cores = ['#223ad2', '#8e9de9', '#002bab', '#c9d0f5', '#5b6fe0', '#aab0bf', '#3a4a9a', '#dfe3fb'];
   const series = db.times.map((t, i) => ({ nome: t.nome, cor: cores[i % cores.length], v: ms.map(m => somavel(db.retratos[t.slug]?.payload) ? totaisPlano(db.retratos[t.slug].payload, [m]).previsto : 0) }));
   if (db.itens.length) series.push({ nome: 'Itens do grupo', cor: '#6f7689', v: ms.map(m => totaisItens([m]).previsto) });
-  const tot = ms.map((_, i) => series.reduce((s, x) => s + x.v[i], 0)), max = Math.max(1, ...tot, db.orcamento.total ? db.orcamento.total / 12 : 0);
+  const tot = ms.map((_, i) => series.reduce((s, x) => s + x.v[i], 0)), max = Math.max(1, ...tot, orcAno() / 12);
   const W = 760, H = 210, bw = (W - 16) / 12, y = v => H - 24 - (v / max) * (H - 40);
   let svg = '';
   ms.forEach((m, i) => { let acc = 0; const x = 8 + i * bw + bw * 0.18, w = bw * 0.64; for (const s of series) { const v = s.v[i]; if (!v) continue; svg += `<rect x="${x}" y="${y(acc + v)}" width="${w}" height="${y(acc) - y(acc + v)}" fill="${s.cor}"><title>${esc(s.nome)} · ${nomeMes(m)}: ${fm(v)}</title></rect>`; acc += v; } svg += `<text x="${x + w / 2}" y="${H - 8}" text-anchor="middle" font-size="10.5" fill="var(--muted)">${nomeMes(m)}</text>`; });
-  if (db.orcamento.total) svg += `<line x1="8" x2="${W - 8}" y1="${y(db.orcamento.total / 12)}" y2="${y(db.orcamento.total / 12)}" stroke="var(--late)" stroke-dasharray="4 4"/>`;
-  return `<svg class="ch" viewBox="0 0 ${W} ${H}">${svg}</svg><div class="legend">${series.map(s => `<span><i style="background:${s.cor}"></i>${esc(s.nome)}</span>`).join('')}${db.orcamento.total ? '<span><i style="background:var(--late);height:2px"></i>Orçamento do grupo ÷ 12</span>' : ''}</div>`;
+  if (orcAno()) svg += `<line x1="8" x2="${W - 8}" y1="${y(orcAno() / 12)}" y2="${y(orcAno() / 12)}" stroke="var(--late)" stroke-dasharray="4 4"/>`;
+  return `<svg class="ch" viewBox="0 0 ${W} ${H}">${svg}</svg><div class="legend">${series.map(s => `<span><i style="background:${s.cor}"></i>${esc(s.nome)}</span>`).join('')}${orcAno() ? `<span><i style="background:var(--late);height:2px"></i>Orçamento do grupo de ${anoV()} ÷ 12</span>` : ''}</div>`;
 }
 function detalheTime(slug) {
   const t = timePorSlug(slug), r = db.retratos[slug], p = r?.payload; if (!p) return toast('Este time ainda não tem plano lido.');
   const ms = mesesAno();
-  modal(`<div class="mh"><h2>${esc(t.nome)} · ${esc(p.planVersion || '')}</h2><span class="grow"></span><span class="chip">rev. ${p.revision}</span></div><div class="mb">
+  modal(`<div class="mh"><h2>${esc(t.nome)} · ${anoV()} · ${esc(p.planVersion || '')}</h2><span class="grow"></span><span class="chip">rev. ${p.revision}</span></div><div class="mb">
     <p class="small muted" style="margin-top:0">Publicado em ${fmtDataHora(p.generatedAt)} por <span class="code">${esc(p.source?.writer || '')}</span> · meses fechados: ${(p.closedMonths || []).map(nomeMes).join(', ') || 'nenhum'}. Só leitura: o número do time só muda quando o time publica.</p>
     <div class="scroll"><table class="t"><tr><th>Linha</th><th>Categoria</th>${ms.map(m => `<th class="n">${nomeMes(m)}</th>`).join('')}<th class="n">Previsto</th><th class="n">Orçado</th></tr>
     ${(p.lines || []).map(l => { const tt = totaisPlano({ lines: [l] }, ms); return `<tr><td>${esc(l.name)}${l.initiative ? ` <span class="code faint">${esc(l.initiative)}</span>` : ''}</td><td>${esc(catPorId(l.category)?.nome || l.category)}</td>${ms.map(m => `<td class="n">${l.months?.[m]?.forecast ? fmtCurto(l.months[m].forecast) : '—'}</td>`).join('')}<td class="n"><b>${fmtCurto(tt.previsto)}</b></td><td class="n">${fmtCurto(tt.orcado)}</td></tr>`; }).join('')}</table></div>
@@ -315,9 +342,9 @@ function detalheTime(slug) {
     </div><div class="mf"><button class="btn pri" onclick="fecharModal()">Fechar</button></div>`, 'wide');
 }
 function exportarCsv() {
-  const ms = mesesAno(), lin = [['time', 'linha', 'categoria', 'tipo', 'iniciativa', 'medida', ...ms].join(';')];
+  const ms = anosG().flatMap(a => mesesAno(a)), lin = [['time', 'linha', 'categoria', 'tipo', 'iniciativa', 'medida', ...ms].join(';')];
   for (const { time, l } of linhasTodas()) for (const [k, n] of [['budget', 'orcado'], ['forecast', 'previsto'], ['actual', 'realizado']]) lin.push([time.nome, l.name, catPorId(l.category)?.nome || l.category, l.kind, l.initiative || '', n, ...ms.map(m => ((+l.months?.[m]?.[k] || 0) / 100).toFixed(2).replace('.', ','))].map(x => `"${String(x).replace(/"/g, '""')}"`).join(';'));
-  baixar(`consolidado-${db.grupo.slug}-${db.ano}.csv`, '\ufeff' + lin.join('\r\n'), 'text/csv');
+  baixar(`consolidado-${db.grupo.slug}-${anosG()[0]}-${anosG().at(-1)}.csv`, '\ufeff' + lin.join('\r\n'), 'text/csv');
   toast('CSV baixado sem cifra: trate o arquivo como confidencial.', 5000);
 }
 
@@ -326,10 +353,10 @@ function vRevisar(el) {
   el.innerHTML = `${raiz ? '' : '<div class="banner warn">Ligue a pasta sincronizada (botão no topo) para ler os planos dos times.</div>'}
     <div class="card"><div class="row"><p class="lbl" style="margin:0">Planos novos <span class="n">${pendentes.length}</span></p><span class="grow"></span>${pendentes.length > 1 ? '<button class="btn pri sm" id="rTodos">Aplicar todos</button>' : ''}</div>
     ${pendentes.length ? pendentes.map(x => { const d = diffPlano(db.retratos[x.t.slug]?.payload, x.p), ok = somavel(x.p); return `<div class="al"><span class="dot ${ok ? '' : 'late'}"></span><div class="grow"><b>${esc(x.t.nome)}</b> · revisão ${x.p.revision} · ${esc(x.p.planVersion || '')} · ${fmtDataHora(x.p.generatedAt)} <span class="faint small">${esc(x.de)}</span><br>
-      Previsto no ano ${fm(d.a.previsto)} → <b>${fm(d.b.previsto)}</b> (${d.b.previsto - d.a.previsto >= 0 ? '+' : ''}${fm(d.b.previsto - d.a.previsto)}) · orçado ${fm(d.b.orcado)} · realizado ${fm(d.b.realizado)}
-      ${d.linhas.length ? `<div class="small muted">${d.linhas.slice(0, 8).map(esc).join(' · ')}${d.linhas.length > 8 ? ` · e mais ${d.linhas.length - 8}` : ''}</div>` : ''}${ok ? '' : '<div class="small latec">Ano ou moeda diferente: fica guardado, mas não entra na soma.</div>'}</div>
+      ${anosPlano(x.p).length > 1 ? `Anos ${anosPlano(x.p).join(', ')} · ` : ''}Previsto em ${anoV()} ${fm(d.a.previsto)} → <b>${fm(d.b.previsto)}</b> (${d.b.previsto - d.a.previsto >= 0 ? '+' : ''}${fm(d.b.previsto - d.a.previsto)}) · orçado ${fm(d.b.orcado)} · realizado ${fm(d.b.realizado)}
+      ${d.linhas.length ? `<div class="small muted">${d.linhas.slice(0, 8).map(esc).join(' · ')}${d.linhas.length > 8 ? ` · e mais ${d.linhas.length - 8}` : ''}</div>` : ''}${ok ? '' : '<div class="small latec">Moeda diferente: fica guardado, mas não entra na soma.</div>'}</div>
       <button class="btn sm" data-ap="${x.t.slug}">Aplicar</button></div>`; }).join('') : '<div class="empty">Nenhum plano novo. A ferramenta confere a pasta a cada minuto e quando você volta para a aba.</div>'}</div>
-    <div class="card"><p class="lbl">Saúde da soma</p>${db.times.length ? db.times.map(t => { const s = saude[t.slug]?.avisos || []; return `<div class="al"><span class="dot ${s.length ? 'late' : ''}"></span><div class="grow"><b>${esc(t.nome)}</b> ${s.length ? '<br><span class="small">' + s.map(esc).join('<br>') + '</span>' : '<span class="small okc">ok</span>'}</div></div>`; }).join('') : '<div class="empty">Cadastre os times na aba Times.</div>'}</div>`;
+    <div class="card"><p class="lbl">Saúde da soma</p>${db.times.length ? db.times.map(t => { const p = db.retratos[t.slug]?.payload, s = [...(saude[t.slug]?.avisos || []), ...(p && !anosPlano(p).includes(anoV()) ? [`o plano publicado não cobre ${anoV()} (cobre ${anosPlano(p).join(', ') || '—'})`] : [])]; return `<div class="al"><span class="dot ${s.length ? 'late' : ''}"></span><div class="grow"><b>${esc(t.nome)}</b> ${s.length ? '<br><span class="small">' + s.map(esc).join('<br>') + '</span>' : '<span class="small okc">ok</span>'}</div></div>`; }).join('') : '<div class="empty">Cadastre os times na aba Times.</div>'}</div>`;
   if ($('#rTodos')) $('#rTodos').onclick = () => aplicar();
   $$('[data-ap]', el).forEach(b => b.onclick = () => aplicar(b.dataset.ap));
 }
@@ -350,14 +377,14 @@ function vTimes(el) {
   $$('[data-pd]', el).forEach(b => b.onclick = () => publicarDiretriz(timePorSlug(b.dataset.pd)));
 }
 function timeDlg(slug) {
-  const t = slug ? timePorSlug(slug) : { nome: '', slug: '', prefixo: '', chaves: [], teto: { total: 0, caps: {} }, diretriz: {}, publishBy: '', nota: '' };
+  const t = slug ? timePorSlug(slug) : { nome: '', slug: '', prefixo: '', chaves: [], teto: { total: 0, caps: {} }, tetos: {}, diretriz: {}, publishBy: '', nota: '' };
   const v = c => c ? (c / 100).toLocaleString('pt-BR') : '';
   const d = modal(`<div class="mh"><h2>${slug ? esc(t.nome) : 'Novo time'}</h2></div><div class="mb">
     <div class="f2"><label class="field"><span>Nome</span><input class="sin" id="mN" value="${esc(t.nome)}"></label><label class="field"><span>Identificador (pasta)</span><input class="sin code" id="mS" value="${esc(t.slug)}" ${slug ? 'disabled' : ''}></label></div>
     <div class="f2"><label class="field"><span>Prefixo de código (opcional)</span><input class="sin" id="mP" value="${esc(t.prefixo || '')}" maxlength="5"></label><label class="field"><span>Publicar plano até</span><input class="sin" type="date" id="mD" value="${esc(t.publishBy || '')}"></label></div>
-    <p class="lbl">Teto do ano (vai na diretriz)</p>
-    <label class="field"><span>Teto total</span><input class="sin" id="mT" value="${v(t.teto.total)}"></label>
-    <div class="f2">${db.categorias.map(c => `<label class="field"><span>${esc(c.nome)}</span><input class="sin" data-cap="${c.id}" value="${v(t.teto.caps?.[c.id])}"></label>`).join('')}</div>
+    <p class="lbl">Teto de ${anoV()} (vai na diretriz; troque o ano no topo para os outros anos)</p>
+    <label class="field"><span>Teto total</span><input class="sin" id="mT" value="${v(tetoAno(t).total)}"></label>
+    <div class="f2">${db.categorias.map(c => `<label class="field"><span>${esc(c.nome)}</span><input class="sin" data-cap="${c.id}" value="${v(tetoAno(t).caps?.[c.id])}"></label>`).join('')}</div>
     <label class="field"><span>Recado para o time (vai cifrado na diretriz)</span><textarea class="sin" id="mR">${esc(t.nota || '')}</textarea></label></div>
     <div class="mf">${slug ? '<button class="btn danger" id="mX">Remover</button><span class="grow"></span>' : ''}<button class="btn" id="mNo">Cancelar</button><button class="btn pri" id="mOk">Salvar</button></div>`, 'wide');
   $('#mN', d).oninput = () => { if (!slug) $('#mS', d).value = slugify($('#mN', d).value); };
@@ -367,7 +394,9 @@ function timeDlg(slug) {
     const nome = clamp($('#mN', d).value.trim(), 80), s = slugify($('#mS', d).value);
     if (!nome || !s) return toast('Preencha nome e identificador.'); if (!slug && timePorSlug(s)) return toast('Já existe um time com esse identificador.');
     t.nome = nome; t.prefixo = clamp($('#mP', d).value.trim().toUpperCase(), 5); t.publishBy = $('#mD', d).value; t.nota = clamp($('#mR', d).value.trim(), 500);
-    t.teto.total = parseValor($('#mT', d).value) || 0; t.teto.caps = {}; $$('[data-cap]', d).forEach(i => { const x = parseValor(i.value); if (x) t.teto.caps[i.dataset.cap] = x; });
+    const te = tetoEditavel(t); te.total = parseValor($('#mT', d).value) || 0; te.caps = {}; $$('[data-cap]', d).forEach(i => { const x = parseValor(i.value); if (x) te.caps[i.dataset.cap] = x; });
+    if (anoV() === db.ano) t.teto = structuredClone(te);   // compatibilidade com arquivos 1.0
+    if (!db.anos.includes(anoV())) db.anos = [...db.anos, anoV()].sort();
     if (!slug) { t.slug = s; db.times.push(t); }
     fecharModal(); agendarSalvar();
     if (slug && t.diretriz.revision) toast('Lembre de publicar a diretriz de novo para o time ver o teto atualizado.', 5000);
@@ -375,13 +404,13 @@ function timeDlg(slug) {
 }
 
 /* --- Versões do plano --- */
-function retratoAtual() { const r = {}; for (const t of db.times) { const p = db.retratos[t.slug]?.payload; if (somavel(p)) r[t.slug] = { revision: p.revision, planVersion: p.planVersion, meses: Object.fromEntries(mesesAno().map(m => [m, totaisPlano(p, [m])])) }; } r._grupo = { meses: Object.fromEntries(mesesAno().map(m => [m, totaisItens([m])])) }; return r; }
-const totVersao = (rt, slug) => Object.values(rt[slug]?.meses || {}).reduce((a, b) => soma(a, b), { orcado: 0, previsto: 0, realizado: 0 });
+function retratoAtual() { const r = {}; for (const t of db.times) { const p = db.retratos[t.slug]?.payload; if (somavel(p)) r[t.slug] = { revision: p.revision, planVersion: p.planVersion, meses: Object.fromEntries(anosG().flatMap(a => mesesAno(a)).map(m => [m, totaisPlano(p, [m])])) }; } r._grupo = { meses: Object.fromEntries(anosG().flatMap(a => mesesAno(a)).map(m => [m, totaisItens([m])])) }; return r; }
+const totVersao = (rt, slug, a = anoV()) => Object.entries(rt[slug]?.meses || {}).filter(([m]) => m.startsWith(a + '-')).map(([, v]) => v).reduce((a, b) => soma(a, b), { orcado: 0, previsto: 0, realizado: 0 });
 function vVersoes(el) {
   const v = db.versoes.find(x => x.id === verVersao), atual = retratoAtual();
   el.innerHTML = `<div class="bar"><span class="muted">Feche uma versão para guardar o retrato do dia (ex.: "Orçamento original", "Reforecast 1") e comparar depois.</span><span class="grow"></span><button class="btn pri" id="vNova">Fechar versão</button></div>
-    <div class="card"><p class="lbl">Versões</p>${db.versoes.length ? db.versoes.map(x => `<div class="al"><span class="dot"></span><div class="grow"><b>${esc(x.nome)}</b> · ${fmtData(x.em)} · previsto ${fm(Object.keys(x.retratos).reduce((s, k) => s + totVersao(x.retratos, k).previsto, 0))}</div><button class="btn sm ${verVersao === x.id ? 'pri' : ''}" data-vv="${x.id}">Comparar com hoje</button></div>`).join('') : '<div class="empty">Nenhuma versão fechada.</div>'}</div>
-    ${v ? `<div class="card"><p class="lbl">${esc(v.nome)} × hoje</p><div class="scroll"><table class="t"><tr><th>Time</th><th class="n">Previsto em ${esc(v.nome)}</th><th class="n">Previsto hoje</th><th class="n">Diferença</th></tr>
+    <div class="card"><p class="lbl">Versões</p>${db.versoes.length ? db.versoes.map(x => `<div class="al"><span class="dot"></span><div class="grow"><b>${esc(x.nome)}</b> · ${fmtData(x.em)} · previsto ${anoV()} ${fm(Object.keys(x.retratos).reduce((s, k) => s + totVersao(x.retratos, k).previsto, 0))}</div><button class="btn sm ${verVersao === x.id ? 'pri' : ''}" data-vv="${x.id}">Comparar com hoje</button></div>`).join('') : '<div class="empty">Nenhuma versão fechada.</div>'}</div>
+    ${v ? `<div class="card"><p class="lbl">${esc(v.nome)} × hoje · ${anoV()}</p><div class="scroll"><table class="t"><tr><th>Time</th><th class="n">Previsto em ${esc(v.nome)}</th><th class="n">Previsto hoje</th><th class="n">Diferença</th></tr>
       ${[...db.times.map(t => [t.slug, t.nome]), ['_grupo', 'Itens do grupo']].map(([s, n]) => { const a = totVersao(v.retratos, s).previsto, b = totVersao(atual, s).previsto; return a || b ? `<tr><td>${esc(n)}</td><td class="n">${fm(a)}</td><td class="n">${fm(b)}</td><td class="n ${b - a > 0 ? 'latec' : 'okc'}">${b - a >= 0 ? '+' : ''}${fm(b - a)}</td></tr>` : ''; }).join('')}</table></div></div>` : ''}`;
   $('#vNova').onclick = async () => {
     const r = await perguntar('Fechar versão', `<label class="field"><span>Nome</span><input class="sin" id="vN" value="${esc(db.versaoAtual || 'Orçamento original')}"></label><label class="row"><input type="checkbox" id="vProx" checked> <span>A próxima diretriz pede a versão seguinte aos times</span></label>`, [['no', 'Cancelar'], ['ok', 'Fechar versão', 'pri']]);
@@ -399,11 +428,13 @@ function vAjustes(el) {
   const v = c => c ? (c / 100).toLocaleString('pt-BR') : '';
   el.innerHTML = `<div class="grid g2">
     <div class="card"><p class="lbl">Grupo</p>
-      <div class="f2"><label class="field"><span>Nome</span><input class="sin" id="gN" value="${esc(db.grupo.nome)}"></label><label class="field"><span>Ano fiscal</span><input class="sin" type="number" id="gA" value="${db.ano}"></label></div>
-      <div class="f2"><label class="field"><span>Orçamento aprovado do grupo (ano)</span><input class="sin" id="gO" value="${v(db.orcamento.total)}"></label><label class="field"><span>Versão pedida aos times</span><input class="sin" id="gV" value="${esc(db.versaoAtual || 'Orçamento original')}"></label></div>
+      <div class="f2"><label class="field"><span>Nome</span><input class="sin" id="gN" value="${esc(db.grupo.nome)}"></label><label class="field"><span>Ano base (o ano em curso)</span><select class="sel" id="gA">${db.anos.map(a => `<option ${a === db.ano ? 'selected' : ''}>${a}</option>`).join('')}</select></label></div>
+      <p class="lbl" style="margin-top:6px">Anos do plano e orçamento aprovado de cada um</p>${db.anos.map(a => `<div class="row" style="margin-bottom:6px"><span class="chip" style="min-width:64px">${a}${a === db.ano ? ' · base' : ''}</span><input class="sin grow" data-go="${a}" value="${v(orcAno(a))}" placeholder="Orçamento aprovado de ${a}">${a === db.ano ? '' : `<button class="btn ghost sm" data-gx="${a}" title="Tirar do horizonte (os valores ficam guardados)">×</button>`}</div>`).join('')}
+      <div class="row" style="margin-bottom:10px"><button class="btn sm" id="gAno">+ Ano ${Math.max(...db.anos) + 1}</button><span class="small muted">Os times publicam os anos que planejam; o consolidado soma cada ano separado.</span></div>
+      <div class="f2"><label class="field"><span>Versão pedida aos times</span><input class="sin" id="gV" value="${esc(db.versaoAtual || 'Orçamento original')}"></label></div>
       <label class="field"><span>Centros de custo (um por linha)</span><textarea class="sin" id="gC">${esc(db.centros.join('\n'))}</textarea></label></div>
-    <div class="card"><p class="lbl">Itens do grupo</p><p class="small muted" style="margin-top:0">Reservas, rateios e custos que não são de nenhum time. Entram no consolidado, nunca no plano de um time.</p>
-      ${db.itens.map(i => `<div class="row" style="margin-bottom:6px"><input class="sin grow" data-in="${i.id}" value="${esc(i.nome)}"><select class="sel" data-ic="${i.id}">${db.categorias.map(c => `<option value="${c.id}" ${c.id === i.cat ? 'selected' : ''}>${esc(c.nome)}</option>`).join('')}</select><input class="sin" style="width:110px" data-iv="${i.id}" value="${v(Object.values(i.orcado || {})[0])}" title="Valor mensal"><button class="btn ghost sm" data-ix="${i.id}">×</button></div>`).join('')}
+    <div class="card"><p class="lbl">Itens do grupo · ${anoV()}</p><p class="small muted" style="margin-top:0">Reservas, rateios e custos que não são de nenhum time. Entram no consolidado, nunca no plano de um time. O valor mensal vale para ${anoV()}; troque o ano no Consolidado para os outros anos.</p>
+      ${db.itens.map(i => `<div class="row" style="margin-bottom:6px"><input class="sin grow" data-in="${i.id}" value="${esc(i.nome)}"><select class="sel" data-ic="${i.id}">${db.categorias.map(c => `<option value="${c.id}" ${c.id === i.cat ? 'selected' : ''}>${esc(c.nome)}</option>`).join('')}</select><input class="sin" style="width:110px" data-iv="${i.id}" value="${v(i.orcado?.[`${anoV()}-01`])}" title="Valor mensal em ${anoV()}"><button class="btn ghost sm" data-ix="${i.id}">×</button></div>`).join('')}
       <button class="btn sm" id="gItem">+ Item mensal</button></div>
     <div class="card"><p class="lbl">Categorias do grupo</p>${db.categorias.map(c => `<div class="row" style="margin-bottom:6px"><input class="sin grow" data-cn="${c.id}" value="${esc(c.nome)}"><select class="sel" data-ct="${c.id}"><option ${c.tipo === 'OPEX' ? 'selected' : ''}>OPEX</option><option ${c.tipo === 'CAPEX' ? 'selected' : ''}>CAPEX</option></select></div>`).join('')}
       <div class="row"><input class="sin grow" id="gNC" placeholder="Nova categoria"><button class="btn" id="gNCb">Adicionar</button></div><p class="small muted">Linhas dos times com categoria fora desta lista são somadas em "Outras" e aparecem na saúde da soma.</p></div>
@@ -411,14 +442,16 @@ function vAjustes(el) {
       <div class="row"><button class="btn" id="gSenha">Trocar senha</button><button class="btn" id="gBk">Baixar cópia cifrada</button></div>
       <p class="small muted">A pasta local guarda as 5 últimas versões em <span class="code">backup/</span>; baixe uma cópia cifrada de vez em quando.</p></div></div>`;
   $('#gN').onchange = e => { db.grupo.nome = clamp(e.target.value.trim(), 80) || db.grupo.nome; agendarSalvar(); };
-  $('#gA').onchange = e => { const a = +e.target.value; if (a > 2000 && a < 2100) { db.ano = a; agendarSalvar(); } };
-  $('#gO').onchange = e => { db.orcamento.total = parseValor(e.target.value) || 0; agendarSalvar(); };
+  $('#gA').onchange = e => { db.ano = +e.target.value; db.orcamento.total = orcAno(db.ano); agendarSalvar(); };
+  $$('[data-go]', el).forEach(i => i.onchange = () => { const a = +i.dataset.go; db.orcamento.porAno[a] = parseValor(i.value) || 0; if (a === db.ano) db.orcamento.total = db.orcamento.porAno[a]; agendarSalvar(); });
+  $$('[data-gx]', el).forEach(b => b.onclick = () => { db.anos = db.anos.filter(x => x !== +b.dataset.gx); agendarSalvar(); });
+  $('#gAno').onclick = () => { db.anos = [...db.anos, Math.max(...db.anos) + 1].sort(); agendarSalvar(); };
   $('#gV').onchange = e => { db.versaoAtual = clamp(e.target.value.trim(), 40); agendarSalvar(); };
   $('#gC').onchange = e => { db.centros = e.target.value.split('\n').map(x => clamp(x.trim(), 40)).filter(Boolean); agendarSalvar(); };
   $('#gItem').onclick = () => { db.itens.push({ id: uid('I'), nome: 'Reserva do grupo', cat: 'outras', orcado: {} }); agendarSalvar(); };
   $$('[data-in]', el).forEach(i => i.onchange = () => { db.itens.find(x => x.id === i.dataset.in).nome = clamp(i.value, 80); agendarSalvar(); });
   $$('[data-ic]', el).forEach(i => i.onchange = () => { db.itens.find(x => x.id === i.dataset.ic).cat = i.value; agendarSalvar(); });
-  $$('[data-iv]', el).forEach(i => i.onchange = () => { const it = db.itens.find(x => x.id === i.dataset.iv), val = parseValor(i.value) || 0; it.orcado = Object.fromEntries(mesesAno().map(m => [m, val])); agendarSalvar(); });
+  $$('[data-iv]', el).forEach(i => i.onchange = () => { const it = db.itens.find(x => x.id === i.dataset.iv), val = parseValor(i.value) || 0; it.orcado ??= {}; for (const m of mesesAno()) it.orcado[m] = val; agendarSalvar(); });
   $$('[data-ix]', el).forEach(b => b.onclick = () => { db.itens = db.itens.filter(x => x.id !== b.dataset.ix); agendarSalvar(); });
   $$('[data-cn]', el).forEach(i => i.onchange = () => { catPorId(i.dataset.cn).nome = clamp(i.value.trim(), 60); agendarSalvar(); });
   $$('[data-ct]', el).forEach(i => i.onchange = () => { catPorId(i.dataset.ct).tipo = i.value; agendarSalvar(); });
@@ -493,7 +526,7 @@ async function criarArquivo({ nome, pessoa, ano, moeda, dir, senha, times = [] }
   if (await lerTexto(h, nomeArq)) { if (await perguntar('Arquivo já existe', `<p>Já existe <span class="code">${esc(nomeArq)}</span>. Abrir?</p>`, [['no', 'Cancelar'], ['ok', 'Abrir', 'pri']]) === 'ok') { await abrirArquivo(h, nomeArq); return true; } return false; }
   senha ??= await criarSenhaDlg(); if (!senha) return false;
   db = novoDb({ nome, ano, moeda, pessoa }); db.seg.cofreConfirmadoEm = new Date().toISOString();
-  for (const t of times) db.times.push({ nome: t.nome, slug: t.slug, prefixo: t.prefixo || '', chaves: [], teto: { total: 0, caps: {} }, diretriz: {} });
+  for (const t of times) db.times.push({ nome: t.nome, slug: t.slug, prefixo: t.prefixo || '', chaves: [], teto: { total: 0, caps: {} }, tetos: {}, diretriz: {} });
   ctx = await novoCtx(senha, TOOL); dirLocal = h; arquivo = nomeArq;
   await gravarLocal(h, nomeArq, await cifrarLocal(db, ctx));
   view = 'times'; await aposAbrir();
