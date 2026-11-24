@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mapa de Férias</title>
+<style>
+/*NUCLEO-CSS*/
+/* ---- Mapa de Férias: mapa de calor, linha do tempo e rankings ---- */
+.hm{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px}
+.hm .mes h4{margin:0 0 6px;font-size:12px;font-weight:650;color:var(--muted)}
+.hm .gr{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.hm .gr span{font-size:9.5px;color:var(--faint);text-align:center}
+.hm .d{aspect-ratio:1;border-radius:5px;font-size:10px;display:grid;place-items:center;color:var(--muted);background:#fff;border:1px solid var(--line);position:relative}
+.hm .d.v{visibility:hidden}.hm .d.fds{background:#f4f5f8;border-color:transparent;color:var(--faint)}
+.hm .d.fer{background:#f4f5f8;border-color:transparent;color:var(--faint);text-decoration:line-through}
+.hm .d.h1{background:#e6e9fb;border-color:#e6e9fb;color:var(--bv-deep)}.hm .d.h2{background:#bcc5f3;border-color:#bcc5f3;color:var(--bv-deep)}
+.hm .d.h3{background:#7d8ee6;border-color:#7d8ee6;color:#fff}.hm .d.h4{background:var(--bv);border-color:var(--bv);color:#fff}
+.hm .d.over{background:var(--late);border-color:var(--late);color:#fff}
+.hm .d.hoje{outline:2px solid var(--ink);outline-offset:1px}
+.hm button.d:hover{filter:brightness(.95)}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:4px;border:1px solid var(--line)}
+.tl{border-collapse:separate;border-spacing:0;font-size:11.5px}
+.tl th,.tl td{padding:0;height:24px;min-width:22px;text-align:center;border-bottom:1px solid var(--line)}
+.tl th{font-weight:550;color:var(--muted);font-size:10.5px;position:sticky;top:0;background:#fff;z-index:1}
+.tl .nm{position:sticky;left:0;background:#fff;text-align:left;padding:0 10px 0 0;min-width:170px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:2}
+.tl th.nm{z-index:3}
+.tl tr.un td{background:#f7f8fb;font-weight:650;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);height:22px}
+.tl tr.un td.nm{background:#f7f8fb}
+.tl td.fds,.tl th.fds{background:#f7f8fb}
+.tl td.c{cursor:default}.tl td.c.ed{cursor:pointer}.tl td.c.ed:hover{background:var(--bv-soft)}
+.tl td i{display:block;height:14px;margin:0 -1px;background:var(--bv)}
+.tl td i.folga{background:var(--bv-mid)}.tl td i.treinamento{background:#5d6fd9;opacity:.65}.tl td i.outro{background:var(--faint)}
+.tl td i.ini{border-radius:7px 0 0 7px;margin-left:2px}.tl td i.fim{border-radius:0 7px 7px 0;margin-right:2px}
+.tl tr.cnt td{font-weight:650;font-variant-numeric:tabular-nums;height:26px}
+.tl tr.cnt td.over{color:var(--late)}
+.tl th.hoje{color:var(--bv);font-weight:700}
+.rk{display:grid;grid-template-columns:1fr auto;gap:6px 12px;font-size:12.5px}.rk b{font-variant-numeric:tabular-nums}
+.pp{display:flex;flex-wrap:wrap;gap:6px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<dialog id="dlg"></dialog>
+<script>
+/*NUCLEO-JS*/
+</script>
+<script>
+/* =====================================================================
+   Mapa de Férias · apoio para enxergar e planejar as ausências do grupo
+   (não substitui a ferramenta oficial de férias da empresa: não aprova nem registra oficialmente).
+
+   Níveis, no mesmo padrão da consolidação das Finanças do Grupo 1.3:
+   - Time: cada pessoa (ou o responsável) cadastra as férias e publica o próprio arquivo
+     times/<time>/ferias/<pessoa>-<computador>.json, cifrado com a chave do time (a mesma do Quadro).
+   - Gestor/liderança: soma os times e os grupos de outros gestores (unidades), cadastra as próprias
+     férias e as dos diretos, e publica o consolidado para o nível acima em
+     grupos/<grupo>/ferias/<pessoa>-<computador>.json, com a chave que a liderança gerou para o grupo
+     (a mesma chave GK1.<grupo>-fin-… das Finanças do Grupo serve). Funciona em quantos níveis forem precisos.
+   Notas das ausências ficam só no arquivo local cifrado. Conteúdo comum: gestao-ferias/1.
+   ===================================================================== */
+const TOOL = 'ferias', TOOL_NOME = 'Mapa de Férias', TOOL_VERSION = '1.0.0';
+const LOCAL_SCHEMA = 'gestao-ferias-local/1', FERIAS_SCHEMA = 'gestao-ferias/1';
+const PRESET = /*FERIAS-PRESET*/null/*FIM-FERIAS-PRESET*/;
+const TIPOS = { ferias: 'Férias', folga: 'Folga ou day off', treinamento: 'Treinamento ou evento', outro: 'Outra ausência' };
+const DIAS_SEM = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+
+let db = null, ctx = null, dirLocal = null, arquivo = '', raiz = null;
+let view = 'painel', periodo = 'prox3', filtroUn = '', mesTl = null, situacao = { erro: '', lidoEm: null, outros: [], copias: 0 };
+let salvarT = null, salvando = false, sujo = false, pubT = null, pollT = null, abertoT = null;
+const chavesMem = new Map();   // kid → CryptoKey
+
+/* ------------------------------- modelo ------------------------------- */
+function novoDb({ nivel, nome, slug, pessoa }) {
+  const eu = { id: uid('p'), nome: clamp(pessoa, 80), ativo: true };
+  return {
+    schema: LOCAL_SCHEMA, version: 1, tool: TOOL, criadoEm: new Date().toISOString(),
+    nivel, unidade: { nome: clamp(nome, 80), slug }, pessoa: { nome: clamp(pessoa, 80), slug: slugify(pessoa).split('-')[0] || 'eu' }, eu: eu.id,
+    pessoas: [eu], ausencias: [], feriados: [], config: { limite: 30, diasUteis: [1, 2, 3, 4, 5], nomesAcima: true },
+    chaves: [], unidades: [], retratos: {}, publicacao: { revision: 0, em: null, assinatura: '' }, seg: {}
+  };
+}
+function normalizar(d) {
+  if (d?.schema !== LOCAL_SCHEMA || d.tool !== TOOL) throw new Error('Este arquivo não é do Mapa de Férias.');
+  d.nivel = d.nivel === 'grupo' ? 'grupo' : 'time';
+  d.pessoas ??= []; d.ausencias ??= []; d.feriados ??= []; d.chaves ??= []; d.unidades ??= []; d.retratos ??= {}; d.seg ??= {};
+  d.config = { limite: 30, diasUteis: [1, 2, 3, 4, 5], nomesAcima: true, ...(d.config || {}) };
+  d.publicacao ??= { revision: 0 };
+  for (const u of d.unidades) { u.tipo = u.tipo === 'grupo' ? 'grupo' : 'time'; u.chaves ??= []; }
+  for (const p of d.pessoas) p.ativo ??= true;
+  return d;
+}
+const ehGrupo = () => db.nivel === 'grupo';
+const writer = () => `${db.pessoa.slug}~${dispositivo().id}`;
+const baseArquivo = () => writer().replace('~', '-');
+const pastaPropria = () => [ehGrupo() ? 'grupos' : 'times', db.unidade.slug, 'ferias'];
+const pastaUnidade = u => [u.tipo === 'grupo' ? 'grupos' : 'times', u.slug, 'ferias'];
+const unPorSlug = s => db.unidades.find(u => u.slug === s);
+const pessoaPorId = id => db.pessoas.find(p => p.id === id);
+
+/* ------------------------------- datas ------------------------------- */
+const ymd = d => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+const dataDe = iso => new Date(iso + 'T12:00:00');
+const addDias = (iso, n) => { const d = dataDe(iso); d.setDate(d.getDate() + n); return ymd(d); };
+const diaSem = iso => dataDe(iso).getDay();
+const fmtDia = iso => `${DIAS_SEM[diaSem(iso)]} ${iso.slice(8)}/${iso.slice(5, 7)}`;
+const fmtCurta = iso => `${iso.slice(8)}/${iso.slice(5, 7)}`;
+const mesAno = m => { const t = new Date(+m.slice(0, 4), +m.slice(5, 7) - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }); return t[0].toUpperCase() + t.slice(1); };
+const fimDoMes = m => ymd(new Date(+m.slice(0, 4), +m.slice(5, 7), 0));
+function dias(ini, fim) { const out = []; for (let d = ini; d <= fim; d = addDias(d, 1)) out.push(d); return out; }
+const feriado = iso => db.feriados.find(f => f.data === iso);
+const util = iso => db.config.diasUteis.includes(diaSem(iso)) && !feriado(iso);
+const diasUteisEntre = (a, b) => dias(a, b).filter(util).length;
+function intervalo() {
+  const h = hojeISO(), a = new Date().getFullYear();
+  if (periodo === 'prox6') return { ini: h, fim: fimDoMes(somaMeses(h.slice(0, 7), 5)), nome: 'próximos 6 meses' };
+  if (periodo === 'ano') return { ini: `${a}-01-01`, fim: `${a}-12-31`, nome: String(a) };
+  if (periodo === 'prox-ano') return { ini: `${a + 1}-01-01`, fim: `${a + 1}-12-31`, nome: String(a + 1) };
+  return { ini: h, fim: fimDoMes(somaMeses(h.slice(0, 7), 2)), nome: 'próximos 3 meses' };
+}
+// Interpreta "dd/mm", "dd/mm/aa" e "dd/mm/aaaa"; sem ano, usa o próximo dd/mm a partir de hoje.
+function lerData(txt, ref = hojeISO()) {
+  const m = /^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?$/.exec(String(txt).trim()); if (!m) return null;
+  let a = m[3] ? (m[3].length === 2 ? 2000 + +m[3] : +m[3]) : +ref.slice(0, 4);
+  let iso = `${a}-${pad2(m[2])}-${pad2(m[1])}`;
+  if (!m[3] && iso < ref && addDias(iso, 60) < ref) iso = `${a + 1}-${pad2(m[2])}-${pad2(m[1])}`;
+  return dataDe(iso).getDate() === +m[1] ? iso : null;
+}
+
+/* ------------------------- chaves (cifradas no arquivo local) ------------------------- */
+async function importarTextos(lista) {
+  for (const c of lista) { if (chavesMem.has(c.kid)) continue; try { const k = lerChaveTexto(c.texto); chavesMem.set(k.kid, await importarChave(k.raw)); } catch {} }
+}
+async function carregarChaves() { await importarTextos(db.chaves); for (const u of db.unidades) await importarTextos(u.chaves); }
+const mapaDe = lista => new Map(lista.filter(c => chavesMem.has(c.kid)).map(c => [c.kid, chavesMem.get(c.kid)]));
+const chaveMinha = () => { const c = db.chaves.filter(x => !x.revogada).at(-1); return c && chavesMem.has(c.kid) ? { kid: c.kid, key: chavesMem.get(c.kid) } : null; };
+// A chave de um nível começa pelo identificador dele: GK1.<slug>.… ou GK1.<slug>-fin-AAMM.… (a mesma das Finanças do Grupo).
+const chaveDoSlug = (kid, slug) => kid === slug || kid.startsWith(slug + '-');
+async function cadastrarChave(lista, texto, slug, origem = 'colada') {
+  const k = lerChaveTexto(texto);
+  if (!chaveDoSlug(k.kid, slug)) throw new Error(`A chave "${k.kid}" não é de "${slug}". Peça a chave gerada para o identificador ${slug}.`);
+  // A última chave colada passa a valer para publicar; as anteriores continuam servindo para ler arquivos antigos.
+  const i = lista.findIndex(c => c.kid === k.kid); if (i >= 0) lista.splice(i, 1);
+  lista.push({ kid: k.kid, texto: texto.trim(), em: new Date().toISOString(), origem });
+  await carregarChaves(); agendarSalvar();
+  return k.kid;
+}
+
+/* ---------------------- visão unificada (eu + pares + unidades) ---------------------- */
+// Cada pessoa vira { key, nome, un (unidade no meu nível; '' = eu e meus diretos), sub (unidade de origem), editavel, id }.
+function visao() {
+  const pessoas = new Map(), aus = [], un0 = db.unidade.slug;
+  const addP = (key, p) => { if (!pessoas.has(key)) pessoas.set(key, p); return key; };
+  const addA = (key, a) => { const sig = `${key}|${a.inicio}|${a.fim}`; if (!aus.some(x => x.sig === sig)) aus.push({ ...a, key, sig }); };
+  for (const p of db.pessoas.filter(p => p.ativo)) addP(`${un0}/${slugify(p.nome)}`, { key: `${un0}/${slugify(p.nome)}`, nome: p.nome, un: '', sub: db.unidade.nome, editavel: true, id: p.id });
+  for (const a of db.ausencias) { const p = pessoaPorId(a.pessoa); if (p?.ativo) addA(`${un0}/${slugify(p.nome)}`, { inicio: a.inicio, fim: a.fim, tipo: a.tipo, id: a.id, editavel: true }); }
+  // Time: os outros membros publicam o próprio arquivo na mesma pasta; somam aqui.
+  const pares = db.retratos['.'];
+  if (pares && !ehGrupo()) for (const p of pares.pessoas) { const k = `${un0}/${p.id}`; addP(k, { key: k, nome: p.name, un: '', sub: db.unidade.nome, editavel: false }); }
+  if (pares && !ehGrupo()) for (const a of pares.ausencias) addA(`${un0}/${a.person}`, { inicio: a.start, fim: a.end, tipo: a.kind, editavel: false });
+  if (ehGrupo()) for (const u of db.unidades) {
+    const r = db.retratos[u.slug]; if (!r) continue;
+    const nomesUn = new Map((r.units || []).map(x => [x.slug, x.name]));
+    for (const p of r.pessoas) { const k = `${u.slug}:${p.id}`; addP(k, { key: k, nome: p.name, un: u.slug, sub: nomesUn.get(p.unit) || u.nome, editavel: false }); }
+    for (const a of r.ausencias) addA(`${u.slug}:${a.person}`, { inicio: a.start, fim: a.end, tipo: a.kind, editavel: false });
+  }
+  return { pessoas: [...pessoas.values()], ausencias: aus.filter(a => pessoas.has(a.key)) };
+}
+const nomeUn = s => s ? (unPorSlug(s)?.nome || s) : (ehGrupo() ? `${db.unidade.nome} · você e diretos` : db.unidade.nome);
+function filtrada(v = visao()) {
+  if (!filtroUn) return v;
+  const un = filtroUn === '.' ? '' : filtroUn;
+  const ps = v.pessoas.filter(p => p.un === un), ks = new Set(ps.map(p => p.key));
+  return { pessoas: ps, ausencias: v.ausencias.filter(a => ks.has(a.key)) };
+}
+// Mapa dia → chaves das pessoas fora (só dias do intervalo).
+function mapaDias(v, ini, fim) {
+  const m = new Map(dias(ini, fim).map(d => [d, new Set()]));
+  for (const a of v.ausencias) {
+    const i = a.inicio > ini ? a.inicio : ini, f = a.fim < fim ? a.fim : fim;
+    for (let d = i; d <= f; d = addDias(d, 1)) m.get(d)?.add(a.key);
+  }
+  return m;
+}
+const limiteFr = () => (db.config.limite || 30) / 100;
+function estatisticas(v, ini, fim) {
+  const m = mapaDias(v, ini, fim), n = v.pessoas.length || 1, uteis = [...m.keys()].filter(util);
+  const serie = uteis.map(d => ({ d, n: m.get(d).size, pct: m.get(d).size / n }));
+  const pico = serie.reduce((a, b) => b.n > (a?.n ?? -1) ? b : a, null);
+  const acima = serie.filter(x => x.pct > limiteFr() && x.n > 0);
+  const vazios = serie.filter(x => x.n === 0);
+  const pessoaDias = serie.reduce((s, x) => s + x.n, 0);
+  return { m, serie, pico, acima, vazios, pessoaDias, total: v.pessoas.length, uteis: uteis.length };
+}
+// Semanas (segunda a domingo) com média de pessoas fora por dia útil.
+function semanas(serie) {
+  const g = new Map();
+  for (const x of serie) { const d = dataDe(x.d), seg = ymd(new Date(d.getFullYear(), d.getMonth(), d.getDate() - ((d.getDay() + 6) % 7))); const w = g.get(seg) || { seg, soma: 0, dias: 0, max: 0 }; w.soma += x.n; w.dias++; w.max = Math.max(w.max, x.n); g.set(seg, w); }
+  return [...g.values()].map(w => ({ ...w, media: w.soma / w.dias }));
+}
+
+/* ----------------------------- conteúdo publicado ----------------------------- */
+// Time: só o que este computador cadastrou (os outros membros publicam o deles).
+// Grupo: o consolidado (eu e diretos + todas as unidades), para o nível acima.
+function montarPayload(meta) {
+  const un0 = db.unidade.slug, people = [], absences = [], units = [{ slug: un0, name: db.unidade.nome, kind: db.nivel, parent: null }];
+  const anon = new Map(), nome = (id, n) => db.config.nomesAcima || !ehGrupo() ? clamp(n, 80) : (anon.get(id) || (anon.set(id, `Pessoa ${anon.size + 1}`), anon.get(id)));
+  for (const p of db.pessoas.filter(p => p.ativo)) people.push({ id: slugify(p.nome) || p.id, name: nome(p.id, p.nome), unit: un0 });
+  for (const a of db.ausencias) { const p = pessoaPorId(a.pessoa); if (p?.ativo) absences.push({ person: slugify(p.nome) || p.id, start: a.inicio, end: a.fim, kind: a.tipo }); }
+  if (ehGrupo()) for (const u of db.unidades) {
+    const r = db.retratos[u.slug]; if (!r) continue;
+    units.push({ slug: u.slug, name: u.nome, kind: u.tipo, parent: un0 });
+    for (const x of r.units || []) if (x.slug !== u.slug) units.push({ slug: x.slug, name: x.name, kind: x.kind, parent: x.parent === r.slugRaiz ? u.slug : x.parent });
+    for (const p of r.pessoas) people.push({ id: `${u.slug}.${p.id}`, name: nome(`${u.slug}.${p.id}`, p.name), unit: p.unit || u.slug });
+    for (const a of r.ausencias) absences.push({ person: `${u.slug}.${a.person}`, start: a.start, end: a.end, kind: a.kind });
+  }
+  absences.sort((a, b) => a.start.localeCompare(b.start) || a.person.localeCompare(b.person));
+  return { schema: FERIAS_SCHEMA, ...meta, source: { team: un0, tool: TOOL, toolVersion: TOOL_VERSION, level: ehGrupo() ? 'group' : 'team' },
+    unit: { name: db.unidade.nome, slug: un0, kind: db.nivel }, units, people, absences,
+    holidays: db.feriados.map(f => ({ date: f.data, name: clamp(f.nome, 60) })),
+    contributors: ehGrupo() ? db.unidades.filter(u => db.retratos[u.slug]).map(u => ({ slug: u.slug, name: u.nome, kind: u.tipo, files: db.retratos[u.slug].writers.length, lastGeneratedAt: db.retratos[u.slug].writers.map(w => w.generatedAt).sort().at(-1) })) : undefined };
+}
+const assinatura = () => JSON.stringify(montarPayload({ revision: 0, generatedAt: '', hlc: '' }));
+const pendente = () => db.publicacao.assinatura !== assinatura();
+
+/* -------------------------------- arquivo -------------------------------- */
+function agendarSalvar() {
+  sujo = true; clearTimeout(salvarT); salvarT = setTimeout(salvar, 1000); render();
+  // Time publica sozinho a cada mudança (ADR 0016); gestor publica só pelo botão.
+  if (!ehGrupo() && raiz && chaveMinha() && db.ausencias.length + db.pessoas.length) { clearTimeout(pubT); pubT = setTimeout(() => { if (pendente()) publicar(false, true); }, 2500); }
+}
+async function salvar() {
+  if (!db || !ctx || !dirLocal || salvando) return;
+  salvando = true;
+  try { await gravarLocal(dirLocal, arquivo, await cifrarLocal(db, ctx)); sujo = false; }
+  catch (e) { toast('Não foi possível salvar: ' + e.message, 6000); }
+  finally { salvando = false; renderTopo(); }
+}
+window.addEventListener('beforeunload', e => { if (!db) return; if (sujo) { salvar(); e.preventDefault(); e.returnValue = ''; } if (raiz) subpasta(raiz, pastaPropria(), false).then(d => desmarcarAberto(d, writer())).catch(() => {}); });
+
+/* --------------------------- pasta sincronizada --------------------------- */
+async function ligarPasta(h, silencioso = false) {
+  if (!await permissao(h, !silencioso)) { if (!silencioso) toast('Sem permissão na pasta.'); return false; }
+  const v = await validarPastaComum(h);
+  if (!v.tem && !v.nomeOk && !silencioso) {
+    const r = await perguntar('Esta é a pasta compartilhada?', `<p>A pasta <b class="code">${esc(h.name)}</b> ainda não tem a estrutura da solução (<span class="code">times/</span>, <span class="code">grupo/</span>).</p>
+      <p class="muted small">Escolha a pasta raiz sincronizada pelo OneDrive (normalmente <span class="code">${PASTA_COMUM}</span>). Se for esta mesma, a ferramenta cria só <span class="code">${esc(pastaPropria().join('/'))}/</span> quando publicar.</p>`, [['no', 'Escolher outra'], ['ok', 'É esta', 'pri']]);
+    if (r !== 'ok') return false;
+  }
+  raiz = h; db.pastaComum = h.name; agendarSalvar();
+  if (!navigator.webdriver) kv.set('ferias-raiz:' + db.unidade.slug, h);
+  await lerPasta(silencioso);
+  clearInterval(pollT); pollT = setInterval(() => lerPasta(true), 60000);
+  clearInterval(abertoT); const marca = async () => marcarAberto(await subpasta(raiz, pastaPropria(), true), writer(), TOOL); marca(); abertoT = setInterval(marca, 60000);
+  return true;
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden && raiz && db) lerPasta(true); });
+// Lê todos os arquivos de uma pasta de férias (um por pessoa e computador), decifra com as chaves dadas e
+// fica com o mais novo de cada pessoa (o mesmo gestor em dois computadores não soma duas vezes).
+async function lerPastaFerias(dir, team, chaves, ignorarWriter = '') {
+  const res = { writers: [], pessoas: [], ausencias: [], units: [], erros: [], slugRaiz: team };
+  if (!dir) return res;
+  const porPessoa = new Map();
+  for await (const [n, h] of dir.entries()) {
+    if (h.kind !== 'file' || !n.endsWith('.json') || n.startsWith('.')) continue;
+    let p = null;
+    try { const env = JSON.parse(await (await h.getFile()).text()); p = await decifrarEnv(env, chaves); if (env.team !== team || p.source?.team !== team || p.schema !== FERIAS_SCHEMA) throw new Error('arquivo de outra unidade'); }
+    catch (e) { res.erros.push(`${n}: ${e.message}`); continue; }
+    const w = p.source.writer || n, pessoa = w.split('~')[0];
+    if (w === ignorarWriter) continue;
+    const at = porPessoa.get(pessoa);
+    if (!at || hlcCmp(p.hlc, at.hlc) > 0 || (p.hlc === at.hlc && p.revision > at.revision)) porPessoa.set(pessoa, p);
+  }
+  for (const p of porPessoa.values()) {
+    res.writers.push({ writer: p.source.writer, revision: p.revision, generatedAt: p.generatedAt, level: p.source.level || 'team' });
+    for (const x of p.people || []) if (!res.pessoas.some(y => y.id === x.id)) res.pessoas.push({ id: clamp(x.id, 160), name: clamp(x.name, 80), unit: clamp(x.unit || team, 60) });
+    for (const a of p.absences || []) if (/^\d{4}-\d{2}-\d{2}$/.test(a.start) && /^\d{4}-\d{2}-\d{2}$/.test(a.end) && a.start <= a.end) res.ausencias.push({ person: clamp(a.person, 160), start: a.start, end: a.end, kind: TIPOS[a.kind] ? a.kind : 'outro' });
+    for (const u of p.units || []) if (!res.units.some(y => y.slug === u.slug)) res.units.push({ slug: clamp(u.slug, 60), name: clamp(u.name, 80), kind: u.kind === 'grupo' ? 'grupo' : 'time', parent: u.parent || null });
+  }
+  return res;
+}
+async function lerPasta(silencioso = false) {
+  if (!raiz || !db) return;
+  situacao.erro = '';
+  try {
+    if (!ehGrupo()) {
+      const ch = chaveMinha();
+      if (ch) {
+        const dir = await subpasta(raiz, pastaPropria(), false);
+        const r = await lerPastaFerias(dir, db.unidade.slug, mapaDe(db.chaves), writer());
+        db.retratos['.'] = { ...r, lidoEm: new Date().toISOString() };
+        situacao.outros = await abertosEmOutros(dir, writer());
+      }
+    } else {
+      for (const u of db.unidades) {
+        const ch = mapaDe(u.chaves); if (!ch.size) { u.status = 'sem chave'; continue; }
+        const dir = await subpasta(raiz, pastaUnidade(u), false);
+        if (!dir) { u.status = 'ainda não publicou'; continue; }
+        const r = await lerPastaFerias(dir, u.slug, ch);
+        u.status = r.writers.length ? '' : r.erros.length ? `${r.erros.length} arquivo(s) não abriram com a chave cadastrada` : 'ainda não publicou';
+        if (r.writers.length) db.retratos[u.slug] = { ...r, lidoEm: new Date().toISOString() };
+      }
+      const dir = await subpasta(raiz, pastaPropria(), false);
+      situacao.outros = await abertosEmOutros(dir, writer());
+    }
+    situacao.lidoEm = new Date().toISOString(); sujo = true; clearTimeout(salvarT); salvarT = setTimeout(salvar, 1000);
+    if (!silencioso) toast('Pasta lida.');
+  } catch (e) { situacao.erro = e.message; }
+  render();
+}
+async function publicar(assumir = false, auto = false) {
+  const ch = chaveMinha();
+  if (!ch) { if (!auto) toast(ehGrupo() ? 'Cadastre a chave que a sua liderança gerou para este grupo (Ajustes).' : 'Cadastre a chave do time (Ajustes).', 5000); return; }
+  if (!raiz) { if (!auto) toast('Ligue a pasta sincronizada primeiro (Ajustes).', 5000); return; }
+  try {
+    const dir = await subpasta(raiz, pastaPropria(), true), sig = assinatura();
+    const r = await publicarUnico({ dir, base: baseArquivo(), chave: ch, team: db.unidade.slug, writer: writer(), assumir, ultimaRevisao: db.publicacao.revision || 0,
+      montar: { schema: FERIAS_SCHEMA, payload: meta => montarPayload(meta) } });
+    db.publicacao = { revision: r.revision, em: r.generatedAt, assinatura: sig };
+    sujo = true; clearTimeout(salvarT); salvarT = setTimeout(salvar, 600); render();
+    if (!auto) toast(`${ehGrupo() ? 'Consolidado publicado para a liderança' : 'Férias publicadas para o time e o gestor'} (revisão ${r.revision}).`, 4500);
+  } catch (e) {
+    if ((e.code === 'DONO' || e.code === 'DISPOSITIVO') && !auto && await perguntar('Assumir a publicação?', `<p>${esc(e.message)}</p><p class="small muted">Cada arquivo comum tem um único dono.</p>`, [['no', 'Cancelar'], ['ok', 'Assumir e publicar', 'pri']]) === 'ok') return publicar(true);
+    if (e.code !== 'DONO' && e.code !== 'DISPOSITIVO') toast('Não foi possível publicar: ' + e.message, 6000);
+  }
+}
+// "Você decide o que sobe": o gestor confere antes de publicar para a liderança.
+async function publicarDlg() {
+  if (!ehGrupo()) return publicar();
+  if (!raiz) return toast('Ligue a pasta sincronizada primeiro (Ajustes).');
+  if (!chaveMinha()) return toast('Cadastre a chave que a sua liderança gerou para este grupo (Ajustes).', 5000);
+  const p = montarPayload({ revision: 0, generatedAt: '', hlc: '' }), fora = db.unidades.filter(u => !db.retratos[u.slug]);
+  const porUn = db.unidades.filter(u => db.retratos[u.slug]).map(u => `<b>${esc(u.nome)}</b> (${db.retratos[u.slug].pessoas.length} pessoas)`);
+  const r = await perguntar('Publicar consolidado para a liderança', `<p class="small muted" style="margin-top:0">Vai cifrado com a chave <span class="code">${esc(chaveMinha().kid)}</span> para <span class="code">${esc(pastaPropria().join('/'))}/${esc(baseArquivo())}.json</span>.</p>
+    <div class="kpis">${kpi('Pessoas', p.people.length)}${kpi('Ausências', p.absences.length)}${kpi('Unidades', p.units.length - 1)}</div>
+    <p class="small">Entram: você e seus diretos${porUn.length ? ', ' + porUn.join(', ') : ''}.</p>
+    ${fora.length ? `<p class="small latec">Ficam de fora (ainda sem dados lidos): ${fora.map(u => esc(u.nome)).join(', ')}.</p>` : ''}
+    <p class="small muted">${db.config.nomesAcima ? 'Os nomes das pessoas vão junto.' : 'Os nomes vão trocados por "Pessoa 1, 2…" (Ajustes).'} As notas das ausências nunca saem do seu arquivo local.</p>`, [['no', 'Cancelar'], ['ok', 'Publicar', 'pri']]);
+  if (r === 'ok') return publicar();
+}
+
+/* ------------------------------- interface ------------------------------- */
+const ICONES = {
+  painel: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/><path d="M7 13h2M11 13h2M15 13h2M7 17h2M11 17h2"/></svg>',
+  calendario: '<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/><path d="M17 15l3 3-3 3"/></svg>',
+  pessoas: '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-4-6"/></svg>',
+  unidades: '<svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><rect x="15" y="16" width="6" height="5" rx="1"/><path d="M12 8v4M6 16v-4h12v4"/></svg>',
+  ajustes: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.6-2-3.4-2.4 1a7 7 0 0 0-1.7-1L14.5 3h-4l-.4 2.6a7 7 0 0 0-1.7 1L6 5.6l-2 3.4L6 10.6a7 7 0 0 0 0 2.8L4 15l2 3.4 2.4-1a7 7 0 0 0 1.7 1l.4 2.6h4l.4-2.6a7 7 0 0 0 1.7-1l2.4 1 2-3.4-2-1.6c.1-.3.1-.7.1-1z"/></svg>'
+};
+const NAV = () => [['painel', 'Mapa'], ['calendario', 'Calendário'], ['pessoas', ehGrupo() ? 'Diretos' : 'Pessoas'], ...(ehGrupo() ? [['unidades', 'Unidades']] : []), ['ajustes', 'Ajustes']];
+const kpi = (r, v, c = '') => `<div class="kpi ${c}"><span>${r}</span><b>${v}</b></div>`;
+function render() {
+  if (!db) return;
+  const semChave = !chaveMinha();
+  $('#app').innerHTML = `<nav class="rail"><div class="logo">FÉR</div>${NAV().map(([k, n]) => `<button class="nv ${view === k ? 'on' : ''}" data-v="${k}">${ICONES[k]}${n}${k === 'ajustes' && (semChave || !raiz) ? '<span class="b">!</span>' : ''}</button>`).join('')}</nav>
+    <main class="main"><header class="top" id="topo"></header><div id="pg"></div></main>`;
+  $$('.nv').forEach(b => b.onclick = () => { view = b.dataset.v; render(); });
+  renderTopo();
+  ({ painel: vPainel, calendario: vCalendario, pessoas: vPessoas, unidades: vUnidades, ajustes: vAjustes })[view]($('#pg'));
+}
+function renderTopo() {
+  const t = $('#topo'); if (!t || !db) return;
+  const titulo = NAV().find(n => n[0] === view)?.[1] || '';
+  const pend = pendente(), filtros = ['painel', 'calendario'].includes(view);
+  t.innerHTML = `<div><h1>${esc(titulo === 'Mapa' ? 'Mapa de ausências' : titulo)}</h1><div class="sub">${esc(db.unidade.nome)} · ${ehGrupo() ? 'gestor' : 'time'}</div></div>
+    ${filtros && ehGrupo() && db.unidades.length ? `<select class="sel" id="tUn" title="Unidade"><option value="">Todo o grupo</option><option value="." ${filtroUn === '.' ? 'selected' : ''}>Você e diretos</option>${db.unidades.map(u => `<option value="${esc(u.slug)}" ${filtroUn === u.slug ? 'selected' : ''}>${esc(u.nome)}</option>`).join('')}</select>` : ''}
+    ${view === 'painel' ? `<select class="sel" id="tPer" title="Período">${[['prox3', 'Próximos 3 meses'], ['prox6', 'Próximos 6 meses'], ['ano', 'Este ano'], ['prox-ano', 'Próximo ano']].map(([k, n]) => `<option value="${k}" ${periodo === k ? 'selected' : ''}>${n}</option>`).join('')}</select>` : ''}
+    <span class="grow"></span>
+    <button class="pill" id="tPasta" title="${raiz ? 'Pasta sincronizada ligada' : 'Pasta sincronizada não ligada'}"><span class="led ${sujo || salvando || !raiz ? 'wait' : situacao.erro ? 'err' : ''}"></span>${sujo || salvando ? 'Salvando…' : 'Salvo e cifrado'}${raiz ? '' : ' · sem pasta'}</button>
+    ${ehGrupo() ? `<button class="btn ${pend && chaveMinha() ? 'pri' : ''}" id="tPub" title="Publicar o consolidado para a sua liderança">${!chaveMinha() ? 'Nível acima' : pend ? 'Publicar para a liderança' : 'Publicado'}</button>` : `<button class="btn ${pend ? 'pri' : ''}" id="tPub">${pend ? 'Publicar' : 'Publicado'}</button>`}
+    <button class="btn pri" id="tNova">+ Ausência</button>
+    <button class="btn ghost" id="tHub" title="Voltar ao Hub da solução">← Hub</button><button class="btn ghost" id="tOnde">Onde estou?</button>`;
+  if ($('#tUn')) $('#tUn').onchange = e => { filtroUn = e.target.value; render(); };
+  if ($('#tPer')) $('#tPer').onchange = e => { periodo = e.target.value; render(); };
+  $('#tPasta').onclick = () => { view = 'ajustes'; render(); };
+  $('#tPub').onclick = () => !chaveMinha() && ehGrupo() ? (view = 'ajustes', render()) : publicarDlg();
+  $('#tNova').onclick = () => ausenciaDlg(null);
+  $('#tHub').onclick = voltarAoHub;
+  $('#tOnde').onclick = () => ondeEstou({ ferramenta: TOOL_NOME, versao: TOOL_VERSION, arquivo, pastaLocal: dirLocal?.name, pastaComum: raiz?.name, writer: writer(),
+    local: ['Pessoas e ausências que você cadastra, com as notas', 'Chaves dos times e grupos (dentro do arquivo cifrado)', 'Últimos dados lidos da pasta', 'Cópias de segurança em backup/'],
+    comum: [`${pastaPropria().join('/')}/${baseArquivo()}.json: ${ehGrupo() ? 'consolidado para a liderança (só quando você publica)' : 'as férias que você cadastrou (publicadas a cada mudança)'}`,
+      ...(ehGrupo() ? ['Leitura de times/<time>/ferias/ e grupos/<grupo>/ferias/'] : [`Leitura dos outros membros em times/${db.unidade.slug}/ferias/`])] });
+}
+
+/* --- Mapa (painel): onde há mais e menos gente fora --- */
+function corDia(n, total) {
+  if (!n) return '';
+  const p = n / (total || 1), l = limiteFr();
+  return p > l ? 'over' : p > l * 0.66 ? 'h4' : p > l * 0.33 ? 'h3' : n > 1 ? 'h2' : 'h1';
+}
+function vPainel(el) {
+  const v = filtrada(), { ini, fim, nome } = intervalo(), e = estatisticas(v, ini, fim), h = hojeISO();
+  const hojeFora = v.ausencias.filter(a => a.inicio <= h && h <= a.fim).map(a => a.key), nomes = k => v.pessoas.find(p => p.key === k)?.nome || '?';
+  const sem = semanas(e.serie), cheias = [...sem].sort((a, b) => b.media - a.media).filter(w => w.media > 0).slice(0, 5), vazias = [...sem].sort((a, b) => a.media - b.media || a.seg.localeCompare(b.seg)).slice(0, 5);
+  const al = alertasDe(v, e);
+  const unidades = ehGrupo() && !filtroUn ? ['', ...db.unidades.map(u => u.slug)] : null;
+  el.innerHTML = `${!v.pessoas.length ? '<div class="banner">Cadastre as pessoas e as férias em <b>Pessoas</b>. ' + (ehGrupo() ? 'Os times e grupos entram pela aba <b>Unidades</b>.' : 'Os outros membros do time aparecem quando publicarem.') + '</div>' : ''}
+    ${ehGrupo() && pendente() && chaveMinha() && db.publicacao.revision ? `<div class="banner">O consolidado mudou desde a última publicação para a liderança. <button class="btn sm pri" id="pAcima">Publicar para a liderança</button></div>` : ''}
+    <div class="inss">
+      ${cardLeitura({ hi: true, k: 'Fora hoje', v: `${new Set(hojeFora).size}<span style="font-size:15px;opacity:.7"> / ${v.pessoas.length}</span>`, pct: v.pessoas.length ? new Set(hojeFora).size / v.pessoas.length : null, s: hojeFora.length ? [...new Set(hojeFora)].slice(0, 4).map(k => `<b>${esc(nomes(k))}</b>`).join(', ') + (new Set(hojeFora).size > 4 ? '…' : '') : 'Todo mundo trabalhando' })}
+      ${cardLeitura({ k: `Pico · ${nome}`, v: e.pico?.n ? `${e.pico.n} fora` : '<span class="faint">ninguém</span>', pct: e.pico?.n ? e.pico.pct : null, marca: limiteFr(), s: e.pico?.n ? `<b>${fmtDia(e.pico.d)}</b> · ${pctTxt(e.pico.n, e.total)} do grupo` : 'Sem ausências no período', tag: e.pico && e.pico.pct > limiteFr() ? '<span class="tag late">acima do limite</span>' : '' })}
+      ${cardLeitura({ k: `Dias acima de ${db.config.limite}% fora`, v: String(e.acima.length), pct: e.uteis ? e.acima.length / e.uteis : null, s: e.acima.length ? `Primeiro: <b>${fmtDia(e.acima[0].d)}</b> (${e.acima[0].n} fora)` : 'Nenhum dia útil passa do limite', tag: e.acima.length ? '<span class="tag late">atenção</span>' : '' })}
+      ${cardLeitura({ k: 'Dias úteis sem ninguém fora', v: `${e.vazios.length}<span class="faint" style="font-size:15px"> / ${e.uteis}</span>`, pct: e.uteis ? e.vazios.length / e.uteis : null, s: `${e.pessoaDias} dia(s)-pessoa de ausência em dias úteis` })}
+    </div>
+    ${al.length ? `<div class="card flat"><p class="lbl">Pedindo atenção <span class="tag ${al.some(a => a[0] === 'late') ? 'late' : ''}">${al.length}</span></p>${al.map(([c, txt]) => `<div class="al compact"><span class="dot ${c}"></span><div class="grow">${txt}</div></div>`).join('')}</div>` : ''}
+    <div class="card"><div class="row"><p class="lbl" style="margin:0">Quantas pessoas fora por dia · ${esc(nome)}</p><span class="grow"></span>
+      <div class="legend" style="margin:0"><span><i class="sw" style="background:#e6e9fb"></i>1</span><span><i class="sw" style="background:#bcc5f3"></i>poucas</span><span><i class="sw" style="background:#7d8ee6"></i>muitas</span><span><i class="sw" style="background:var(--bv)"></i>perto do limite</span><span><i class="sw" style="background:var(--late)"></i>acima de ${db.config.limite}%</span><span><i class="sw" style="background:#f4f5f8"></i>fim de semana ou feriado</span></div></div>
+      <div class="hm" style="margin-top:14px">${heatmap(e.m, e.total, ini, fim)}</div></div>
+    <div class="g21">
+      <div class="card"><p class="lbl">Semanas mais cheias</p>${cheias.length ? `<div class="rk">${cheias.map(w => `<span>Semana de ${fmtCurta(w.seg)}</span><b>${w.media.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} fora/dia · pico ${w.max}</b>`).join('')}</div>` : '<div class="empty">Nenhuma ausência no período.</div>'}
+        <p class="lbl" style="margin-top:18px">Semanas mais tranquilas <span class="faint" style="text-transform:none;letter-spacing:0;font-weight:500">bom para marcar novas férias</span></p><div class="rk">${vazias.map(w => `<span>Semana de ${fmtCurta(w.seg)}</span><b>${w.media ? w.media.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' fora/dia' : 'ninguém fora'}</b>`).join('')}</div></div>
+      <div class="card"><p class="lbl">${unidades ? 'Por unidade · ' : 'Por pessoa · '}dias úteis fora no período</p>${unidades ? porUnidade(v, ini, fim, unidades) : porPessoa(v, ini, fim)}</div>
+    </div>`;
+  if ($('#pAcima')) $('#pAcima').onclick = publicarDlg;
+  $$('[data-dia]', el).forEach(b => b.onclick = () => diaDlg(b.dataset.dia));
+}
+function heatmap(m, total, ini, fim) {
+  const h = hojeISO(), meses = []; for (let mm = ini.slice(0, 7); mm <= fim.slice(0, 7); mm = somaMeses(mm, 1)) meses.push(mm);
+  return meses.map(mm => {
+    const prim = `${mm}-01`, ult = fimDoMes(mm), off = (diaSem(prim) + 6) % 7;
+    const cel = dias(prim, ult).map(d => {
+      const n = m.get(d)?.size || 0, f = feriado(d), cls = !db.config.diasUteis.includes(diaSem(d)) ? 'fds' : f ? 'fer' : corDia(n, total);
+      const tit = `${fmtDia(d)}${f ? ' · feriado: ' + f.nome : ''} · ${n} fora`;
+      return m.has(d) ? `<button class="d ${cls} ${d === h ? 'hoje' : ''}" data-dia="${d}" title="${esc(tit)}">${+d.slice(8)}</button>` : `<span class="d fds" style="opacity:.45">${+d.slice(8)}</span>`;
+    }).join('');
+    return `<div class="mes"><h4>${mesAno(mm)}</h4><div class="gr">${['S', 'T', 'Q', 'Q', 'S', 'S', 'D'].map(x => `<span>${x}</span>`).join('')}${'<span class="d v"></span>'.repeat(off)}${cel}</div></div>`;
+  }).join('');
+}
+function porUnidade(v, ini, fim, uns) {
+  const it = uns.map(s => { const ps = v.pessoas.filter(p => p.un === s), ks = new Set(ps.map(p => p.key)); const sub = { pessoas: ps, ausencias: v.ausencias.filter(a => ks.has(a.key)) }; const e = estatisticas(sub, ini, fim); return { s, n: ps.length, e }; }).filter(x => x.n);
+  return barrasH(it.sort((a, b) => b.e.pessoaDias - a.e.pessoaDias).map(({ s, n, e }) => ({ nome: `${esc(nomeUn(s))} <span class="faint">${n}</span>`, valor: e.pessoaDias, rotulo: `${e.pessoaDias} · pico ${e.pico?.n || 0}${e.pico && e.pico.pct > limiteFr() ? ' <span class="tag late">limite</span>' : ''}`, titulo: `${nomeUn(s)}: ${n} pessoas · ${e.pessoaDias} dias úteis fora · pico ${e.pico?.n || 0} em ${e.pico?.n ? fmtDia(e.pico.d) : '—'}` })), x => x);
+}
+function porPessoa(v, ini, fim) {
+  const it = v.pessoas.map(p => ({ p, d: v.ausencias.filter(a => a.key === p.key).reduce((s, a) => s + diasUteisEntre(a.inicio > ini ? a.inicio : ini, a.fim < fim ? a.fim : fim), 0) })).filter(x => x.d);
+  return barrasH(it.sort((a, b) => b.d - a.d).slice(0, 15).map(({ p, d }) => ({ nome: esc(p.nome), valor: d, rotulo: `${d} dia(s)` })), x => x);
+}
+function alertasDe(v, e) {
+  const out = [];
+  if (e.acima.length) out.push(['late', `${e.acima.length} dia(s) útil(eis) com mais de ${db.config.limite}% do ${filtroUn ? 'recorte' : 'grupo'} fora. O pior: <b>${fmtDia(e.acima.reduce((a, b) => b.n > a.n ? b : a).d)}</b>.`]);
+  // Sobreposição dentro da mesma unidade: duas ou mais pessoas da mesma unidade fora no mesmo dia útil.
+  const porUn = new Map(); for (const p of v.pessoas) porUn.set(p.un, [...(porUn.get(p.un) || []), p.key]);
+  for (const [un, ks] of porUn) {
+    if (ks.length < 3) continue;
+    const dia = e.serie.find(x => [...e.m.get(x.d)].filter(k => ks.includes(k)).length / ks.length > limiteFr() && [...e.m.get(x.d)].filter(k => ks.includes(k)).length > 1);
+    if (dia && (ehGrupo() || un === '')) out.push(['', `${esc(nomeUn(un))}: mais de ${db.config.limite}% das pessoas fora em ${fmtDia(dia.d)}.`]);
+  }
+  if (ehGrupo()) for (const u of db.unidades) if (u.status) out.push([u.status === 'sem chave' ? 'late' : '', `${esc(u.nome)}: ${esc(u.status)}.`]);
+  if (!chaveMinha()) out.push(['', ehGrupo() ? 'Sem chave do nível acima: o consolidado ainda não sobe para a sua liderança (Ajustes).' : 'Sem a chave do time: suas férias ainda não chegam ao time nem ao gestor (Ajustes).']);
+  if (!raiz) out.push(['', 'Pasta sincronizada não ligada (Ajustes).']);
+  for (const o of situacao.outros) out.push(['late', `O Mapa de Férias também está aberto em outro computador (${esc(o.writer)}).`]);
+  return out;
+}
+function diaDlg(d) {
+  const v = filtrada(), m = mapaDias(v, d, d), ks = [...(m.get(d) || [])], f = feriado(d);
+  const lista = ks.map(k => { const p = v.pessoas.find(x => x.key === k), a = v.ausencias.find(x => x.key === k && x.inicio <= d && d <= x.fim); return { p, a }; }).sort((x, y) => (x.p.un || '').localeCompare(y.p.un || '') || x.p.nome.localeCompare(y.p.nome));
+  modal(`<div class="mh"><h2>${esc(fmtDia(d))} de ${d.slice(0, 4)}</h2></div><div class="mb">
+    <p style="margin-top:0">${ks.length} de ${v.pessoas.length} pessoa(s) fora${v.pessoas.length ? ` (${pctTxt(ks.length, v.pessoas.length)})` : ''}${f ? ` · feriado: <b>${esc(f.nome)}</b>` : ''}.</p>
+    ${lista.length ? `<table class="t"><tr><th>Pessoa</th><th>Unidade</th><th>Ausência</th></tr>${lista.map(({ p, a }) => `<tr><td>${esc(p.nome)}</td><td class="muted">${esc(p.sub || nomeUn(p.un))}</td><td>${esc(TIPOS[a?.tipo] || 'Ausência')} · ${fmtCurta(a.inicio)} a ${fmtCurta(a.fim)}</td></tr>`).join('')}</table>` : '<div class="empty">Ninguém fora neste dia.</div>'}
+    </div><div class="mf"><button class="btn" id="dNova">+ Ausência começando neste dia</button><button class="btn pri" onclick="fecharModal()">Fechar</button></div>`);
+  $('#dNova').onclick = () => { fecharModal(); ausenciaDlg(null, { inicio: d, fim: d }); };
+}
+
+/* --- Calendário: uma linha por pessoa, agrupada por unidade, com a contagem do dia no topo --- */
+function vCalendario(el) {
+  mesTl ??= mesAtual();
+  const v = filtrada(), ini = `${mesTl}-01`, fim = fimDoMes(mesTl), ds = dias(ini, fim), m = mapaDias(v, ini, fim), h = hojeISO(), tot = v.pessoas.length || 1;
+  const grupos = new Map(); for (const p of v.pessoas) { const g = p.un; grupos.set(g, [...(grupos.get(g) || []), p]); }
+  const ordem = [...grupos.keys()].sort((a, b) => (a === '' ? -1 : b === '' ? 1 : nomeUn(a).localeCompare(nomeUn(b), 'pt-BR')));
+  const fds = d => !db.config.diasUteis.includes(diaSem(d)) || feriado(d);
+  const linha = p => {
+    const as = v.ausencias.filter(a => a.key === p.key && a.fim >= ini && a.inicio <= fim);
+    return `<tr><td class="nm" title="${esc(p.sub || '')}">${esc(p.nome)}</td>${ds.map(d => { const a = as.find(x => x.inicio <= d && d <= x.fim); return `<td class="c ${fds(d) ? 'fds' : ''} ${p.editavel ? 'ed' : ''}" ${p.editavel ? `data-p="${esc(p.id)}" data-d="${d}" ${a?.id ? `data-a="${esc(a.id)}"` : ''}` : ''} title="${esc(p.nome)} · ${fmtDia(d)}${a ? ' · ' + (TIPOS[a.tipo] || 'Ausência') : ''}">${a ? `<i class="${esc(a.tipo)} ${a.inicio === d || d === ini ? 'ini' : ''} ${a.fim === d || d === fim ? 'fim' : ''}"></i>` : ''}</td>`; }).join('')}</tr>`;
+  };
+  el.innerHTML = `<div class="bar"><button class="btn sm" id="cAnt">‹</button><b style="min-width:150px;text-align:center">${mesAno(mesTl)}</b><button class="btn sm" id="cProx">›</button><button class="btn sm ghost" id="cHoje">Hoje</button>
+      <span class="grow"></span><div class="legend" style="margin:0">${Object.entries(TIPOS).map(([k, n]) => `<span><i style="background:${{ ferias: 'var(--bv)', folga: 'var(--bv-mid)', treinamento: '#9ea9e6', outro: 'var(--faint)' }[k]}"></i>${n}</span>`).join('')}</div></div>
+    <div class="card" style="padding:12px 14px"><div class="scroll"><table class="tl">
+      <tr><th class="nm">Pessoa</th>${ds.map(d => `<th class="${fds(d) ? 'fds' : ''} ${d === h ? 'hoje' : ''}" title="${esc(feriado(d)?.nome || '')}">${DIAS_SEM[diaSem(d)][0].toUpperCase()}<br>${+d.slice(8)}</th>`).join('')}</tr>
+      <tr class="cnt"><td class="nm">Fora no dia</td>${ds.map(d => { const n = m.get(d).size; return `<td class="${fds(d) ? 'fds' : ''} ${n / tot > limiteFr() && !fds(d) ? 'over' : ''}">${n && !fds(d) ? n : ''}</td>`; }).join('')}</tr>
+      ${ordem.map(g => `${ehGrupo() || ordem.length > 1 ? `<tr class="un"><td class="nm">${esc(nomeUn(g))}</td><td colspan="${ds.length}"></td></tr>` : ''}${grupos.get(g).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).map(linha).join('')}`).join('') || `<tr><td class="nm muted" colspan="${ds.length + 1}">Ninguém cadastrado ainda.</td></tr>`}
+    </table></div><p class="small muted" style="margin:10px 0 0">Clique numa célula das suas pessoas para marcar ou editar uma ausência. As demais vêm da pasta, publicadas por quem cadastrou.</p></div>`;
+  $('#cAnt').onclick = () => { mesTl = somaMeses(mesTl, -1); render(); };
+  $('#cProx').onclick = () => { mesTl = somaMeses(mesTl, 1); render(); };
+  $('#cHoje').onclick = () => { mesTl = mesAtual(); render(); };
+  $$('td.ed', el).forEach(c => c.onclick = () => c.dataset.a ? ausenciaDlg(c.dataset.a) : ausenciaDlg(null, { pessoa: c.dataset.p, inicio: c.dataset.d, fim: c.dataset.d }));
+}
+
+/* --- Pessoas e ausências cadastradas aqui --- */
+function vPessoas(el) {
+  const ativas = db.pessoas.filter(p => p.ativo), h = hojeISO();
+  el.innerHTML = `<div class="quick"><span class="pl">+</span><input id="qk" placeholder="Ex.: Ana 05/01 a 23/01 férias  ·  Bruno 14/02 folga" title="Nome (padrão: você), uma ou duas datas dd/mm e o tipo (férias, folga, treinamento, outra). Enter abre a confirmação."></div>
+    <div class="bar"><span class="muted">${ehGrupo() ? 'Você e as pessoas que respondem direto a você (fora dos times). Os times e grupos entram pela aba Unidades.' : 'Você e, se quiser, as outras pessoas do time. Cada um também pode cadastrar as próprias férias no próprio Mapa de Férias: tudo soma.'}</span><span class="grow"></span><button class="btn" id="pNova">+ Pessoa</button></div>
+    ${ativas.map(p => { const as = db.ausencias.filter(a => a.pessoa === p.id).sort((a, b) => a.inicio.localeCompare(b.inicio)), fut = as.filter(a => a.fim >= h), pas = as.filter(a => a.fim < h);
+      return `<div class="card"><div class="row"><h3>${esc(p.nome)}</h3>${p.id === db.eu ? '<span class="chip bv">você</span>' : ''}<span class="grow"></span><button class="btn sm" data-np="${p.id}">+ Ausência</button>${p.id === db.eu ? '' : `<button class="btn sm ghost" data-ep="${p.id}">Editar</button>`}</div>
+        ${fut.length ? `<div class="pp" style="margin-top:10px">${fut.map(a => `<button class="chip ${a.inicio <= h ? 'bv' : ''}" data-a="${a.id}" title="${esc(a.nota || '')}">${esc(TIPOS[a.tipo])} · ${fmtCurta(a.inicio)}${a.fim !== a.inicio ? ' a ' + fmtCurta(a.fim) : ''} · ${diasUteisEntre(a.inicio, a.fim)} dia(s) útil(eis)</button>`).join('')}</div>` : '<div class="empty" style="padding:8px 0 0">Nenhuma ausência futura.</div>'}
+        ${pas.length ? `<details style="margin-top:8px"><summary class="small muted">${pas.length} ausência(s) passada(s)</summary><div class="pp" style="margin-top:6px">${pas.map(a => `<button class="chip" data-a="${a.id}">${esc(TIPOS[a.tipo])} · ${fmtCurta(a.inicio)} a ${fmtCurta(a.fim)}/${a.fim.slice(2, 4)}</button>`).join('')}</div></details>` : ''}</div>`; }).join('')}
+    ${db.pessoas.some(p => !p.ativo) ? `<p class="small muted">Inativas (não aparecem no mapa): ${db.pessoas.filter(p => !p.ativo).map(p => `<button class="bvc" data-rv="${p.id}">${esc(p.nome)}</button>`).join(', ')}</p>` : ''}`;
+  const qk = $('#qk'); qk.onkeydown = e => { if (e.key === 'Enter' && qk.value.trim()) { const pre = interpretar(qk.value); qk.value = ''; ausenciaDlg(null, pre); } };
+  $('#pNova').onclick = () => pessoaDlg(null);
+  $$('[data-np]', el).forEach(b => b.onclick = () => ausenciaDlg(null, { pessoa: b.dataset.np }));
+  $$('[data-ep]', el).forEach(b => b.onclick = () => pessoaDlg(b.dataset.ep));
+  $$('[data-a]', el).forEach(b => b.onclick = () => ausenciaDlg(b.dataset.a));
+  $$('[data-rv]', el).forEach(b => b.onclick = () => { pessoaPorId(b.dataset.rv).ativo = true; agendarSalvar(); });
+}
+function interpretar(txt) {
+  let s = ' ' + txt + ' ';
+  const o = { pessoa: db.eu, tipo: 'ferias' };
+  const ds = [...s.matchAll(/\s(\d{1,2}\/\d{1,2}(?:\/\d{2,4})?)(?=\s)/g)].map(m => lerData(m[1])).filter(Boolean);
+  if (ds[0]) { o.inicio = ds[0]; o.fim = ds[1] && ds[1] >= ds[0] ? ds[1] : ds[0]; if (ds[1] && ds[1] < ds[0]) o.fim = lerData(ds[1].slice(8) + '/' + ds[1].slice(5, 7) + '/' + (+ds[0].slice(0, 4) + 1)); }
+  s = s.replace(/\s\d{1,2}\/\d{1,2}(?:\/\d{2,4})?(?=\s)/g, ' ').replace(/\s(a|até|ate|-)(?=\s)/gi, ' ');
+  for (const [k, re] of [['folga', /\s(folga|day ?off|abono)(?=\s)/i], ['treinamento', /\s(treinamento|curso|evento|confer[êe]ncia)(?=\s)/i], ['outro', /\s(outra|outro|aus[êe]ncia|licen[çc]a)(?=\s)/i], ['ferias', /\s(f[ée]rias)(?=\s)/i]]) if (re.test(s)) { o.tipo = k; s = s.replace(re, ' '); break; }
+  const nome = slugify(s.trim());
+  if (nome) { const p = db.pessoas.filter(p => p.ativo).find(p => slugify(p.nome).startsWith(nome)) || db.pessoas.filter(p => p.ativo).find(p => slugify(p.nome).split('-').some(x => x.startsWith(nome.split('-')[0]))); if (p) o.pessoa = p.id; else o.novoNome = s.trim(); }
+  return o;
+}
+function pessoaDlg(id) {
+  const p = id ? pessoaPorId(id) : { nome: '' };
+  const d = modal(`<div class="mh"><h2>${id ? 'Editar pessoa' : 'Nova pessoa'}</h2></div><div class="mb">
+    <label class="field"><span>Nome</span><input class="sin" id="pN" value="${esc(p.nome)}"></label>
+    <p class="small muted">Use o mesmo nome que a pessoa usa no Mapa de Férias dela, se ela também cadastrar: assim as duas listas se somam sem duplicar.</p></div>
+    <div class="mf">${id ? '<button class="btn danger" id="pX">Tirar do mapa</button><span class="grow"></span>' : ''}<button class="btn" onclick="fecharModal()">Cancelar</button><button class="btn pri" id="pOk">Salvar</button></div>`);
+  setTimeout(() => $('#pN', d)?.focus(), 30);
+  if (id) $('#pX', d).onclick = () => { p.ativo = false; fecharModal(); agendarSalvar(); toast('Pessoa tirada do mapa. As ausências ficam guardadas.'); };
+  $('#pOk', d).onclick = () => {
+    const n = clamp($('#pN', d).value.trim(), 80); if (!n) return;
+    if (!id && db.pessoas.some(x => x.ativo && slugify(x.nome) === slugify(n))) return toast('Já existe uma pessoa com esse nome.');
+    if (id) p.nome = n; else db.pessoas.push({ id: uid('p'), nome: n, ativo: true });
+    fecharModal(); agendarSalvar();
+  };
+}
+// Impacto de uma ausência no grupo: quantas outras pessoas fora em cada dia útil do período.
+function impacto(ini, fim, chaveIgnorar) {
+  const v = visao(), m = mapaDias(v, ini, fim), total = v.pessoas.length || 1, uteis = dias(ini, fim).filter(util);
+  let max = 0, diaMax = null, acima = 0;
+  for (const d of uteis) { const n = [...m.get(d)].filter(k => k !== chaveIgnorar).length; if (n > max) { max = n; diaMax = d; } if ((n + 1) / total > limiteFr()) acima++; }
+  return { max, diaMax, acima, uteis: uteis.length, total: v.pessoas.length };
+}
+// Sugere os períodos com menos gente fora nos próximos 6 meses, com o mesmo número de dias úteis.
+function sugerir(nUteis, chaveIgnorar) {
+  const h = hojeISO(), fim = addDias(h, 200), v = visao(), m = mapaDias(v, h, fim), total = v.pessoas.length || 1;
+  const uteis = dias(addDias(h, 7), addDias(h, 180)).filter(util), out = [];
+  for (let i = 0; i + nUteis <= uteis.length; i++) {
+    if (i && diaSem(uteis[i]) !== 1 && nUteis >= 5) continue;   // períodos de uma semana ou mais começam na segunda
+    const jan = uteis.slice(i, i + nUteis), ns = jan.map(d => [...(m.get(d) || [])].filter(k => k !== chaveIgnorar).length);
+    out.push({ ini: jan[0], fim: jan.at(-1), max: Math.max(...ns), soma: ns.reduce((a, b) => a + b, 0) });
+  }
+  out.sort((a, b) => a.max - b.max || a.soma - b.soma || a.ini.localeCompare(b.ini));
+  const esc2 = []; for (const x of out) { if (esc2.some(y => !(x.fim < y.ini || x.ini > y.fim))) continue; esc2.push(x); if (esc2.length === 3) break; }
+  return esc2.map(x => ({ ...x, pct: x.max / total }));
+}
+async function ausenciaDlg(id, pre = {}) {
+  if (pre.novoNome) { const n = clamp(pre.novoNome, 80); if (await perguntar('Pessoa nova?', `<p><b>${esc(n)}</b> ainda não está na lista. Cadastrar e marcar a ausência?</p>`, [['no', 'Cancelar'], ['ok', 'Cadastrar', 'pri']]) !== 'ok') return; const p = { id: uid('p'), nome: n, ativo: true }; db.pessoas.push(p); pre.pessoa = p.id; }
+  const a = id ? db.ausencias.find(x => x.id === id) : { pessoa: pre.pessoa || db.eu, inicio: pre.inicio || '', fim: pre.fim || pre.inicio || '', tipo: pre.tipo || 'ferias', nota: '' };
+  if (!a) return;
+  const d = modal(`<div class="mh"><h2>${id ? 'Editar ausência' : 'Nova ausência'}</h2></div><div class="mb">
+    <label class="field"><span>Pessoa</span><select class="sel" id="aP">${db.pessoas.filter(p => p.ativo || p.id === a.pessoa).map(p => `<option value="${p.id}" ${p.id === a.pessoa ? 'selected' : ''}>${esc(p.nome)}${p.id === db.eu ? ' (você)' : ''}</option>`).join('')}</select></label>
+    <div class="f2"><label class="field"><span>De</span><input class="sin" type="date" id="aI" value="${esc(a.inicio)}"></label><label class="field"><span>Até (inclusive)</span><input class="sin" type="date" id="aF" value="${esc(a.fim)}"></label></div>
+    <label class="field"><span>Tipo</span><select class="sel" id="aT">${Object.entries(TIPOS).map(([k, n]) => `<option value="${k}" ${a.tipo === k ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
+    <label class="field"><span>Nota (só neste computador)</span><input class="sin" id="aN" value="${esc(a.nota || '')}" placeholder="Opcional. Não vai para a pasta."></label>
+    <div id="aImp" class="small" style="min-height:40px"></div>
+    <div class="row"><button class="btn sm" id="aSug">Sugerir períodos com menos gente fora</button></div><div id="aSugL" class="small" style="margin-top:8px"></div>
+    <p class="small muted">Apoio para planejar: não substitui o pedido na ferramenta oficial de férias da empresa.</p></div>
+    <div class="mf">${id ? '<button class="btn danger" id="aX">Excluir</button><span class="grow"></span>' : ''}<button class="btn" onclick="fecharModal()">Cancelar</button><button class="btn pri" id="aOk">${id ? 'Salvar' : 'Marcar'}</button></div>`);
+  const chaveP = () => { const p = pessoaPorId($('#aP', d).value); return `${db.unidade.slug}/${slugify(p?.nome || '')}`; };
+  const atualizar = () => {
+    const i = $('#aI', d).value, f = $('#aF', d).value || i;
+    if (!i || f < i) { $('#aImp', d).innerHTML = i && f < i ? '<span class="latec">A data final é antes da inicial.</span>' : ''; return; }
+    const x = impacto(i, f, chaveP());
+    $('#aImp', d).innerHTML = `<div class="${x.acima ? 'banner warn' : 'banner'}" style="margin:6px 0 10px;display:block">${x.uteis} dia(s) útil(eis). ${x.max ? `No dia mais cheio (${fmtDia(x.diaMax)}) já há <b>${x.max}</b> outra(s) pessoa(s) fora${x.total ? ` de ${x.total}` : ''}.` : 'Ninguém mais fora nesse período.'}${x.acima ? ` <b>${x.acima} dia(s) passam de ${db.config.limite}% do grupo fora.</b>` : ''}</div>`;
+  };
+  ['#aI', '#aF', '#aP'].forEach(s => $(s, d).onchange = () => { if (s === '#aI' && (!$('#aF', d).value || $('#aF', d).value < $('#aI', d).value)) $('#aF', d).value = $('#aI', d).value; atualizar(); });
+  atualizar();
+  $('#aSug', d).onclick = () => {
+    const i = $('#aI', d).value, f = $('#aF', d).value || i, n = i && f >= i ? Math.max(1, diasUteisEntre(i, f)) : 10;
+    const s = sugerir(n, chaveP());
+    $('#aSugL', d).innerHTML = s.length ? `Para ${n} dia(s) útil(eis): ${s.map((x, k) => `<button class="chip bv" data-sg="${k}">${fmtCurta(x.ini)} a ${fmtCurta(x.fim)} · ${x.max ? `até ${x.max} fora` : 'ninguém fora'}</button>`).join(' ')}` : 'Sem sugestões.';
+    $$('[data-sg]', d).forEach(b => b.onclick = () => { const x = s[+b.dataset.sg]; $('#aI', d).value = x.ini; $('#aF', d).value = x.fim; atualizar(); });
+  };
+  if (id) $('#aX', d).onclick = () => { db.ausencias = db.ausencias.filter(x => x.id !== id); fecharModal(); agendarSalvar(); };
+  $('#aOk', d).onclick = () => {
+    const i = $('#aI', d).value, f = $('#aF', d).value || i;
+    if (!i || f < i) return toast('Confira as datas.');
+    if (diasUteisEntre(i, f) > 120) return toast('Períodos acima de 120 dias úteis: divida em partes.');
+    const novo = { pessoa: $('#aP', d).value, inicio: i, fim: f, tipo: $('#aT', d).value, nota: clamp($('#aN', d).value.trim(), 200) };
+    const sobre = db.ausencias.find(x => x.id !== id && x.pessoa === novo.pessoa && !(f < x.inicio || i > x.fim));
+    if (sobre) return toast(`Já existe uma ausência dessa pessoa de ${fmtCurta(sobre.inicio)} a ${fmtCurta(sobre.fim)}.`, 5000);
+    if (id) Object.assign(a, novo); else db.ausencias.push({ id: uid('a'), ...novo });
+    fecharModal(); agendarSalvar();
+  };
+}
+
+/* --- Unidades (gestor): times e grupos de outros gestores --- */
+function vUnidades(el) {
+  el.innerHTML = `<div class="bar"><span class="muted">Times usam a <b>chave do time</b> (a mesma do Quadro). Grupos de outros gestores usam a chave que você gerou para eles (a mesma das Finanças do Grupo serve).</span><span class="grow"></span>
+      <button class="btn" id="uHub">Importar times do Hub</button><button class="btn" id="uFin">Importar grupos das Finanças do Grupo</button><button class="btn" id="uNovoG">+ Grupo de outro gestor</button><button class="btn pri" id="uNovo">+ Time</button></div>
+    ${db.unidades.map(u => { const c = u.chaves.filter(x => !x.revogada).at(-1), r = db.retratos[u.slug];
+      return `<div class="card"><div class="row"><h3>${esc(u.nome)}</h3><span class="code faint">${esc(pastaUnidade(u).join('/'))}</span>${u.tipo === 'grupo' ? '<span class="chip bv">grupo</span>' : ''}<span class="grow"></span>
+        ${c ? `<span class="chip ok code">${esc(c.kid)}</span>` : '<span class="chip late">sem chave</span>'}${r ? `<span class="chip">${r.pessoas.length} pessoas · ${r.ausencias.length} ausências</span>` : ''}</div>
+        <p class="small muted" style="margin:8px 0">${u.status ? esc(u.status) : r ? `Lido ${fmtDataHora(r.lidoEm)} · ${r.writers.length} arquivo(s): ${r.writers.map(w => `<span class="code">${esc(w.writer)}</span> rev. ${w.revision}`).join(', ')}` : raiz ? 'Ainda não lido.' : 'Ligue a pasta sincronizada para ler.'}</p>
+        <div class="row"><button class="btn sm" data-ch="${esc(u.slug)}">${c ? 'Trocar chave' : 'Colar chave'}</button>${u.tipo === 'grupo' ? `<button class="btn sm" data-gk="${esc(u.slug)}">Gerar chave para o gestor</button>` : ''}${c ? `<button class="btn sm" data-cp="${esc(u.slug)}">Copiar chave</button>` : ''}<span class="grow"></span><button class="btn sm danger" data-rm="${esc(u.slug)}">Remover</button></div></div>`; }).join('') || '<div class="card empty">Nenhuma unidade. Adicione os times que você lidera e, se for liderança, os grupos dos gestores abaixo de você.</div>'}`;
+  $('#uNovo').onclick = () => unidadeDlg('time');
+  $('#uNovoG').onclick = () => unidadeDlg('grupo');
+  $('#uHub').onclick = () => importarLocal('hub');
+  $('#uFin').onclick = () => importarLocal('financas-grupo');
+  $$('[data-ch]', el).forEach(b => b.onclick = () => colarChaveUnidade(unPorSlug(b.dataset.ch)));
+  $$('[data-gk]', el).forEach(b => b.onclick = () => gerarChaveUnidade(unPorSlug(b.dataset.gk)));
+  $$('[data-cp]', el).forEach(b => b.onclick = async () => { const u = unPorSlug(b.dataset.cp); if (!await avisoCofre('chave')) return; try { await navigator.clipboard.writeText(u.chaves.filter(x => !x.revogada).at(-1).texto); toast('Chave copiada. Envie só por mensagem direta.'); } catch { toast('Não foi possível copiar.'); } });
+  $$('[data-rm]', el).forEach(b => b.onclick = async () => { const u = unPorSlug(b.dataset.rm); if (await perguntar('Remover unidade?', `<p>Tirar <b>${esc(u.nome)}</b> do mapa? A chave guardada também sai do seu arquivo.</p>`, [['no', 'Cancelar'], ['ok', 'Remover', 'danger']]) !== 'ok') return; db.unidades = db.unidades.filter(x => x !== u); delete db.retratos[u.slug]; agendarSalvar(); });
+}
+function unidadeDlg(tipo) {
+  const d = modal(`<div class="mh"><h2>${tipo === 'grupo' ? 'Novo grupo de outro gestor' : 'Novo time'}</h2></div><div class="mb">
+    <div class="f2"><label class="field"><span>Nome</span><input class="sin" id="uN"></label><label class="field"><span>Identificador (pasta)</span><input class="sin code" id="uS"></label></div>
+    <p class="small muted">${tipo === 'grupo' ? 'Use o identificador do grupo do gestor (aparece nos Ajustes do Mapa de Férias e das Finanças do Grupo dele). Depois gere a chave e envie por mensagem direta, ou reaproveite a que você já gerou para ele nas Finanças do Grupo.' : 'Use o mesmo identificador do time no Quadro e na Central (ex.: pagamentos). Depois cole a chave do time.'}</p></div>
+    <div class="mf"><button class="btn" onclick="fecharModal()">Cancelar</button><button class="btn pri" id="uOk">Adicionar</button></div>`);
+  $('#uN', d).oninput = () => { $('#uS', d).value = slugify($('#uN', d).value); };
+  $('#uOk', d).onclick = () => {
+    const nome = clamp($('#uN', d).value.trim(), 80), slug = slugify($('#uS', d).value);
+    if (!nome || !slug) return toast('Preencha nome e identificador.');
+    if (unPorSlug(slug) || slug === db.unidade.slug) return toast('Esse identificador já está em uso.');
+    db.unidades.push({ nome, slug, tipo, chaves: [] }); fecharModal(); agendarSalvar();
+  };
+}
+async function colarChaveUnidade(u) {
+  const r = await perguntar(`Chave de ${u.nome}`, `<label class="field"><span>Chave (GK1.${esc(u.slug)}…)</span><input class="sin code" id="kT" type="password"></label><p class="small muted">${u.tipo === 'grupo' ? 'A chave que você gerou para este gestor.' : 'A chave do time, a mesma do Quadro do Time (está no seu cofre, no Hub ou na Central).'}</p>`, [['no', 'Cancelar'], ['ok', 'Cadastrar', 'pri']]);
+  if (r !== 'ok') return;
+  const v = document.getElementById('kT')?.value || '';
+  try { lerChaveTexto(v); } catch (e) { return toast(e.message, 5000); }
+  if (!await avisoCofre('chave')) return;
+  try { const kid = await cadastrarChave(u.chaves, v, u.slug); toast('Chave cadastrada: ' + kid); await lerPasta(true); } catch (e) { toast(e.message, 6000); }
+}
+async function gerarChaveUnidade(u) {
+  const kid0 = `${u.slug}-fer-${String(new Date().getFullYear()).slice(2)}${pad2(new Date().getMonth() + 1)}`, kid = u.chaves.some(c => c.kid === kid0) ? `${kid0}-${u.chaves.length + 1}` : kid0;
+  const texto = gerarChaveTexto(kid);
+  if (!await avisoCofre('chave', `<p class="small">Chave do grupo <b>${esc(u.nome)}</b>: o gestor cola em Ajustes &gt; Nível acima do Mapa de Férias dele.</p><input class="sin code" style="width:100%" readonly value="${esc(texto)}" onclick="this.select()"><div class="row" style="margin-top:6px"><button class="btn sm" onclick="navigator.clipboard?.writeText('${texto}');toast('Chave copiada.')">Copiar</button></div>`)) return;
+  u.chaves.push({ kid, texto, em: new Date().toISOString(), origem: 'gerada' }); await carregarChaves(); agendarSalvar();
+}
+// Lê o arquivo local cifrado do Hub ou das Finanças do Grupo, com a senha dele, e traz unidades e chaves.
+// Só lê: o arquivo da outra ferramenta não é alterado (ADR 0010).
+async function importarLocal(tool) {
+  let fh; try { [fh] = await window.showOpenFilePicker({ id: 'ferias-imp-' + tool, types: [{ description: 'Arquivo cifrado da solução', accept: { 'application/json': ['.json'] } }] }); } catch { return; }
+  const texto = await (await fh.getFile()).text();
+  try { lerCabecalhoLocal(texto); } catch (e) { return toast(e.message); }
+  let obj = null;
+  for (let i = 0; i < 3 && !obj; i++) {
+    const s = await pedirSenhaDlg(tool === 'hub' ? 'Senha do Hub' : 'Senha das Finanças do Grupo', i > 0); if (s == null) return;
+    try { obj = (await decifrarLocal(texto, s)).dados; } catch (e) { if (e.code !== 'SENHA') return toast(e.message); }
+  }
+  if (!obj) return toast('Senha incorreta.');
+  if (obj.tool !== tool || !Array.isArray(obj.times)) return toast(tool === 'hub' ? 'Este arquivo não é do Hub.' : 'Este arquivo não é das Finanças do Grupo.');
+  let nu = 0, nk = 0, acima = 0;
+  const lista = tool === 'hub' ? obj.times.map(t => ({ nome: t.nome, slug: t.slug, tipo: 'time', chaves: t.chaves || [] })) : obj.times.filter(t => t.tipo === 'grupo').map(t => ({ nome: t.nome, slug: t.slug, tipo: 'grupo', chaves: t.chaves || [] }));
+  for (const x of lista) {
+    if (!x.slug || x.slug === db.unidade.slug) continue;
+    let u = unPorSlug(x.slug); if (!u) { u = { nome: clamp(x.nome, 80), slug: x.slug, tipo: x.tipo, chaves: [] }; db.unidades.push(u); nu++; }
+    for (const c of x.chaves.filter(c => !c.revogada)) { try { const k = lerChaveTexto(c.texto); if (chaveDoSlug(k.kid, u.slug) && !u.chaves.some(y => y.kid === k.kid)) { u.chaves.push({ kid: k.kid, texto: c.texto, em: new Date().toISOString(), origem: tool }); nk++; } } catch {} }
+  }
+  if (tool === 'financas-grupo' && obj.grupo?.slug === db.unidade.slug) for (const c of (obj.acima?.chaves || []).filter(c => !c.revogada)) { try { const k = lerChaveTexto(c.texto); if (chaveDoSlug(k.kid, db.unidade.slug) && !db.chaves.some(y => y.kid === k.kid)) { db.chaves.push({ kid: k.kid, texto: c.texto, em: new Date().toISOString(), origem: tool }); acima++; } } catch {} }
+  obj = null;
+  await carregarChaves(); agendarSalvar(); await lerPasta(true);
+  await perguntar('Importado', `<p>${nu} unidade(s) nova(s) e ${nk} chave(s) trazidas${acima ? ', além da chave da sua liderança' : ''}.</p><div class="cofre">As chaves agora também ficam dentro do arquivo do Mapa de Férias, cifrado com a <b>sua senha</b>. Ela deve estar no cofre de senhas.</div>`);
+}
+
+/* --- Ajustes --- */
+function vAjustes(el) {
+  const c = db.chaves.filter(x => !x.revogada).at(-1), pub = db.publicacao;
+  el.innerHTML = `<div class="grid g2">
+    <div class="card"><p class="lbl">1 · Pasta sincronizada (OneDrive)</p>
+      ${raiz ? `<p>Ligada: <span class="code">${esc(raiz.name)}/${esc(pastaPropria().join('/'))}/</span>${situacao.lidoEm ? ` · lida ${fmtDataHora(situacao.lidoEm)}` : ''}</p>` : `<p class="muted">Escolha a pasta raiz compartilhada, sincronizada pelo OneDrive (normalmente <span class="code">${PASTA_COMUM}</span>).</p>`}
+      <div class="row"><button class="btn ${raiz ? '' : 'pri'}" id="jPasta">${raiz ? 'Trocar pasta' : 'Ligar pasta'}</button>${raiz ? '<button class="btn" id="jLer">Ler agora</button>' : ''}</div>
+      ${situacao.erro ? `<div class="banner warn" style="margin-top:10px">${esc(situacao.erro)}</div>` : ''}</div>
+    <div class="card"><p class="lbl">2 · ${ehGrupo() ? 'Nível acima · sua liderança' : 'Chave do time'}</p>
+      ${c ? `<p>Chave <span class="code">${esc(c.kid)}</span> · ${pub.revision ? `publicado na revisão ${pub.revision}, ${fmtDataHora(pub.em)} ${pendente() ? '<span class="chip late">mudou desde então</span>' : '<span class="chip ok">em dia</span>'}` : 'ainda não publicado'}</p>`
+        : `<p class="small muted" style="margin-top:0">${ehGrupo() ? `Se a sua liderança também usa o Mapa de Férias, ela cadastra este grupo (identificador <span class="code">${esc(db.unidade.slug)}</span>) e envia uma chave por mensagem direta. A chave que ela já gerou para as Finanças do Grupo (<span class="code">GK1.${esc(db.unidade.slug)}-fin-…</span>) também serve.` : `A mesma chave do Quadro do Time (<span class="code">GK1.${esc(db.unidade.slug)}…</span>), que o gestor enviou por mensagem direta. Com ela suas férias chegam ao time e ao gestor.`}</p>`}
+      <div class="row"><input class="sin grow" id="jCh" type="password" placeholder="GK1.${esc(db.unidade.slug)}…"><button class="btn" id="jChOk">Cadastrar</button>${ehGrupo() ? '<button class="btn" id="jFin">Trazer das Finanças do Grupo</button>' : ''}</div>
+      <div class="row" style="margin-top:10px"><button class="btn pri" id="jPub" ${c && raiz ? '' : 'disabled'}>${ehGrupo() ? 'Publicar consolidado para a liderança' : 'Publicar agora'}</button></div>
+      <p class="small muted">${ehGrupo() ? 'Você confere antes o que sobe. Vai uma linha por pessoa e ausência, sem as notas.' : 'Suas férias são publicadas sozinhas a cada mudança, sem as notas.'} Arquivo: <span class="code">${esc(pastaPropria().join('/'))}/${esc(baseArquivo())}.json</span></p></div>
+    <div class="card"><p class="lbl">Regras do mapa</p>
+      <label class="field"><span>Limite de pessoas fora ao mesmo tempo (% do grupo)</span><input class="sin" type="number" min="5" max="100" id="jLim" value="${db.config.limite}"></label>
+      <div class="field"><span>Dias úteis</span><div class="row">${[1, 2, 3, 4, 5, 6, 0].map(i => `<label class="chip"><input type="checkbox" data-du="${i}" ${db.config.diasUteis.includes(i) ? 'checked' : ''}> ${DIAS_SEM[i]}</label>`).join('')}</div></div>
+      ${ehGrupo() ? `<label class="row small"><input type="checkbox" id="jNom" ${db.config.nomesAcima ? 'checked' : ''}> Enviar os nomes das pessoas para a liderança (desmarcado: "Pessoa 1, 2…")</label>` : ''}</div>
+    <div class="card"><p class="lbl">Feriados</p>${db.feriados.length ? `<div class="pp">${[...db.feriados].sort((a, b) => a.data.localeCompare(b.data)).map(f => `<span class="chip">${fmtCurta(f.data)}/${f.data.slice(2, 4)} ${esc(f.nome)} <button data-rf="${f.data}" title="Remover">×</button></span>`).join('')}</div>` : '<div class="empty">Nenhum feriado cadastrado.</div>'}
+      <div class="row" style="margin-top:8px"><input class="sin" type="date" id="jFD"><input class="sin grow" id="jFN" placeholder="Nome do feriado"><button class="btn" id="jFOk">Adicionar</button></div>
+      <p class="small muted">Feriados não contam como dia útil no mapa. Cada nível cadastra os seus.</p></div>
+    <div class="card"><p class="lbl">${ehGrupo() ? 'Grupo' : 'Time'} e você</p>
+      <div class="f2"><label class="field"><span>Nome</span><input class="sin" id="jN" value="${esc(db.unidade.nome)}"></label><label class="field"><span>Identificador (pasta)</span><input class="sin code" value="${esc(db.unidade.slug)}" disabled></label></div>
+      <div class="f2"><label class="field"><span>Seu nome</span><input class="sin" id="jP" value="${esc(db.pessoa.nome)}"></label><label class="field"><span>Este computador</span><input class="sin" id="jD" value="${esc(dispositivo().nome)}" placeholder="Ex.: notebook do trabalho"></label></div></div>
+    <div class="card"><p class="lbl">Segurança</p><p class="small">Arquivo <span class="code">${esc(arquivo)}</span> cifrado com a sua senha (AES-256, PBKDF2 600 mil). As chaves ficam dentro dele.</p>
+      <div class="row"><button class="btn" id="jSenha">Trocar senha</button><button class="btn" id="jBk">Baixar cópia cifrada</button><button class="btn" id="jTeste">Testar minha senha</button></div>
+      <p class="small muted">Apoio para enxergar e planejar ausências: não substitui a ferramenta oficial de férias da empresa.</p></div>
+  </div>`;
+  $('#jPasta').onclick = async () => { try { await ligarPasta(await escolherPasta('ferias-comum')); } catch (e) { if (e.name !== 'AbortError') toast(e.message); } };
+  if ($('#jLer')) $('#jLer').onclick = () => lerPasta();
+  $('#jChOk').onclick = async () => {
+    const v = $('#jCh').value.trim(); if (!v) return;
+    try { lerChaveTexto(v); } catch (e) { return toast(e.message, 5000); }
+    if (!await avisoCofre('chave')) return;
+    try { const kid = await cadastrarChave(db.chaves, v, db.unidade.slug); toast('Chave cadastrada: ' + kid); await lerPasta(true); } catch (e) { toast(e.message, 6000); }
+  };
+  if ($('#jFin')) $('#jFin').onclick = () => importarLocal('financas-grupo');
+  $('#jPub').onclick = publicarDlg;
+  $('#jLim').onchange = e => { db.config.limite = Math.max(5, Math.min(100, +e.target.value || 30)); agendarSalvar(); };
+  $$('[data-du]', el).forEach(i => i.onchange = () => { db.config.diasUteis = $$('[data-du]', el).filter(x => x.checked).map(x => +x.dataset.du); agendarSalvar(); });
+  if ($('#jNom')) $('#jNom').onchange = e => { db.config.nomesAcima = e.target.checked; agendarSalvar(); };
+  $$('[data-rf]', el).forEach(b => b.onclick = () => { db.feriados = db.feriados.filter(f => f.data !== b.dataset.rf); agendarSalvar(); });
+  $('#jFOk').onclick = () => { const dt = $('#jFD').value, n = clamp($('#jFN').value.trim(), 60) || 'Feriado'; if (!dt || feriado(dt)) return; db.feriados.push({ data: dt, nome: n }); agendarSalvar(); };
+  $('#jN').onchange = e => { db.unidade.nome = clamp(e.target.value.trim(), 80) || db.unidade.nome; agendarSalvar(); };
+  $('#jP').onchange = e => { db.pessoa.nome = clamp(e.target.value.trim(), 80) || db.pessoa.nome; const eu = pessoaPorId(db.eu); if (eu) eu.nome = db.pessoa.nome; agendarSalvar(); };
+  $('#jD').onchange = e => nomearDispositivo(e.target.value.trim());
+  $('#jSenha').onclick = async () => { const s = await criarSenhaDlg('Nova senha do arquivo'); if (!s) return; ctx = await novoCtx(s, TOOL); db.seg = { cofreConfirmadoEm: new Date().toISOString() }; await salvar(); toast('Senha trocada.'); };
+  $('#jBk').onclick = async () => baixar(arquivo.replace(/\.json$/, '') + '-copia-' + hojeISO() + '.json', await cifrarLocal(db, ctx));
+  $('#jTeste').onclick = async () => { const s = await pedirSenhaDlg('Testar minha senha'); if (s == null) return; if (await senhaConfere(s, ctx)) { db.seg.ultimoTesteEm = new Date().toISOString(); agendarSalvar(); toast('Senha correta.'); } else toast('Senha não confere. Troque a senha enquanto o arquivo está aberto.', 6000); };
+}
+
+/* ---------------------------- abertura e criação ---------------------------- */
+function telaInicial(msg = '') {
+  $('#app').innerHTML = `<div class="welcome"><div class="card">
+    <div class="row"><div class="logo" style="margin:0">FÉR</div><div><h2 style="margin:0">Mapa de Férias</h2><div class="small muted">Enxergar e planejar as ausências do time e do grupo</div></div></div>
+    ${PRESET?.unidade ? `<div class="banner" style="margin-top:16px">Pré-configurado para <b>${esc(PRESET.unidade.nome)}</b>.</div>` : ''}
+    ${msg ? `<div class="banner warn" style="margin-top:12px">${esc(msg)}</div>` : ''}
+    <p class="lbl" style="margin-top:20px">É a primeira vez?</p>
+    <button class="opt" id="iTime"><b>Sou de um time</b><span>Cadastro as minhas férias (e, se quiser, as do time). Elas somam com as dos colegas e chegam ao gestor.</span></button>
+    <button class="opt" id="iGrupo"><b>Sou gestor ou liderança</b><span>Vejo os dias com mais e menos gente fora em todos os meus times e grupos, cadastro as minhas e as dos diretos e publico para a minha liderança.</span></button>
+    <p class="lbl" style="margin-top:16px">Já tenho o arquivo</p>
+    <button class="opt" id="iAbrir"><b>Abrir a pasta local</b><span>A pasta deste computador onde está o arquivo <span class="code">ferias-&lt;nome&gt;.json</span>.</span></button>
+    ${temFS() ? '' : '<div class="banner warn">Abra no Microsoft Edge ou no Google Chrome: esta ferramenta precisa ler e gravar arquivos.</div>'}
+    <p class="small muted" style="margin-top:16px">Apoio para a visão do grupo: não substitui a ferramenta oficial de férias da empresa. Tudo fica cifrado; as notas nunca saem deste computador.</p>
+  </div></div>`;
+  $('#iTime').onclick = () => criarDlg('time');
+  $('#iGrupo').onclick = () => criarDlg('grupo');
+  $('#iAbrir').onclick = abrirPasta;
+}
+async function abrirPasta() {
+  let h; try { h = await escolherPasta('ferias-local'); } catch (e) { if (e.name !== 'AbortError') toast(e.message); return; }
+  if (!await permissao(h)) return;
+  const cand = [];
+  for await (const [n, f] of h.entries()) if (f.kind === 'file' && /^ferias-.*\.json$/.test(n)) { try { const o = JSON.parse(await (await f.getFile()).text()); if (o.schema === LOCAL_ENC && o.app === TOOL) cand.push(n); } catch {} }
+  if (!cand.length) return telaInicial('Não encontrei um arquivo do Mapa de Férias nesta pasta.');
+  let nome = cand[0];
+  if (cand.length > 1) { const r = await perguntar('Qual arquivo?', cand.map((n, i) => `<button class="opt" data-r="${i}"><b class="code">${esc(n)}</b></button>`).join(''), [['no', 'Cancelar']]); if (r == null || r === 'no') return; nome = cand[+r]; }
+  await abrirArquivo(h, nome);
+}
+async function abrirArquivo(h, nome) {
+  const texto = await lerTexto(h, nome);
+  for (let i = 0; i < 3; i++) {
+    const s = await pedirSenhaDlg('Senha do Mapa de Férias', i > 0); if (s == null) return;
+    try { const r = await decifrarLocal(texto, s); db = normalizar(r.dados); ctx = r.ctx; dirLocal = h; arquivo = nome; break; }
+    catch (e) { if (e.code !== 'SENHA') return telaInicial(e.message); }
+  }
+  if (!db) return telaInicial('Senha incorreta três vezes.');
+  await aposAbrir();
+}
+async function aposAbrir() {
+  await carregarChaves();
+  render();
+  if (await lembreteTesteSenha(db.seg, ctx)) agendarSalvar();
+  if (!navigator.webdriver) { const h = await kv.get('ferias-raiz:' + db.unidade.slug); if (h && await permissao(h, false)) await ligarPasta(h, true); }
+}
+function criarDlg(nivel) {
+  if (!temFS()) return toast('Abra no Edge ou no Chrome.');
+  const p = PRESET?.unidade || {};
+  const d = modal(`<div class="mh"><h2>${nivel === 'grupo' ? 'Mapa de Férias do grupo' : 'Mapa de Férias do time'}</h2></div><div class="mb">
+    <div class="steps"><i class="on"></i><i></i><i></i></div>
+    <div class="f2"><label class="field"><span>${nivel === 'grupo' ? 'Nome do grupo (ex.: Tecnologia)' : 'Nome do time'}</span><input class="sin" id="cN" value="${esc(p.nome || '')}"></label>
+    <label class="field"><span>Identificador (pasta)</span><input class="sin code" id="cS" value="${esc(p.slug || '')}"></label></div>
+    <label class="field"><span>Seu nome</span><input class="sin" id="cP"></label>
+    <p class="small muted">${nivel === 'grupo' ? 'Use o mesmo identificador do grupo nas Finanças do Grupo: a liderança encontra o seu consolidado por ele.' : 'Use o mesmo identificador do time no Quadro e na Central (ex.: pagamentos).'} Depois você escolhe a pasta local (fora do OneDrive) e cria a senha.</p></div>
+    <div class="mf"><button class="btn" onclick="fecharModal()">Cancelar</button><button class="btn pri" id="cOk">Escolher pasta local</button></div>`);
+  $('#cN', d).oninput = () => { $('#cS', d).value = slugify($('#cN', d).value); };
+  $('#cOk', d).onclick = async () => {
+    const nome = $('#cN', d).value.trim(), slug = slugify($('#cS', d).value), pessoa = $('#cP', d).value.trim();
+    if (!nome || !slug || !pessoa) return toast('Preencha o nome, o identificador e o seu nome.');
+    fecharModal();
+    if (!await criarArquivo({ nivel, nome, slug, pessoa })) telaInicial();
+  };
+}
+async function escolherPastaLocal() {
+  await perguntar('Pasta local', `<p>Escolha uma pasta <b>deste computador</b> que <b>não</b> esteja no OneDrive. Ela guarda seus dados cifrados (pode ser a mesma das outras ferramentas).</p>
+    <div class="banner warn">Com o backup de pastas do OneDrive ligado, <b>Documentos</b> e <b>Área de Trabalho</b> também sincronizam. Prefira algo como <span class="code">C:\\Users\\voce\\GestaoLocal</span>.</div>`, [['ok', 'Escolher pasta', 'pri']]);
+  let h; try { h = await escolherPasta('ferias-local'); } catch { return null; }
+  if (!await permissao(h)) return null;
+  const s = await suspeitaDeSincronizada(h);
+  if (s.length) { const r = await perguntar('Esta pasta parece sincronizada', `<div class="cofre">A pasta <b>${esc(h.name)}</b> ${esc(s.join(', '))}. Dados individuais devem ficar fora do OneDrive.</div>`, [['no', 'Escolher outra'], ['ok', 'Usar mesmo assim']]); if (r !== 'ok') return escolherPastaLocal(); }
+  return h;
+}
+async function criarArquivo({ nivel, nome, slug, pessoa }) {
+  const h = await escolherPastaLocal(); if (!h) return false;
+  const nomeArq = `ferias-${slug}.json`;
+  if (await lerTexto(h, nomeArq)) { const r = await perguntar('Arquivo já existe', `<p>Já existe <span class="code">${esc(nomeArq)}</span> nesta pasta. Abrir o existente?</p>`, [['no', 'Cancelar'], ['ok', 'Abrir', 'pri']]); if (r === 'ok') { await abrirArquivo(h, nomeArq); return true; } return false; }
+  const senha = await criarSenhaDlg(); if (!senha) return false;
+  db = novoDb({ nivel, nome, slug, pessoa });
+  db.seg.cofreConfirmadoEm = new Date().toISOString();
+  ctx = await novoCtx(senha, TOOL); dirLocal = h; arquivo = nomeArq;
+  await gravarLocal(h, nomeArq, await cifrarLocal(db, ctx));
+  view = nivel === 'grupo' ? 'unidades' : 'pessoas'; await aposAbrir();
+  toast(nivel === 'grupo' ? 'Arquivo criado e cifrado. Agora adicione os times e grupos.' : 'Arquivo criado e cifrado. Agora marque as suas férias.', 5000);
+  return true;
+}
+telaInicial();
+</script>
+</body>
+</html>

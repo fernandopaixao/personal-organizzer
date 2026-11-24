@@ -38,6 +38,9 @@ jobs:
       - name: Teste de ponta a ponta
         run: node financas/testes/teste-e2e.js
 
+      - name: Teste do Mapa de Férias
+        run: node financas/testes/teste-ferias.js
+
       - name: Montar o pacote .zip
         run: python3 tools/empacotar.py
 

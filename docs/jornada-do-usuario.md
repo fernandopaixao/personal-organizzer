@@ -102,3 +102,19 @@ Esta revisão olhou a solução como um todo em 24/11/2026. Os pontos abaixo nã
 | 5 | **Hub depende de estar na mesma pasta** dos HTMLs | Hub | Já avisa; o assistente já grava tudo junto. Manter a orientação no cartão "Onde fica cada coisa" |
 | 6 | **Times com ferramenta própria** não veem post-its sem adaptar | Caminho B | Incluir post-its no pacote para agentes dos times (`integracao-time/03`) |
 | 7 | **Documentação espalhada** entre repositório e pasta do projeto | Docs | Este conjunto (ADRs, funcionalidades, jornada, passo a passo) vira a porta de entrada; a visão geral aponta para ele |
+
+---
+
+## 8. Jornada das férias (time, gestor e liderança)
+
+O Mapa de Férias é apoio para a visão do grupo; o pedido oficial de férias continua na ferramenta da empresa.
+
+| Etapa | Quem | O que faz | Ferramenta | Ponto de atenção |
+|---|---|---|---|---|
+| **1. Cadastrar** | Membro do time (ou o responsável) | Cria o próprio arquivo como "time", cola a chave do time e marca as férias | Mapa de Férias › Pessoas | Usar o mesmo nome em todos os arquivos para não duplicar a pessoa |
+| **2. Subir para o gestor** | Automático | Cada mudança publica `times/<time>/ferias/<pessoa>-<computador>.json` | Pasta sincronizada | Sem a chave do time, nada sobe (aviso no Mapa) |
+| **3. Enxergar o grupo** | Gestor | Soma os times, vê os dias com mais e menos gente fora, as semanas tranquilas e quem está fora em cada dia | Mapa, Calendário | Limite de pessoas fora ajustável (padrão 30%) |
+| **4. Planejar** | Gestor e times | Ao marcar uma ausência, vê o impacto e pede sugestões de períodos com menos gente fora | Formulário de ausência | Apoio: o pedido oficial é feito na ferramenta da empresa |
+| **5. Cadastrar as próprias** | Gestor | Marca as próprias férias e as dos diretos | Diretos | Notas ficam só locais |
+| **6. Subir para a liderança** | Gestor | Cola a chave do grupo (a mesma das Finanças), confere e publica o consolidado | Ajustes › Nível acima | Opção de trocar nomes por "Pessoa N" |
+| **7. Visão da liderança** | Liderança | Cadastra cada gestor como unidade e soma tudo, em quantos níveis existirem | Unidades, Mapa | A liderança precisa ler a mesma pasta compartilhada |

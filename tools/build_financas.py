@@ -7,6 +7,7 @@
 - financas/financas_time.html   ← src/time.html
 - financas/financas_grupo.html  ← src/grupo.html (+ Finanças do Time embutido, para gerar o HTML de cada time)
 - hub.html                      ← src/hub.html (tela inicial do dia a dia, sem nada embutido)
+- ferias/ferias.html            ← src/ferias.html (Mapa de Férias: time, gestor e liderança no mesmo HTML)
 - inicio.html                   ← src/inicio.html (+ Finanças do Time, Finanças do Grupo, Central, Quadro e Hub embutidos)
 
 Os HTMLs embutidos vão em gzip + base64 dentro de <script type="text/plain" id="...">.
@@ -48,6 +49,9 @@ def main():
     (RAIZ / 'financas' / 'financas_grupo.html').write_text(grupo, encoding='utf-8')
     hub = nucleo((SRC / 'hub.html').read_text(encoding='utf-8'))
     (RAIZ / 'hub.html').write_text(hub, encoding='utf-8')
+    fer = nucleo((SRC / 'ferias.html').read_text(encoding='utf-8'))
+    (RAIZ / 'ferias').mkdir(exist_ok=True)
+    (RAIZ / 'ferias' / 'ferias.html').write_text(fer, encoding='utf-8')
     ini = nucleo((SRC / 'inicio.html').read_text(encoding='utf-8'))
     c = central(); q = RAIZ / 'ferramenta-time' / 'quadro_do_time_v1.html'
     ini, _ = embutir(ini, 'finTimeEmb', tempo.encode('utf-8'), versao(tempo))
@@ -56,7 +60,7 @@ def main():
     ini, _ = embutir(ini, 'quadroEmb', q.read_bytes(), versao(q.read_text(encoding='utf-8')))
     ini, _ = embutir(ini, 'hubEmb', hub.encode('utf-8'), versao(hub))
     (RAIZ / 'inicio.html').write_text(ini, encoding='utf-8')
-    for p in [RAIZ / 'financas' / 'financas_time.html', RAIZ / 'financas' / 'financas_grupo.html', RAIZ / 'hub.html', RAIZ / 'inicio.html']:
+    for p in [RAIZ / 'financas' / 'financas_time.html', RAIZ / 'financas' / 'financas_grupo.html', RAIZ / 'hub.html', RAIZ / 'ferias' / 'ferias.html', RAIZ / 'inicio.html']:
         print(f'{p.relative_to(RAIZ)}: {p.stat().st_size // 1024} KB')
     print(f'Central embutida: {c.name}; Quadro: {q.name}')
 

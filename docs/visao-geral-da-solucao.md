@@ -43,6 +43,7 @@ A solução é um pequeno ecossistema de **ferramentas HTML de arquivo único**,
 | **Central de Gestão v15** | Gestão pessoal e de portfólio do gestor: tarefas, delegação, iniciativas e features, rituais, pessoas, métricas e integração com os times | Fernando | Repositório: `gestao_pessoal_v15.html`, plano em `docs/plano-v15.md`. Projeto: `gestao-v15/` |
 | **Quadro do Time 2.2** | Quadro de cards, backlog, sprints, iniciativas ligadas à Central e métricas de fluxo do time | Cada time | Repositório e projeto: `ferramenta-time/` (HTML, guia, telas) |
 | **Finanças do Grupo e do Time** | Plano financeiro multianual de cada time (lançamentos locais, plano agregado publicado) e consolidado do grupo ano a ano contra o orçamento, com cards de leitura e gráficos | Fernando (grupo) e responsável financeiro de cada time | Repositório: `financas/`, plano em `docs/plano-financas.md` |
+| **Mapa de Férias** | Férias e ausências do time e do grupo em níveis (time → gestor → liderança): mapa de calor dos dias com mais e menos gente fora, calendário e sugestão de períodos. Apoio, não substitui a ferramenta oficial | Times, gestores e liderança | Repositório: `ferias/ferias.html`, plano em `docs/plano-ferias.md` |
 | **Assistente inicial** | Monta a solução para o papel da pessoa e cria os primeiros arquivos cifrados | Quem está começando | Repositório: `inicio.html` |
 | **Integração** | Pasta SharePoint, contratos JSON versionados, envelope cifrado, chaves por time | Central e ferramentas dos times | Projeto: `integracao-time/` (documentos 00 a 06, `contrato/`, `exemplos/`) |
 | **Agentes do Fernando** | Agentes com acesso a reuniões, chats e e-mails que geram arquivos de importação para a Central | Fernando | Projeto: `integracao-time/06-prompts-para-agentes.md` |
@@ -153,7 +154,7 @@ Como funciona por dentro:
 
 ### 6.1 A pasta
 
-Desde 23/11/2026 o nome recomendado é `Gestao-Compartilhado` (biblioteca SharePoint sincronizada pelo cliente do OneDrive); `Gestao-Integracao` continua aceito. A pasta também recebe finanças (`grupo/financas/`, `times/<time>/financas/`), o Quadro por pessoa (`times/<time>/quadro/`) e os post-its (`times/<time>/postits/`); a árvore completa está na [ADR-0004](adr/0004-troca-por-arquivos-na-pasta-sincronizada.md).
+Desde 23/11/2026 o nome recomendado é `Gestao-Compartilhado` (biblioteca SharePoint sincronizada pelo cliente do OneDrive); `Gestao-Integracao` continua aceito. A pasta também recebe finanças (`grupo/financas/`, `times/<time>/financas/`), o Quadro por pessoa (`times/<time>/quadro/`), os post-its (`times/<time>/postits/`), as férias (`times/<time>/ferias/<pessoa>-<computador>.json`) e os consolidados de cada grupo para a liderança (`grupos/<grupo>/financas/` e `grupos/<grupo>/ferias/`, [ADR-0022](adr/0022-consolidacao-em-niveis.md)); a árvore completa está na [ADR-0004](adr/0004-troca-por-arquivos-na-pasta-sincronizada.md).
 
 ```
 Gestao-Integracao/                      (administrada pelo Fernando)
@@ -301,6 +302,8 @@ Faz parte do ecossistema uma **ferramenta de feedbacks**, usada para registrar e
 | `docs/adr/` (repositório) | Decisões de arquitetura (ADRs) e checklist para funcionalidades novas |
 | `docs/plano-financas.md` (repositório) | Finanças do grupo e do time, assistente, regras de sincronização |
 | `README.md` (repositório) | Como abrir a Central e lista de telas |
+| `docs/plano-ferias.md` (repositório) | Mapa de Férias: níveis, telas, decisões e contrato `gestao-ferias/1` |
+| `CLAUDE.md` (repositório) | Regras do repositório: toda funcionalidade atualiza a documentação no mesmo PR |
 | `docs/plano-hub.md` (repositório) | Hub da solução e post-its para os times (contratos `gestao-postits/1` e `gestao-postits-vistos/1`) |
 | `docs/plano-v15.md` (repositório) | O que mudou na v15 e no Quadro 2.0 |
 | `docs/plano-v14.md` (repositório) | O que mudou na v14 |
