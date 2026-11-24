@@ -1,0 +1,12 @@
+{
+  "schema": "gestao-envelope/1",
+  "content": "gestao-postits-vistos/1",
+  "team": "pagamentos",
+  "kid": "pagamentos-2611",
+  "revision": 2,
+  "generatedAt": "2026-11-24T09:02:00-03:00",
+  "alg": "A256GCM",
+  "iv": "nZqUl8UmSWKswjSj",
+  "ct": "qNZ/iltHpEO338ucBgjH5PoBXdhaBfO1fN9f5CBFPYnfs43MGKjaAYQZTIMUR4IK0ehYHLAKRN3tWplUPB6DbU5D59zx2GgJLeyVw7vzgva3ueK4iIdn/diNID1Oa4GNVHHNm4OND5IwlNa12GirxNQTzllHCxda17+vX/ob3cu6zkMqnzR6nULzMBNPSFGgtxPJEo68uM2qdcsO6MHGjprI53+YtcYkI0iVRaTL5QXgbF79xD3iptXOrl1cjWICIM95ZHmCsp0wZW9GVSrPuLB1EXlv/SCdgYNoQwXHlEzfiSliHN6QWHSbcYhSWkdZTJTGfSRE5IZo4/JUijE+cDjd4Tz3dGVPg/fWLb+LtKtkWtl26qARSvmrEoLk3txHZor3BNxGeoBcUkZUHcuKYsUccQ==",
+  "writer": "ana~k3f9a"
+}

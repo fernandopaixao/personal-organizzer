@@ -14,6 +14,6 @@ O Fernando pediu férias com a mesma lógica de níveis das Finanças do Grupo 1
 6. **Dado pessoal mínimo:** notas só locais, tipos sem saúde (licença entra como "Outra ausência") e opção de trocar nomes por "Pessoa N" ao subir para a liderança.
 
 ## Consequências
-- Contrato novo `gestao-ferias/1` (`financas/contrato/gestao-ferias-1.schema.json`).
+- Contrato novo `gestao-ferias/1` (`contratos/schemas/gestao-ferias-1.schema.json`).
 - A liderança precisa ler a mesma pasta compartilhada.
 - O onboarding pode criar o arquivo `gestao-ferias-local/1` já com a chave do time ou do nível acima.

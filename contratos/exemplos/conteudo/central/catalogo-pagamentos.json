@@ -1,0 +1,101 @@
+{
+  "schema": "gestao-catalogo/1",
+  "generatedAt": "2026-11-15T09:10:00-03:00",
+  "revision": 18,
+  "teams": [
+    {
+      "slug": "pagamentos",
+      "name": "Pagamentos",
+      "prefix": "PAG"
+    }
+  ],
+  "initiatives": [
+    {
+      "ref": "PAG-042",
+      "name": "Pix parcelado no app",
+      "team": "pagamentos",
+      "owner": "Ana Souza",
+      "bucket": "now",
+      "start": "2026-09-01",
+      "end": "2026-12-19",
+      "status": "active",
+      "phases": [
+        {
+          "ref": "PAG-042.P1",
+          "name": "Construção",
+          "start": "2026-10-01",
+          "end": "2026-11-28",
+          "done": false,
+          "features": [
+            "PAG-042.F1"
+          ]
+        },
+        {
+          "ref": "PAG-042.P2",
+          "name": "Homologação com o parceiro",
+          "start": "2026-11-10",
+          "end": "2026-12-05",
+          "done": false,
+          "features": [
+            "PAG-042.F2"
+          ]
+        },
+        {
+          "ref": "PAG-042.P3",
+          "name": "Piloto",
+          "start": "2026-12-01",
+          "end": "2026-12-19",
+          "done": false,
+          "features": [
+            "PAG-042.F3"
+          ]
+        }
+      ],
+      "features": [
+        {
+          "ref": "PAG-042.F1",
+          "name": "Simulação de parcelas",
+          "status": "done",
+          "owner": "Carla Dias",
+          "due": "2026-11-07",
+          "doneAt": "2026-11-06",
+          "phase": "PAG-042.P1"
+        },
+        {
+          "ref": "PAG-042.F2",
+          "name": "Contratação no app",
+          "status": "open",
+          "owner": "Diego Reis",
+          "due": "2026-11-28",
+          "phase": "PAG-042.P2",
+          "dependsOn": [
+            "PAG-042.F1"
+          ]
+        },
+        {
+          "ref": "PAG-042.F3",
+          "name": "Piloto com 1% da base",
+          "status": "open",
+          "owner": "Ana Souza",
+          "start": "2026-12-01",
+          "due": "2026-12-19",
+          "phase": "PAG-042.P3",
+          "dependsOn": [
+            "PAG-042.F2"
+          ]
+        }
+      ]
+    },
+    {
+      "ref": "PAG-051",
+      "name": "Conciliação automática",
+      "team": "pagamentos",
+      "owner": "Bruno Lima",
+      "bucket": "next",
+      "start": "2027-01-11",
+      "end": "2027-04-30",
+      "status": "active",
+      "phases": []
+    }
+  ]
+}

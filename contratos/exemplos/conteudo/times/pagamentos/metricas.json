@@ -1,0 +1,636 @@
+{
+  "schema": "gestao-metricas/1",
+  "source": {
+    "team": "pagamentos",
+    "teamName": "Pagamentos",
+    "tool": "kanban-pagamentos.html",
+    "toolVersion": "3.4.0",
+    "contact": "Ana Souza"
+  },
+  "generatedAt": "2026-11-14T17:40:00-03:00",
+  "revision": 231,
+  "sprint": {
+    "name": "Sprint 21",
+    "start": "2026-10-27",
+    "end": "2026-11-09",
+    "closedAt": "2026-11-09T18:20:00-03:00"
+  },
+  "groups": [
+    {
+      "key": "fluxo",
+      "label": "Fluxo"
+    },
+    {
+      "key": "previsibilidade",
+      "label": "Previsibilidade"
+    },
+    {
+      "key": "qualidade",
+      "label": "Qualidade"
+    }
+  ],
+  "metrics": [
+    {
+      "id": "throughput",
+      "standard": "throughput",
+      "name": "Vazão",
+      "description": "Cards concluídos por semana.",
+      "definition": "Cards que entraram na coluna Concluído na semana (segunda a domingo).",
+      "group": "fluxo",
+      "order": 1,
+      "highlight": true,
+      "scope": {
+        "level": "team"
+      },
+      "valueType": "count",
+      "unit": "cards",
+      "direction": "higher_is_better",
+      "grain": "week",
+      "aggregation": "sum",
+      "viz": {
+        "type": "bar"
+      },
+      "data": {
+        "series": [
+          {
+            "key": "concluidos",
+            "label": "Concluídos",
+            "points": [
+              {
+                "t": "2026-09-21",
+                "v": 7
+              },
+              {
+                "t": "2026-09-28",
+                "v": 9
+              },
+              {
+                "t": "2026-10-05",
+                "v": 6
+              },
+              {
+                "t": "2026-10-12",
+                "v": 10
+              },
+              {
+                "t": "2026-10-19",
+                "v": 8
+              },
+              {
+                "t": "2026-10-26",
+                "v": 11
+              },
+              {
+                "t": "2026-11-02",
+                "v": 9
+              },
+              {
+                "t": "2026-11-09",
+                "v": 12
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "lead_time",
+      "standard": "lead_time",
+      "name": "Lead time",
+      "description": "Do compromisso à entrega.",
+      "definition": "Dias corridos entre a entrada em 'Pronto para fazer' e a entrada em 'Concluído', dos cards concluídos na semana.",
+      "group": "fluxo",
+      "order": 2,
+      "highlight": true,
+      "scope": {
+        "level": "team"
+      },
+      "valueType": "duration",
+      "unit": "dias",
+      "decimals": 1,
+      "direction": "lower_is_better",
+      "grain": "week",
+      "aggregation": "median",
+      "target": {
+        "value": 8,
+        "op": "<=",
+        "label": "Meta do trimestre"
+      },
+      "thresholds": [
+        {
+          "status": "ok",
+          "op": "<=",
+          "value": 8
+        },
+        {
+          "status": "attn",
+          "op": "<=",
+          "value": 12
+        },
+        {
+          "status": "late",
+          "op": ">",
+          "value": 12
+        }
+      ],
+      "viz": {
+        "type": "line",
+        "showTarget": true
+      },
+      "data": {
+        "series": [
+          {
+            "key": "p50",
+            "label": "Mediana",
+            "points": [
+              {
+                "t": "2026-09-21",
+                "v": 9.5
+              },
+              {
+                "t": "2026-09-28",
+                "v": 8
+              },
+              {
+                "t": "2026-10-05",
+                "v": 10.5
+              },
+              {
+                "t": "2026-10-12",
+                "v": 7.5
+              },
+              {
+                "t": "2026-10-19",
+                "v": 8.5
+              },
+              {
+                "t": "2026-10-26",
+                "v": 7
+              },
+              {
+                "t": "2026-11-02",
+                "v": 7.5
+              },
+              {
+                "t": "2026-11-09",
+                "v": 6.5
+              }
+            ]
+          },
+          {
+            "key": "p85",
+            "label": "85º percentil",
+            "points": [
+              {
+                "t": "2026-09-21",
+                "v": 15
+              },
+              {
+                "t": "2026-09-28",
+                "v": 14
+              },
+              {
+                "t": "2026-10-05",
+                "v": 18
+              },
+              {
+                "t": "2026-10-12",
+                "v": 13
+              },
+              {
+                "t": "2026-10-19",
+                "v": 14
+              },
+              {
+                "t": "2026-10-26",
+                "v": 12
+              },
+              {
+                "t": "2026-11-02",
+                "v": 13
+              },
+              {
+                "t": "2026-11-09",
+                "v": 11
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "wip",
+      "standard": "wip",
+      "name": "Trabalho em andamento",
+      "definition": "Cards nas colunas entre 'Fazendo' e 'Validação' no fim do dia.",
+      "group": "fluxo",
+      "order": 3,
+      "scope": {
+        "level": "team"
+      },
+      "valueType": "count",
+      "unit": "cards",
+      "direction": "neutral",
+      "grain": "none",
+      "aggregation": "last",
+      "target": {
+        "value": 12,
+        "op": "<=",
+        "label": "Limite de WIP"
+      },
+      "status": "attn",
+      "viz": {
+        "type": "kpi"
+      },
+      "data": {
+        "value": 14,
+        "previous": 11,
+        "asOf": "2026-11-14"
+      }
+    },
+    {
+      "id": "cfd",
+      "standard": "cfd",
+      "name": "Fluxo cumulativo",
+      "definition": "Quantidade de cards em cada coluna no último dia de cada semana.",
+      "group": "fluxo",
+      "order": 4,
+      "scope": {
+        "level": "team"
+      },
+      "valueType": "count",
+      "unit": "cards",
+      "grain": "week",
+      "aggregation": "last",
+      "viz": {
+        "type": "stacked_area"
+      },
+      "data": {
+        "series": [
+          {
+            "key": "concluido",
+            "label": "Concluído",
+            "points": [
+              {
+                "t": "2026-09-21",
+                "v": 40
+              },
+              {
+                "t": "2026-09-28",
+                "v": 49
+              },
+              {
+                "t": "2026-10-05",
+                "v": 55
+              },
+              {
+                "t": "2026-10-12",
+                "v": 65
+              },
+              {
+                "t": "2026-10-19",
+                "v": 73
+              },
+              {
+                "t": "2026-10-26",
+                "v": 84
+              },
+              {
+                "t": "2026-11-02",
+                "v": 93
+              },
+              {
+                "t": "2026-11-09",
+                "v": 105
+              }
+            ]
+          },
+          {
+            "key": "validacao",
+            "label": "Validação",
+            "points": [
+              {
+                "t": "2026-09-21",
+                "v": 4
+              },
+              {
+                "t": "2026-09-28",
+                "v": 3
+              },
+              {
+                "t": "2026-10-05",
+                "v": 5
+              },
+              {
+                "t": "2026-10-12",
+                "v": 4
+              },
+              {
+                "t": "2026-10-19",
+                "v": 5
+              },
+              {
+                "t": "2026-10-26",
+                "v": 4
+              },
+              {
+                "t": "2026-11-02",
+                "v": 6
+              },
+              {
+                "t": "2026-11-09",
+                "v": 5
+              }
+            ]
+          },
+          {
+            "key": "fazendo",
+            "label": "Fazendo",
+            "points": [
+              {
+                "t": "2026-09-21",
+                "v": 8
+              },
+              {
+                "t": "2026-09-28",
+                "v": 9
+              },
+              {
+                "t": "2026-10-05",
+                "v": 8
+              },
+              {
+                "t": "2026-10-12",
+                "v": 9
+              },
+              {
+                "t": "2026-10-19",
+                "v": 10
+              },
+              {
+                "t": "2026-10-26",
+                "v": 9
+              },
+              {
+                "t": "2026-11-02",
+                "v": 8
+              },
+              {
+                "t": "2026-11-09",
+                "v": 9
+              }
+            ]
+          },
+          {
+            "key": "a_fazer",
+            "label": "A fazer",
+            "points": [
+              {
+                "t": "2026-09-21",
+                "v": 30
+              },
+              {
+                "t": "2026-09-28",
+                "v": 28
+              },
+              {
+                "t": "2026-10-05",
+                "v": 31
+              },
+              {
+                "t": "2026-10-12",
+                "v": 27
+              },
+              {
+                "t": "2026-10-19",
+                "v": 29
+              },
+              {
+                "t": "2026-10-26",
+                "v": 30
+              },
+              {
+                "t": "2026-11-02",
+                "v": 26
+              },
+              {
+                "t": "2026-11-09",
+                "v": 24
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "lead_time_dist",
+      "name": "Distribuição do lead time · 8 semanas",
+      "group": "previsibilidade",
+      "order": 5,
+      "scope": {
+        "level": "team"
+      },
+      "valueType": "count",
+      "unit": "cards",
+      "grain": "none",
+      "viz": {
+        "type": "histogram"
+      },
+      "data": {
+        "bins": [
+          {
+            "from": 0,
+            "to": 3,
+            "v": 9
+          },
+          {
+            "from": 3,
+            "to": 6,
+            "v": 21
+          },
+          {
+            "from": 6,
+            "to": 9,
+            "v": 19
+          },
+          {
+            "from": 9,
+            "to": 12,
+            "v": 12
+          },
+          {
+            "from": 12,
+            "to": 15,
+            "v": 6
+          },
+          {
+            "from": 15,
+            "to": 21,
+            "v": 4
+          },
+          {
+            "from": 21,
+            "to": 30,
+            "v": 1
+          }
+        ]
+      },
+      "definition": "Cards entregues nos últimos 90 dias por faixa de lead time (dias do compromisso à entrega)."
+    },
+    {
+      "id": "compromisso_sprint",
+      "name": "Compromisso da sprint cumprido",
+      "description": "Itens planejados que foram entregues na própria sprint.",
+      "group": "previsibilidade",
+      "order": 6,
+      "highlight": true,
+      "scope": {
+        "level": "initiative",
+        "ref": "PAG-042",
+        "localId": "EPIC-PIX-PARC"
+      },
+      "valueType": "percent",
+      "unit": "%",
+      "decimals": 0,
+      "direction": "higher_is_better",
+      "grain": "sprint",
+      "aggregation": "last",
+      "target": {
+        "value": 80,
+        "op": ">="
+      },
+      "viz": {
+        "type": "bar",
+        "showTarget": true
+      },
+      "data": {
+        "series": [
+          {
+            "key": "cumprido",
+            "label": "% cumprido",
+            "points": [
+              {
+                "t": "2026-09-15",
+                "v": 72,
+                "label": "Sprint 18"
+              },
+              {
+                "t": "2026-09-29",
+                "v": 85,
+                "label": "Sprint 19"
+              },
+              {
+                "t": "2026-10-13",
+                "v": 78,
+                "label": "Sprint 20"
+              },
+              {
+                "t": "2026-10-27",
+                "v": 81,
+                "label": "Sprint 21"
+              },
+              {
+                "t": "2026-11-10",
+                "v": null,
+                "label": "Sprint 22 (em curso)"
+              }
+            ]
+          }
+        ]
+      },
+      "definition": "Cards na sprint quando ela começou e entregues até o fim dela ÷ cards na sprint quando ela começou."
+    },
+    {
+      "id": "bloqueados_por_motivo",
+      "name": "Cards bloqueados por motivo",
+      "group": "qualidade",
+      "order": 7,
+      "scope": {
+        "level": "feature",
+        "ref": "PAG-042.F2"
+      },
+      "valueType": "count",
+      "unit": "cards",
+      "grain": "none",
+      "viz": {
+        "type": "bar"
+      },
+      "data": {
+        "categories": [
+          {
+            "key": "terceiro",
+            "label": "Dependência de terceiro",
+            "v": 3
+          },
+          {
+            "key": "ambiente",
+            "label": "Ambiente",
+            "v": 1
+          },
+          {
+            "key": "decisao",
+            "label": "Aguardando decisão",
+            "v": 2
+          }
+        ]
+      },
+      "definition": "Cards bloqueados agora, agrupados pelo motivo informado no bloqueio."
+    },
+    {
+      "id": "cards_fechados_sprint",
+      "standard": "sprint_closed",
+      "name": "Cards fechados por sprint",
+      "description": "Volume de cards concluídos em cada sprint.",
+      "definition": "Cards que entraram na coluna Concluído entre o início e o fim da sprint.",
+      "group": "fluxo",
+      "order": 5,
+      "highlight": true,
+      "scope": {
+        "level": "team"
+      },
+      "valueType": "count",
+      "unit": "cards",
+      "direction": "higher_is_better",
+      "grain": "sprint",
+      "aggregation": "sum",
+      "viz": {
+        "type": "bar"
+      },
+      "data": {
+        "series": [
+          {
+            "key": "fechados",
+            "label": "Fechados",
+            "points": [
+              {
+                "t": "2026-09-15",
+                "v": 18,
+                "label": "Sprint 18"
+              },
+              {
+                "t": "2026-09-29",
+                "v": 21,
+                "label": "Sprint 19"
+              },
+              {
+                "t": "2026-10-13",
+                "v": 17,
+                "label": "Sprint 20"
+              },
+              {
+                "t": "2026-10-27",
+                "v": 24,
+                "label": "Sprint 21"
+              },
+              {
+                "t": "2026-11-10",
+                "v": null,
+                "label": "Sprint 22 (em curso)"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

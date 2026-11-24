@@ -62,7 +62,7 @@ O dado individual (lista de times, chaves, rascunhos e histórico dos seus post-
 
 ## 7. Contratos novos
 
-Em `financas/contrato/`: `gestao-postits-1.schema.json` e `gestao-postits-vistos-1.schema.json`. Os dois vão dentro de `gestao-envelope/1`, com `writer` em claro no cabeçalho conferido contra `source.writer` depois de decifrar. Os contratos da integração (`gestao-status/1`, `gestao-metricas/1`, `gestao-catalogo/1`) não mudaram. Uma ferramenta de time adaptada (caminho B do guia) pode exibir post-its lendo `times/<time>/postits/*.json` com a mesma chave.
+Em `contratos/schemas/` (antes `financas/contrato/`): `gestao-postits-1.schema.json` e `gestao-postits-vistos-1.schema.json`. Os dois vão dentro de `gestao-envelope/1`, com `writer` em claro no cabeçalho conferido contra `source.writer` depois de decifrar. Os contratos da integração (`gestao-status/1`, `gestao-metricas/1`, `gestao-catalogo/1`) não mudaram. Uma ferramenta de time adaptada (caminho B do guia) pode exibir post-its lendo `times/<time>/postits/*.json` com a mesma chave.
 
 ## 8. Como testar
 
@@ -73,7 +73,7 @@ Em `financas/contrato/`: `gestao-postits-1.schema.json` e `gestao-postits-vistos
 - **Links relativos:** o hub precisa estar na mesma pasta dos HTMLs. Se não estiver, ele avisa. Ele também avisa se estiver numa pasta do OneDrive.
 - **Atraso do OneDrive:** um post-it leva o tempo da sincronização (normalmente segundos, às vezes minutos) para chegar.
 - **Metadados visíveis:** quem tem acesso à pasta vê os nomes dos arquivos (`fernando-k3f9a.json`) e quando mudaram, mas não o conteúdo.
-- **Times com ferramenta própria** (caminho B) só veem post-its se adaptarem a leitura; o contrato está em `financas/contrato/`.
+- **Times com ferramenta própria** (caminho B) só veem post-its se adaptarem a leitura; o contrato está em `contratos/` ([`05-como-integrar.md`](../contratos/05-como-integrar.md), receita E).
 
 ## 10. Hub 1.2 (24/11/2026): finanças dos times e importação do Finanças do Grupo
 

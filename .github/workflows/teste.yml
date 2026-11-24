@@ -40,7 +40,7 @@ jobs:
         run: |
           mudou=$(git diff --name-only "$BASE"...HEAD)
           codigo=$(echo "$mudou" | grep -E '\.html$|^financas/src/|^ferramenta-time/.*\.html$|^tools/' || true)
-          docs=$(echo "$mudou" | grep -E '^docs/|^README\.md$|^ferramenta-time/.*\.md$|^financas/contrato/' || true)
+          docs=$(echo "$mudou" | grep -E '^docs/|^README\.md$|^ferramenta-time/.*\.md$|^contratos/' || true)
           if [ -n "$codigo" ] && [ -z "$docs" ]; then
             case "$TITULO" in *"[sem-docs]"*) echo "PR marcado [sem-docs]: sem conferência."; exit 0;; esac
             echo "::error::O PR muda ferramentas sem atualizar a documentação (docs/, README.md). Veja docs/adr/0022-documentacao-no-mesmo-pr.md. Para correção sem efeito para quem usa, ponha [sem-docs] no título."
@@ -61,6 +61,9 @@ jobs:
 
       - name: Teste do aviso sem acesso a pastas
         run: node financas/testes/teste-navegador.js
+
+      - name: Teste dos contratos de integração
+        run: node contratos/testes/teste-contratos.js
 
       - name: Montar o pacote .zip
         run: python3 tools/empacotar.py

@@ -1,0 +1,355 @@
+{
+  "schema": "gestao-financas-plano/1",
+  "revision": 14,
+  "generatedAt": "2026-11-20T18:12:40-03:00",
+  "hlc": "1763673160000.0",
+  "source": {
+    "team": "pagamentos",
+    "writer": "ana~k3f9a",
+    "tool": "financas-time",
+    "toolVersion": "1.4.0"
+  },
+  "team": {
+    "name": "Pagamentos",
+    "slug": "pagamentos"
+  },
+  "fiscalYear": 2026,
+  "fiscalYears": [
+    2026,
+    2027
+  ],
+  "currency": "BRL",
+  "planVersion": "Reforecast 1",
+  "closedMonths": [
+    "2026-01",
+    "2026-02",
+    "2026-03",
+    "2026-04",
+    "2026-05",
+    "2026-06",
+    "2026-07",
+    "2026-08",
+    "2026-09",
+    "2026-10"
+  ],
+  "categories": [
+    {
+      "id": "pessoas",
+      "name": "Pessoas",
+      "kind": "OPEX"
+    },
+    {
+      "id": "ferramentas",
+      "name": "Ferramentas e licenças",
+      "kind": "OPEX"
+    },
+    {
+      "id": "infra",
+      "name": "Infraestrutura",
+      "kind": "OPEX"
+    },
+    {
+      "id": "projetos",
+      "name": "Projetos (CAPEX)",
+      "kind": "CAPEX"
+    }
+  ],
+  "lines": [
+    {
+      "id": "ln-terceiros",
+      "name": "Squad terceirizada",
+      "category": "pessoas",
+      "kind": "OPEX",
+      "costCenter": "CC-1020",
+      "supplier": "Fornecedor A",
+      "months": {
+        "2026-01": {
+          "budget": 4800000,
+          "forecast": 4800000,
+          "actual": 4800000
+        },
+        "2026-02": {
+          "budget": 4800000,
+          "forecast": 4800000,
+          "actual": 4800000
+        },
+        "2026-03": {
+          "budget": 4800000,
+          "forecast": 4800000,
+          "actual": 4800000
+        },
+        "2026-04": {
+          "budget": 4800000,
+          "forecast": 4800000,
+          "actual": 4800000
+        },
+        "2026-05": {
+          "budget": 4800000,
+          "forecast": 4800000,
+          "actual": 4800000
+        },
+        "2026-06": {
+          "budget": 4800000,
+          "forecast": 4800000,
+          "actual": 4800000
+        },
+        "2026-07": {
+          "budget": 4800000,
+          "forecast": 5200000,
+          "actual": 5200000
+        },
+        "2026-08": {
+          "budget": 4800000,
+          "forecast": 5200000,
+          "actual": 5200000
+        },
+        "2026-09": {
+          "budget": 4800000,
+          "forecast": 5200000,
+          "actual": 5200000
+        },
+        "2026-10": {
+          "budget": 4800000,
+          "forecast": 5200000,
+          "actual": 5200000
+        },
+        "2026-11": {
+          "budget": 4800000,
+          "forecast": 5200000,
+          "actual": 0
+        },
+        "2026-12": {
+          "budget": 4800000,
+          "forecast": 5200000,
+          "actual": 0
+        },
+        "2027-01": {
+          "budget": 0,
+          "forecast": 5200000,
+          "actual": 0
+        },
+        "2027-02": {
+          "budget": 0,
+          "forecast": 5200000,
+          "actual": 0
+        },
+        "2027-03": {
+          "budget": 0,
+          "forecast": 5200000,
+          "actual": 0
+        },
+        "2027-04": {
+          "budget": 0,
+          "forecast": 5200000,
+          "actual": 0
+        },
+        "2027-05": {
+          "budget": 0,
+          "forecast": 5200000,
+          "actual": 0
+        },
+        "2027-06": {
+          "budget": 0,
+          "forecast": 5200000,
+          "actual": 0
+        }
+      }
+    },
+    {
+      "id": "ln-licencas",
+      "name": "Licenças de observabilidade",
+      "category": "ferramentas",
+      "kind": "OPEX",
+      "costCenter": "CC-1020",
+      "months": {
+        "2026-01": {
+          "budget": 350000,
+          "forecast": 350000,
+          "actual": 350000
+        },
+        "2026-02": {
+          "budget": 350000,
+          "forecast": 350000,
+          "actual": 350000
+        },
+        "2026-03": {
+          "budget": 350000,
+          "forecast": 350000,
+          "actual": 350000
+        },
+        "2026-04": {
+          "budget": 350000,
+          "forecast": 350000,
+          "actual": 350000
+        },
+        "2026-05": {
+          "budget": 350000,
+          "forecast": 350000,
+          "actual": 350000
+        },
+        "2026-06": {
+          "budget": 350000,
+          "forecast": 350000,
+          "actual": 350000
+        },
+        "2026-07": {
+          "budget": 350000,
+          "forecast": 350000,
+          "actual": 350000
+        },
+        "2026-08": {
+          "budget": 350000,
+          "forecast": 350000,
+          "actual": 350000
+        },
+        "2026-09": {
+          "budget": 350000,
+          "forecast": 350000,
+          "actual": 350000
+        },
+        "2026-10": {
+          "budget": 350000,
+          "forecast": 350000,
+          "actual": 350000
+        },
+        "2026-11": {
+          "budget": 350000,
+          "forecast": 350000,
+          "actual": 0
+        },
+        "2026-12": {
+          "budget": 350000,
+          "forecast": 350000,
+          "actual": 0
+        },
+        "2027-01": {
+          "budget": 0,
+          "forecast": 380000,
+          "actual": 0
+        },
+        "2027-02": {
+          "budget": 0,
+          "forecast": 380000,
+          "actual": 0
+        },
+        "2027-03": {
+          "budget": 0,
+          "forecast": 380000,
+          "actual": 0
+        },
+        "2027-04": {
+          "budget": 0,
+          "forecast": 380000,
+          "actual": 0
+        },
+        "2027-05": {
+          "budget": 0,
+          "forecast": 380000,
+          "actual": 0
+        },
+        "2027-06": {
+          "budget": 0,
+          "forecast": 380000,
+          "actual": 0
+        },
+        "2027-07": {
+          "budget": 0,
+          "forecast": 380000,
+          "actual": 0
+        },
+        "2027-08": {
+          "budget": 0,
+          "forecast": 380000,
+          "actual": 0
+        },
+        "2027-09": {
+          "budget": 0,
+          "forecast": 380000,
+          "actual": 0
+        },
+        "2027-10": {
+          "budget": 0,
+          "forecast": 380000,
+          "actual": 0
+        },
+        "2027-11": {
+          "budget": 0,
+          "forecast": 380000,
+          "actual": 0
+        },
+        "2027-12": {
+          "budget": 0,
+          "forecast": 380000,
+          "actual": 0
+        }
+      }
+    },
+    {
+      "id": "ln-pix-parc",
+      "name": "Desenvolvimento Pix parcelado",
+      "category": "projetos",
+      "kind": "CAPEX",
+      "costCenter": "CC-1020",
+      "initiative": "PAG-042",
+      "months": {
+        "2026-07": {
+          "budget": 2000000,
+          "forecast": 2000000,
+          "actual": 2100000
+        },
+        "2026-08": {
+          "budget": 2000000,
+          "forecast": 2000000,
+          "actual": 2100000
+        },
+        "2026-09": {
+          "budget": 2000000,
+          "forecast": 2000000,
+          "actual": 2100000
+        },
+        "2026-10": {
+          "budget": 2000000,
+          "forecast": 2000000,
+          "actual": 2100000
+        },
+        "2026-11": {
+          "budget": 2000000,
+          "forecast": 2000000,
+          "actual": 0
+        },
+        "2026-12": {
+          "budget": 2000000,
+          "forecast": 3000000,
+          "actual": 0
+        }
+      }
+    }
+  ],
+  "commitments": [
+    {
+      "name": "Contrato da squad terceirizada",
+      "line": "ln-terceiros",
+      "monthly": 5200000,
+      "start": "2026-07",
+      "end": "2027-06"
+    }
+  ],
+  "totals": {
+    "budget": 73800000,
+    "forecast": 77200000,
+    "actual": 61500000
+  },
+  "totalsByYear": {
+    "2026": {
+      "budget": 73800000,
+      "forecast": 77200000,
+      "actual": 61500000
+    },
+    "2027": {
+      "budget": 0,
+      "forecast": 35760000,
+      "actual": 0
+    }
+  },
+  "directiveRevision": 3
+}

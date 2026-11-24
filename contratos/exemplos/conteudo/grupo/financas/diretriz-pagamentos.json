@@ -1,0 +1,75 @@
+{
+  "schema": "gestao-financas-diretriz/1",
+  "revision": 3,
+  "generatedAt": "2026-11-03T10:00:00-03:00",
+  "hlc": "1762174800000.0",
+  "source": {
+    "group": "canais",
+    "tool": "financas-grupo",
+    "toolVersion": "1.5.0",
+    "team": "pagamentos",
+    "writer": "marina~p8x2c"
+  },
+  "team": {
+    "name": "Pagamentos",
+    "slug": "pagamentos"
+  },
+  "fiscalYear": 2026,
+  "currency": "BRL",
+  "categories": [
+    {
+      "id": "pessoas",
+      "name": "Pessoas",
+      "kind": "OPEX"
+    },
+    {
+      "id": "ferramentas",
+      "name": "Ferramentas e licenças",
+      "kind": "OPEX"
+    },
+    {
+      "id": "infra",
+      "name": "Infraestrutura",
+      "kind": "OPEX"
+    },
+    {
+      "id": "projetos",
+      "name": "Projetos (CAPEX)",
+      "kind": "CAPEX"
+    }
+  ],
+  "costCenters": [
+    "CC-1020",
+    "CC-1030"
+  ],
+  "caps": {
+    "pessoas": 62000000,
+    "ferramentas": 4500000,
+    "projetos": 14000000
+  },
+  "capTotal": 80500000,
+  "fiscalYears": [
+    2026,
+    2027
+  ],
+  "byYear": {
+    "2026": {
+      "caps": {
+        "pessoas": 62000000,
+        "ferramentas": 4500000,
+        "projetos": 14000000
+      },
+      "capTotal": 80500000
+    },
+    "2027": {
+      "caps": {
+        "pessoas": 64000000
+      },
+      "capTotal": 70000000
+    }
+  },
+  "planVersion": "Reforecast 1",
+  "publishBy": "2026-11-28",
+  "closingDay": 5,
+  "note": "Reforecast até dia 28. Explique a variação do CAPEX do Pix parcelado."
+}

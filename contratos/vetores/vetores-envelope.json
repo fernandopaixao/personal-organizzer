@@ -1,0 +1,120 @@
+{
+  "schema": "gestao-vetores-envelope/1",
+  "descricao": "Vetores de teste do envelope gestao-envelope/1 (AES-256-GCM, iv de 12 bytes, tag de 16 bytes ao fim do ct, AAD em UTF-8). Uma implementação nova precisa: (1) ler a chave GK1 e obter chaveBytesBase64; (2) montar exatamente o aad; (3) cifrar payloadJson com o iv do envelope e obter o mesmo ct; (4) decifrar os casos \"ok\" e recusar os casos \"falha\".",
+  "casos": [
+    {
+      "nome": "status-minimo",
+      "nota": "Envelope sem writer (status, métricas e catálogo).",
+      "chave": "GK1.vetor-2611.AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "chaveBytesBase64": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
+      "aad": "gestao-envelope/1|gestao-status/1|vetor|vetor-2611|7|2026-11-24T10:00:00-03:00",
+      "payloadJson": "{\"schema\":\"gestao-status/1\",\"source\":{\"team\":\"vetor\",\"tool\":\"vetor\",\"toolVersion\":\"1\"},\"generatedAt\":\"2026-11-24T10:00:00-03:00\",\"revision\":7,\"initiatives\":[]}",
+      "envelope": {
+        "schema": "gestao-envelope/1",
+        "content": "gestao-status/1",
+        "team": "vetor",
+        "kid": "vetor-2611",
+        "revision": 7,
+        "generatedAt": "2026-11-24T10:00:00-03:00",
+        "alg": "A256GCM",
+        "iv": "oKGio6Slpqeoqaqr",
+        "ct": "nToPTi2ub95AX6W0Ygm0vx+BKmTzwzcfsz8Eql3YGnSgFSLdlVlxSTr9aeozWPWcM3Q0ak7ybhEuMilkhgbgxNvOp0MS0YuPmLSaavyno9TvMYmV57y1WIkQUP/D+znx68VfiTmMvaus7SthtKXfHHBhUZTuBaEMH+Lul45lwm/pM8IapSvzflg33LElZrO/5rDZAt+kk/qYvp/P9JpJgpleZBWFXItP9/eLyX4SvQ=="
+      },
+      "espera": "ok"
+    },
+    {
+      "nome": "postit-com-writer",
+      "nota": "Arquivo de dono único: writer em claro no cabeçalho, fora do AAD, igual a source.writer. O texto tem acentos e um símbolo fora do ASCII: cifre os bytes UTF-8 de payloadJson.",
+      "chave": "GK1.vetor-2611.AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "chaveBytesBase64": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
+      "aad": "gestao-envelope/1|gestao-postits/1|vetor|vetor-2611|3|2026-11-24T10:00:00-03:00",
+      "payloadJson": "{\"schema\":\"gestao-postits/1\",\"revision\":3,\"generatedAt\":\"2026-11-24T10:00:00-03:00\",\"hlc\":\"1763989200000.0\",\"source\":{\"team\":\"vetor\",\"writer\":\"ana~k3f9a\",\"tool\":\"hub\",\"toolVersion\":\"1.3.0\",\"author\":{\"name\":\"Ana\"}},\"notes\":[{\"id\":\"pi-1\",\"text\":\"Olá, time! Ação às 10h ✓\",\"color\":\"amarelo\"}]}",
+      "envelope": {
+        "schema": "gestao-envelope/1",
+        "content": "gestao-postits/1",
+        "team": "vetor",
+        "kid": "vetor-2611",
+        "revision": 3,
+        "generatedAt": "2026-11-24T10:00:00-03:00",
+        "alg": "A256GCM",
+        "iv": "oKGio6Slpqeoqaqr",
+        "ct": "nToPTi2ub95AX6W0Ygm0vx+BKX/hwysY7yEXpFOJB2SkHzSWwExxB2ywJq9sFOaLJm8jLCOkOERjbDtskl20gZmOsTsBld7QxNjPKKL+/4D9O4mI56n1GcxPHKuGrH6tt70ZmzOev6uw6yR8p/uCXVYzBIzkTrlISq6zho53hCixfsJd/2D3ZV4tm/kwcLO35rjTAI22w+3f4Z+BwKhYCfw6d8TUSGw09mVETjm3xJIeSZO6OESfELGsRhtwoH4iQF4ju0LrwM+dPC2qax4Q9DyIxpVCT/rWgrU9ln/8gRxKOFYDg0+pVu2NYHNgfyUHf5/4HcY+syZHjdkDCFYJslb8bkRMo4IjxtB3tFdTTDGkgih8mdmsRpcVNODA0elM6S0qzQJ/ILDyvYfA+tKrQcpKq9O+nKmd",
+        "writer": "ana~k3f9a"
+      },
+      "espera": "ok"
+    },
+    {
+      "nome": "revisao-alterada",
+      "nota": "Alguém trocou a revisão no cabeçalho: o AAD muda e a decifragem falha.",
+      "chave": "GK1.vetor-2611.AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "chaveBytesBase64": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
+      "envelope": {
+        "schema": "gestao-envelope/1",
+        "content": "gestao-status/1",
+        "team": "vetor",
+        "kid": "vetor-2611",
+        "revision": 8,
+        "generatedAt": "2026-11-24T10:00:00-03:00",
+        "alg": "A256GCM",
+        "iv": "oKGio6Slpqeoqaqr",
+        "ct": "nToPTi2ub95AX6W0Ygm0vx+BKmTzwzcfsz8Eql3YGnSgFSLdlVlxSTr9aeozWPWcM3Q0ak7ybhEuMilkhgbgxNvOp0MS0YuPmLSaavyno9TvMYmV57y1WIkQUP/D+znx68VfiTmMvaus7SthtKXfHHBhUZTuBaEMH+Lul45lwm/pM8IapSvzflg33LElZrO/5rDZAt+kk/qYvp/P9JpJgpleZBWFXItP9/eLyX4SvQ=="
+      },
+      "espera": "falha"
+    },
+    {
+      "nome": "team-alterado",
+      "nota": "Trocar o time no cabeçalho também quebra o AAD.",
+      "chave": "GK1.vetor-2611.AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "chaveBytesBase64": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
+      "envelope": {
+        "schema": "gestao-envelope/1",
+        "content": "gestao-status/1",
+        "team": "outro-time",
+        "kid": "vetor-2611",
+        "revision": 7,
+        "generatedAt": "2026-11-24T10:00:00-03:00",
+        "alg": "A256GCM",
+        "iv": "oKGio6Slpqeoqaqr",
+        "ct": "nToPTi2ub95AX6W0Ygm0vx+BKmTzwzcfsz8Eql3YGnSgFSLdlVlxSTr9aeozWPWcM3Q0ak7ybhEuMilkhgbgxNvOp0MS0YuPmLSaavyno9TvMYmV57y1WIkQUP/D+znx68VfiTmMvaus7SthtKXfHHBhUZTuBaEMH+Lul45lwm/pM8IapSvzflg33LElZrO/5rDZAt+kk/qYvp/P9JpJgpleZBWFXItP9/eLyX4SvQ=="
+      },
+      "espera": "falha"
+    },
+    {
+      "nome": "ct-truncado",
+      "nota": "Arquivo cortado (sincronização incompleta): a tag GCM não confere.",
+      "chave": "GK1.vetor-2611.AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "chaveBytesBase64": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
+      "envelope": {
+        "schema": "gestao-envelope/1",
+        "content": "gestao-status/1",
+        "team": "vetor",
+        "kid": "vetor-2611",
+        "revision": 7,
+        "generatedAt": "2026-11-24T10:00:00-03:00",
+        "alg": "A256GCM",
+        "iv": "oKGio6Slpqeoqaqr",
+        "ct": "nToPTi2ub95AX6W0Ygm0vx+BKmTzwzcfsz8Eql3YGnSgFSLdlVlxSTr9aeozWPWcM3Q0ak7ybhEuMilkhgbgxNvOp0MS0YuPmLSaavyno9TvMYmV57y1WIkQUP/D+znx68VfiTmMvaus7SthtKXfHHBhUZTuBaEMH+Lul45lwm/pM8IapSvzflg33LElZrO/5rDZAt+kk/qYvp/P9JpJgpleZBWFXItP9/eL"
+      },
+      "espera": "falha"
+    },
+    {
+      "nome": "writer-trocado",
+      "nota": "writer em claro diferente de source.writer: quem lê recusa, mesmo decifrando.",
+      "chave": "GK1.vetor-2611.AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "chaveBytesBase64": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
+      "envelope": {
+        "schema": "gestao-envelope/1",
+        "content": "gestao-postits/1",
+        "team": "vetor",
+        "kid": "vetor-2611",
+        "revision": 3,
+        "generatedAt": "2026-11-24T10:00:00-03:00",
+        "alg": "A256GCM",
+        "iv": "oKGio6Slpqeoqaqr",
+        "ct": "nToPTi2ub95AX6W0Ygm0vx+BKX/hwysY7yEXpFOJB2SkHzSWwExxB2ywJq9sFOaLJm8jLCOkOERjbDtskl20gZmOsTsBld7QxNjPKKL+/4D9O4mI56n1GcxPHKuGrH6tt70ZmzOev6uw6yR8p/uCXVYzBIzkTrlISq6zho53hCixfsJd/2D3ZV4tm/kwcLO35rjTAI22w+3f4Z+BwKhYCfw6d8TUSGw09mVETjm3xJIeSZO6OESfELGsRhtwoH4iQF4ju0LrwM+dPC2qax4Q9DyIxpVCT/rWgrU9ln/8gRxKOFYDg0+pVu2NYHNgfyUHf5/4HcY+syZHjdkDCFYJslb8bkRMo4IjxtB3tFdTTDGkgih8mdmsRpcVNODA0elM6S0qzQJ/ILDyvYfA+tKrQcpKq9O+nKmd",
+        "writer": "bruno~z9z9z"
+      },
+      "espera": "falha"
+    }
+  ]
+}

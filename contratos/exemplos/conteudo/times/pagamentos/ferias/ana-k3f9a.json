@@ -1,0 +1,68 @@
+{
+  "schema": "gestao-ferias/1",
+  "revision": 5,
+  "generatedAt": "2026-11-18T11:20:00-03:00",
+  "hlc": "1763475600000.0",
+  "source": {
+    "team": "pagamentos",
+    "tool": "ferias",
+    "toolVersion": "1.2.0",
+    "level": "team",
+    "writer": "ana~k3f9a"
+  },
+  "unit": {
+    "name": "Pagamentos",
+    "slug": "pagamentos",
+    "kind": "time"
+  },
+  "units": [
+    {
+      "slug": "pagamentos",
+      "name": "Pagamentos",
+      "kind": "time",
+      "parent": null
+    }
+  ],
+  "people": [
+    {
+      "id": "ana-souza",
+      "name": "Ana Souza",
+      "unit": "pagamentos"
+    },
+    {
+      "id": "bruno-lima",
+      "name": "Bruno Lima",
+      "unit": "pagamentos"
+    }
+  ],
+  "absences": [
+    {
+      "person": "ana-souza",
+      "start": "2026-12-21",
+      "end": "2027-01-08",
+      "kind": "ferias"
+    },
+    {
+      "person": "bruno-lima",
+      "start": "2026-12-08",
+      "end": "2026-12-08",
+      "kind": "folga"
+    },
+    {
+      "person": "bruno-lima",
+      "start": "2027-01-12",
+      "end": "2027-01-30",
+      "kind": "ferias"
+    }
+  ],
+  "holidays": [
+    {
+      "date": "2026-12-25",
+      "name": "Natal"
+    },
+    {
+      "date": "2027-01-01",
+      "name": "Confraternização universal"
+    }
+  ]
+}

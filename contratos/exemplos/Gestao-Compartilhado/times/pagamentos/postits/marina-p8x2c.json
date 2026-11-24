@@ -1,0 +1,12 @@
+{
+  "schema": "gestao-envelope/1",
+  "content": "gestao-postits/1",
+  "team": "pagamentos",
+  "kid": "pagamentos-2611",
+  "revision": 8,
+  "generatedAt": "2026-11-24T08:45:00-03:00",
+  "alg": "A256GCM",
+  "iv": "J7DdZzFmZyifpmcR",
+  "ct": "ZKLWEZ0rcl2Z1tE4kKvfraJUFE13ntMLGp991VzwOmA6JXiNPjLMQuDeKQRu8IGZJgjB447BHd/wpO4TCVexGYHdQRTgb4w+MBCgc4xupPpeqnCrCi5QzDO3kmv6Zs9cP48LNH96jd7pE7r/CHgmZ4wvi026UNMmiBwgoA7bFQy4oBgkZvM5CGUasB7/qj2N6MR8euOOX0OvooYJ763YgXJRCLbhEw0oPGdW3Dmmu6VaiHgiWfmTJQYDuSsbBv8HY0QaMc/Tlc1hxYptdTcjjQPbwOg7EWf+lYHWc3bWMY7Z0pI5ISnM2p7IjOlE3u1BUog1EdWpLb3xr8ffTn8hpZ/aDp7HXlyIg5R7FdazdcfcfChU0Gqr7UQMxXnGgmQH7XYYSwG/IH5Xaq4zGXAs6Ba+6Xm4OmZPmbcFILkdnulroL6mhJl+VHhLQu+LwIG5cOKgaQyNAbAEm8xG5prEzmNZqnVCzcyAELPbGkk/oVW+qoGUQUTLGNqwOmk69LhRAnjTzEKbmp64Wf3HWhdRPLdDHFsRoEW+x0Bjys8EFl5Xy6k26SY+ZtZOo96Sty3bf18XYoqcndan9eR9TQUXjZNk3W1mWjdqgNCbK/zVhVg2laf/hPMCI/NMCgr/UROnpeHHXzXvSoKPLSqBMR+lQsf8OQN0RPshakBmn2A9l3mWmIlYQcEHaB/GzsaApWLMxaTuQHKyRW4PWDeZu391bCsqPrPmQoyGnf4rVquKaYzAIf2JoTbMJiQ3C7+7UmrStV7g9UesY6HpK7isNrLi1G/hiIBkvefH6WIps/aRGsiQ4y/swV/tS7BV13QHn2AkvFUpX2uEbsPZgPMMXBjbKFMdzSFMthcA4gZvj99iVDHjPQM6LZL5wkxuyfhmSw1wiBLE9FB6sXP3aFoesv3Z/KuySGDrkZ/t2ylQcJiv7IXp",
+  "writer": "marina~p8x2c"
+}

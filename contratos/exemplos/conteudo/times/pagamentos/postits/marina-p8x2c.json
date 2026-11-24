@@ -1,0 +1,37 @@
+{
+  "schema": "gestao-postits/1",
+  "revision": 8,
+  "generatedAt": "2026-11-24T08:45:00-03:00",
+  "hlc": "1763984700000.0",
+  "source": {
+    "team": "pagamentos",
+    "writer": "marina~p8x2c",
+    "tool": "hub",
+    "toolVersion": "1.4.0",
+    "author": {
+      "name": "Marina"
+    }
+  },
+  "team": {
+    "name": "Pagamentos",
+    "slug": "pagamentos"
+  },
+  "notes": [
+    {
+      "id": "pi-mhx1a2b3c",
+      "text": "Revisão do reforecast na quinta, 10h. Tragam a variação do CAPEX.",
+      "color": "amarelo",
+      "createdAt": "2026-11-24T08:40:00-03:00",
+      "updatedAt": "2026-11-24T08:45:00-03:00",
+      "expiresAt": "2099-12-31"
+    },
+    {
+      "id": "pi-mhx1d4e5f",
+      "text": "Parabéns pela entrega do PAG-042.F1!",
+      "color": "verde",
+      "to": "Ana Souza",
+      "createdAt": "2026-11-22T17:00:00-03:00",
+      "updatedAt": "2026-11-22T17:00:00-03:00"
+    }
+  ]
+}

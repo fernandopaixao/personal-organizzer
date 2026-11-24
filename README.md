@@ -24,6 +24,8 @@ Ferramenta de gestão pessoal em um único arquivo HTML, sem servidor e sem inst
 
 **Regra:** toda funcionalidade nova atualiza a documentação no mesmo PR ([ADR-0022](docs/adr/0022-documentacao-no-mesmo-pr.md)); a CI confere e o template de PR traz o checklist.
 
+**Integrar outra solução:** a pasta [`contratos/`](contratos/LEIA-ME.md) tem tudo o que uma ferramenta de outro time, de um gestor par ou um agente precisa para gravar arquivos que o hub, a Central, as Finanças e o Mapa de Férias leem, até a visão da liderança: arquitetura e níveis, criptografia com vetores de teste, regras anti-conflito, códigos, schemas, exemplos cifrados e o validador `node contratos/validar.js` ([ADR-0032](docs/adr/0032-pasta-de-contratos.md)).
+
 **Levar para a empresa:** `python3 tools/empacotar.py` gera `dist/gestao-solucao-AAAA-MM-DD.zip` com tudo lado a lado, a documentação e um LEIA-ME. A CI do repositório pessoal gera o mesmo .zip como artefato de cada PR e da `main` ([ADR-0024](docs/adr/0024-distribuicao-por-zip.md)).
 
 A visão geral da solução (Central, Quadro do Time, integração, métricas e agentes) está em [`docs/visao-geral-da-solucao.md`](docs/visao-geral-da-solucao.md). O plano da versão atual está em [`docs/plano-v15.md`](docs/plano-v15.md). As versões anteriores ficam em `legacy/` como referência.

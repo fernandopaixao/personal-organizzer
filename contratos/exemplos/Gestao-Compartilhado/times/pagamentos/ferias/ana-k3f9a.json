@@ -1,0 +1,12 @@
+{
+  "schema": "gestao-envelope/1",
+  "content": "gestao-ferias/1",
+  "team": "pagamentos",
+  "kid": "pagamentos-2611",
+  "revision": 5,
+  "generatedAt": "2026-11-18T11:20:00-03:00",
+  "alg": "A256GCM",
+  "iv": "HHZ1EhvgD+vVBTtw",
+  "ct": "VpAiDdD7Fxf66JXXYlQ/oCk6TMOLgtKO6P1qa+8GkaTiNlvtjHGN2dc2KPZGjIzJKB0XVPb/3wb08DA0Ks9uo6gFIDpqriYQpIie5nvYay1yodpGsmD1j66CGhbq+F9wbOhX8+zqpxhdv6XjZpE8eR9cjG2181rF4KDPRY2Yjs6M3jqDxVIo4FpP+FWJ8SIDKF5t4VTiLFbcg17AYLVgvGkKMmz51WWhvyItMsI+dUTeWCklMdh+om5Af684EDe4SEgSB2yA88iyExCqhjG0JW+gtvu1SJ8UbUynfgJqe2ECJM27L8dgd9fT0KegumI/R1CBMx2p4svwPfyiydZcwFWyuug+w5GIVc01ChV/xvT8rqN7CtijTk30LGfP5htBeMWXn1qmUPhMN6nDXqDO1SX0lw/JY8EVb040Y0tkShP6Rp4xMegzxpOhvPgnSY9zfkxbW4G7aEC7TKDXMWiqQptBYgRDmF1maBzNb1au06vVX3YVdmNpQaJOqLONuvX2RGfpsvyu301hM/R8Nj8tvVr25HIdy4C+T7IH1UfrEXPPEUIQXKLeAKoq4e1vnKh249TevX/zIBbNqyd60jZpIq8INQADYPseKOV7GmR5AAGWU7+Lu8xikBMUwhI/DlMyFrdWiw1XK2ig6DiY9uMVzfsQpuDYfLOcZdb8J9HgSrLpbX8oAM5UUFf2VdN/RQdsTb2m8uJr6y2i3LARK/1SMqwD70IEEkoJEbooQG7POa68nJu7bzvY/zG1aTAE8Z+3NCelcr6xhuYQiP6r3PS02/S4O+gWJxBL751k+WT2q5JPAe3S/ftVQG62zIEE6FGI4cCDk1GW5f4tGgVDucepYSRQrtrBG3eIvvH8U0zb/NYG2Mxs8lpYMhc5DduDYlvv2ReDPSiF3ldpAmg+46+m4sx0ahIAMNNF9xn1VUXPk+rneTTPnFnT/FpqEirtFFtAnpES6wL1l9yHy/om/lIrEQ2WpTNhZPMD7lVJqKdjbgqvhWU5lqssORlJZfZUcUwQwVGPDEGBq8/syC9D8enDbV5Z8TfwY5phECAEIdK9wpoyuuyJWS/s6dREWn37bkT4FyxUdW/uYB9OEA53WkPqf0wj5o0QDBiFSArr6r+c3Mo4NWB7pIzJcYyA/PcU",
+  "writer": "ana~k3f9a"
+}

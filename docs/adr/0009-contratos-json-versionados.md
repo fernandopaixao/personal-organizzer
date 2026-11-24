@@ -1,6 +1,6 @@
 # ADR-0009 · Contratos JSON versionados e tolerantes
 
-**Status:** aceita · **Data:** 15/11/2026; ampliada em 23 e 24/11/2026 · **Origem:** `integracao-time/contrato/`, `financas/contrato/`
+**Status:** aceita · **Data:** 15/11/2026; ampliada em 23 e 24/11/2026 · **Origem:** `integracao-time/contrato/`, `financas/contrato/` (desde 24/11/2026 consolidados em [`contratos/`](../../contratos/LEIA-ME.md), [ADR-0032](0032-pasta-de-contratos.md))
 
 ## Contexto
 Ferramentas diferentes (inclusive ferramentas próprias dos times, adaptadas pelo caminho B) leem os arquivos umas das outras e evoluem em ritmos diferentes.

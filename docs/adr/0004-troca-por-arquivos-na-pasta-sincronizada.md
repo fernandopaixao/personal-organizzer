@@ -10,7 +10,7 @@ O "barramento" é uma **biblioteca do SharePoint sincronizada pelo cliente do On
 
 ```
 Gestao-Compartilhado/            (antes Gestao-Integracao; os dois nomes são aceitos)
-  contrato/                      schemas e referência de cripto, em claro
+  contrato/                      cópia de contratos/ (schemas, referência de cripto), em claro
   central/catalogo-<time>.json   só a Central escreve
   grupo/financas/diretriz-<time>.json   só o gestor escreve
   times/<time>/status.json       só o publicador do time
@@ -19,7 +19,13 @@ Gestao-Compartilhado/            (antes Gestao-Integracao; os dois nomes são ac
   times/<time>/financas/plano.json
   times/<time>/postits/<pessoa>-<computador>.json
   times/<time>/postits/vistos/<pessoa>-<computador>.json
+  times/<time>/ferias/<pessoa>-<computador>.json
+  grupos/<grupo>/financas/plano.json      consolidado do gestor para a liderança
+  grupos/<grupo>/financas/diretriz.json   só a liderança escreve
+  grupos/<grupo>/ferias/<pessoa>-<computador>.json
 ```
+
+O layout completo, com chave, dono, leitores e cadência de cada arquivo, está em [`contratos/01-arquitetura.md`](../../contratos/01-arquitetura.md).
 
 O Fernando administra a pasta. Cada time edita só `times/<time>/`.
 

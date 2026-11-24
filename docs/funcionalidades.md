@@ -1,6 +1,6 @@
 # Funcionalidades, usos e objetivos
 
-*24/11/2026 · Central v15.8, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.2, assistente 2.3*
+*24/11/2026 · Central v15.8, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.2, assistente 2.3, contratos 1.0*
 
 Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. Para as regras técnicas por trás, veja as [decisões de arquitetura](adr/README.md). Para o caminho de quem usa, veja a [jornada do usuário](jornada-do-usuario.md) e o [passo a passo](passo-a-passo.md).
 
@@ -33,6 +33,7 @@ Dar a um gestor de vários times, e aos próprios times, **um lugar organizado p
 | **Finanças do Time** | `financas_time.html` (gerado por time) | Responsável financeiro do time | Registrar gastos, planejar o ano e publicar o plano |
 | **Mapa de Férias** | `ferias.html` | Time, gestor e liderança | Enxergar e planejar as ausências: que dias têm mais e menos gente fora, somando em níveis |
 | **Cartão "Onde fica cada coisa"** | `onde-fica-cada-coisa.html` | Todos | Mapa em claro (sem dados) de arquivos e pastas |
+| **Contratos de integração** | pasta `contratos/` | Quem constrói outra solução (time, gestor par, agente) | Gravar arquivos que o hub, a Central, as Finanças e o Mapa de Férias leem e conciliam, até a visão da liderança ([seção 10](#10-contratos-para-outras-soluções)) |
 
 Todas têm, no topo, **Onde estou?** (qual ferramenta, qual arquivo, o que é local e o que é compartilhado) e **← Hub**.
 
@@ -269,3 +270,23 @@ Apoio para **enxergar e planejar as ausências** do time e do grupo. Não substi
 **Planejar:** ao marcar uma ausência, o formulário mostra quantas outras pessoas já estão fora e se algum dia passa do limite, e sugere os três períodos com menos gente fora nos próximos seis meses.
 
 **Níveis:** cada membro do time publica o que cadastrou em `times/<time>/ferias/` (sozinho, a cada mudança, com a chave do time); o gestor soma os times, cadastra as próprias férias e as dos diretos e publica o consolidado em `grupos/<grupo>/ferias/` depois de conferir; a liderança cadastra o grupo do gestor como unidade e soma do mesmo jeito ([ADR-0025](adr/0025-consolidacao-em-niveis.md) e [ADR-0026](adr/0026-ferias-em-niveis.md)).
+
+---
+
+## 10. Contratos para outras soluções (`contratos/`, 1.0)
+
+Times e gestores que usam **ferramentas próprias** (sistema do time, planilha com macro, agente) podem aparecer no hub do gestor e na visão da **liderança** (líder de líderes) sem usar os nossos HTMLs: basta gravarem na pasta compartilhada os mesmos arquivos, no mesmo formato. A pasta `contratos/` reúne tudo o que essas soluções precisam respeitar ([ADR-0032](adr/0032-pasta-de-contratos.md)).
+
+| Parte | O que traz | Para quê |
+|---|---|---|
+| **Arquitetura e níveis** (`01-arquitetura.md`) | Níveis time → gestor → liderança, layout da pasta com chave, dono, leitores e cadência de cada arquivo, como cada ferramenta lê | Saber onde gravar e o que precisa satisfazer para aparecer |
+| **Criptografia** (`02-criptografia.md`) | Envelope `gestao-envelope/1`, AAD, famílias de chave (tarefas, finanças, grupo), entrega e troca, vetores de teste | Cifrar exatamente como as ferramentas decifram |
+| **Regras de escrita** (`03-regras-de-escrita.md`) | Um dono por arquivo, retrato completo, revisão, HLC, gravação atômica, cópias de conflito, cadência, limites, dado pessoal mínimo | Não criar conflito no OneDrive nem perder dados |
+| **Versionamento e códigos** (`04-versionamento-e-codigos.md`) | Versões dos contratos, slugs, prefixos, `PAG-042.F2`, `writer`, `kid`, centavos e datas | Nomear tudo do jeito que a conciliação espera |
+| **Como integrar** (`05-como-integrar.md`) | Receitas: time → Central, finanças do time → gestor, gestor → liderança, férias, post-its; checklist; o que fazer quando algo não aparece | Integrar na prática |
+| **Schemas** (`schemas/`) | JSON Schema de catálogo, status, métricas, plano financeiro (time e consolidado), diretriz e teto, férias, post-its, vistos e envelope | Validar o conteúdo |
+| **Exemplos** (`exemplos/`) | Um cenário completo (time Pagamentos, grupo Canais, liderança) em claro e cifrado no layout real, com chaves públicas de exemplo | Copiar e adaptar |
+| **Validador** (`validar.js`) | Confere uma pasta inteira, um arquivo ou um conteúdo em claro; cifra, decifra e roda os vetores. Só Node 20+, sem instalar nada | Saber se está certo antes de publicar |
+
+Os exemplos são lidos, no teste da CI, pelas funções de leitura reais do hub, das Finanças do Grupo, do Mapa de Férias e do Quadro do Time. A pasta vai inteira no pacote .zip.
+

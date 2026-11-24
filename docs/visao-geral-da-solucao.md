@@ -1,6 +1,6 @@
 # Visão geral da solução · Central de Gestão, Quadro do Time e integração
 
-*24/11/2026 · estado atual: Central v15.2, Quadro do Time 2.2, Hub 1.1 e Finanças do Grupo e do Time 1.2 (detalhes em `docs/plano-v15.md`, `docs/plano-hub.md` e `docs/plano-financas.md`)*
+*24/11/2026 · estado atual: Central v15.8, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.2 e contratos 1.0 (detalhes em `docs/plano-v15.md`, `docs/plano-hub.md`, `docs/plano-financas.md` e [`contratos/`](../contratos/LEIA-ME.md))*
 
 > **Por onde começar:** [funcionalidades, usos e objetivos](funcionalidades.md) · [jornada do usuário](jornada-do-usuario.md) · [passo a passo](passo-a-passo.md) · [decisões de arquitetura (ADRs)](adr/README.md)
 
@@ -159,7 +159,7 @@ Desde 23/11/2026 o nome recomendado é `Gestao-Compartilhado` (biblioteca ShareP
 
 ```
 Gestao-Integracao/                      (administrada pelo Fernando)
-  contrato/                             schemas e cripto-referencia.js, em claro (não têm dados)
+  contrato/                             cópia de contratos/ (schemas, referência de cripto, validador), em claro
   central/catalogo-<slug>.json          a Central escreve; o time só lê
   times/<slug>/status.json              o time escreve: backlog
   times/<slug>/metricas.json            o time escreve: métricas do time
@@ -185,7 +185,9 @@ Cada time edita só a própria pasta `times/<slug>` e lê `central/`. O "barrame
 | `times/<slug>/status.json` | `gestao-status/1` | Iniciativas do time (ligadas ou não), status reportado, previsão, bloqueios e os itens do time | **Automaticamente** a cada movimentação de card (espera de ~10 s para agrupar mudanças) |
 | `times/<slug>/metricas.json` | `gestao-metricas/1` | Métricas autodescritivas do time, com o campo `sprint` | **Ao fechar a sprint, com confirmação**, ou pelo botão "Publicar métricas agora" |
 
-Os três vão dentro do envelope `gestao-envelope/1`. Schemas (JSON Schema 2020-12) em `integracao-time/contrato/`, exemplos em claro e cifrados em `integracao-time/exemplos/`.
+Os três vão dentro do envelope `gestao-envelope/1`. Schemas (JSON Schema 2020-12) de **todos** os arquivos trocados (também finanças, férias e post-its), exemplos em claro e cifrados, vetores de teste e o validador ficam em [`contratos/`](../contratos/LEIA-ME.md) ([ADR-0032](adr/0032-pasta-de-contratos.md)).
+
+**Outras soluções** (ferramenta própria de um time, planilha de um gestor par, agente) se acoplam pelos mesmos arquivos: o guia [`contratos/05-como-integrar.md`](../contratos/05-como-integrar.md) mostra o que gravar para aparecer no hub do gestor e na visão da liderança, e `node contratos/validar.js` confere antes de publicar.
 
 ### 6.4 Criptografia e chaves
 
@@ -198,7 +200,7 @@ Os três vão dentro do envelope `gestao-envelope/1`. Schemas (JSON Schema 2020-
 - **O que fica visível sem chave:** nomes de arquivos e pastas, slug, `kid`, revisão, data e tamanho. Nomes, pessoas, status e métricas ficam cifrados.
 - **Limites assumidos:** a chave é compartilhada dentro do time e não há assinatura digital; a Central sabe que o arquivo veio de alguém do time, não de qual pessoa.
 
-Implementação de referência, sem dependências: `integracao-time/contrato/cripto-referencia.js`.
+Implementação de referência, sem dependências: [`contratos/referencia/cripto.js`](../contratos/referencia/cripto.js), com vetores de teste em `contratos/vetores/` ([especificação](../contratos/02-criptografia.md)).
 
 ### 6.5 O que sai da Central
 
@@ -315,7 +317,8 @@ Faz parte do ecossistema uma **ferramenta de feedbacks**, usada para registrar e
 | `integracao-time/04-modelo-iniciativa-feature.md` | Modelo Iniciativa › Feature, fases, tarefas, migração da v13 |
 | `integracao-time/05-conciliacao-publicacao-e-dicionario.md` | Conciliação, cadência de publicação, tela de compartilhamento, dicionário |
 | `integracao-time/06-prompts-para-agentes.md` | Contrato `gestao-import/3` e os 12 prompts |
-| `integracao-time/contrato/` | Schemas, dicionário de métricas e criptografia de referência |
+| `contratos/` (repositório e pacote .zip) | **Fonte única dos contratos:** arquitetura e níveis, criptografia com vetores, regras de escrita, códigos, guia "como integrar", schemas, exemplos cifrados e validador |
+| `integracao-time/contrato/` | Versão de 15/11/2026 dos schemas de integração (histórico; vale `contratos/`) |
 | `integracao-time/exemplos/` | Exemplos em claro e cifrados (com chave de exemplo pública) |
 
-Os documentos de `integracao-time/` ficam na pasta do projeto. Para entregar a um time: o pacote 03, `contrato/` e `exemplos/`, com a chave real enviada à parte.
+Os documentos de `integracao-time/` ficam na pasta do projeto. Para entregar a um time ou a outra solução: a pasta `contratos/` (e, para times de tarefas, o pacote 03), com a chave real enviada à parte.

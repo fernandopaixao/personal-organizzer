@@ -1,0 +1,243 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "gestao-catalogo/1",
+  "title": "Catálogo de iniciativas publicado pela Central de Gestão",
+  "description": "Escrito somente pela Central em central/catalogo-<slug>.json (um por time, só com as iniciativas daquele time), dentro de um envelope gestao-envelope/1. Os times apenas leem. Campos desconhecidos devem ser ignorados por quem lê.",
+  "type": "object",
+  "required": [
+    "schema",
+    "generatedAt",
+    "revision",
+    "teams",
+    "initiatives"
+  ],
+  "properties": {
+    "schema": {
+      "const": "gestao-catalogo/1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "teams": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "slug",
+          "name",
+          "prefix"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "prefix": {
+            "type": "string",
+            "pattern": "^[A-Z]{2,5}$",
+            "description": "Prefixo do time, definido na criação do time na Central e imutável; prefixa os códigos das iniciativas (PAG-042)."
+          }
+        }
+      }
+    },
+    "initiatives": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "ref",
+          "name",
+          "team",
+          "bucket"
+        ],
+        "properties": {
+          "ref": {
+            "type": "string",
+            "pattern": "^[A-Z]{2,5}-[0-9]{3,}$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "team": {
+            "type": "string",
+            "description": "slug do time"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "bucket": {
+            "enum": [
+              "now",
+              "next",
+              "later",
+              "discovery"
+            ]
+          },
+          "start": {
+            "type": "string",
+            "format": "date"
+          },
+          "end": {
+            "type": "string",
+            "format": "date"
+          },
+          "phases": {
+            "type": "array",
+            "description": "Fases: agrupamentos de features no tempo, fora da hierarquia; podem se sobrepor. Só contexto para os times.",
+            "items": {
+              "type": "object",
+              "required": [
+                "ref",
+                "name"
+              ],
+              "properties": {
+                "ref": {
+                  "type": "string",
+                  "pattern": "^[A-Z]{2,5}-[0-9]{3,}\\.P[0-9]+$"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "start": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "end": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "done": {
+                  "type": "boolean"
+                },
+                "features": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Z]{2,5}-[0-9]{3,}\\.F[0-9]+$"
+                  },
+                  "description": "Códigos das features desta fase. Uma feature aparece em no máximo uma fase (decidido em 15/11/2026)."
+                }
+              }
+            }
+          },
+          "status": {
+            "enum": [
+              "active",
+              "archived"
+            ]
+          },
+          "features": {
+            "type": "array",
+            "description": "Features da iniciativa (nível abaixo da iniciativa). Os times vinculam seus itens a elas por ref.",
+            "items": {
+              "type": "object",
+              "required": [
+                "ref",
+                "name",
+                "status"
+              ],
+              "properties": {
+                "ref": {
+                  "type": "string",
+                  "pattern": "^[A-Z]{2,5}-[0-9]{3,}\\.F[0-9]+$"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "status": {
+                  "enum": [
+                    "open",
+                    "done",
+                    "cancelled"
+                  ]
+                },
+                "owner": {
+                  "type": "string"
+                },
+                "start": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "due": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "doneAt": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "phase": {
+                  "type": "string",
+                  "pattern": "^[A-Z]{2,5}-[0-9]{3,}\\.P[0-9]+$",
+                  "description": "Fase (agrupamento no tempo) a que a feature pertence. Cada feature está em no máximo uma fase."
+                },
+                "dependsOn": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Z]{2,5}-[0-9]{3,}\\.F[0-9]+$"
+                  },
+                  "description": "Features de que esta depende (códigos)."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "links": {
+      "type": "array",
+      "description": "Vínculos decididos na conciliação da Central; a ferramenta do time grava o ref nos seus épicos/itens.",
+      "items": {
+        "type": "object",
+        "required": [
+          "kind",
+          "localId",
+          "ref"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "initiative",
+              "feature"
+            ]
+          },
+          "localId": {
+            "type": "string"
+          },
+          "ref": {
+            "type": "string",
+            "pattern": "^[A-Z]{2,5}-[0-9]{3,}(\\.F[0-9]+)?$"
+          }
+        }
+      }
+    },
+    "aliases": {
+      "type": "array",
+      "description": "Códigos de iniciativas unidas a outra; trocar ref por sameAs.",
+      "items": {
+        "type": "object",
+        "required": [
+          "ref",
+          "sameAs"
+        ],
+        "properties": {
+          "ref": {
+            "type": "string"
+          },
+          "sameAs": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
