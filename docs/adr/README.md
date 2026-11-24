@@ -1,6 +1,6 @@
 # Decisões de arquitetura (ADRs)
 
-*24/11/2026 · estado: Central v15.6, Quadro do Time 2.2, Hub 1.2, Finanças do Grupo 1.3 e do Time 1.2, assistente 2.1*
+*24/11/2026 · estado: Central v15.7, Quadro do Time 2.2, Hub 1.3, Finanças do Grupo 1.4 e do Time 1.3, Mapa de Férias 1.1, assistente 2.2*
 
 Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequências e o que observar ao evoluir. Elas existem para que uma funcionalidade nova comece pelas regras certas, sem precisar reler todos os planos.
 
@@ -15,7 +15,7 @@ Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequê
 | [0005](0005-chave-aleatoria-por-time.md) | Chave por time | 256 bits, envelope `gestao-envelope/1`, entrega por Teams/e-mail, troca só em vazamento |
 | [0006](0006-chave-de-financas-separada.md) | Chave de finanças | Separada da chave de tarefas |
 | [0007](0007-um-escritor-por-arquivo.md) | Um escritor por arquivo | Pessoa + computador, retrato completo, revisão monotônica, cópias de conflito |
-| [0008](0008-local-individual-comum-sincronizado.md) | Local × comum | Individual fica na máquina; só agregados vão para a pasta |
+| [0008](0008-local-individual-comum-sincronizado.md) | Pessoal × comum | Individual numa pasta só sua (de preferência no seu OneDrive); só agregados vão para a pasta compartilhada |
 | [0009](0009-contratos-json-versionados.md) | Contratos versionados | `schema: gestao-x/n`, campos opcionais, leitor tolerante |
 | [0010](0010-htmls-desacoplados.md) | HTMLs desacoplados | Nenhuma ferramenta lê o arquivo de outra |
 | [0011](0011-migracao-aditiva-versionada.md) | Migração aditiva | `DB_VERSION`, `normalizeDb`, backup automático, `legacy/` |
@@ -36,6 +36,7 @@ Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequê
 | [0026](0026-ferias-em-niveis.md) | Férias em níveis | Mapa de Férias: chave do time no time, chave do grupo entre níveis, um arquivo por pessoa |
 | [0027](0027-tema-claro-escuro-compartilhado.md) | Tema claro/escuro | Uma camada `tema.js` injetada em todos os HTMLs; escolha salva só no computador |
 | [0028](0028-financas-na-central-so-leitura.md) | Finanças na Central | A Central lê o plano e o teto dos times com a chave de finanças; não escreve em finanças |
+| [0029](0029-uma-senha-por-sessao.md) | Uma senha por sessão | O hub e a Central passam a senha, só em memória, para a janela que acabaram de abrir |
 
 ## Checklist para uma funcionalidade nova
 

@@ -28,5 +28,5 @@ A decisão D6 deixava finanças fora da Central: o gestor abria o Finanças do G
 - **Contra:** a Central passa a guardar mais uma chave por time, e o retrato fica tão atual quanto a última leitura da pasta.
 
 ## Ao evoluir
-- Etapa 3: uma senha por sessão para as janelas abertas pelo hub ou pela Central (I2), e o hub da liderança.
+- Etapa 3 feita em 24/11/2026: uma senha por sessão ([0029](0029-uma-senha-por-sessao.md)) e o **Hub 1.3 da liderança**. O hub importa o gestor par como unidade `grupo` do Finanças do Grupo da liderança e lê o consolidado que ele publica em `grupos/<grupo>/financas/plano.json` ([0025](0025-consolidacao-em-niveis.md)). O card do gestor não tem post-its, e o painel vira "Visão dos gestores".
 - Se um dia a Central precisar escrever em finanças, isso é uma decisão nova que substitui esta.

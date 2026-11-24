@@ -57,9 +57,9 @@
       times/<time>/postits/<pessoa>-<computador>.json   (gestao-envelope/1, conteúdo gestao-postits/1)
       cifrado com a chave do time, um arquivo por autor (ninguém grava o arquivo de outra pessoa).
       O Quadro do Time mostra os post-its e grava quem já viu em times/<time>/postits/vistos/<pessoa>-<computador>.json.
-   O arquivo local do hub (times, chaves e seus post-its) é cifrado com a sua senha e fica fora do OneDrive.
+   O arquivo pessoal do hub (times, chaves e seus post-its) é cifrado com a sua senha e fica numa pasta só sua (de preferência no seu OneDrive), nunca na compartilhada.
    ===================================================================== */
-const TOOL = 'hub', TOOL_NOME = 'Hub da solução', TOOL_VERSION = '1.2.0';
+const TOOL = 'hub', TOOL_NOME = 'Hub da solução', TOOL_VERSION = '1.3.0';
 try { window.name = 'gestao-hub'; } catch {}   // o botão "← Hub" das ferramentas volta para esta aba sem recarregar
 const LOCAL_SCHEMA = 'gestao-hub-local/1', POSTITS = 'gestao-postits/1', VISTOS = 'gestao-postits-vistos/1', PLANO = 'gestao-financas-plano/1';
 const CORES = [['amarelo', 'Amarelo'], ['rosa', 'Rosa'], ['verde', 'Verde'], ['azul', 'Azul'], ['lilas', 'Lilás']];
@@ -83,7 +83,7 @@ const slugPessoa = n => slugify(n).replace(/-/g, '').slice(0, 16) || 'eu';
 function normalizar(d) {
   if (d?.schema !== LOCAL_SCHEMA || d.tool !== TOOL) throw new Error('Este arquivo não é do Hub da solução.');
   d.times ??= []; d.notas ??= {}; d.publicacao ??= {}; d.seg ??= {}; d.pessoa ??= { nome: 'Eu', slug: 'eu' };
-  for (const t of d.times) { t.chaves ??= []; t.chavesFin ??= []; }
+  for (const t of d.times) { t.chaves ??= []; t.chavesFin ??= []; t.tipo = t.tipo === 'grupo' ? 'grupo' : 'time'; }
   return d;
 }
 const writer = () => `${db.pessoa.slug}~${dispositivo().id}`;
@@ -202,6 +202,7 @@ const anoCorrente = () => { const a = String(new Date().getFullYear()); const pl
 function totaisAno(pl, ano = anoCorrente()) { return pl?.porAno?.[ano] || null; }
 async function lerTime(t) {
   const r = { notas: [], vistos: {}, atividade: {}, erros: [], copias: 0, plano: null, planoErro: '' };
+  if (t.tipo === 'grupo') return lerGestor(t, r);
   const dt = await subpasta(raiz, ['times', t.slug]);
   if (!dt) return r;
   r.atividade.quadro = await ultimaAlteracao(await subpasta(dt, ['quadro']));
@@ -238,6 +239,16 @@ async function lerTime(t) {
     const porLeitor = new Map();
     await ler(dv, VISTOS, (n, p) => { const w = p.source?.writer || n, ant = porLeitor.get(w); if (!ant || p.revision > ant.revision) porLeitor.set(w, p); });
     for (const [w, p] of porLeitor) for (const s of p.seen || []) (r.vistos[s.id] ||= []).push({ quem: clamp(p.source?.author?.name || w.split('~')[0], 40), em: s.at });
+  }
+  return r;
+}
+// Liderança (Hub 1.3): um gestor par é uma unidade "grupo" no Finanças do Grupo da liderança. O hub lê o consolidado
+// que ele publica para a liderança (grupos/<grupo>/financas/plano.json, ADR-0025) com a chave de finanças do grupo.
+async function lerGestor(t, r) {
+  const df = await subpasta(raiz, ['grupos', t.slug, 'financas']); if (!df) return r;
+  r.atividade.plano = await ultimaAlteracao(df, n => /^plano/.test(n));
+  if (temChaveFin(t)) {
+    try { const e = await lerEnvelopes(df, 'plano', mapaFinDoTime(t), { team: t.slug, content: PLANO }); if (e.melhor) r.plano = resumoPlano(e.melhor.payload); else if (e.invalidos.some(x => x.principal)) r.planoErro = 'o consolidado não abriu com a chave de finanças do grupo'; } catch {}
   }
   return r;
 }
@@ -299,7 +310,7 @@ function render() {
   const ferr = ferramentas.map(f => `<a class="tool" href="${encodeURI(f.arquivo)}" target="_blank" rel="opener" data-f="${esc(f.arquivo)}"><span class="ic ${f.cls}">${esc(f.ic)}</span>
     <span style="min-width:0;flex:1"><b>${esc(f.titulo)}${f.time?.nome ? ' · ' + esc(f.time.nome) : ''}</b><span class="small muted">${esc(f.desc)}</span><span class="code">${esc(f.arquivo)}</span></span><span class="go">Abrir ↗</span></a>`).join('');
   $('#app').innerHTML = `<div class="hub"><header class="top" id="topo"></header>
-    ${ph && /onedrive|sharepoint/i.test(ph.caminho) ? '<div class="banner warn">Este hub está numa pasta sincronizada pelo OneDrive. O arquivo de dados dele (com as chaves dos times) deve ficar numa pasta local, fora do OneDrive.</div>' : ''}
+    ${ph && [PASTA_COMUM, PASTA_COMUM_ANTIGA].includes(ph.nome) ? '<div class="banner warn">Este hub está na pasta compartilhada com os times. O arquivo de dados dele (com as chaves dos times) deve ficar numa pasta só sua (de preferência no seu OneDrive).</div>' : ''}
     ${!mesma ? `<div class="banner warn">Este hub.html não está na pasta local <b class="code">${esc(dirLocal.name)}</b>, então os links podem não abrir. Copie o hub.html para a mesma pasta das ferramentas.</div>` : ''}
     <p class="lbl">Ferramentas <button class="btn sm ghost" id="fAtu">Procurar de novo</button></p>
     ${ferr ? `<div class="tools">${ferr}</div>` : `<div class="card"><div class="empty">Nenhuma ferramenta encontrada na pasta local <b class="code">${esc(dirLocal?.name || '')}</b>. Coloque o hub.html na mesma pasta dos HTMLs (Central, Quadro, Finanças) ou gere as ferramentas pelo <b>Início da solução</b>.</div></div>`}
@@ -322,21 +333,31 @@ function painel() {
     const vistas = minhas.filter(({ t, n }) => (recebidos[t.slug]?.vistos?.[n.id] || []).length).length;
     cards.push(cardLeitura({ k: 'Seus post-its ativos', v: String(minhas.length), pct: vistas / minhas.length, s: vistas === minhas.length ? 'Todos já foram vistos' : `<b>${minhas.length - vistas}</b> ainda sem "Vi"` }));
   }
+  const lid = db.times.every(t => t.tipo === 'grupo'), U = lid ? ['dos gestores', 'gestor'] : ['dos times', 'time'];
   const comPlano = db.times.map(t => ({ t, pl: recebidos[t.slug]?.plano })).filter(x => totaisAno(x.pl, ano));
   let barras = '';
   if (comPlano.length) {
     const moeda = comPlano[0].pl.moeda, mesmos = comPlano.filter(x => x.pl.moeda === moeda);
     const tot = mesmos.reduce((a, { pl }) => { const x = totaisAno(pl, ano); a.o += x.orcado; a.p += x.previsto; a.r += x.realizado; return a; }, { o: 0, p: 0, r: 0 });
     const fm = v => fmtMoeda(v, moeda), folga = tot.o - tot.p, mesIdx = +ano === new Date().getFullYear() ? new Date().getMonth() + 1 : +ano < new Date().getFullYear() ? 12 : 0;
-    cards.unshift(cardLeitura({ hi: true, k: `Previsto dos times em ${ano}`, v: fm(tot.p), pct: tot.o ? tot.p / tot.o : null,
+    cards.unshift(cardLeitura({ hi: true, k: `Previsto ${U[0]} em ${ano}`, v: fm(tot.p), pct: tot.o ? tot.p / tot.o : null,
       s: tot.o ? (folga >= 0 ? `Folga de <b>${fm(folga)}</b> no orçado de ${fmtCurto(tot.o)}` : `<b>${fm(-folga)}</b> acima do orçado de ${fmtCurto(tot.o)}`) : 'Os times ainda não informaram o orçado' }));
     cards.splice(1, 0, cardLeitura({ k: `Realizado em ${ano}`, v: fm(tot.r), pct: tot.p ? tot.r / tot.p : null, marca: mesIdx / 12, s: `<b>${pctTxt(tot.r, tot.p)}</b> do previsto · ${mesmos.length} time(s) com plano` }));
-    barras = `<div class="card"><p class="lbl" style="margin-top:0">Previsto por time em ${ano} <span class="faint">· marca = orçado</span></p>${barrasH(mesmos.map(({ t, pl }) => { const x = totaisAno(pl, ano); return { nome: esc(t.nome), valor: x.previsto, ref: x.orcado, cor: x.orcado && x.previsto > x.orcado ? 'var(--late)' : '', titulo: `Orçado ${fm(x.orcado)} · previsto ${fm(x.previsto)} · realizado ${fm(x.realizado)}` }; }), v => fmtCurto(v))}
+    barras = `<div class="card"><p class="lbl" style="margin-top:0">Previsto por ${U[1]} em ${ano} <span class="faint">· marca = orçado</span></p>${barrasH(mesmos.map(({ t, pl }) => { const x = totaisAno(pl, ano); return { nome: esc(t.nome), valor: x.previsto, ref: x.orcado, cor: x.orcado && x.previsto > x.orcado ? 'var(--late)' : '', titulo: `Orçado ${fm(x.orcado)} · previsto ${fm(x.previsto)} · realizado ${fm(x.realizado)}` }; }), v => fmtCurto(v))}
       ${mesmos.length < comPlano.length ? `<p class="small muted">${comPlano.length - mesmos.length} time(s) em outra moeda ficaram fora da soma.</p>` : ''}</div>`;
   }
-  return `<p class="lbl">Visão dos times</p><div class="inss">${cards.join('')}</div>${barras}`;
+  return `<p class="lbl">${db.times.every(t => t.tipo === 'grupo') ? 'Visão dos gestores' : db.times.some(t => t.tipo === 'grupo') ? 'Visão dos times e gestores' : 'Visão dos times'}</p><div class="inss">${cards.join('')}</div>${barras}`;
+}
+function gestorHtml(t) {
+  const r = recebidos[t.slug] || { atividade: {} }, kf = (t.chavesFin || []).slice(-1)[0];
+  return `<div class="card team" data-time="${esc(t.slug)}"><div class="hd"><h3>${esc(t.nome)}</h3><span class="chip">gestor</span><span class="chip code">grupos/${esc(t.slug)}/</span>
+    ${kf ? `<span class="chip bv code" title="Chave de finanças do grupo">${esc(kf.kid)}</span>` : '<span class="chip late">sem chave de finanças</span>'}<span class="grow"></span></div>
+    ${raiz ? `<p class="act">Consolidado publicado para a liderança ${tempo(r.atividade?.plano)}</p>` : ''}
+    ${linhaFin(t, r)}
+    ${!r.plano && raiz && !r.planoErro ? '<p class="small muted">Este gestor ainda não publicou o consolidado para a liderança (Finanças do Grupo › Ajustes › Nível acima).</p>' : ''}</div>`;
 }
 function timeHtml(t) {
+  if (t.tipo === 'grupo') return gestorHtml(t);
   const r = recebidos[t.slug] || { notas: [], vistos: {}, atividade: {}, erros: [] }, k = chaveDoTime(t), pe = pubEstado[t.slug], pb = db.publicacao[t.slug];
   const qd = ferramentas.find(f => f.titulo === 'Quadro do Time' && f.time?.slug === t.slug), fn = ferramentas.find(f => f.titulo === 'Finanças do Time' && f.time?.slug === t.slug);
   const a = r.atividade || {};
@@ -501,7 +522,8 @@ async function importarDoGrupo() {
   for (const tg of obj.times) {
     const slug = tg.slug || ''; if (!slug) continue;
     let t = timePorSlug(slug);
-    if (!t) { t = { nome: clamp(tg.nome, 80), slug, prefixo: clamp(tg.prefixo || '', 5), chaves: [], chavesFin: [] }; db.times.push(t); nt++; }
+    if (!t) { t = { nome: clamp(tg.nome, 80), slug, prefixo: clamp(tg.prefixo || '', 5), chaves: [], chavesFin: [], tipo: 'time' }; db.times.push(t); nt++; }
+    if (tg.tipo === 'grupo') t.tipo = 'grupo';
     for (const c of (tg.chaves || []).filter(c => !c.revogada)) { try { const p = lerChaveTexto(c.texto); if (!t.chavesFin.some(x => x.kid === p.kid)) { t.chavesFin.push({ kid: p.kid, texto: c.texto, em: new Date().toISOString(), origem: 'grupo' }); nk++; } } catch {} }
   }
   obj = null;
@@ -542,7 +564,7 @@ async function telaInicial(msg = '') {
     ${msg ? `<div class="banner warn" style="margin-top:12px">${esc(msg)}</div>` : ''}
     ${ult ? `<button class="opt" id="iUlt" style="margin-top:18px"><b>Abrir ${esc(ult.arquivo)}</b><span>Pasta local <span class="code">${esc(ult.dir.name)}</span>, usada por último neste computador.</span></button>` : ''}
     <p class="lbl" style="margin-top:20px">Já tenho o hub</p>
-    <button class="opt" id="iAbrir"><b>Abrir a pasta local</b><span>A pasta deste computador (fora do OneDrive) com as ferramentas e o arquivo <span class="code">hub-&lt;nome&gt;.json</span>.</span></button>
+    <button class="opt" id="iAbrir"><b>Abrir a pasta local</b><span>A pasta deste computador (só sua; de preferência no seu OneDrive) com as ferramentas e o arquivo <span class="code">hub-&lt;nome&gt;.json</span>.</span></button>
     <p class="lbl" style="margin-top:16px">É a primeira vez?</p>
     <button class="opt" id="iNovo"><b>Criar o hub</b><span>Seu nome, a pasta local e a senha. Depois você liga a pasta sincronizada e cola as chaves dos times (ou importa da Central).</span></button>
     ${temFS() ? '' : '<div class="banner warn">Abra no Microsoft Edge ou no Google Chrome: o hub precisa ler pastas.</div>'}
@@ -566,8 +588,8 @@ async function abrirArquivo(h, nome) {
   const texto = await lerTexto(h, nome);
   if (!texto) return telaInicial('Arquivo não encontrado.');
   for (let i = 0; i < 3; i++) {
-    const s = await pedirSenhaDlg('Senha do hub', i > 0); if (s == null) return;
-    try { const r = await decifrarLocal(texto, s); db = normalizar(r.dados); ctx = r.ctx; dirLocal = h; arquivo = nome; break; }
+    const s = await pedirSenhaDlg('Senha do hub', i > 0, { sessao: true }); if (s == null) return;
+    try { const r = await decifrarLocal(texto, s); db = normalizar(r.dados); ctx = r.ctx; dirLocal = h; arquivo = nome; window.gestaoSessao?.definir(s); break; }
     catch (e) { if (e.code !== 'SENHA') return telaInicial(e.message); }
   }
   if (!db) return telaInicial('Senha incorreta três vezes.');
@@ -587,7 +609,7 @@ async function criarDlg() {
   if (!temFS()) return toast('Abra no Edge ou no Chrome.');
   const d = modal(`<div class="mh"><h2>Criar o hub</h2></div><div class="mb">
     <div class="f2"><label class="field"><span>Seu nome (aparece nos post-its)</span><input class="sin" id="cP"></label><label class="field"><span>Nome no topo (grupo ou time)</span><input class="sin" id="cN" placeholder="Ex.: Tecnologia"></label></div>
-    <p class="small muted">Depois você escolhe a pasta local (fora do OneDrive, a mesma das ferramentas) e cria a senha.</p></div>
+    <p class="small muted">Depois você escolhe a pasta pessoal (só sua, de preferência no seu OneDrive; a mesma das ferramentas) e cria a senha.</p></div>
     <div class="mf"><button class="btn" id="cNo">Cancelar</button><button class="btn pri" id="cOk">Escolher pasta local</button></div>`);
   $('#cNo', d).onclick = fecharModal;
   $('#cOk', d).onclick = async () => {
@@ -603,7 +625,7 @@ async function escolherPastaLocal() {
   let h; try { h = await escolherPasta('fin-local'); } catch { return null; }
   if (!await permissao(h)) return null;
   const s = await suspeitaDeSincronizada(h);
-  if (s.length) { const r = await perguntar('Esta pasta parece sincronizada', `<div class="cofre">A pasta <b>${esc(h.name)}</b> ${esc(s.join(', '))}. Dados individuais devem ficar fora do OneDrive.</div>`, [['no', 'Escolher outra'], ['ok', 'Usar mesmo assim']]); if (r !== 'ok') return escolherPastaLocal(); }
+  if (s.length) { const r = await perguntar('Esta parece ser a pasta compartilhada', `<div class="cofre">A pasta <b>${esc(h.name)}</b> ${esc(s.join(', '))}. ${AVISO_PASTA_PESSOAL}</div>`, [['no', 'Escolher outra'], ['ok', 'Usar mesmo assim']]); if (r !== 'ok') return escolherPastaLocal(); }
   return h;
 }
 async function criarArquivo({ nome, pessoa }) {
@@ -613,7 +635,7 @@ async function criarArquivo({ nome, pessoa }) {
   const senha = await criarSenhaDlg('Senha do hub'); if (!senha) return false;
   db = novoDb({ nome: nome || pessoa, pessoa });
   db.seg.cofreConfirmadoEm = new Date().toISOString();
-  ctx = await novoCtx(senha, TOOL); dirLocal = h; arquivo = nomeArq;
+  ctx = await novoCtx(senha, TOOL); dirLocal = h; arquivo = nomeArq; window.gestaoSessao?.definir(senha);
   await gravarLocal(h, nomeArq, await cifrarLocal(db, ctx));
   await aposAbrir();
   toast('Hub criado e cifrado. Agora ligue a pasta sincronizada e cadastre os times.', 5000);

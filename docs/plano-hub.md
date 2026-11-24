@@ -30,7 +30,7 @@ Juntar os dois deixaria a tela do dia a dia pesada e misturaria "gerar ferrament
 | Arquivo | Onde | Quem escreve | Cifrado com |
 |---|---|---|---|
 | `hub.html` | Pasta local, **ao lado das outras ferramentas** (os links são relativos) | — | — (HTML não guarda dados) |
-| `hub-<nome>.json` | Pasta local, fora do OneDrive | O hub | Sua senha (`gestao-local-cifrado/1`, PBKDF2 600 mil) |
+| `hub-<nome>.json` | Pasta pessoal, só sua (de preferência no seu OneDrive) | O hub | Sua senha (`gestao-local-cifrado/1`, PBKDF2 600 mil) |
 | `times/<time>/postits/<pessoa>-<computador>.json` | Pasta sincronizada pelo OneDrive | Só o autor, daquele computador | Chave de tarefas do time (`gestao-envelope/1`, conteúdo `gestao-postits/1`) |
 | `times/<time>/postits/vistos/<pessoa>-<computador>.json` | Pasta sincronizada | Só aquela pessoa, pelo Quadro | Chave do time (conteúdo `gestao-postits-vistos/1`) |
 
@@ -81,3 +81,9 @@ Em `financas/contrato/`: `gestao-postits-1.schema.json` e `gestao-postits-vistos
 - **Plano de cada time:** com a chave de finanças, o hub lê `times/<time>/financas/plano.json` (`gestao-financas-plano/1`, com `totalsByYear`) pelo mesmo `lerEnvelopes` das outras ferramentas e mostra previsto, realizado e orçado no card do time.
 - **Visão dos times:** cards de leitura (previsto dos times, realizado com a marca do mês, times ativos na semana, post-its vistos) e barras do previsto por time com a marca do orçado. O ano é o corrente; se nenhum time publicou o ano corrente, o hub usa o ano base mais recente publicado.
 - Nada muda nas regras: o hub continua só lendo arquivos dos times, e as chaves ficam só dentro do arquivo cifrado do hub.
+
+## 11. Hub 1.3 (24/11/2026): liderança e uma senha por sessão
+
+- **Liderança:** ao importar do Finanças do Grupo da liderança, cada unidade do tipo `grupo` (um gestor par) entra no hub com `tipo: "grupo"`. O hub lê o consolidado que esse gestor publica em `grupos/<grupo>/financas/plano.json`, com a chave de finanças do grupo ([ADR-0025](adr/0025-consolidacao-em-niveis.md)). O card do gestor mostra o previsto, o orçado e o realizado do ano, sem post-its, e o painel vira **Visão dos gestores** quando todas as unidades são gestores.
+- **Uma senha por sessão:** o hub guarda em memória a senha com que abriu o próprio arquivo. As ferramentas abertas pelos links dele recebem essa senha uma vez ([ADR-0029](adr/0029-uma-senha-por-sessao.md)).
+- **Pasta pessoal:** o aviso de pasta errada só aparece quando o hub está na pasta compartilhada. Estar no OneDrive da pessoa é o recomendado ([ADR-0008](adr/0008-local-individual-comum-sincronizado.md)).

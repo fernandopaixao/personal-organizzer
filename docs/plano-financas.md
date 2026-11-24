@@ -128,7 +128,7 @@ Em **todo HTML que gera outro HTML ou cria um arquivo** (assistente, Central no 
 ## 5. Dado individual local e pedaço comum na pasta sincronizada
 
 ### 5.1 O que fica onde
-| Ferramenta | Local (só na máquina, fora do OneDrive) | Comum (pasta sincronizada) |
+| Ferramenta | Pessoal (pasta só sua, de preferência no seu OneDrive; revisto em 24/11/2026) | Comum (pasta sincronizada) |
 |---|---|---|
 | Finanças do Time | Lançamentos detalhados, notas, anexos referenciados, cenários não publicados, chaves (no navegador) | `times/<time>/financas/plano.json`: plano agregado por mês × categoria × linha (orçado, previsto, realizado), compromissos resumidos, data do último fechamento |
 | Finanças do Grupo | Orçamento aprovado do grupo, reservas, notas do gestor, retratos de versões, chaves | `grupo/financas/diretriz-<time>.json`: tetos, categorias, calendário, cenário oficial |

@@ -544,6 +544,55 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   ok(/Por time/.test(await c.textContent('#drawer')) && /Pagamentos/.test(await c.textContent('#drawer')), 'painel da iniciativa ganha a aba Finanças com o custo por time');
   await c.screenshot({ path: path.join(SAIDA, 'central-financas-iniciativa.png') });
 
+  console.log('18. Uma senha por sessão e hub da liderança');
+  await h.bringToFront();
+  const abrirDoHub = async alvo => { await h.evaluate(u => { const a = document.createElement('a'); a.id = 'sesLink'; a.href = u; a.target = '_blank'; a.rel = 'opener'; a.textContent = 'abrir'; document.body.appendChild(a); }, alvo);
+    const [pp] = await Promise.all([h.waitForEvent('popup'), h.click('#sesLink')]); await h.evaluate(() => document.getElementById('sesLink').remove()); pp.on('pageerror', e => erros.push('popup: ' + e.message)); await pp.waitForLoadState(); return pp; };
+  const pg = await abrirDoHub(SAIDA_URL + 'financas_grupo_gerado.html');
+  await pg.waitForFunction(() => window.gestaoSessao && window.gestaoSessao.recebida !== null, null, { timeout: 5000 }).catch(() => {});
+  ok(await pg.evaluate(() => gestaoSessao.recebida) === SENHA2, 'janela aberta pelo hub recebe a senha da sessão');
+  ok(await pg.evaluate(() => pedirSenhaDlg('Senha das Finanças do Grupo', false, { sessao: true })) === SENHA2, 'Finanças do Grupo usa a senha da sessão para abrir o próprio arquivo, sem perguntar');
+  pg.evaluate(() => pedirSenhaDlg('Senha das Finanças do Grupo', true, { sessao: true })).catch(() => {}); await pg.waitForSelector('#pw');
+  ok(/não abre este arquivo/.test(await pg.textContent('#dlg')), 'se a senha da sessão não servir, pede a senha do arquivo com explicação');
+  await pg.close();
+  const pc = await abrirDoHub(SAIDA_URL + 'gestao_gerada.html');
+  await pc.waitForFunction(() => document.getElementById('lockPass')?.value, null, { timeout: 5000 }).catch(() => {});
+  ok(await pc.evaluate(() => document.getElementById('lockPass').value) === SENHA2 && /Senha da sessão/.test(await pc.textContent('#lockMsg')), 'Central aberta pelo hub chega com a senha preenchida');
+  await pc.close();
+  const [pw] = await Promise.all([h.waitForEvent('popup'), h.evaluate(u => { window.open(u, '_blank'); }, SAIDA_URL + 'financas_grupo_gerado.html')]);
+  await pw.waitForLoadState(); await pw.waitForTimeout(500);
+  ok(await pw.evaluate(() => gestaoSessao.recebida) === null, 'janela aberta sem clique num link do hub não recebe a senha');
+  await pw.close();
+  ok(await c.evaluate(() => gestaoSessao.recebida) === null && !(await c.evaluate(() => JSON.stringify(localStorage))).includes(SENHA2), 'senha da sessão só em memória (nada no localStorage)');
+  // Hub 1.3 da liderança: gestor par como unidade "grupo", lido de grupos/<grupo>/financas/plano.json
+  const arqChefe = (await opfs(h, async () => listar('LocalChefe'))).find(n => /^financas-grupo-.*\.json$/.test(n));
+  await h.evaluate(a => { window.__abrir = { dir: 'LocalChefe', arq: a }; }, arqChefe);
+  await h.click('#aImpF'); await senhaAbrir(h, SENHA); await h.waitForSelector('#dlg .cofre'); await btn(h, 'ok');
+  ok(await h.evaluate(() => __hub.db.times.find(t => t.slug === 'tecnologia')?.tipo === 'grupo'), 'hub importa o gestor par como unidade do tipo grupo');
+  await h.evaluate(() => __hub.atualizar()); await h.waitForTimeout(300);
+  const plG = await h.evaluate(() => __hub.recebidos.tecnologia?.plano);
+  ok(plG && plG.porAno['2026'] && plG.porAno['2027'] && plG.porAno['2026'].previsto === +gTot[0].split('/')[1], 'hub da liderança lê o consolidado que o gestor publicou (grupos/tecnologia/financas)');
+  ok(/gestor/.test(await h.textContent('[data-time="tecnologia"]')) && /grupos\/tecnologia\//.test(await h.textContent('[data-time="tecnologia"]')) && !(await h.$('[data-time="tecnologia"] [data-novo]')), 'card do gestor mostra o consolidado, sem post-its');
+  await h.evaluate(() => { const db = __hub.db, keep = db.times; db.times = keep.filter(t => t.slug === 'tecnologia'); window.__keep = keep; });
+  ok(/Visão dos gestores/.test(await h.evaluate(() => __hub.painel())) && /Previsto dos gestores/.test(await h.evaluate(() => __hub.painel())), 'hub só com gestores mostra "Visão dos gestores"');
+  await h.evaluate(() => { __hub.db.times = window.__keep; });
+  await h.setViewportSize({ width: 1280, height: 900 }); await h.screenshot({ path: path.join(SAIDA, 'hub-lideranca.png'), fullPage: true });
+
+  console.log('19. Assistente 2.2: pasta pessoal no OneDrive, dois tipos de arquivo e botão do hub');
+  await ls.bringToFront();
+  const sinais = await ls.evaluate(async () => { const r = await navigator.storage.getDirectory();
+    const od = await r.getDirectoryHandle('OneDrive - Empresa', { create: true }); await (await od.getFileHandle('desktop.ini', { create: true })).createWritable().then(w => w.close());
+    const comp = await r.getDirectoryHandle('CompSorte');
+    return [await suspeitaDeSincronizada(od), await suspeitaDeSincronizada(comp)]; });
+  ok(sinais[0].length === 0 && sinais[1].length > 0, 'pasta pessoal no OneDrive é aceita; só a pasta compartilhada gera aviso');
+  ok(await ls.evaluate(() => !!document.querySelector('.dois') && /Ninguém lê sem a senha/.test(document.querySelector('.dois').textContent) && /Por que separadas/.test(document.querySelector('.dois').textContent) && !!document.querySelector('[data-ck="backup"]')), 'tela final explica os dois arquivos, a senha e pede a pasta pessoal no OneDrive no checklist');
+  await ls.waitForFunction(() => /^blob:/.test(document.getElementById('abrirHub')?.href || ''), null, { timeout: 5000 }).catch(() => {});
+  const [hp] = await Promise.all([ls.waitForEvent('popup'), ls.click('#abrirHub')]); hp.on('pageerror', e => erros.push('hub do assistente: ' + e.message));
+  await hp.waitForLoadState(); await hp.waitForFunction(() => window.gestaoSessao && window.gestaoSessao.recebida !== null, null, { timeout: 5000 }).catch(() => {});
+  ok(await hp.evaluate(() => /Hub da solução/.test(document.title + document.body.textContent) && gestaoSessao.recebida) === SENHA2, 'botão "Abrir o hub" abre o hub criado na pasta, já com a senha da sessão');
+  await hp.close();
+  await ls.screenshot({ path: path.join(SAIDA, 'inicio-dois-arquivos.png'), fullPage: true });
+
   ok(erros.length === 0, 'sem erros de JavaScript nas páginas' + (erros.length ? ': ' + erros.join(' | ') : ''));
   await browser.close(); srv.close();
   console.log(falhas ? `\n${falhas} verificação(ões) falharam.` : '\nTodas as verificações passaram.');

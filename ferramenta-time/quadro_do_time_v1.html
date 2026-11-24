@@ -506,6 +506,45 @@ pre.json{background:#f6f7fb;border-radius:10px;padding:12px;font-size:11.5px;max
   else montarBotao();
 })();
 </script>
+<script id="sessao">
+/* sessao 1.0 · uma senha por sessão (ADR-0029)
+   Quem abre (hub, Central) guarda só em memória a senha que abriu o próprio arquivo. Quando a pessoa clica num link
+   para outra ferramenta (target=_blank rel=opener), a janela nova pede a senha e o abridor responde uma vez, só nos
+   90 segundos seguintes ao clique e só para uma janela aberta por ele (e.source.opener === window).
+   A ferramenta aberta usa a senha só para abrir o próprio arquivo; se não servir, pede a senha como sempre.
+   Nada vai para disco, localStorage ou para a pasta. Injetado em todos os HTMLs pelo build, junto com o tema. */
+(() => {
+  if (window.gestaoSessao) return;
+  const SC = 'gestao-sessao/1', JANELA = 90e3;
+  let senha = null, cliqueEm = 0, recebida = null, usada = false;
+  document.addEventListener('click', e => {
+    const a = e.target && e.target.closest && e.target.closest('a[target="_blank"][rel~="opener"]');
+    if (a && senha) cliqueEm = Date.now();
+  }, true);
+  window.addEventListener('message', e => {
+    const m = e.data; if (!m || m.schema !== SC) return;
+    if (m.tipo === 'pedir') {
+      if (!senha || !cliqueEm || Date.now() - cliqueEm > JANELA) return;
+      let filha = false; try { filha = !!e.source && e.source.opener === window; } catch {}
+      if (!filha) return;
+      cliqueEm = 0;
+      try { e.source.postMessage({ schema: SC, tipo: 'senha', senha }, '*'); } catch {}
+    } else if (m.tipo === 'senha') {
+      if (!window.opener || e.source !== window.opener || recebida !== null || typeof m.senha !== 'string' || !m.senha) return;
+      recebida = m.senha.slice(0, 500);
+      window.dispatchEvent(new Event('gestao-sessao'));
+    }
+  });
+  if (window.opener) try { window.opener.postMessage({ schema: SC, tipo: 'pedir' }, '*'); } catch {}
+  window.gestaoSessao = {
+    definir(s) { senha = s ? String(s) : null; if (!s) cliqueEm = 0; },
+    get recebida() { return recebida; },
+    // Entrega a senha recebida uma única vez (para abrir o próprio arquivo).
+    usar() { if (recebida == null || usada) return null; usada = true; return recebida; },
+    get usada() { return usada; }
+  };
+})();
+</script>
 </head>
 <body class="v2">
 <nav class="rail" id="rail"></nav>
@@ -1898,7 +1937,7 @@ function newBoardModal() {
     <label class="f"><span>Repita a senha</span><input class="sin" type="password" id="nbPw2" autocomplete="new-password"></label>
     <label class="f full"><span>Pessoas do time (opcional, uma por linha; papel depois de ponto e vírgula)</span><textarea class="sin" id="nbPeople" rows="4" placeholder="Ana Souza; Produto (PO)
 Bruno Lima; Desenvolvimento"></textarea></label></div>
-    <p class="small muted">Em seguida você escolhe onde salvar o arquivo de dados: uma pasta <b>deste computador, fora do OneDrive</b> (cada pessoa tem o seu). O quadro do time se junta pela pasta sincronizada, onde cada pessoa grava só o próprio arquivo. A senha não pode ser recuperada: você vai guardá-la no cofre de senhas.</p></div>
+    <p class="small muted">Em seguida você escolhe onde salvar o arquivo de dados: uma pasta <b>só sua</b>, de preferência no seu OneDrive (backup se trocar de computador), nunca a pasta compartilhada do time (cada pessoa tem o seu). O quadro do time se junta pela pasta sincronizada, onde cada pessoa grava só o próprio arquivo. A senha não pode ser recuperada: você vai guardá-la no cofre de senhas.</p></div>
     <div class="mf"><button class="btn" data-act="close">Cancelar</button><button class="btn pri" data-act="createBoard">Escolher local e criar</button></div>`);
   $('#nbName').oninput = () => { if (!$('#nbSlug').dataset.touched) $('#nbSlug').value = slugify($('#nbName').value); };
   $('#nbSlug').oninput = () => { $('#nbSlug').dataset.touched = 1; };
@@ -2200,7 +2239,7 @@ window.__qt = { PRESET, conectarPasta, get db() { return db; }, set db(v) { db =
       <dt>Pasta sincronizada</dt><dd>${info.pastaComum ? e(info.pastaComum) : '<span style="color:#aab0bf">não ligada</span>'}</dd>${info.voce ? `<dt>Você neste computador</dt><dd>${e(info.voce)}</dd>` : ''}</dl>
       <div class="mp"><div><h4>Fica só neste computador</h4>${info.local.map(x => '• ' + e(x)).join('<br>')}</div><div><h4>Vai para a pasta sincronizada</h4>${info.comum.map(x => '• ' + e(x)).join('<br>')}</div></div>
       <h4 style="margin-top:16px">Ferramentas da solução</h4>${FERR.map(([n, a, t]) => `<div class="t"><b>${e(n)}</b> <code style="color:#aab0bf">${e(a)}</code>${n === info.ferramenta ? ' <b style="color:#223ad2">· você está aqui</b>' : ''}<br><span style="color:#6f7689">${e(t)}</span></div>`).join('')}
-      <p style="font-size:12px;color:#6f7689">Os HTMLs não guardam dados. Os dados ficam em arquivos cifrados: o individual numa pasta local fora do OneDrive, o comum na pasta sincronizada.</p></div>
+      <p style="font-size:12px;color:#6f7689">Os HTMLs não guardam dados. Os dados ficam em arquivos cifrados: o pessoal numa pasta só sua (de preferência no seu OneDrive, como backup), o comum na pasta sincronizada.</p></div>
       <div class="f"><button class="p" id="f4fecha">Fechar</button></div>`);
     d.querySelector('#f4fecha').onclick = () => d.close();
   };
@@ -2324,7 +2363,7 @@ async function f4senhaConfere(s) {
 }
 function f4info() {
   return { ferramenta: 'Quadro do Time', versao: TOOL_VERSION, arquivo: db?.demo ? 'exemplo em memória' : fileHandle?.name, pastaComum: rootMem ? `${rootMem.name}/times/${db?.team.slug || '?'}/` : '', voce: f4eu() ? f4writer() : '',
-    local: ['Arquivo do quadro (cifrado com a senha), numa pasta fora do OneDrive', 'Chaves do time (no navegador, não exportáveis)'],
+    local: ['Arquivo do quadro (cifrado com a senha), numa pasta só sua (de preferência no seu OneDrive)', 'Chaves do time (no navegador, não exportáveis)'],
     comum: [`quadro/${f4eu() ? f4arquivo() : '<você>.json'}: seu retrato do quadro (só você grava)`, 'Arquivos das outras pessoas do time, unidos a cada 20 s', 'status.json e metricas.json para a Central', 'Leitura de postits/: post-its deixados para o time pelo Hub', `postits/vistos/${f4eu() ? f4arquivo() : '<você>.json'}: quais post-its você já viu (só você grava)`] };
 }
 // Ganchos nas funções do Quadro (as chamadas resolvem o nome na hora, então a troca vale para todos).
