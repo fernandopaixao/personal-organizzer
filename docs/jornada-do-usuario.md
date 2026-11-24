@@ -86,6 +86,7 @@ A solução tem quatro papéis. A mesma pessoa pode ter mais de um (o gestor cos
 | **Lembrete de teste da senha** | Digitar a senha do cofre; se falhar, trocar a senha enquanto o arquivo está aberto | [ADR-0003](adr/0003-criptografia-sempre.md) |
 | **Chave vazou** | Gestor revoga e gera outra; envia ao responsável; o time cola a nova | [Passo a passo §11](passo-a-passo.md#11-uma-chave-vazou) |
 | **Cópia de conflito encontrada** | Aceitar a resolução proposta pela ferramenta | [ADR-0007](adr/0007-um-escritor-por-arquivo.md) |
+| **Prefere a tela escura** | Botão redondo no canto inferior direito de qualquer ferramenta: Claro, Escuro ou Automático (segue o sistema). Vale para todas as ferramentas neste computador | [Passo a passo §12](passo-a-passo.md#12-problemas-comuns) |
 | **Pessoa saiu do time** | Desativar a pessoa nos Ajustes do Quadro; o arquivo dela continua lido | |
 
 ---

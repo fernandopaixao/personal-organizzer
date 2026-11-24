@@ -4,7 +4,9 @@
 // então o teste roda sem diálogos. Simula também cópias de conflito do OneDrive e arquivo truncado.
 const { chromium } = require('playwright');
 const http = require('http'), fs = require('fs'), path = require('path');
-const RAIZ = path.resolve(__dirname, '..', '..'), SAIDA = path.join(RAIZ, 'financas', 'testes', 'saida');
+// TEMA=escuro roda tudo com o sistema em modo escuro (o tema automático segue) e salva as telas em saida/escuro/.
+const ESCURO = process.env.TEMA === 'escuro', SAIDA_URL = '/financas/testes/saida/' + (ESCURO ? 'escuro/' : '');
+const RAIZ = path.resolve(__dirname, '..', '..'), SAIDA = path.join(RAIZ, 'financas', 'testes', 'saida', ESCURO ? 'escuro' : '');
 fs.mkdirSync(SAIDA, { recursive: true });
 const SENHA = 'senha-de-teste-123', SENHA2 = 'outra-senha-456!';
 let falhas = 0;
@@ -45,7 +47,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   await new Promise(r => srv.listen(0, r));
   const base = `http://127.0.0.1:${srv.address().port}`;
   const browser = await chromium.launch();
-  const ctxB = await browser.newContext({ acceptDownloads: true });
+  const ctxB = await browser.newContext({ acceptDownloads: true, colorScheme: ESCURO ? 'dark' : 'light' });
   const erros = [];
   const nova = async (url, mapa) => { const p = await ctxB.newPage(); p.on('pageerror', e => erros.push(url + ': ' + e.message)); await p.addInitScript(stub(mapa)); await p.goto(base + url); return p; };
 
@@ -75,7 +77,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   ok(fs.readFileSync(htmlTime, 'utf8').includes('"slug":"pagamentos"'), 'HTML do time gerado com pré-configuração');
 
   console.log('2. Finanças do Time (HTML gerado): criar, plano, lançamentos, publicar');
-  const t = await nova('/financas/testes/saida/financas_pagamentos.html', { 'fin-local': 'LocalAna', 'fin-comum': 'Gestao-Compartilhado' });
+  const t = await nova(SAIDA_URL + 'financas_pagamentos.html', { 'fin-local': 'LocalAna', 'fin-comum': 'Gestao-Compartilhado' });
   ok(/Pré-configurado pelo gestor/.test(await t.textContent('body')), 'tela inicial mostra pré-configuração');
   await t.click('#iNovo'); ok(await t.isDisabled('#cN'), 'nome do time travado pela pré-configuração');
   await t.fill('#cP', 'Ana Souza'); await t.click('#cOk'); await btn(t, 'ok'); await criarSenha(t);
@@ -145,7 +147,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   ok(await g.evaluate(() => saude.pagamentos.avisos.some(a => /mais antigo/.test(a))), 'revisão antiga reaparecendo é ignorada com aviso');
 
   console.log('5. Senha: reabrir, senha errada, lembrete de teste');
-  const t2 = await nova('/financas/testes/saida/financas_pagamentos.html', { 'fin-local': 'LocalAna', 'fin-comum': 'Gestao-Compartilhado' });
+  const t2 = await nova(SAIDA_URL + 'financas_pagamentos.html', { 'fin-local': 'LocalAna', 'fin-comum': 'Gestao-Compartilhado' });
   await t2.click('#iAbrir'); await senhaAbrir(t2, 'errada-errada-1'); await t2.waitForSelector('#dlg .latec');
   ok(/Senha incorreta/.test(await t2.textContent('#dlg')), 'senha errada é recusada');
   await t2.fill('#pw', SENHA); await btn(t2, 'ok'); await t2.waitForSelector('#topo');
@@ -186,12 +188,12 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   ok(!(await opfs(a, async () => ler('LocalInicio', 'financas-cartoes.json'))).includes('cartoes-fin'), 'chave não aparece em claro no arquivo local');
   // O arquivo criado pelo assistente abre nas Finanças do Time gerado por ele
   fs.writeFileSync(path.join(SAIDA, 'financas_cartoes.html'), await opfs(a, async () => ler('LocalInicio', 'financas_cartoes.html')));
-  const t3 = await nova('/financas/testes/saida/financas_cartoes.html', { 'fin-local': 'LocalInicio' });
+  const t3 = await nova(SAIDA_URL + 'financas_cartoes.html', { 'fin-local': 'LocalInicio' });
   await t3.click('#iAbrir'); await senhaAbrir(t3); await t3.waitForSelector('#topo');
   ok(await t3.evaluate(() => db.team.slug === 'cartoes' && db.pessoa.nome === 'Caio'), 'Finanças do Time abre o primeiro arquivo criado pelo assistente');
   // O Quadro gerado abre o arquivo cifrado criado pelo assistente
   fs.writeFileSync(path.join(SAIDA, 'quadro_cartoes.html'), await opfs(a, async () => ler('LocalInicio', 'quadro_cartoes.html')));
-  const q = await nova('/financas/testes/saida/quadro_cartoes.html', {});
+  const q = await nova(SAIDA_URL + 'quadro_cartoes.html', {});
   await q.waitForFunction(() => window.__qt);
   await q.evaluate(async () => { const d = await (await navigator.storage.getDirectory()).getDirectoryHandle('LocalInicio'); window.__h = await d.getFileHandle('quadro-cartoes.json'); setTimeout(() => window.__qt.abrirArquivo(window.__h), 0); });
   await q.waitForSelector('#pw'); await q.fill('#pw', SENHA); await q.click('#dlg [data-x="ok"]'); await q.waitForTimeout(800);
@@ -210,12 +212,12 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   const loc2 = await opfs(a2, async () => listar('LocalGestor2'));
   ok(['financas_grupo.html', 'financas-grupo-tecnologia.json', 'gestao_pessoal.html', 'gestao-tecnologia.json', 'hub.html', 'hub-tecnologia.json'].every(n => loc2.includes(n)), 'arquivos do gestor: ' + loc2.join(', '));
   fs.writeFileSync(path.join(SAIDA, 'financas_grupo_gerado.html'), await opfs(a2, async () => ler('LocalGestor2', 'financas_grupo.html')));
-  const g2 = await nova('/financas/testes/saida/financas_grupo_gerado.html', { 'fin-local': 'LocalGestor2' });
+  const g2 = await nova(SAIDA_URL + 'financas_grupo_gerado.html', { 'fin-local': 'LocalGestor2' });
   await g2.click('#iAbrir'); await senhaAbrir(g2, SENHA2); await g2.waitForSelector('#topo');
   ok(await g2.evaluate(() => db.times.map(t => t.slug + ':' + t.prefixo).join(',')) === 'pagamentos:PAG,cartoes:CAR', 'Finanças do Grupo abre com os times informados no assistente');
   ok(await g2.evaluate(() => db.acima?.chaves?.[0]?.kid === 'tecnologia-fin-2611' && db.acima.chaves[0].origem === 'onboarding'), 'Finanças do Grupo criado com a chave do nível acima (db.acima)');
   fs.writeFileSync(path.join(SAIDA, 'gestao_gerada.html'), await opfs(a2, async () => ler('LocalGestor2', 'gestao_pessoal.html')));
-  const c = await nova('/financas/testes/saida/gestao_gerada.html', {});
+  const c = await nova(SAIDA_URL + 'gestao_gerada.html', {});
   await c.evaluate(() => { window.__abrir = { dir: 'LocalGestor2', arq: 'gestao-tecnologia.json' }; });
   await c.fill('#lockPass', SENHA2); await c.click('#btnOpen'); await c.waitForTimeout(1500);
   ok(await c.evaluate(() => !document.querySelector('#app').classList.contains('hidden')), 'Central abre o arquivo cifrado criado pelo assistente');
@@ -261,8 +263,8 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
     await senhaAbrirQ(pg); await pg.waitForTimeout(1200);
   };
   const senhaAbrirQ = async pg => { await pg.waitForSelector('#pw'); await pg.fill('#pw', SENHA); await pg.click('#dlg [data-x="ok"]'); };
-  const qc = await nova('/financas/testes/saida/quadro_cartoes.html', {}); await prepara(qc, 'LocalInicio', 'caio', 'aaaaa');
-  const qb = await nova('/financas/testes/saida/quadro_cartoes.html', {}); await prepara(qb, 'LocalBia', 'bia', 'bbbbb');
+  const qc = await nova(SAIDA_URL + 'quadro_cartoes.html', {}); await prepara(qc, 'LocalInicio', 'caio', 'aaaaa');
+  const qb = await nova(SAIDA_URL + 'quadro_cartoes.html', {}); await prepara(qb, 'LocalBia', 'bia', 'bbbbb');
   await qc.evaluate(async () => { novoCard({ title: 'Card do Caio', col: cols()[0].id }); touch(); await salvar(); await f4sincronizar(); });
   await qb.evaluate(async () => { novoCard({ title: 'Card da Bia', col: cols()[0].id }); touch(); await salvar(); await f4sincronizar(); });
   await qc.evaluate(() => f4sincronizar()); await qc.waitForTimeout(300);
@@ -285,7 +287,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   ok(await c.evaluate(() => /Hub/.test(document.querySelector('#ondeEstou .f4hub')?.textContent || '')) && await t2.evaluate(() => !!document.getElementById('tHub')) && await g2.evaluate(() => !!document.getElementById('tHub')) && await qb.evaluate(() => !!document.querySelector('#ondeEstou .f4hub')), 'botão "← Hub" na Central, no Quadro e nas Finanças do Grupo e do Time');
   console.log('9. Hub da solução: ferramentas, chaves e post-its para os times');
   fs.writeFileSync(path.join(SAIDA, 'hub_gerado.html'), await opfs(a2, async () => ler('LocalGestor2', 'hub.html')));
-  const h = await nova('/financas/testes/saida/hub_gerado.html', { 'fin-local': 'LocalGestor2', 'fin-comum': 'Gestao-Compartilhado' });
+  const h = await nova(SAIDA_URL + 'hub_gerado.html', { 'fin-local': 'LocalGestor2', 'fin-comum': 'Gestao-Compartilhado' });
   await h.click('#iAbrir'); await senhaAbrir(h, SENHA2); await h.waitForSelector('#topo');
   ok(await h.evaluate(() => __hub.db.times.map(t => t.slug).join(',')) === 'pagamentos,cartoes', 'hub abre o arquivo criado pelo assistente, com os times do grupo');
   const titulosF = await h.evaluate(() => __hub.ferramentas.map(f => f.titulo).join(' | '));
@@ -463,6 +465,26 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   ok(await h.evaluate(() => !!document.querySelector('.hb')) && /previsto/.test(await h.textContent('[data-time="pagamentos"] .finl')), 'hub mostra barras por time e a linha de finanças no card do time');
   ok(!JSON.stringify(await opfs(h, async () => ler('LocalGestor2', 'hub-tecnologia.json'))).includes('pagamentos-fin'), 'chave de finanças só dentro do arquivo cifrado do hub');
   await h.setViewportSize({ width: 1280, height: 900 }); await h.screenshot({ path: path.join(SAIDA, 'hub-visao.png'), fullPage: true });
+
+  console.log('14. Tema claro, escuro e automático');
+  const fundo = p => p.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  const corCard = p => p.evaluate(() => { const e = document.querySelector('.card'); return e ? getComputedStyle(e).backgroundColor : ''; });
+  const tPaginas = { hub: h, central: c, quadro: qc, grupo: g, time: t2, inicio: a };
+  for (const [n, p] of Object.entries(tPaginas)) ok(await p.evaluate(() => !!document.getElementById('temaSel') && !!window.gestaoTema), `${n}: seletor de tema presente`);
+  ok(await h.evaluate(() => document.documentElement.dataset.tema) === (ESCURO ? 'escuro' : 'claro'), 'automático segue o sistema');
+  await h.evaluate(() => gestaoTema.escolher('claro')); const bgClaro = await fundo(h), cardClaro = await corCard(h);
+  ok(bgClaro === 'rgb(250, 250, 252)', 'claro usa o fundo original: ' + bgClaro);
+  await h.click('#temaSel>button'); await h.click('#temaSel [data-t="escuro"]');
+  ok(await h.evaluate(() => document.documentElement.dataset.tema) === 'escuro' && await h.evaluate(() => localStorage.getItem('gestao.tema')) === 'escuro', 'escolha pelo seletor fica salva neste computador');
+  ok(await fundo(h) === 'rgb(14, 18, 28)' && await corCard(h) !== cardClaro, 'escuro troca fundo e cards do hub');
+  await c.waitForTimeout(200);
+  ok(await c.evaluate(() => document.documentElement.dataset.tema) === 'escuro' && await fundo(c) === 'rgb(14, 18, 28)', 'outra ferramenta aberta acompanha a escolha (Central)');
+  const corInline = await qc.evaluate(() => { const e = [...document.querySelectorAll('[style*="background"]')].find(x => x.offsetParent); return e ? getComputedStyle(e).backgroundColor : ''; });
+  await h.evaluate(() => gestaoTema.escolher('claro')); await c.waitForTimeout(200);
+  ok(await fundo(h) === bgClaro && await corCard(h) === cardClaro && await fundo(c) === 'rgb(250, 250, 252)', 'voltar para o claro restaura as cores originais');
+  ok(corInline !== await qc.evaluate(() => { const e = [...document.querySelectorAll('[style*="background"]')].find(x => x.offsetParent); return e ? getComputedStyle(e).backgroundColor : ''; }) || !corInline, 'estilos inline também mudam com o tema (Quadro)');
+  await h.evaluate(() => gestaoTema.escolher('auto'));
+  ok(await h.evaluate(() => localStorage.getItem('gestao.tema')) === null && await h.evaluate(() => document.documentElement.dataset.tema) === (ESCURO ? 'escuro' : 'claro'), 'automático volta a seguir o sistema');
 
   ok(erros.length === 0, 'sem erros de JavaScript nas páginas' + (erros.length ? ': ' + erros.join(' | ') : ''));
   await browser.close(); srv.close();
