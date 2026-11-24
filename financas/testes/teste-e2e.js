@@ -157,10 +157,19 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
 
   console.log('6. Assistente inicial: responsável por um time, finanças + tarefas');
   const a = await nova('/inicio.html', { 'fin-local': 'LocalInicio', 'fin-comum': 'Gestao-Compartilhado' });
-  await a.click('#prox'); await a.click('[data-p="responsavel"]'); await a.click('#prox');
+  await a.click('#prox'); await a.click('[data-p="responsavel"]');
   await a.click('[data-u="financas"]'); await a.click('[data-u="tarefas"]');
-  ok((await a.textContent('#wz')).includes('Finanças do Time') && (await a.textContent('#wz')).includes('Quadro do Time'), 'mostra os HTMLs que serão gerados');
-  await a.click('#prox'); await a.fill('#dN', 'Cartões'); await a.fill('#dPx', 'CAR'); await a.fill('#dP', 'Caio'); await a.click('#prox');
+  ok((await a.textContent('#wz')).includes('Finanças do Time') && (await a.textContent('#wz')).includes('Quadro do Time'), 'perfil: lidera 1 time, finanças e tarefas; mostra os HTMLs que serão gerados');
+  await a.click('#prox');
+  const [kTarCar, kFinCar] = await a.evaluate(() => [gerarChaveTexto('cartoes-2501'), gerarChaveTexto('cartoes-fin-2611')]);
+  await a.click('[data-k="sim"]'); await a.fill('#kT', 'GK1.quebrada'); await a.click('#kLer');
+  ok(/GK1\.quebrada/.test(await a.textContent('#kErr')) && await a.isDisabled('#prox'), 'onboarding recusa chave inválida');
+  await a.fill('#kT', kTarCar + '\n' + kFinCar); await a.fill('#kP', 'Gestao-Compartilhado'); await a.click('#kLer');
+  const kTxt = await a.textContent('#wz');
+  ok(/Tarefas do time/.test(kTxt) && /Finanças do time/.test(kTxt) && /cartoes-fin-2611/.test(kTxt), 'onboarding reconhece a chave de tarefas e a de finanças do time pelo kid');
+  await a.click('#prox'); await cofre(a);
+  ok(await a.isDisabled('#dS') && await a.inputValue('#dS') === 'cartoes', 'identificador do time vem da chave e fica travado');
+  await a.fill('#dN', 'Cartões'); await a.fill('#dPx', 'CAR'); await a.fill('#dP', 'Caio'); await a.click('#prox');
   await a.click('#pL'); await a.waitForSelector('#pL ~ .chip'); await a.click('#pC'); await a.click('#prox');
   await a.click('#sC'); await criarSenha(a); await a.click('#prox');
   await a.waitForSelector('#mapa2', { timeout: 30000 });
@@ -169,6 +178,12 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   ok((await opfs(a, async () => listar('Gestao-Compartilhado/times'))).includes('cartoes'), 'estrutura criada na pasta comum');
   const cart = await opfs(a, async () => ler('LocalInicio', 'onde-fica-cada-coisa.html'));
   ok(/cofre de senhas/.test(cart) && !cart.includes(SENHA), 'cartão "onde fica cada coisa" com aviso de cofre e sem senha');
+  const dec = async arq => a.evaluate(async ([t, s]) => (await decifrarLocal(t, s)).dados, [await opfs(a, async n => ler('LocalInicio', n), arq), SENHA]);
+  const ftDb = await dec('financas-cartoes.json'), hbDb = await dec('hub-cartoes.json');
+  ok(ftDb.chaves.length === 1 && ftDb.chaves[0].kid === 'cartoes-fin-2611', 'Finanças do Time criado já com a chave de finanças do time');
+  ok(hbDb.times[0].chaves[0]?.kid === 'cartoes-2501' && hbDb.times[0].chavesFin[0]?.kid === 'cartoes-fin-2611', 'hub criado com as duas chaves do time, separadas');
+  ok((await opfs(a, async () => ler('LocalInicio', 'quadro_cartoes.html'))).includes(kTarCar), 'Quadro do Time gerado com a chave de tarefas na pré-configuração');
+  ok(!(await opfs(a, async () => ler('LocalInicio', 'financas-cartoes.json'))).includes('cartoes-fin'), 'chave não aparece em claro no arquivo local');
   // O arquivo criado pelo assistente abre nas Finanças do Time gerado por ele
   fs.writeFileSync(path.join(SAIDA, 'financas_cartoes.html'), await opfs(a, async () => ler('LocalInicio', 'financas_cartoes.html')));
   const t3 = await nova('/financas/testes/saida/financas_cartoes.html', { 'fin-local': 'LocalInicio' });
@@ -184,7 +199,11 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
 
   console.log('7. Assistente: gestor, finanças + tarefas (Central)');
   const a2 = await nova('/inicio.html', { 'fin-local': 'LocalGestor2', 'fin-comum': 'Gestao-Compartilhado' });
-  await a2.click('#prox'); await a2.click('[data-p="gestor"]'); await a2.click('#prox'); await a2.click('[data-u="financas"]'); await a2.click('[data-u="tarefas"]'); await a2.click('#prox');
+  await a2.click('#prox'); await a2.click('[data-p="gestor"]'); await a2.click('[data-u="financas"]'); await a2.click('[data-u="tarefas"]'); await a2.click('#prox');
+  const kAcima = await a2.evaluate(() => gerarChaveTexto('diretoria-fin-2611'));
+  await a2.click('[data-k="sim"]'); await a2.fill('#kT', kAcima + '\n' + await a2.evaluate(() => gerarChaveTexto('pagamentos-2611'))); await a2.click('#kLer');
+  ok(/nível acima/.test(await a2.textContent('#wz')) && /será ignorada/.test(await a2.textContent('#wz')), 'gestor: chave de finanças da liderança vira "nível acima"; chave de tarefas de time é ignorada');
+  await a2.click('#prox'); await cofre(a2);
   await a2.fill('#dN', 'Tecnologia'); await a2.fill('#dT', 'Pagamentos PAG\nCartões CAR'); await a2.fill('#dP', 'Fernando'); await a2.click('#prox');
   await a2.click('#pL'); await a2.waitForSelector('#pL ~ .chip'); await a2.click('#prox'); await a2.click('#sC'); await criarSenha(a2, SENHA2); await a2.click('#prox');
   await a2.waitForSelector('#mapa2', { timeout: 30000 });
@@ -194,6 +213,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   const g2 = await nova('/financas/testes/saida/financas_grupo_gerado.html', { 'fin-local': 'LocalGestor2' });
   await g2.click('#iAbrir'); await senhaAbrir(g2, SENHA2); await g2.waitForSelector('#topo');
   ok(await g2.evaluate(() => db.times.map(t => t.slug + ':' + t.prefixo).join(',')) === 'pagamentos:PAG,cartoes:CAR', 'Finanças do Grupo abre com os times informados no assistente');
+  ok(await g2.evaluate(() => db.acima?.chaves?.[0]?.kid === 'diretoria-fin-2611' && db.acima.chaves[0].origem === 'onboarding'), 'Finanças do Grupo criado com a chave do nível acima (db.acima)');
   fs.writeFileSync(path.join(SAIDA, 'gestao_gerada.html'), await opfs(a2, async () => ler('LocalGestor2', 'gestao_pessoal.html')));
   const c = await nova('/financas/testes/saida/gestao_gerada.html', {});
   await c.evaluate(() => { window.__abrir = { dir: 'LocalGestor2', arq: 'gestao-tecnologia.json' }; });
