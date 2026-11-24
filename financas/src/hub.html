@@ -12,7 +12,7 @@
 .tool{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;text-decoration:none;color:inherit;min-width:0}
 .tool:hover{border-color:var(--bv-mid);box-shadow:0 2px 10px rgba(34,58,210,.08)}
 .tool .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-weight:700;font-size:11px;flex:none;background:var(--bv-soft);color:var(--bv)}
-.tool .ic.fin{background:var(--ok-soft);color:var(--ok)}.tool .ic.aux{background:#f2f3f8;color:var(--muted)}
+.tool .ic.fin{background:var(--ok-soft);color:var(--ok)}.tool .ic.aux{background:#edf1f9;color:var(--muted)}
 .tool b{display:block;font-size:13.5px}.tool .code{color:var(--faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
 .tool .go{margin-left:auto;color:var(--bv);font-size:12px;font-weight:600;white-space:nowrap}
 .team{padding:16px 18px}
@@ -20,7 +20,7 @@
 .team .hd h3{font-family:var(--title);font-size:16px;font-weight:600}
 .act{font-size:12px;color:var(--muted);margin:0 0 12px}
 .wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
-.pi{position:relative;border-radius:4px 4px 14px 4px;padding:12px 12px 10px;min-height:120px;display:flex;flex-direction:column;gap:6px;box-shadow:0 1px 2px rgba(20,30,70,.08),0 6px 14px rgba(20,30,70,.06);font-size:13px;line-height:1.4;word-break:break-word}
+.pi{position:relative;border-radius:4px 4px 14px 4px;padding:12px 12px 10px;min-height:120px;display:flex;flex-direction:column;gap:6px;box-shadow:0 1px 2px rgba(11,33,85,.08),0 6px 14px rgba(11,33,85,.06);font-size:13px;line-height:1.4;word-break:break-word}
 .pi .tx{white-space:pre-wrap;flex:1}
 .pi .ft{font-size:11px;color:rgba(22,26,35,.62);display:flex;flex-wrap:wrap;gap:4px 8px}
 .pi .para{font-size:11px;font-weight:650;color:rgba(22,26,35,.7)}
@@ -31,7 +31,7 @@
 .pi.novo{border:1.5px dashed var(--bv-line);background:#fff;box-shadow:none;align-items:center;justify-content:center;color:var(--bv);font-weight:600;cursor:pointer}
 .pi.novo:hover{background:var(--bv-soft)}
 .pi.novo:disabled{color:var(--faint);cursor:not-allowed;background:#fff}
-.c-amarelo{background:#fff4b8}.c-rosa{background:#ffdbe4}.c-verde{background:#d8f2e0}.c-azul{background:#dde7ff}.c-lilas{background:#ebdfff}
+.c-amarelo{background:#fff4b8}.c-rosa{background:#ffdbe4}.c-verde{background:#d3f0e7}.c-azul{background:#dde7ff}.c-lilas{background:#ebdfff}
 .cores{display:flex;gap:8px}.cores label{width:28px;height:28px;border-radius:8px;cursor:pointer;border:2px solid transparent;display:block}
 .cores input{display:none}.cores input:checked+label{border-color:var(--ink)}
 .tchk{display:flex;flex-wrap:wrap;gap:6px}.tchk label{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);border-radius:99px;padding:3px 10px;font-size:12px;cursor:pointer}
@@ -59,7 +59,7 @@
       O Quadro do Time mostra os post-its e grava quem já viu em times/<time>/postits/vistos/<pessoa>-<computador>.json.
    O arquivo local do hub (times, chaves e seus post-its) é cifrado com a sua senha e fica fora do OneDrive.
    ===================================================================== */
-const TOOL = 'hub', TOOL_NOME = 'Hub da solução', TOOL_VERSION = '1.2.0';
+const TOOL = 'hub', TOOL_NOME = 'Hub da solução', TOOL_VERSION = '1.3.0';
 try { window.name = 'gestao-hub'; } catch {}   // o botão "← Hub" das ferramentas volta para esta aba sem recarregar
 const LOCAL_SCHEMA = 'gestao-hub-local/1', POSTITS = 'gestao-postits/1', VISTOS = 'gestao-postits-vistos/1', PLANO = 'gestao-financas-plano/1';
 const CORES = [['amarelo', 'Amarelo'], ['rosa', 'Rosa'], ['verde', 'Verde'], ['azul', 'Azul'], ['lilas', 'Lilás']];

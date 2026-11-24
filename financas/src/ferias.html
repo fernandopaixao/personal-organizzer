@@ -12,10 +12,10 @@
 .hm .gr{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
 .hm .gr span{font-size:9.5px;color:var(--faint);text-align:center}
 .hm .d{aspect-ratio:1;border-radius:5px;font-size:10px;display:grid;place-items:center;color:var(--muted);background:#fff;border:1px solid var(--line);position:relative}
-.hm .d.v{visibility:hidden}.hm .d.fds{background:#f4f5f8;border-color:transparent;color:var(--faint)}
-.hm .d.fer{background:#f4f5f8;border-color:transparent;color:var(--faint);text-decoration:line-through}
-.hm .d.h1{background:#e6e9fb;border-color:#e6e9fb;color:var(--bv-deep)}.hm .d.h2{background:#bcc5f3;border-color:#bcc5f3;color:var(--bv-deep)}
-.hm .d.h3{background:#7d8ee6;border-color:#7d8ee6;color:#fff}.hm .d.h4{background:var(--bv);border-color:var(--bv);color:#fff}
+.hm .d.v{visibility:hidden}.hm .d.fds{background:#f1f4fb;border-color:transparent;color:var(--faint)}
+.hm .d.fer{background:#f1f4fb;border-color:transparent;color:var(--faint);text-decoration:line-through}
+.hm .d.h1{background:#e4ebfc;border-color:#e4ebfc;color:var(--bv-deep)}.hm .d.h2{background:#b8caf3;border-color:#b8caf3;color:var(--bv-deep)}
+.hm .d.h3{background:#7a9ae6;border-color:#7a9ae6;color:#fff}.hm .d.h4{background:var(--bv);border-color:var(--bv);color:#fff}
 .hm .d.over{background:var(--late);border-color:var(--late);color:#fff}
 .hm .d.hoje{outline:2px solid var(--ink);outline-offset:1px}
 .hm button.d:hover{filter:brightness(.95)}
@@ -25,12 +25,12 @@
 .tl th{font-weight:550;color:var(--muted);font-size:10.5px;position:sticky;top:0;background:#fff;z-index:1}
 .tl .nm{position:sticky;left:0;background:#fff;text-align:left;padding:0 10px 0 0;min-width:170px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:2}
 .tl th.nm{z-index:3}
-.tl tr.un td{background:#f7f8fb;font-weight:650;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);height:22px}
-.tl tr.un td.nm{background:#f7f8fb}
-.tl td.fds,.tl th.fds{background:#f7f8fb}
+.tl tr.un td{background:#f3f6fc;font-weight:650;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);height:22px}
+.tl tr.un td.nm{background:#f3f6fc}
+.tl td.fds,.tl th.fds{background:#f3f6fc}
 .tl td.c{cursor:default}.tl td.c.ed{cursor:pointer}.tl td.c.ed:hover{background:var(--bv-soft)}
 .tl td i{display:block;height:14px;margin:0 -1px;background:var(--bv)}
-.tl td i.folga{background:var(--bv-mid)}.tl td i.treinamento{background:#5d6fd9;opacity:.65}.tl td i.outro{background:var(--faint)}
+.tl td i.folga{background:var(--bv-mid)}.tl td i.treinamento{background:#4a72dc;opacity:.65}.tl td i.outro{background:var(--faint)}
 .tl td i.ini{border-radius:7px 0 0 7px;margin-left:2px}.tl td i.fim{border-radius:0 7px 7px 0;margin-right:2px}
 .tl tr.cnt td{font-weight:650;font-variant-numeric:tabular-nums;height:26px}
 .tl tr.cnt td.over{color:var(--late)}
@@ -59,7 +59,7 @@
      (a mesma chave GK1.<grupo>-fin-… das Finanças do Grupo serve). Funciona em quantos níveis forem precisos.
    Notas das ausências ficam só no arquivo local cifrado. Conteúdo comum: gestao-ferias/1.
    ===================================================================== */
-const TOOL = 'ferias', TOOL_NOME = 'Mapa de Férias', TOOL_VERSION = '1.0.0';
+const TOOL = 'ferias', TOOL_NOME = 'Mapa de Férias', TOOL_VERSION = '1.1.0';
 const LOCAL_SCHEMA = 'gestao-ferias-local/1', FERIAS_SCHEMA = 'gestao-ferias/1';
 const PRESET = /*FERIAS-PRESET*/null/*FIM-FERIAS-PRESET*/;
 const TIPOS = { ferias: 'Férias', folga: 'Folga ou day off', treinamento: 'Treinamento ou evento', outro: 'Outra ausência' };
@@ -404,7 +404,7 @@ function vPainel(el) {
     </div>
     ${al.length ? `<div class="card flat"><p class="lbl">Pedindo atenção <span class="tag ${al.some(a => a[0] === 'late') ? 'late' : ''}">${al.length}</span></p>${al.map(([c, txt]) => `<div class="al compact"><span class="dot ${c}"></span><div class="grow">${txt}</div></div>`).join('')}</div>` : ''}
     <div class="card"><div class="row"><p class="lbl" style="margin:0">Quantas pessoas fora por dia · ${esc(nome)}</p><span class="grow"></span>
-      <div class="legend" style="margin:0"><span><i class="sw" style="background:#e6e9fb"></i>1</span><span><i class="sw" style="background:#bcc5f3"></i>poucas</span><span><i class="sw" style="background:#7d8ee6"></i>muitas</span><span><i class="sw" style="background:var(--bv)"></i>perto do limite</span><span><i class="sw" style="background:var(--late)"></i>acima de ${db.config.limite}%</span><span><i class="sw" style="background:#f4f5f8"></i>fim de semana ou feriado</span></div></div>
+      <div class="legend" style="margin:0"><span><i class="sw" style="background:#e4ebfc"></i>1</span><span><i class="sw" style="background:#b8caf3"></i>poucas</span><span><i class="sw" style="background:#7a9ae6"></i>muitas</span><span><i class="sw" style="background:var(--bv)"></i>perto do limite</span><span><i class="sw" style="background:var(--late)"></i>acima de ${db.config.limite}%</span><span><i class="sw" style="background:#f1f4fb"></i>fim de semana ou feriado</span></div></div>
       <div class="hm" style="margin-top:14px">${heatmap(e.m, e.total, ini, fim)}</div></div>
     <div class="g21">
       <div class="card"><p class="lbl">Semanas mais cheias</p>${cheias.length ? `<div class="rk">${cheias.map(w => `<span>Semana de ${fmtCurta(w.seg)}</span><b>${w.media.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} fora/dia · pico ${w.max}</b>`).join('')}</div>` : '<div class="empty">Nenhuma ausência no período.</div>'}
@@ -472,7 +472,7 @@ function vCalendario(el) {
     return `<tr><td class="nm" title="${esc(p.sub || '')}">${esc(p.nome)}</td>${ds.map(d => { const a = as.find(x => x.inicio <= d && d <= x.fim); return `<td class="c ${fds(d) ? 'fds' : ''} ${p.editavel ? 'ed' : ''}" ${p.editavel ? `data-p="${esc(p.id)}" data-d="${d}" ${a?.id ? `data-a="${esc(a.id)}"` : ''}` : ''} title="${esc(p.nome)} · ${fmtDia(d)}${a ? ' · ' + (TIPOS[a.tipo] || 'Ausência') : ''}">${a ? `<i class="${esc(a.tipo)} ${a.inicio === d || d === ini ? 'ini' : ''} ${a.fim === d || d === fim ? 'fim' : ''}"></i>` : ''}</td>`; }).join('')}</tr>`;
   };
   el.innerHTML = `<div class="bar"><button class="btn sm" id="cAnt">‹</button><b style="min-width:150px;text-align:center">${mesAno(mesTl)}</b><button class="btn sm" id="cProx">›</button><button class="btn sm ghost" id="cHoje">Hoje</button>
-      <span class="grow"></span><div class="legend" style="margin:0">${Object.entries(TIPOS).map(([k, n]) => `<span><i style="background:${{ ferias: 'var(--bv)', folga: 'var(--bv-mid)', treinamento: '#9ea9e6', outro: 'var(--faint)' }[k]}"></i>${n}</span>`).join('')}</div></div>
+      <span class="grow"></span><div class="legend" style="margin:0">${Object.entries(TIPOS).map(([k, n]) => `<span><i style="background:${{ ferias: 'var(--bv)', folga: 'var(--bv-mid)', treinamento: '#9cb2ea', outro: 'var(--faint)' }[k]}"></i>${n}</span>`).join('')}</div></div>
     <div class="card" style="padding:12px 14px"><div class="scroll"><table class="tl">
       <tr><th class="nm">Pessoa</th>${ds.map(d => `<th class="${fds(d) ? 'fds' : ''} ${d === h ? 'hoje' : ''}" title="${esc(feriado(d)?.nome || '')}">${DIAS_SEM[diaSem(d)][0].toUpperCase()}<br>${+d.slice(8)}</th>`).join('')}</tr>
       <tr class="cnt"><td class="nm">Fora no dia</td>${ds.map(d => { const n = m.get(d).size; return `<td class="${fds(d) ? 'fds' : ''} ${n / tot > limiteFr() && !fds(d) ? 'over' : ''}">${n && !fds(d) ? n : ''}</td>`; }).join('')}</tr>

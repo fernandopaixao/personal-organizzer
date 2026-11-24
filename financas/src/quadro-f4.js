@@ -22,8 +22,8 @@ function f4quemSou() {
   return new Promise(ok => {
     const ps = activePeople();
     const d = f4Abrir(`<div class="h">Quem é você neste quadro?</div><div class="b"><p style="margin-top:0">Cada pessoa grava só o próprio arquivo na pasta do time, para o OneDrive nunca juntar duas versões. Escolha seu nome (fica guardado neste navegador).</p>
-      <select id="f4eu" style="width:100%;padding:7px;border:1px solid #eceef4;border-radius:10px">${ps.map(p => `<option value="${esc(p.name)}">${esc(p.name)}</option>`).join('')}<option value="">Outro nome…</option></select>
-      <input id="f4euN" placeholder="Seu nome" style="width:100%;margin-top:8px;padding:7px;border:1px solid #eceef4;border-radius:10px;${ps.length ? 'display:none' : ''}"></div>
+      <select id="f4eu" style="width:100%;padding:7px;border:1px solid #e0e6f1;border-radius:10px">${ps.map(p => `<option value="${esc(p.name)}">${esc(p.name)}</option>`).join('')}<option value="">Outro nome…</option></select>
+      <input id="f4euN" placeholder="Seu nome" style="width:100%;margin-top:8px;padding:7px;border:1px solid #e0e6f1;border-radius:10px;${ps.length ? 'display:none' : ''}"></div>
       <div class="f"><button id="f4euNo">Agora não</button><button class="p" id="f4euOk">Confirmar</button></div>`);
     const sel = d.querySelector('#f4eu'), inp = d.querySelector('#f4euN');
     sel.onchange = () => inp.style.display = sel.value ? 'none' : '';
@@ -84,7 +84,7 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) f4si
 function f4exigirSenha() {
   return new Promise(ok => {
     const d = f4Abrir(`<div class="h">Proteja este quadro com senha</div><div class="b"><p style="margin-top:0">A partir do Quadro 2.1 todo arquivo de dados é cifrado. Este quadro ainda não tem senha: crie uma agora (pelo menos 12 caracteres).</p>
-      <input type="password" id="f4p1" placeholder="Senha" autocomplete="new-password"><input type="password" id="f4p2" placeholder="Repita a senha" autocomplete="new-password" style="margin-top:8px"><p id="f4pm" style="color:#c4574f;font-size:12px"></p></div>
+      <input type="password" id="f4p1" placeholder="Senha" autocomplete="new-password"><input type="password" id="f4p2" placeholder="Repita a senha" autocomplete="new-password" style="margin-top:8px"><p id="f4pm" style="color:#c2334f;font-size:12px"></p></div>
       <div class="f"><button class="p" id="f4pok">Continuar</button></div>`);
     d.addEventListener('cancel', ev => ev.preventDefault());
     d.querySelector('#f4pok').onclick = async () => {

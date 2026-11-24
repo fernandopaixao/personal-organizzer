@@ -2,17 +2,17 @@
    Bloco injetado na Central e no Quadro por tools/injetar_seguranca.py (o mesmo texto das ferramentas de finanças).
    Usa um <dialog> próprio para não interferir nos diálogos da ferramenta. */
 (() => {
-  const css = `.f4d{border:0;border-radius:18px;padding:0;width:min(600px,94vw);max-height:90vh;box-shadow:0 24px 64px rgba(20,30,70,.25);font:13.5px/1.5 Inter,"Segoe UI",system-ui,sans-serif;color:#161a23}
-  .f4d::backdrop{background:rgba(22,26,35,.35)}.f4d .h{padding:16px 20px;border-bottom:1px solid #eceef4;font:600 16px "BV Leve",Montserrat,Inter,sans-serif}
-  .f4d .b{padding:16px 20px;overflow:auto;max-height:62vh}.f4d .f{display:flex;gap:8px;justify-content:flex-end;padding:12px 20px;border-top:1px solid #eceef4}
-  .f4d button{font:inherit;cursor:pointer;border:1px solid #eceef4;background:#fff;border-radius:10px;padding:6px 12px;font-weight:550}
-  .f4d button.p{background:#223ad2;border-color:#223ad2;color:#fff}.f4d button:disabled{opacity:.4;cursor:not-allowed}
-  .f4d .cofre{border:1.5px solid #c4574f;background:#fbefee;border-radius:14px;padding:12px 14px;color:#6d2620}
-  .f4d .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0 0 12px}.f4d .kv dt{color:#6f7689}.f4d .kv dd{margin:0;font-weight:600;word-break:break-all}
-  .f4d .mp{display:grid;grid-template-columns:1fr 1fr;gap:10px}.f4d .mp div{border:1px solid #eceef4;border-radius:12px;padding:10px 12px;font-size:12.5px}
-  .f4d h4{margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#6f7689}.f4d .t{font-size:12.5px;padding:6px 0;border-bottom:1px solid #eceef4}
-  .f4d input[type=password]{width:100%;border:1px solid #eceef4;border-radius:10px;padding:7px 10px;font:inherit}
-  .f4btn{font:inherit;font-size:12px;cursor:pointer;border:1px solid #eceef4;background:#fff;border-radius:99px;padding:4px 11px;color:#6f7689;white-space:nowrap}.f4btn:hover{color:#161a23;border-color:#cfd3e0}`;
+  const css = `.f4d{border:0;border-radius:18px;padding:0;width:min(600px,94vw);max-height:90vh;box-shadow:0 24px 64px rgba(11,33,85,.25);font:13.5px/1.5 var(--font,"Segoe UI",system-ui,sans-serif);color:#121f3d}
+  .f4d::backdrop{background:rgba(22,26,35,.35)}.f4d .h{padding:16px 20px;border-bottom:1px solid #e0e6f1;font:600 16px var(--title,"Segoe UI",sans-serif)}
+  .f4d .b{padding:16px 20px;overflow:auto;max-height:62vh}.f4d .f{display:flex;gap:8px;justify-content:flex-end;padding:12px 20px;border-top:1px solid #e0e6f1}
+  .f4d button{font:inherit;cursor:pointer;border:1px solid #e0e6f1;background:#fff;border-radius:10px;padding:6px 12px;font-weight:550}
+  .f4d button.p{background:#1e4fc8;border-color:#1e4fc8;color:#fff}.f4d button:disabled{opacity:.4;cursor:not-allowed}
+  .f4d .cofre{border:1.5px solid #c2334f;background:#fdedf1;border-radius:14px;padding:12px 14px;color:#7a1d33}
+  .f4d .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0 0 12px}.f4d .kv dt{color:#52607e}.f4d .kv dd{margin:0;font-weight:600;word-break:break-all}
+  .f4d .mp{display:grid;grid-template-columns:1fr 1fr;gap:10px}.f4d .mp div{border:1px solid #e0e6f1;border-radius:12px;padding:10px 12px;font-size:12.5px}
+  .f4d h4{margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#52607e}.f4d .t{font-size:12.5px;padding:6px 0;border-bottom:1px solid #e0e6f1}
+  .f4d input[type=password]{width:100%;border:1px solid #e0e6f1;border-radius:10px;padding:7px 10px;font:inherit}
+  .f4btn{font:inherit;font-size:12px;cursor:pointer;border:1px solid #e0e6f1;background:#fff;border-radius:99px;padding:4px 11px;color:#52607e;white-space:nowrap}.f4btn:hover{color:#121f3d;border-color:#c2cde2}`;
   const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
   const e = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   function abrir(html) {
@@ -44,7 +44,7 @@
     const base = s.teste || s.desde, lim = s.teste ? 90 : 30;
     if ((agora - base) / 864e5 < lim) return;
     const r = await new Promise(ok => {
-      const d = abrir(`<div class="h">Confirme que a senha está no cofre</div><div class="b"><p style="margin-top:0">Para garantir que você não vai perder o acesso, digite a senha deste arquivo (ela deve estar no seu cofre de senhas).</p><input type="password" id="f4pw" autocomplete="current-password"><p id="f4msg" style="color:#c4574f;font-size:12px"></p></div>
+      const d = abrir(`<div class="h">Confirme que a senha está no cofre</div><div class="b"><p style="margin-top:0">Para garantir que você não vai perder o acesso, digite a senha deste arquivo (ela deve estar no seu cofre de senhas).</p><input type="password" id="f4pw" autocomplete="current-password"><p id="f4msg" style="color:#c2334f;font-size:12px"></p></div>
         <div class="f"><button id="f4dep">Lembrar amanhã</button><button class="p" id="f4conf">Confirmar</button></div>`);
       let n = 0;
       d.querySelector('#f4dep').onclick = () => { d.close(); ok('adiar'); };
@@ -65,12 +65,12 @@
   ];
   // info = { ferramenta, versao, arquivo, pastaComum, voce, local: [], comum: [] }
   window.f4OndeEstou = info => {
-    const d = abrir(`<div class="h">Onde estou?</div><div class="b"><dl class="kv"><dt>Ferramenta</dt><dd>${e(info.ferramenta)} <span style="color:#aab0bf;font-weight:400">${e(info.versao || '')}</span></dd>
-      <dt>Arquivo aberto</dt><dd>${info.arquivo ? e(info.arquivo) : '<span style="color:#aab0bf">nenhum</span>'}</dd>
-      <dt>Pasta sincronizada</dt><dd>${info.pastaComum ? e(info.pastaComum) : '<span style="color:#aab0bf">não ligada</span>'}</dd>${info.voce ? `<dt>Você neste computador</dt><dd>${e(info.voce)}</dd>` : ''}</dl>
+    const d = abrir(`<div class="h">Onde estou?</div><div class="b"><dl class="kv"><dt>Ferramenta</dt><dd>${e(info.ferramenta)} <span style="color:#a3adc4;font-weight:400">${e(info.versao || '')}</span></dd>
+      <dt>Arquivo aberto</dt><dd>${info.arquivo ? e(info.arquivo) : '<span style="color:#a3adc4">nenhum</span>'}</dd>
+      <dt>Pasta sincronizada</dt><dd>${info.pastaComum ? e(info.pastaComum) : '<span style="color:#a3adc4">não ligada</span>'}</dd>${info.voce ? `<dt>Você neste computador</dt><dd>${e(info.voce)}</dd>` : ''}</dl>
       <div class="mp"><div><h4>Fica só neste computador</h4>${info.local.map(x => '• ' + e(x)).join('<br>')}</div><div><h4>Vai para a pasta sincronizada</h4>${info.comum.map(x => '• ' + e(x)).join('<br>')}</div></div>
-      <h4 style="margin-top:16px">Ferramentas da solução</h4>${FERR.map(([n, a, t]) => `<div class="t"><b>${e(n)}</b> <code style="color:#aab0bf">${e(a)}</code>${n === info.ferramenta ? ' <b style="color:#223ad2">· você está aqui</b>' : ''}<br><span style="color:#6f7689">${e(t)}</span></div>`).join('')}
-      <p style="font-size:12px;color:#6f7689">Os HTMLs não guardam dados. Os dados ficam em arquivos cifrados: o individual numa pasta local fora do OneDrive, o comum na pasta sincronizada.</p></div>
+      <h4 style="margin-top:16px">Ferramentas da solução</h4>${FERR.map(([n, a, t]) => `<div class="t"><b>${e(n)}</b> <code style="color:#a3adc4">${e(a)}</code>${n === info.ferramenta ? ' <b style="color:#1e4fc8">· você está aqui</b>' : ''}<br><span style="color:#52607e">${e(t)}</span></div>`).join('')}
+      <p style="font-size:12px;color:#52607e">Os HTMLs não guardam dados. Os dados ficam em arquivos cifrados: o individual numa pasta local fora do OneDrive, o comum na pasta sincronizada.</p></div>
       <div class="f"><button class="p" id="f4fecha">Fechar</button></div>`);
     d.querySelector('#f4fecha').onclick = () => d.close();
   };

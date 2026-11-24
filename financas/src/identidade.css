@@ -1,0 +1,32 @@
+/* Identidade visual comum a todas as ferramentas (design system "Organizzer", ADR-0028).
+   Injetada no <head> de cada HTML por tools/build_financas.py (função tema), DEPOIS do estilo da
+   ferramenta: o que está aqui vale por cima dele. Só use variáveis (var(--...)) nas regras: o tema
+   escuro (tema.js) troca as variáveis e não precisa converter nada desta folha.
+   As fontes vêm de financas/src/fontes/ e são embutidas em base64 no build: funcionam sem rede. */
+@font-face{font-family:"DM Sans";src:/*FONTE:DMSans-Variable-latin.woff2*/;font-weight:400 700;font-style:normal;font-display:swap}
+@font-face{font-family:"Plus Jakarta Sans";src:/*FONTE:PlusJakartaSans-Variable-latin.woff2*/;font-weight:400 800;font-style:normal;font-display:swap}
+:root{
+  --font:"DM Sans","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+  --title:"Plus Jakarta Sans","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+  --warn:#9a5c00; --warn-soft:#fff4de;
+  --rail:#0b2155; --rail-ink:#a8b9e0; --rail-on:#ffffff; --rail-active:#1a3d96;
+}
+
+/* Trilho lateral marinho: a âncora da marca. Item ativo em branco sobre azul. */
+.rail{background:var(--rail);border-right-color:var(--rail);border-top-color:var(--rail)}
+.rail .logo{background:var(--rail-on);color:var(--rail)}
+.rail .nv{color:var(--rail-ink)}
+.rail .nv:hover{color:var(--rail-on)}
+.rail .nv.on{color:var(--rail-on);background:var(--rail-active)}
+.rail .nv .b{box-shadow:0 0 0 2px var(--rail)}
+.rail .nvg{color:var(--rail-ink);opacity:.75}
+.rail .nvt{background:var(--rail-active);color:var(--rail-ink)}
+.rail .nvt:hover{color:var(--rail-on)}
+.rail .nvt.on{background:var(--bv);color:var(--rail-on)}
+.rail .railver{color:var(--rail-ink)}
+
+/* Card de destaque: azul sólido, sem gradiente. */
+.ins.hi{background:var(--bv);border-color:var(--bv)}
+
+/* Títulos e números na fonte de títulos, mais firmes. */
+h1,h2{letter-spacing:-.015em}

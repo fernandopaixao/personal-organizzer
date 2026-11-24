@@ -21,7 +21,7 @@
    compara com o orçamento do grupo e publica diretrizes grupo/financas/diretriz-<time>.json.
    Orçamento aprovado, itens do grupo, chaves e versões ficam no arquivo local cifrado.
    ===================================================================== */
-const TOOL = 'financas-grupo', TOOL_NOME = 'Finanças do Grupo', TOOL_VERSION = '1.3.0';
+const TOOL = 'financas-grupo', TOOL_NOME = 'Finanças do Grupo', TOOL_VERSION = '1.4.0';
 const LOCAL_SCHEMA = 'gestao-financas-local/1', PLANO_SCHEMA = 'gestao-financas-plano/1', DIRETRIZ_SCHEMA = 'gestao-financas-diretriz/1';
 const PRESET = /*FING-PRESET*/null/*FIM-FING-PRESET*/;
 const CATS_PADRAO = [
@@ -430,9 +430,9 @@ function tabelaAnos() {
   return `<div class="scroll"><table class="t"><tr><th>Previsto por ano</th>${anos.map(a => `<th class="n">${a}${a === db.ano ? ' <span class="faint">base</span>' : ''}</th>`).join('')}</tr>${rows.join('')}</table></div><p class="small muted">Cada time entra com os anos que publicou. Passe o mouse sobre um valor para ver orçado e realizado.</p>`;
 }
 function graficoTimes() {
-  const ms = mesesAno(), cores = ['#223ad2', '#8e9de9', '#002bab', '#c3ccf5', '#5b6fe0', '#3a4a9a', '#a9b5ef', '#14257f'];
+  const ms = mesesAno(), cores = ['#1e4fc8', '#8fabee', '#173fa6', '#c3d3f6', '#4a72dc', '#2f4c96', '#a6bcf0', '#122f80'];
   const series = db.times.map((t, i) => ({ nome: t.nome, cor: cores[i % cores.length], v: ms.map(m => somavel(db.retratos[t.slug]?.payload) ? totaisPlano(db.retratos[t.slug].payload, [m]).previsto : 0) }));
-  if (db.itens.length) series.push({ nome: 'Itens do grupo', cor: '#cfd3e0', v: ms.map(m => totaisItens([m]).previsto) });
+  if (db.itens.length) series.push({ nome: 'Itens do grupo', cor: '#c2cde2', v: ms.map(m => totaisItens([m]).previsto) });
   const tot = ms.map((_, i) => series.reduce((s, x) => s + x.v[i], 0)), max = Math.max(1, ...tot, orcAno() / 12);
   const W = 760, H = 210, bw = (W - 16) / 12, y = v => H - 24 - (v / max) * (H - 40);
   let svg = '';

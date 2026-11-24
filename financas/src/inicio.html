@@ -27,7 +27,7 @@
    Pergunta o uso esperado, cria o primeiro arquivo (sempre cifrado), gera os HTMLs
    desacoplados de cada uso e o cartão "Onde fica cada coisa".
    ===================================================================== */
-const TOOL_NOME = 'Início da solução', TOOL_VERSION = '2.0.0';
+const TOOL_NOME = 'Início da solução', TOOL_VERSION = '2.1.0';
 $('#ver').textContent = TOOL_VERSION;
 const st = { passo: 0, papel: '', usos: [], dados: {}, dirLocal: null, raiz: null, senha: null, criados: [], temChave: null, chaves: [], kErr: '', pastaDoLider: '', cofreChaves: false };
 // Perfil: quem lidera, se quer finanças e tarefas, e se o líder já mandou chaves e a pasta.
@@ -259,7 +259,7 @@ async function cifrarQuadro(obj, senha) {
 function cartao() {
   const d = st.dados, linhas = st.criados.map(c => `<tr><td><code>${esc(c.nome)}</code></td><td>${esc(c.desc)}</td></tr>`).join('');
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Onde fica cada coisa</title>
-<style>body{font-family:Inter,"Segoe UI",system-ui,sans-serif;max-width:760px;margin:40px auto;padding:0 20px;color:#161a23;background:#fafafc;line-height:1.5}h1{font-size:22px}h2{font-size:15px;margin-top:28px}table{border-collapse:collapse;width:100%;font-size:14px}td{border-bottom:1px solid #eceef4;padding:8px 6px;vertical-align:top}code{font-size:13px}.box{border:1.5px solid #c4574f;background:#fbefee;border-radius:12px;padding:12px 14px;color:#6d2620}.g{display:grid;grid-template-columns:1fr 1fr;gap:12px}.g div{border:1px solid #eceef4;background:#fff;border-radius:12px;padding:10px 12px}</style></head><body>
+<style>body{font-family:"DM Sans","Segoe UI",system-ui,sans-serif;max-width:760px;margin:40px auto;padding:0 20px;color:#121f3d;background:#f4f7fc;line-height:1.5}h1{font-size:22px}h2{font-size:15px;margin-top:28px}table{border-collapse:collapse;width:100%;font-size:14px}td{border-bottom:1px solid #e0e6f1;padding:8px 6px;vertical-align:top}code{font-size:13px}.box{border:1.5px solid #c2334f;background:#fdedf1;border-radius:12px;padding:12px 14px;color:#7a1d33}.g{display:grid;grid-template-columns:1fr 1fr;gap:12px}.g div{border:1px solid #e0e6f1;background:#fff;border-radius:12px;padding:10px 12px}</style></head><body>
 <h1>Onde fica cada coisa</h1><p>${esc(st.papel === 'gestor' ? 'Grupo' : 'Time')} <b>${esc(d.nome)}</b> · criado em ${esc(new Date().toLocaleDateString('pt-BR'))} pelo assistente Início da solução. Este cartão não tem dados nem senhas.</p>
 <div class="box"><b>A senha dos arquivos está no seu cofre de senhas.</b> Sem ela não há como abrir os dados. As chaves dos times também ficam no cofre e só são enviadas por mensagem direta ou e-mail.</div>
 <h2>Pasta local (${esc(st.dirLocal.name)}) · só neste computador, fora do OneDrive</h2><table>${linhas}<tr><td><code>backup/</code></td><td>As 5 últimas versões de cada arquivo de dados (cifradas).</td></tr></table>

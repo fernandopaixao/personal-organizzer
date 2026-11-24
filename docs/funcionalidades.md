@@ -1,6 +1,6 @@
 # Funcionalidades, usos e objetivos
 
-*24/11/2026 · Central v15.4, Quadro do Time 2.2, Hub 1.2, Finanças do Grupo 1.3 e do Time 1.2, assistente 2.0*
+*24/11/2026 · Central v15.5, Quadro do Time 2.3, Hub 1.3, Finanças do Grupo 1.4 e do Time 1.3, Mapa de Férias 1.1, assistente 2.1*
 
 Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. Para as regras técnicas por trás, veja as [decisões de arquitetura](adr/README.md). Para o caminho de quem usa, veja a [jornada do usuário](jornada-do-usuario.md) e o [passo a passo](passo-a-passo.md).
 
@@ -81,7 +81,7 @@ Onde as chaves coladas vão parar: no hub (tarefas e finanças de cada time), no
 
 ---
 
-## 5. Central de Gestão (v15.4)
+## 5. Central de Gestão (v15.5)
 
 **Objetivo:** concentrar o trabalho do gestor: o que ele faz, o que delegou, com quem conversa, em quais fóruns decide e como anda o portfólio.
 
@@ -135,7 +135,7 @@ Navegação em 8 páginas (teclas 1 a 8) e o botão **Importar e agentes** no to
 
 ---
 
-## 6. Quadro do Time (2.2)
+## 6. Quadro do Time (2.3)
 
 **Objetivo:** dar ao time uma ferramenta de fluxo pronta, que publica sozinha o que a Central precisa.
 
@@ -221,12 +221,13 @@ O grupo enxerga os anos do próprio horizonte **mais os anos publicados pelos ti
 | **Detecção de cópias de conflito** | Todas que leem a pasta comum | Não perder dado escondido em `arquivo (1).json` |
 | **Reconhecer arquivo errado** | Todas | Dizer qual HTML abre aquele arquivo |
 | **Tema claro, escuro ou automático** | Todas | Botão redondo no canto inferior direito; Automático segue o sistema. A escolha fica só neste computador e vale para todas as ferramentas abertas ([ADR-0027](adr/0027-tema-claro-escuro-compartilhado.md)) |
+| **Identidade visual comum** | Todas | Mesmo visual em toda a solução, feito para ficar aberto o dia todo: fundo cinza-azulado (não branco puro), cards brancos, trilho lateral marinho, um único destaque azul por tela, vermelho só para atraso e âmbar só para "vence hoje". Fontes DM Sans (texto) e Plus Jakarta Sans (títulos e números), embutidas no HTML para funcionar sem rede ([ADR-0028](adr/0028-identidade-visual-comum.md)) |
 | **Migração automática** | Central (e demais quando o formato muda) | Abrir arquivo antigo na versão nova, com backup |
 | **Pacote .zip** | `python3 tools/empacotar.py` (e a CI do repositório pessoal) | Levar a solução para a empresa num único arquivo: HTMLs lado a lado, contratos, documentação e LEIA-ME. Não passa pelo repositório da empresa |
 
 ---
 
-## 9. Mapa de Férias (`ferias.html`, 1.0)
+## 9. Mapa de Férias (`ferias.html`, 1.1)
 
 Apoio para **enxergar e planejar as ausências** do time e do grupo. Não substitui a ferramenta oficial de férias da empresa: não aprova, não controla saldo. O mesmo HTML serve ao time e ao gestor; o papel é escolhido ao criar o arquivo. Plano e decisões: [`plano-ferias.md`](plano-ferias.md).
 

@@ -33,12 +33,24 @@ def central():
     cs = sorted(RAIZ.glob('gestao_pessoal_v*.html'), key=lambda p: int(re.search(r'v(\d+)', p.name).group(1)))
     return cs[-1]
 
+def identidade():
+    """financas/src/identidade.css com as fontes de financas/src/fontes/ embutidas em base64 (sem rede)."""
+    css = (SRC / 'identidade.css').read_text(encoding='utf-8')
+    for nome in re.findall(r'/\*FONTE:([\w.-]+)\*/', css):
+        b64 = base64.b64encode((SRC / 'fontes' / nome).read_bytes()).decode('ascii')
+        css = css.replace(f'/*FONTE:{nome}*/', f'url(data:font/woff2;base64,{b64}) format("woff2")')
+    assert '</style' not in css.lower()
+    return css
+
 def tema(html):
-    """Põe (ou troca) <script id="tema"> com financas/src/tema.js logo antes do primeiro </head>.
-    Fica no <head> para o tema escuro valer antes da primeira pintura, sem piscar em branco."""
+    """Põe (ou troca) <style id="identidade"> (financas/src/identidade.css: fontes, trilho, destaque) e
+    <script id="tema"> (financas/src/tema.js) logo antes do primeiro </head>, nessa ordem.
+    A identidade vem depois do estilo da ferramenta, então vale por cima dele.
+    O tema fica no <head> para o escuro valer antes da primeira pintura, sem piscar em branco."""
     js = (SRC / 'tema.js').read_text(encoding='utf-8')
     assert '</script' not in js.lower()
-    tag = f'<script id="tema">\n{js}</script>'
+    tag = f'<style id="identidade">\n{identidade()}</style>\n<script id="tema">\n{js}</script>'
+    html = re.sub(r'<style id="identidade">.*?</style>\n?', '', html, count=1, flags=re.S)
     if '<script id="tema">' in html:
         return re.sub(r'<script id="tema">.*?</script>', lambda m: tag, html, count=1, flags=re.S)
     i = html.index('</head>')

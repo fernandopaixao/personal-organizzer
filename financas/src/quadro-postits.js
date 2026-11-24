@@ -8,15 +8,15 @@ const PI_SCHEMA = 'gestao-postits/1', PI_VISTOS = 'gestao-postits-vistos/1';
 let piNotas = [], piAbertos = false, piLendo = false, piAssinatura = '';
 (() => {
   const st = document.createElement('style');
-  st.textContent = `.pi-strip{margin:0 0 14px}.pi-h{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:650;letter-spacing:.06em;text-transform:uppercase;color:var(--muted,#6f7689);margin:0 0 8px}
+  st.textContent = `.pi-strip{margin:0 0 14px}.pi-h{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:650;letter-spacing:.06em;text-transform:uppercase;color:var(--muted,#52607e);margin:0 0 8px}
   .pi-row{display:flex;gap:12px;overflow-x:auto;padding:2px 2px 8px}
-  .pi-n{flex:0 0 220px;border-radius:4px 4px 14px 4px;padding:10px 12px;font-size:13px;line-height:1.4;box-shadow:0 1px 2px rgba(20,30,70,.08),0 6px 14px rgba(20,30,70,.06);display:flex;flex-direction:column;gap:6px;word-break:break-word}
+  .pi-n{flex:0 0 220px;border-radius:4px 4px 14px 4px;padding:10px 12px;font-size:13px;line-height:1.4;box-shadow:0 1px 2px rgba(11,33,85,.08),0 6px 14px rgba(11,33,85,.06);display:flex;flex-direction:column;gap:6px;word-break:break-word}
   .pi-n .tx{white-space:pre-wrap;flex:1}.pi-n .ft{font-size:11px;color:rgba(22,26,35,.62);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .pi-n .para{font-size:11px;font-weight:650;color:rgba(22,26,35,.7)}.pi-n.visto{opacity:.6}
   .pi-n button{margin-left:auto;font:inherit;font-size:11px;font-weight:600;border:1px solid rgba(22,26,35,.18);background:rgba(255,255,255,.7);border-radius:99px;padding:1px 9px;cursor:pointer}
-  .pi-c-amarelo{background:#fff4b8}.pi-c-rosa{background:#ffdbe4}.pi-c-verde{background:#d8f2e0}.pi-c-azul{background:#dde7ff}.pi-c-lilas{background:#ebdfff}
-  .pi-h .n{background:var(--late,#c4574f);color:#fff;border-radius:99px;padding:0 7px;font-size:10.5px;letter-spacing:0}
-  .pi-h button{font:inherit;text-transform:none;letter-spacing:0;font-weight:550;color:var(--bv,#223ad2);background:none;border:0;cursor:pointer;font-size:12px}`;
+  .pi-c-amarelo{background:#fff4b8}.pi-c-rosa{background:#ffdbe4}.pi-c-verde{background:#d3f0e7}.pi-c-azul{background:#dde7ff}.pi-c-lilas{background:#ebdfff}
+  .pi-h .n{background:var(--late,#c2334f);color:#fff;border-radius:99px;padding:0 7px;font-size:10.5px;letter-spacing:0}
+  .pi-h button{font:inherit;text-transform:none;letter-spacing:0;font-weight:550;color:var(--bv,#1e4fc8);background:none;border:0;cursor:pointer;font-size:12px}`;
   document.head.appendChild(st);
 })();
 const piChaveVistos = () => 'quadro.postits.vistos.' + (db?.team.slug || '') + '.' + (f4eu() || '');
