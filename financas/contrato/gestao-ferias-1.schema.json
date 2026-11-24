@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "gestao-ferias/1",
+  "title": "Férias e ausências publicadas por uma pessoa ou por um grupo (conteúdo decifrado do envelope gestao-envelope/1)",
+  "description": "Mapa de Férias 1.0. Time: times/<time>/ferias/<pessoa>-<computador>.json, cifrado com a chave de tarefas do time (a mesma do Quadro); cada membro publica o que cadastrou e quem lê soma todos. Grupo: grupos/<grupo>/ferias/<pessoa>-<computador>.json, cifrado com a chave que a liderança gerou para o grupo (a chave GK1.<grupo>-fin-… das Finanças do Grupo serve); é o consolidado do gestor para o nível acima. Retrato completo: remover uma ausência é publicar sem ela. Quem lê fica, por pessoa (prefixo do writer), com o arquivo de HLC mais novo. Notas das ausências nunca são publicadas. Apoio de planejamento: não substitui a ferramenta oficial de férias.",
+  "type": "object",
+  "required": ["schema", "revision", "generatedAt", "source", "unit", "people", "absences"],
+  "properties": {
+    "schema": { "const": "gestao-ferias/1" },
+    "revision": { "type": "integer", "minimum": 1 },
+    "generatedAt": { "type": "string" },
+    "hlc": { "type": "string" },
+    "source": {
+      "type": "object", "required": ["team", "writer"],
+      "properties": {
+        "team": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "description": "Slug do time ou do grupo; igual ao team do envelope." },
+        "writer": { "type": "string", "pattern": "^[a-z0-9]+~[a-z0-9]+$" },
+        "tool": { "type": "string" }, "toolVersion": { "type": "string" },
+        "level": { "enum": ["team", "group"], "description": "team: contribuição de um membro; group: consolidado de um gestor para a liderança." }
+      }
+    },
+    "unit": { "type": "object", "properties": { "name": { "type": "string" }, "slug": { "type": "string" }, "kind": { "enum": ["time", "grupo"] } } },
+    "units": {
+      "type": "array", "description": "Árvore das unidades somadas (a primeira é a própria). parent = slug da unidade de cima, null na raiz.",
+      "items": { "type": "object", "required": ["slug", "name"], "properties": { "slug": { "type": "string" }, "name": { "type": "string" }, "kind": { "enum": ["time", "grupo"] }, "parent": { "type": ["string", "null"] } } }
+    },
+    "people": {
+      "type": "array",
+      "items": { "type": "object", "required": ["id", "name"], "properties": {
+        "id": { "type": "string", "description": "Time: slug do nome (o mesmo nome em dois arquivos é a mesma pessoa). Grupo: <unidade>.<id na unidade>." },
+        "name": { "type": "string", "maxLength": 80, "description": "No grupo pode vir como 'Pessoa N' se o gestor desligou o envio de nomes." },
+        "unit": { "type": "string", "description": "Slug da unidade de origem (folha)." } } }
+    },
+    "absences": {
+      "type": "array",
+      "items": { "type": "object", "required": ["person", "start", "end"], "properties": {
+        "person": { "type": "string" },
+        "start": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "end": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$", "description": "Inclusive; end >= start." },
+        "kind": { "enum": ["ferias", "folga", "treinamento", "outro"], "description": "Sem tipos de saúde: licenças entram como 'outro'." } } }
+    },
+    "holidays": { "type": "array", "items": { "type": "object", "properties": { "date": { "type": "string" }, "name": { "type": "string" } } } },
+    "contributors": { "type": "array", "description": "Só no grupo: unidades somadas, quantos arquivos e a data do mais novo.", "items": { "type": "object" } }
+  }
+}

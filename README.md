@@ -52,3 +52,13 @@ Tem o próprio arquivo cifrado (`hub-<nome>.json`, com os times e as chaves), cr
 - Regras: tudo cifrado; dado individual fica numa pasta local fora do OneDrive; só o pedaço comum vai para a pasta sincronizada (`Gestao-Compartilhado`), com um único dono por arquivo e detecção de cópias de conflito do OneDrive.
 - A Central e o Quadro (2.2) seguem as mesmas regras: senha obrigatória, aviso de cofre, botão "Onde estou?" e, no Quadro, um arquivo por pessoa em `times/<time>/quadro/`. Depois de mudar a Central ou o Quadro, rode `python3 tools/injetar_seguranca.py` (reinjeta o bloco comum, reembute o Quadro e remonta o assistente).
 - Código-fonte em `financas/src/`; monte com `python3 tools/build_financas.py` e teste com `node financas/testes/teste-e2e.js`. Plano e decisões em [`docs/plano-financas.md`](docs/plano-financas.md).
+
+## Mapa de Férias
+
+[`ferias/ferias.html`](ferias/ferias.html) é o apoio para **enxergar e planejar as ausências** do time e do grupo (não substitui a ferramenta oficial de férias da empresa):
+
+- cada pessoa do time marca as próprias férias (ou o responsável marca as de todos) e a ferramenta publica sozinha, cifrado com a chave do time, em `times/<time>/ferias/`;
+- o gestor soma os times, marca as próprias férias e as dos diretos e vê o **mapa de calor** dos dias com mais e menos gente fora, as semanas mais tranquilas e quem está fora em cada dia; ao marcar uma ausência, a ferramenta mostra o impacto e sugere períodos com menos gente fora;
+- o gestor publica o consolidado para a liderança em `grupos/<grupo>/ferias/`, com a mesma chave do grupo das Finanças do Grupo, e a liderança soma os gestores do mesmo jeito, em quantos níveis forem precisos.
+
+Plano e decisões em [`docs/plano-ferias.md`](docs/plano-ferias.md); teste com `node financas/testes/teste-ferias.js`.

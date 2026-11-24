@@ -26,6 +26,7 @@ def main():
         'quadro_do_time_v1.html': RAIZ / 'ferramenta-time' / 'quadro_do_time_v1.html',
         'financas_grupo.html': RAIZ / 'financas' / 'financas_grupo.html',
         'financas_time.html': RAIZ / 'financas' / 'financas_time.html',
+        'ferias.html': RAIZ / 'ferias' / 'ferias.html',
     }
     for f in sorted((RAIZ / 'financas' / 'contrato').iterdir()):
         arquivos[f'contrato/{f.name}'] = f
