@@ -396,7 +396,8 @@ const FERRAMENTAS = [
   ['Finanças do Grupo', 'financas_grupo.html', 'Consolidado: soma os planos publicados pelos times. Uso do gestor.'],
   ['Finanças do Time', 'financas_<time>.html', 'Dia a dia e futuro das finanças de um time. Publica o plano para o grupo.'],
   ['Central de Gestão', 'gestao_pessoal_vNN.html', 'Tarefas consolidado: gestão do gestor, iniciativas e times.'],
-  ['Quadro do Time', 'quadro_<time>.html', 'Tarefas de um time: quadro, backlog, sprints e métricas.']
+  ['Quadro do Time', 'quadro_<time>.html', 'Tarefas de um time: quadro, backlog, sprints e métricas.'],
+  ['Mapa de Férias', 'ferias.html', 'Férias e ausências do time e do grupo, somadas em níveis até a liderança.']
 ];
 function ondeEstou(info) {
   const lin = (k, v) => `<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line);padding:6px 0"><span class="muted">${k}</span><b style="text-align:right">${v}</b></div>`;

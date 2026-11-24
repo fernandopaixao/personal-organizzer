@@ -31,6 +31,7 @@ Dar a um gestor de vários times, e aos próprios times, **um lugar organizado p
 | **Quadro do Time** | `quadro_do_time_v1.html` (gerado por time) | Cada time | Kanban, backlog, sprints e métricas de fluxo do time |
 | **Finanças do Grupo** | `financas_grupo.html` | Gestor | Consolidar os planos financeiros dos times contra o orçamento |
 | **Finanças do Time** | `financas_time.html` (gerado por time) | Responsável financeiro do time | Registrar gastos, planejar o ano e publicar o plano |
+| **Mapa de Férias** | `ferias.html` | Time, gestor e liderança | Enxergar e planejar as ausências: que dias têm mais e menos gente fora, somando em níveis |
 | **Cartão "Onde fica cada coisa"** | `onde-fica-cada-coisa.html` | Todos | Mapa em claro (sem dados) de arquivos e pastas |
 
 Todas têm, no topo, **Onde estou?** (qual ferramenta, qual arquivo, o que é local e o que é compartilhado) e **← Hub**.
@@ -215,9 +216,27 @@ O grupo enxerga os anos do próprio horizonte **mais os anos publicados pelos ti
 | **Senha obrigatória e aviso de cofre** | Todas | Ninguém abre o arquivo sem a senha; a pessoa guarda a senha antes de seguir |
 | **Lembrete de teste da senha** | Todas | Descobrir cedo que a senha se perdeu (30 dias, depois a cada 90) |
 | **Onde estou?** | Todas | Mostrar ferramenta, versão, arquivo, pasta local, pasta comum e o que vai para cada uma |
-| **← Hub** | Central, Quadro, Finanças | Voltar à tela inicial sem recarregar |
+| **← Hub** | Central, Quadro, Finanças, Mapa de Férias | Voltar à tela inicial sem recarregar |
 | **Backup cifrado rotativo** | Ferramentas com arquivo local | 5 últimas versões em `backup/` e lembrete semanal de exportar |
 | **Detecção de cópias de conflito** | Todas que leem a pasta comum | Não perder dado escondido em `arquivo (1).json` |
 | **Reconhecer arquivo errado** | Todas | Dizer qual HTML abre aquele arquivo |
 | **Migração automática** | Central (e demais quando o formato muda) | Abrir arquivo antigo na versão nova, com backup |
 | **Pacote .zip** | `python3 tools/empacotar.py` (e a CI do repositório pessoal) | Levar a solução para a empresa num único arquivo: HTMLs lado a lado, contratos, documentação e LEIA-ME. Não passa pelo repositório da empresa |
+
+---
+
+## 9. Mapa de Férias (`ferias.html`, 1.0)
+
+Apoio para **enxergar e planejar as ausências** do time e do grupo. Não substitui a ferramenta oficial de férias da empresa: não aprova, não controla saldo. O mesmo HTML serve ao time e ao gestor; o papel é escolhido ao criar o arquivo. Plano e decisões: [`plano-ferias.md`](plano-ferias.md).
+
+| Tela | O que faz | Para quê |
+|---|---|---|
+| **Mapa** | Cards (fora hoje, pico do período, dias acima do limite, dias úteis sem ninguém fora), mapa de calor por dia, semanas mais cheias e mais tranquilas, barras por unidade; filtros por unidade e período | Ver de relance onde há mais e menos gente fora |
+| **Calendário** | Mês a mês, uma linha por pessoa agrupada por unidade, com a contagem do dia no topo | Planejar e ajustar períodos, clicando na célula |
+| **Pessoas / Diretos** | Cadastro de pessoas e ausências (férias, folga, treinamento, outra), barra rápida, nota só local | Registrar o que você sabe |
+| **Unidades** (gestor) | Times e grupos de outros gestores, chaves, o que foi lido; importar do Hub e das Finanças do Grupo | Somar os níveis de baixo |
+| **Ajustes** | Pasta, chave do time ou do nível acima, publicar, limite de pessoas fora, dias úteis, feriados, nomes para cima, senha | Configurar |
+
+**Planejar:** ao marcar uma ausência, o formulário mostra quantas outras pessoas já estão fora e se algum dia passa do limite, e sugere os três períodos com menos gente fora nos próximos seis meses.
+
+**Níveis:** cada membro do time publica o que cadastrou em `times/<time>/ferias/` (sozinho, a cada mudança, com a chave do time); o gestor soma os times, cadastra as próprias férias e as dos diretos e publica o consolidado em `grupos/<grupo>/ferias/` depois de conferir; a liderança cadastra o grupo do gestor como unidade e soma do mesmo jeito ([ADR-0025](adr/0025-consolidacao-em-niveis.md) e [ADR-0026](adr/0026-ferias-em-niveis.md)).
