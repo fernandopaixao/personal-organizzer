@@ -1,6 +1,6 @@
 # Passo a passo · como lidar com a solução
 
-*24/11/2026 · Central v15.4, Quadro do Time 2.2, Hub 1.2, Finanças do Grupo 1.3 e do Time 1.2, assistente 2.0*
+*24/11/2026 · Central v15.4, Quadro do Time 2.2, Hub 1.2, Finanças do Grupo 1.3 e do Time 1.2, assistente 2.1*
 
 Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é independente. Antes de começar: use **Edge ou Chrome** e tenha à mão um **cofre de senhas** (o gerenciador de senhas da empresa).
 
@@ -34,6 +34,13 @@ Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é ind
 8. Em **Senha**, crie a senha, **guarde no cofre** e marque "Já guardei no cofre".
 9. Em **Pronto**, a pasta local passa a ter os HTMLs, os arquivos cifrados (já com as chaves coladas), o `hub.html` e o `onde-fica-cada-coisa.html`. Siga os **próximos passos** que a tela mostra para o seu perfil.
 10. Abra o `hub.html`. A partir de agora ele é a sua tela inicial.
+
+**Atalho: Estou com sorte.** Na primeira tela do assistente, quem lidera times pode clicar **Estou com sorte**:
+1. Preencha o nome do grupo, o seu nome, os times (um por linha, com o prefixo se quiser), o ano e a moeda.
+2. Escolha a pasta (fora do OneDrive), a pasta sincronizada (se já tiver) e crie a senha.
+3. Clique **Gerar tudo** e confirme o aviso de cofre das chaves.
+4. Na tela final, copie a chave de cada time para o cofre, siga o checklist e envie a cada responsável a pasta `para-os-times/<time>/` por mensagem direta ou e-mail (nunca pela pasta compartilhada).
+5. O time abre o `quadro_<time>.html`, o `financas_<time>.html` ou o `ferias.html`, cria a própria senha e guarda a chave quando a ferramenta pedir.
 
 **Gestor: equipar cada time com o assistente.** Depois de gerar as chaves dos times (seção 2), mande a cada time o `inicio.html` e, por mensagem direta, a chave e o nome da pasta sincronizada. O responsável abre o assistente, escolhe "Sim, lidero 1 time", cola a chave e sai com o Quadro e/ou o Finanças do Time prontos. É o caminho recomendado; gerar o HTML do time pela Central (seção 2) continua valendo.
 

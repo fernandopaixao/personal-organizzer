@@ -68,6 +68,7 @@ def main():
     ini, _ = embutir(ini, 'centralEmb', c.read_bytes(), c.stem)
     ini, _ = embutir(ini, 'quadroEmb', q.read_bytes(), versao(q.read_text(encoding='utf-8')))
     ini, _ = embutir(ini, 'hubEmb', hub.encode('utf-8'), versao(hub))
+    ini, _ = embutir(ini, 'feriasEmb', fer.encode('utf-8'), versao(fer))
     (RAIZ / 'inicio.html').write_text(ini, encoding='utf-8')
     for p in [RAIZ / 'financas' / 'financas_time.html', RAIZ / 'financas' / 'financas_grupo.html', RAIZ / 'hub.html', RAIZ / 'ferias' / 'ferias.html', RAIZ / 'inicio.html']:
         print(f'{p.relative_to(RAIZ)}: {p.stat().st_size // 1024} KB')

@@ -1318,7 +1318,7 @@ function vAjustes(el) {
 function telaInicial(msg = '') {
   $('#app').innerHTML = `<div class="welcome"><div class="card">
     <div class="row"><div class="logo" style="margin:0">FÉR</div><div><h2 style="margin:0">Mapa de Férias</h2><div class="small muted">Enxergar e planejar as ausências do time e do grupo</div></div></div>
-    ${PRESET?.unidade ? `<div class="banner" style="margin-top:16px">Pré-configurado para <b>${esc(PRESET.unidade.nome)}</b>.</div>` : ''}
+    ${PRESET?.unidade ? `<div class="banner" style="margin-top:16px">Pré-configurado para <b>${esc(PRESET.unidade.nome)}</b>.${PRESET.chave ? ' A chave do time vem junto: você vai guardá-la no cofre ao criar o arquivo.' : ''}</div>` : ''}
     ${msg ? `<div class="banner warn" style="margin-top:12px">${esc(msg)}</div>` : ''}
     <p class="lbl" style="margin-top:20px">É a primeira vez?</p>
     <button class="opt" id="iTime"><b>Sou de um time</b><span>Cadastro as minhas férias (e, se quiser, as do time). Elas somam com as dos colegas e chegam ao gestor.</span></button>
@@ -1392,6 +1392,8 @@ async function criarArquivo({ nivel, nome, slug, pessoa }) {
   const senha = await criarSenhaDlg(); if (!senha) return false;
   db = novoDb({ nivel, nome, slug, pessoa });
   db.seg.cofreConfirmadoEm = new Date().toISOString();
+  // HTML gerado pelo assistente ("Estou com sorte") pode trazer a chave do time: guarda no cofre e já usa.
+  if (PRESET?.chave && nivel === 'time') { try { const k = lerChaveTexto(PRESET.chave); if (chaveDoSlug(k.kid, slug) && await avisoCofre('chave', `<p class="small">Chave do time: <span class="code">${esc(k.kid)}</span>. Copie-a para o cofre:</p><input class="sin code" style="width:100%" readonly value="${esc(PRESET.chave)}" onclick="this.select()">`)) db.chaves.push({ kid: k.kid, texto: PRESET.chave, em: new Date().toISOString(), origem: 'preset' }); } catch {} }
   ctx = await novoCtx(senha, TOOL); dirLocal = h; arquivo = nomeArq;
   await gravarLocal(h, nomeArq, await cifrarLocal(db, ctx));
   view = nivel === 'grupo' ? 'unidades' : 'pessoas'; await aposAbrir();

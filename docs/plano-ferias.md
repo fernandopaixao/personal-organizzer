@@ -49,3 +49,7 @@ A liderança cadastra o grupo do gestor como uma **unidade** e soma o consolidad
 ## 7. Próximos passos sugeridos
 - Onboarding por perfil: gerar o Mapa de Férias para gestor e time, com a chave do nível acima.
 - Hub: mostrar "fora hoje" por time, lendo `times/<time>/ferias/` com a chave do time que o hub já tem.
+
+## Gerado pelo assistente (24/11/2026)
+
+O `inicio.html` 2.1 gera o Mapa de Férias quando a pessoa marca "Férias" no perfil, e também no "Estou com sorte". No gestor, o arquivo `ferias-<grupo>.json` já sai com os times como unidades (cada uma com a chave de tarefas do time) e, se houver, a chave da liderança. No time, o arquivo sai com a chave do time. O `ferias.html` de `para-os-times/<time>/` leva a chave do time no preset (`chave`), e a ferramenta pede o aviso de cofre ao criar o arquivo.
