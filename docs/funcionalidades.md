@@ -1,6 +1,6 @@
 # Funcionalidades, usos e objetivos
 
-*24/11/2026 · Central v15.4, Quadro do Time 2.2, Hub 1.2, Finanças do Grupo 1.3 e do Time 1.2, assistente 2.0*
+*24/11/2026 · Central v15.5, Quadro do Time 2.2, Hub 1.2, Finanças do Grupo 1.3 e do Time 1.2, assistente 2.1*
 
 Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. Para as regras técnicas por trás, veja as [decisões de arquitetura](adr/README.md). Para o caminho de quem usa, veja a [jornada do usuário](jornada-do-usuario.md) e o [passo a passo](passo-a-passo.md).
 
@@ -42,6 +42,8 @@ Todas têm, no topo, **Onde estou?** (qual ferramenta, qual arquivo, o que é lo
 
 **Objetivo:** fazer a primeira montagem sem a pessoa precisar entender a arquitetura.
 
+**Como funciona (2.1).** A primeira tela explica a solução em quatro desenhos: o HTML é a ferramenta e o JSON é o caderno cifrado; a chave de integração é um idioma que só você e o time falam; quem lidera 1 time publica para o gestor, e quem lidera vários soma os times e publica para a liderança; a troca é por uma pasta sincronizada pelo OneDrive, onde cada pessoa grava só o próprio arquivo.
+
 | Passo | O que acontece |
 |---|---|
 | Perfil | **Você lidera times?** "Sim, lidero 2 ou mais times" (gestor), "Sim, lidero 1 time" (responsável) ou "Não, faço parte de um time" (membro). Depois, **o que quer organizar**: tarefas, finanças ou os dois (membro só tarefas) |
@@ -57,11 +59,23 @@ Todas têm, no topo, **Onde estou?** (qual ferramenta, qual arquivo, o que é lo
 | Gestor + tarefas | Central (que gera o Quadro de cada time) |
 | Responsável + finanças | Finanças do Time |
 | Responsável ou membro + tarefas | Quadro do Time |
-| Os dois | A soma das linhas, cada HTML separado |
+| Qualquer papel + férias | Mapa de Férias: no time, cada pessoa marca as suas; no gestor, os times entram como unidades |
+| Vários usos | A soma das linhas, cada HTML separado |
 
 Onde as chaves coladas vão parar: no hub (tarefas e finanças de cada time), no Quadro (chave de tarefas), no Finanças do Time (chave de finanças) e no Finanças do Grupo (`acima`, a chave da liderança). Nenhuma chave vai para a pasta compartilhada.
 
-**Quando usar:** uma vez, ou ao trocar de computador. O gestor manda o mesmo `inicio.html` (está no .zip da solução) a cada time, com a chave por mensagem direta, e o time monta tudo sozinho.
+**Estou com sorte (2.1).** Para quem lidera times e quer tudo de uma vez. Uma tela só (grupo, times, seu nome, pasta, pasta sincronizada opcional e senha) e o assistente:
+
+| Gera | Onde | Com o quê |
+|---|---|---|
+| Chaves de tarefas e de finanças de cada time | Dentro dos arquivos cifrados e dos HTMLs dos times | Aviso de cofre antes; botões para copiar cada chave depois |
+| Hub, Central, Finanças do Grupo, Mapa de Férias e "Onde fica cada coisa" | Na pasta escolhida | Times, prefixos, pastas e chaves já cadastrados; uma senha para todos |
+| Quadro do Time, Finanças do Time, Mapa de Férias e LEIA-ME de cada time | `para-os-times/<time>/` | A chave do time e a pasta sincronizada já configuradas |
+| Estrutura da pasta sincronizada | `times/<time>/…`, `grupos/<grupo>/ferias/` | Só pastas vazias |
+
+A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados), um desenho do que ficou em cada pasta, as chaves por time e um **checklist** (senha no cofre, pasta local fora do OneDrive, pasta compartilhada sincronizando, hub mostrando os times, pasta ligada na Central e no Finanças do Grupo, chaves no cofre, pastas enviadas aos times). O caminho normal também termina com o checklist do perfil. As marcações ficam só no navegador.
+
+**Quando usar:** uma vez, ou ao trocar de computador. O gestor manda a cada time a pasta `para-os-times/<time>/` (ou o mesmo `inicio.html`, com a chave por mensagem direta), e o time monta tudo sozinho.
 
 ---
 
@@ -81,14 +95,14 @@ Onde as chaves coladas vão parar: no hub (tarefas e finanças de cada time), no
 
 ---
 
-## 5. Central de Gestão (v15.4)
+## 5. Central de Gestão (v15.5)
 
 **Objetivo:** concentrar o trabalho do gestor: o que ele faz, o que delegou, com quem conversa, em quais fóruns decide e como anda o portfólio.
 
 Navegação em 8 páginas (teclas 1 a 8) e o botão **Importar e agentes** no topo.
 
 ### 5.1 Hoje (1)
-- **Cards de leitura no topo:** o dia (feitas de quantas, atrasadas), delegadas no prazo, iniciativas em andamento em dia e rituais dos próximos 7 dias. Cada card abre a página dona do dado.
+- **Cards de leitura no topo:** o dia (feitas de quantas, atrasadas), delegadas no prazo, iniciativas em andamento em dia e rituais dos próximos 7 dias. Com a chave de finanças dos times (15.5), entra o card **Finanças dos times**: previsto do ano contra o teto ou o orçado, times acima do teto e planos sem publicar há mais de 35 dias. Cada card abre a página dona do dado.
 - **Uso:** abrir o dia. Tarefas do dia e atrasadas, 1:1 da semana, fóruns dos próximos 7 dias, iniciativas pedindo atenção e o cartão **Dos times** (arquivos novos, alertas, épicos sem vínculo, times sem chave).
 - **Objetivo:** responder "o que pede atenção agora" sem navegar.
 
@@ -122,10 +136,11 @@ Navegação em 8 páginas (teclas 1 a 8) e o botão **Importar e agentes** no to
 
 ### 5.7 Times (7)
 - **Uso:** cadastro dos times (prefixo e pasta), **Métricas dos times** (fluxo publicado por eles), visão de cada time (backlog, features, reunião de status guiada, folha para o Teams) e **HTML do time** (gera o Quadro já configurado, com aviso de cofre).
+- **Finanças (15.5, só leitura):** com a chave de finanças do time, o card do time mostra o previsto do ano contra o teto ou o orçado. A reunião de status ganha o bloco **Finanças** quando o time passou do teto ou não publica há mais de 35 dias ([ADR-0028](adr/0028-financas-na-central-so-leitura.md)).
 - **Objetivo:** acompanhar cada time e entregar a ferramenta pronta.
 
 ### 5.8 Integração (8)
-- **Uso:** pasta e chaves (gerar, copiar, revogar), arquivos recebidos (com prévia), **Conciliação** (unir épicos, trazer para a Central, ligar itens a features) e **Compartilhar** (tela que mostra o que vai para cada time).
+- **Uso:** pasta e chaves (gerar, copiar, revogar; **chave de finanças** por time, colada ou importada com **Chaves do Finanças do Grupo**), arquivos recebidos (com prévia), **Conciliação** (unir épicos, trazer para a Central, ligar itens a features) e **Compartilhar** (tela que mostra o que vai para cada time).
 - **Objetivo:** manter a Central e os times falando a mesma língua, sem sobrescrever nada.
 
 ### 5.9 Importar e agentes

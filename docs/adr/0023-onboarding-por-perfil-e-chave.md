@@ -12,6 +12,9 @@ O primeiro uso pedia várias ações em cada ferramenta (senha, chave, pasta, id
 - As chaves vão direto para os arquivos cifrados: hub (`times[].chaves`, `chavesFin`), Quadro (pré-configuração), Finanças do Time (`chaves`) e Finanças do Grupo (`acima.chaves`). Nunca para a pasta compartilhada.
 - O gestor manda o `inicio.html` a cada time, com a chave por mensagem direta; gerar o HTML do time pela Central continua possível.
 
+- **Estou com sorte (2.1):** o gestor gera numa tela só as chaves de tarefas e de finanças de cada time e todas as ferramentas, dele e dos times. Os HTMLs de `para-os-times/<time>/` levam a chave do time no preset (Quadro, Finanças do Time e Mapa de Férias), com aviso de cofre na primeira abertura. Por isso essa pasta é enviada só por mensagem direta ou e-mail, nunca pela pasta compartilhada.
+- O assistente termina com um checklist do perfil; as marcações ficam só no navegador (`localStorage`), sem dado sensível.
+
 ## Consequências
 - Um time monta tudo sozinho com uma chave e um nome de pasta.
 - O formato do `kid` virou contrato: mudar o formato exige mudar o assistente, o hub e as finanças juntos.

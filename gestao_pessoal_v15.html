@@ -844,7 +844,7 @@ textarea.paste:focus{border-color:var(--bv)}
 <div class="lock" id="lock">
   <div class="lockcard">
     <div class="logo" style="margin:0">CG</div>
-    <h1>Central de Gestão <span class="appver" title="Versão desta Central">v15.4</span></h1>
+    <h1>Central de Gestão <span class="appver" title="Versão desta Central">v15.5</span></h1>
     <div class="muted small">Seus dados ficam em um arquivo JSON criptografado (AES-GCM 256, chave derivada da senha), separado deste HTML. Este arquivo não guarda nenhum dado.</div>
     <div class="field"><label for="lockPass">Senha</label><input type="password" id="lockPass" autocomplete="off" placeholder="Mínimo de 8 caracteres"></div>
     <div class="stack2">
@@ -858,7 +858,7 @@ textarea.paste:focus{border-color:var(--bv)}
   </div>
 </div>
 <div class="hidden" id="app">
-  <nav class="rail"><div class="logo">CG</div><div id="nav" style="display:contents"></div><div class="railver" title="Versão desta Central">v15.4</div></nav>
+  <nav class="rail"><div class="logo">CG</div><div id="nav" style="display:contents"></div><div class="railver" title="Versão desta Central">v15.5</div></nav>
   <main class="main"><div class="wrap">
     <div class="top">
       <h1 id="pageTitle"></h1>
@@ -1066,7 +1066,7 @@ const horizon=d=>{const n=dayDiff(today(),d);if(n<0)return'atrasada';if(n===0)re
 const KINDS={geral:'Geral',forte:'Ponto forte',desenv:'Desenvolvimento'};
 /* ============ Estado e migração (dados desacoplados, versionados e aditivos) ============ */
 const ME='me';
-const DB_VERSION=15,APP_VERSION='15.4'; /* versão exibida na página (rail e tela de senha); DB_VERSION é a do arquivo de dados */
+const DB_VERSION=15,APP_VERSION='15.5'; /* versão exibida na página (rail e tela de senha); DB_VERSION é a do arquivo de dados */
 const emptyDb=()=>({version:DB_VERSION,settings:{selfName:'Eu',hideFeedback:false,staffForumId:''},people:[],teams:[],initiatives:[],tasks:[],notes:[],cycles:[],staffs:[],weeklyReports:[],dateLog:[],forums:[],agendaItems:[],agreements:[],meetings:[],ooSessions:[]});
 let db=emptyDb();
 let password='',handle=null,dirty=false,saveTimer=null,pendingMigration=false;
@@ -1411,8 +1411,15 @@ function homeCards(o){
     s:!now.length?'Nenhuma iniciativa em andamento':attn.length?`<b>${attn.length}</b> pedindo atenção`:'Nenhuma pedindo atenção'}));
   const vazias=meets.filter(({f,d})=>!openAgenda(f.id,d).length).length,ooAtr=talk.filter(x=>x.s.late&&!x.p.calSeries).length;
   c.push(insCard({k:'Rituais nos próximos 7 dias',v:`${meets.length+talk.length}`,s:`${meets.length} fórum${meets.length===1?'':'s'}${vazias?` (<b>${vazias}</b> sem pauta)`:''} · ${talk.length} 1:1${ooAtr?` (<b>${ooAtr}</b> atrasado${ooAtr>1?'s':''})`:''}`,act:'goto-forum'}));
+  const fc=finHomeCard();if(fc)c.push(fc);
   return`<div class="inss">${c.join('')}</div>`;
 }
+// Card de finanças da Hoje: previsto de todos os times contra o orçado do ano, marca do mês e times acima do teto.
+function finHomeCard(){const ano=finAno(),xs=db.teams.map(t=>finTeam(t.id,ano)).filter(x=>x&&x.y);if(!xs.length)return'';
+  const cur=xs[0].s.cur,f=xs.reduce((a,x)=>a+x.y.f,0),b=xs.reduce((a,x)=>a+(x.ref||0),0),r=xs.reduce((a,x)=>a+x.y.a,0),over=xs.filter(x=>x.over).length,velhos=xs.filter(x=>x.velho).length;
+  const mes=String(new Date().getFullYear())===ano?(new Date().getMonth()+1)/12:null;
+  return insCard({k:`Finanças dos times · ${esc(ano)}`,v:`${esc(finFmt(f,cur))} <small>de ${esc(finFmt(b,cur))}</small>`,pct:b?f/b:null,bad:over>0,go:'teams',
+    s:over?`<b>${over}</b> ${over>1?'times acima do teto':'time acima do teto'}`:velhos?`<b>${velhos}</b> sem publicar há mais de 35 dias`:`realizado ${esc(finFmt(r,cur))}${mes!=null&&b?` · ${Math.round(r/b*100)}% com ${Math.round(mes*100)}% do ano`:''}`})}
 function teamCard(t){
   const all=db.initiatives.filter(i=>(i.teamId||'')===t.id),now=all.filter(i=>i.bucket==='now').sort((a,b)=>(a.end||'9999').localeCompare(b.end||'9999'));
   const mem=t.id?membersOf(t.id):[],cnt=b=>all.filter(i=>i.bucket===b).length;
@@ -1422,7 +1429,7 @@ function teamCard(t){
       <div class="ts-end ${late?'late':''}">${okDate(i.end)?`${esc(fmtShort(i.end))}<small>${horizon(i.end)}</small>`:'<small>sem data</small>'}</div>
       <div class="ts-bar"><i style="width:${pr}%"></i>${tp!=null?`<b style="left:${tp}%" title="Hoje"></b>`:''}</div></div>`}).join('');
   return`<div class="card flat"><div class="tc2-h">${t.id?`<b class="tlink" data-act="open-team" data-id="${t.id}" title="Abrir a visão do time">${esc(t.name)}</b>`:`<b>${esc(t.name)}</b>`}<span class="stk">${mem.slice(0,4).map(p=>av(p.id,'xs')).join('')}</span><span class="grow"></span><span class="chip ${now.length?'bv':''}">${now.length} agora</span>${t.id?`<button class="ib" data-act="open-team" data-id="${t.id}" title="Abrir a visão do time">${ic('chevr','sm')}</button>`:''}</div>
-    ${rows||empty('Nada em andamento.')}<div class="tm" style="margin-top:8px;padding-left:6px"><span class="cm">próximas ${cnt('next')}</span><span class="cm">depois ${cnt('later')}</span><span class="cm">discovery ${cnt('discovery')}</span></div></div>`;
+    ${rows||empty('Nada em andamento.')}<div class="tm" style="margin-top:8px;padding-left:6px">${t.id?finLine(t.id):''}<span class="cm">próximas ${cnt('next')}</span><span class="cm">depois ${cnt('later')}</span><span class="cm">discovery ${cnt('discovery')}</span></div></div>`;
 }
 function renderHome(){
   const T=today(),open=db.tasks.filter(t=>!t.done),mine=open.filter(isMine);
@@ -2121,6 +2128,7 @@ function tmOpenStep(tid,f,m){
   const T=today(),items=tmAgendaOpen(f).concat(doneAgenda(f.id,T)),act=teamActive(tid),st=k=>act.filter(i=>health(i).k===k).length,wk=tmWeekItems(tid,weekStart(T)),late=wk.filter(x=>!x.done&&x.late);
   return`<div class="card"><h2 class="tm-h2">Abertura</h2><div class="muted small" style="margin-bottom:16px">Comece pelos assuntos trazidos para esta reunião e pelo panorama do time.</div>
     <div class="tm-sum"><div><b>${act.length}</b><span>iniciativas em andamento</span></div><div><b style="${st('late')?'color:var(--late)':''}">${st('late')}</b><span>atrasadas</span></div><div><b>${st('attn')}</b><span>em atenção</span></div><div><b>${wk.filter(x=>x.done).length}/${wk.length}</b><span>entregas da semana</span></div></div>
+    ${(()=>{const x=finTeam(tid);return x&&x.y&&(x.over||x.velho)?`<div class="lbl mt-sec">Finanças</div><div class="tm">${finLine(tid)}</div><div class="muted small" style="margin-top:4px">${x.over?'O previsto do ano passou do '+(x.cap?'teto':'orçado')+'. ':''}${x.velho?'O plano não é publicado há mais de 35 dias.':''}</div>`:''})()}
     ${late.length?`<div class="lbl mt-sec">Entregas atrasadas<span class="n">${late.length}</span></div>${late.map(tmWeekRow).join('')}`:''}
     <div class="lbl mt-sec">Pauta<span class="n">${items.filter(a=>a.status==='open').length} aberta${items.filter(a=>a.status==='open').length===1?'':'s'}</span></div>
     ${items.map(tmAgItem).join('')||empty('Nenhum assunto anotado para esta reunião.')}
@@ -2586,7 +2594,7 @@ function teamsHTML(){
       <div class="tc-m">${mem.map(p=>{const o=personTeamNames(p).filter(n=>n!==t.name);return`<span class="mchip" title="${o.length?'Também em: '+esc(o.join(', ')):'Somente neste time'}">${av(p.id,'xs')}${esc(p.name)}${o.length?`<em>+${o.length}</em>`:''}<button class="x" data-act="tm-remove" data-t="${t.id}" data-p="${p.id}">${ic('x','sm')}</button></span>`}).join('')||'<span class="muted small">Sem pessoas.</span>'}</div>
       ${cand.length?`<select class="tc-add" data-tmadd="${t.id}"><option value="">+ Adicionar pessoa…</option>${cand.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('')}</select>`:''}
       ${inits.length?`<div class="tc-m" style="margin-bottom:0">${inits.map(i=>`<button class="chip" data-act="open-init" data-id="${i.id}">${hd(health(i))} ${esc(cut(i.name,22))}</button>`).join('')}</div>`:''}
-      <div class="tc-f"><div class="sub">${t.prefix?`<span class="ref" title="Prefixo dos códigos">${esc(t.prefix)}</span>`:'<span class="warn">sem prefixo</span> ·'}${t.slug?`<span title="Pasta na integração">times/${esc(t.slug)}/</span>`:'<span class="warn">sem pasta</span>'}<span>·</span>${k?`<span title="Chave de integração">${ic('lock','sm')} chave ativa</span>`:'<span class="warn">sem chave</span>'}</div>
+      <div class="tc-f"><div class="sub">${t.prefix?`<span class="ref" title="Prefixo dos códigos">${esc(t.prefix)}</span>`:'<span class="warn">sem prefixo</span> ·'}${t.slug?`<span title="Pasta na integração">times/${esc(t.slug)}/</span>`:'<span class="warn">sem pasta</span>'}<span>·</span>${k?`<span title="Chave de integração">${ic('lock','sm')} chave ativa</span>`:'<span class="warn">sem chave</span>'}${finTeam(t.id)?`<div style="margin-top:4px;white-space:normal">${finLine(t.id)}</div>`:''}</div>
         <button class="btn sm" data-act="qt-open" data-id="${t.id}" title="Gerar o Quadro do Time já configurado para este time">${ic('down','sm')} HTML do time</button></div></div>`};
   const none=db.people.filter(p=>!(p.teamIds||[]).length);
   return`<div class="bar"><span class="muted small">Uma pessoa pode estar em vários times (+N indica os outros).</span><span class="grow"></span><button class="btn pri" data-act="new-team">${ic('plus','sm')} Time</button></div>
@@ -3181,9 +3189,9 @@ const ST_L={ok:'no prazo',attn:'atenção',late:'atrasada',done:'concluída',pau
 
 /* ---------- dados e códigos ---------- */
 function igFinalize(o){
-  const g=o.integ=Object.assign({keys:{},seq:{},received:{},links:[],ignored:[],aliases:[],shared:{},metricMap:{},suggest:[],merged:[],html:{}},o.integ&&typeof o.integ==='object'?o.integ:{});
+  const g=o.integ=Object.assign({keys:{},seq:{},received:{},links:[],ignored:[],aliases:[],shared:{},metricMap:{},suggest:[],merged:[],html:{},finKeys:{},fin:{}},o.integ&&typeof o.integ==='object'?o.integ:{});
   ['links','ignored','aliases','suggest','merged'].forEach(k=>{if(!Array.isArray(g[k]))g[k]=[]});
-  ['keys','seq','received','shared','metricMap','html'].forEach(k=>{if(!g[k]||typeof g[k]!=='object'||Array.isArray(g[k]))g[k]={}});
+  ['keys','seq','received','shared','metricMap','html','finKeys','fin'].forEach(k=>{if(!g[k]||typeof g[k]!=='object'||Array.isArray(g[k]))g[k]={}});
   let n=0;const used=new Set(o.initiatives.map(i=>i.ref).filter(Boolean));
   o.teams.forEach(t=>{t.prefix=/^[A-Z]{2,5}$/.test(t.prefix||'')?t.prefix:'';t.slug=igSlugify(t.slug||'')});
   const tm=new Map(o.teams.map(t=>[t.id,t])),fIds=new Set(o.tasks.filter(t=>t.type==='feature').map(t=>t.id));
@@ -3221,6 +3229,66 @@ function igNewKey(t){const ym=today().slice(2,7).replace('-',''),base=`${t.slug|
   while(Object.values(db.integ.keys).flat().some(k=>{try{return igParseKey(k.key).kid===kid}catch{return false}}))kid=`${base}-${++n}`;
   const k={key:`GK1.${kid}.${igB64.urlEnc(crypto.getRandomValues(new Uint8Array(32)))}`,createdAt:today()};ks.push(k);return k}
 
+/* ---------- v15.5: finanças dos times, só leitura (ADR-0026) ----------
+   A Central lê o plano que cada time publica (times/<pasta>/financas/plano.json) e o teto da diretriz do grupo
+   (grupo/financas/diretriz-<pasta>.json) com a chave de FINANÇAS do time, separada da chave de tarefas (ADR-0006).
+   Quem edita orçamento, tetos e consolidado continua sendo o Finanças do Grupo. Valores em centavos. */
+const FIN_LOCAL='gestao-local-cifrado/1';
+const finKeyActive=tid=>(db.integ.finKeys[tid]||[]).filter(k=>!k.revokedAt).slice(-1)[0]||null;
+function finAddKey(t,texto,origin){texto=String(texto||'').trim();let kid;try{kid=igParseKey(texto).kid}catch{throw new Error('Chave inválida: confira se copiou o texto inteiro (GK1.…).')}
+  if(!/-fin(-|$)/.test(kid))throw new Error(`"${kid}" é uma chave de tarefas. A de finanças tem "-fin-" no nome e é gerada no Finanças do Grupo.`);
+  if(!t.slug||!(kid===t.slug+'-fin'||kid.startsWith(t.slug+'-fin-')))throw new Error(`A chave "${kid}" não é do time ${t.name} (pasta ${t.slug||'não definida'}).`);
+  const ks=db.integ.finKeys[t.id]=db.integ.finKeys[t.id]||[];if(ks.some(k=>k.key===texto))return false;ks.push({key:texto,createdAt:today(),origin:origin||'colada'});return true}
+async function finDecrypt(env,t){
+  if(env?.schema!==IG_ENV||env.alg!=='A256GCM')throw new Error('Não é um envelope gestao-envelope/1');if(env.team!==t.slug)throw new Error('Arquivo de outro time');
+  const k=(db.integ.finKeys[t.id]||[]).find(x=>!x.revokedAt&&igParseKey(x.key).kid===env.kid);if(!k)throw new Error(`Chave de finanças "${igStr(env.kid,60)}" não cadastrada na Central`);
+  let pt;try{pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:igB64.dec(env.iv),additionalData:igAad(env)},await igCryptoKey(k.key),igB64.dec(env.ct))}catch{throw new Error('Falha ao decifrar: chave errada ou arquivo alterado')}
+  const p=JSON.parse(igTd.decode(pt));if(p.schema!==env.content||p.revision!==env.revision||p.generatedAt!==env.generatedAt)throw new Error('Cabeçalho do envelope não confere');return p}
+// Retrato do plano: totais por ano (totalsByYear, como o hub) e soma por código de iniciativa, mês a mês.
+function finSnap(p){const n=v=>Number.isFinite(+v)?Math.round(+v):0,years={},ini={};
+  for(const[a,x]of Object.entries(p.totalsByYear||{}))if(/^\d{4}$/.test(a))years[a]={b:n(x?.budget),f:n(x?.forecast),a:n(x?.actual)};
+  if(!Object.keys(years).length&&p.fiscalYear)years[p.fiscalYear]={b:n(p.totals?.budget),f:n(p.totals?.forecast),a:n(p.totals?.actual)};
+  for(const l of(p.lines||[]).slice(0,2000)){const c=String(l.initiative||'').trim().toUpperCase().slice(0,40);if(!c)continue;
+    for(const[mk,m]of Object.entries(l.months||{})){const y=mk.slice(0,4);if(!years[y])continue;const o=(ini[c]=ini[c]||{})[y]=(ini[c]||{})[y]||{b:0,f:0,a:0};o.b+=n(m?.budget);o.f+=n(m?.forecast);o.a+=n(m?.actual)}}
+  return{rev:n(p.revision),gen:String(p.generatedAt||'').slice(0,40),cur:/^[A-Z]{3}$/.test(p.currency||'')?p.currency:'BRL',fy:n(p.fiscalYear),years,ini,closed:(p.closedMonths||[]).filter(x=>/^\d{4}-\d{2}$/.test(x)).sort().slice(-1)[0]||'',version:String(p.planVersion||'').slice(0,40),cap:{}}}
+async function finReadAll(){
+  const erros=[],times=await igSub(IG.dir,'times'),grupo=await igSub(IG.dir,'grupo'),gfin=grupo&&await igSub(grupo,'financas');
+  for(const t of db.teams){if(!t.slug||!(db.integ.finKeys[t.id]||[]).length)continue;
+    const dir=times&&await igSub(times,t.slug),fdir=dir&&await igSub(dir,'financas');let best=null,err='';
+    if(fdir)for await(const[fn,fh]of fdir.entries()){if(fh.kind!=='file'||!/^plano.*\.json$/i.test(fn))continue;
+      try{const f=await fh.getFile();if(f.size>5e6)continue;const p=await finDecrypt(JSON.parse(await f.text()),t);if(p.schema!=='gestao-financas-plano/1'||p.source?.team!==t.slug)continue;if(!best||p.revision>best.revision)best=p}catch(e){err=e.message}}
+    if(best){const old=db.integ.fin[t.id];if(!old||old.rev!==best.revision||old.gen!==String(best.generatedAt||'').slice(0,40)){db.integ.fin[t.id]=Object.assign(finSnap(best),{cap:old?.cap||{}});touch()}}
+    else if(err)erros.push(`${t.name}: ${err}`);
+    const s=db.integ.fin[t.id];
+    if(s&&gfin){try{const fh=await gfin.getFileHandle(`diretriz-${t.slug}.json`),d=await finDecrypt(JSON.parse(await(await fh.getFile()).text()),t),cap={};
+      for(const[y,v]of Object.entries(d.byYear||{}))if(/^\d{4}$/.test(y))cap[y]=Math.round(+v?.capTotal||0);if(!Object.keys(cap).length&&d.fiscalYear)cap[d.fiscalYear]=Math.round(+d.capTotal||0);
+      if(JSON.stringify(cap)!==JSON.stringify(s.cap)){s.cap=cap;touch()}}catch{}}}
+  IG.finErr=erros;return erros}
+// Ano mostrado: o corrente, se algum time publicou; senão o ano base mais recente publicado.
+function finAno(){const ss=Object.values(db.integ.fin||{}),a=String(new Date().getFullYear());return!ss.length||ss.some(x=>x.years[a])?a:String(Math.max(...ss.map(x=>x.fy||0)))}
+const finFmt=(c,cur='BRL')=>{const v=(c||0)/100,a=Math.abs(v),sy=cur==='BRL'?'R$':cur==='USD'?'US$':cur==='EUR'?'€':cur;return a>=1e6?`${sy} ${(v/1e6).toLocaleString('pt-BR',{maximumFractionDigits:1})} mi`:a>=1e3?`${sy} ${Math.round(v/1e3).toLocaleString('pt-BR')} mil`:`${sy} ${Math.round(v).toLocaleString('pt-BR')}`};
+// Situação de um time no ano: previsto contra o teto (ou o orçado, sem teto) e há quantos dias publicou.
+function finTeam(tid,ano=finAno()){const s=db.integ.fin?.[tid];if(!s)return null;const y=s.years[ano];if(!y)return{s,ano,y:null};
+  const ref=s.cap[ano]||y.b,dias=s.gen?Math.max(0,dayDiff(s.gen.slice(0,10),today())):null;return{s,ano,y,ref,cap:s.cap[ano]||0,over:ref>0&&y.f>ref,dias,velho:dias!=null&&dias>35}}
+function finLine(tid){const x=finTeam(tid);if(!x)return'';if(!x.y)return`<span class="cm">finanças: sem plano de ${esc(x.ano)}</span>`;
+  return`<span class="cm" style="${x.over?'color:var(--late)':''}" title="${esc(x.ano)} · realizado ${esc(finFmt(x.y.a,x.s.cur))} · plano revisão ${x.s.rev}${x.s.version?' · '+esc(x.s.version):''}">${ic('chart','sm')}previsto ${esc(finFmt(x.y.f,x.s.cur))} de ${esc(finFmt(x.ref,x.s.cur))}${x.cap?' (teto)':' orçado'}${x.velho?` · publicado há ${x.dias} dias`:''}</span>`}
+// Importa as chaves de finanças dos times do arquivo do Finanças do Grupo (só leitura, com a senha dele).
+function finAskPass(nome){return new Promise(res=>{const d=document.createElement('dialog');d.innerHTML=`<form class="modal" method="dialog" style="max-width:420px"><h2>Senha do Finanças do Grupo</h2><div class="muted small" style="margin:-6px 0 12px">Para ler as chaves de finanças de <span class="igkey">${esc(nome)}</span>. A Central só lê: nada é gravado nesse arquivo.</div><input type="password" id="finPw" autocomplete="off" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px 10px"><div class="macts"><button type="button" class="btn" value="">Cancelar</button><button class="btn pri" value="ok">Ler chaves</button></div></form>`;
+  document.body.appendChild(d);d.querySelector('button[type=button]').onclick=()=>d.close('');d.onclose=()=>{const v=d.returnValue==='ok'?d.querySelector('#finPw').value:'';d.remove();res(v)};d.showModal();setTimeout(()=>d.querySelector('#finPw').focus(),0)})}
+async function finImport(){
+  if(!window.showOpenFilePicker){toast('Use Edge ou Chrome.');return}
+  let fh;try{[fh]=await showOpenFilePicker({id:'fin-grupo',types:[{description:'Finanças do Grupo',accept:{'application/json':['.json']}}]})}catch{return}
+  let o;try{o=JSON.parse(await(await fh.getFile()).text())}catch{toast('Não é um arquivo JSON.');return}
+  if(o?.schema!==FIN_LOCAL||o.app!=='financas-grupo'){toast('Este não é o arquivo do Finanças do Grupo (financas-grupo-<grupo>.json).',6000);return}
+  const senha=await finAskPass(fh.name);if(!senha)return;let dados;
+  try{const base=await crypto.subtle.importKey('raw',igTe.encode(senha),'PBKDF2',false,['deriveKey']),key=await crypto.subtle.deriveKey({name:'PBKDF2',hash:'SHA-256',salt:igB64.dec(o.kdf.salt),iterations:o.kdf.iter||600000},base,{name:'AES-GCM',length:256},false,['decrypt']);
+    dados=JSON.parse(igTd.decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:igB64.dec(o.iv),additionalData:igTe.encode(FIN_LOCAL+'|financas-grupo')},key,igB64.dec(o.ct))))}catch{toast('Senha incorreta ou arquivo alterado.',6000);return}
+  let novas=0;const fora=[];
+  for(const g of dados.times||[]){if(g.tipo==='grupo')continue;const t=db.teams.find(x=>x.slug&&x.slug===g.slug);if(!t){fora.push(g.nome||g.slug);continue}
+    for(const c of(g.chaves||[]).filter(c=>!c.revogada&&!c.revogadaEm))try{if(finAddKey(t,c.texto,'financas-grupo'))novas++}catch{}}
+  changed();toast(`${novas} chave(s) de finanças importada(s)${fora.length?`. Sem time com a mesma pasta na Central: ${fora.join(', ')}`:''}.`,7000);
+  if(novas&&IG.dir){await igReadAll(false)}
+}
 /* ---------- leitura da pasta e dos arquivos ---------- */
 const igHasFS=()=>'showDirectoryPicker' in window;
 async function igLoadDir(){if(IG.dir)return IG.dir;try{const h=await kvGet('igDir');if(h){IG.dir=h;IG.dirName=h.name}}catch{}return IG.dir}
@@ -3234,6 +3302,7 @@ async function igReadAll(ask){
     if(times)for await(const[name,h]of times.entries()){if(h.kind!=='directory')continue;
       for await(const[fn,fh]of h.entries()){if(fh.kind!=='file'||!/\.json$/i.test(fn))continue;const kind=/^status/i.test(fn)?'status':/^metricas(?!-pessoas)/i.test(fn)?'metricas':'';if(!kind)continue;
         try{const f=await fh.getFile();if(f.size>5e6){found.push({file:`times/${name}/${fn}`,err:'Arquivo maior que 5 MB, ignorado'});continue}found.push(await igIngest(await f.text(),`times/${name}/${fn}`,name))}catch(e){found.push({file:`times/${name}/${fn}`,err:e.message})}}}
+    try{await finReadAll()}catch(e){IG.finErr=[e.message]}
   }finally{IG.busy=false}
   igSetInbox(found);IG.lastRead=igNowIso();renderIgSafe();
 }
@@ -3451,13 +3520,13 @@ function renderIgSafe(){if(page==='integ')renderInteg();else render()}
 function renderInteg(){
   const tabs=[['pasta','Pasta e chaves'],['rec','Recebidos'],['conc','Conciliação'],['share','Compartilhamento']];
   let h=`<div class="bar"><div class="sg">${tabs.map(([k,l])=>`<button class="${IG.tab===k?'on':''}" data-act="ig-tab" data-v="${k}">${l}${k==='rec'&&igBadge()?` · ${igBadge()}`:''}</button>`).join('')}</div><span class="grow"></span>
-    <button class="btn sm" data-act="ig-read" ${IG.busy?'disabled':''}>${ic('down','sm')} ${IG.busy?'Lendo…':'Atualizar da pasta'}</button><button class="btn sm" data-act="ig-files">${ic('upload','sm')} Importar arquivos</button><input type="file" id="igFiles" accept=".json,application/json" multiple hidden></div>`;
+    <button class="btn sm" data-act="ig-read" ${IG.busy?'disabled':''}>${ic('down','sm')} ${IG.busy?'Lendo…':'Atualizar da pasta'}</button><button class="btn sm" data-act="ig-files">${ic('upload','sm')} Importar arquivos</button><button class="btn sm" data-act="fin-import" title="Lê as chaves de finanças dos times no arquivo do Finanças do Grupo">${ic('chart','sm')} Chaves do Finanças do Grupo</button><input type="file" id="igFiles" accept=".json,application/json" multiple hidden></div>`;
   h+=IG.tab==='pasta'?igPaneFolder():IG.tab==='rec'?igPaneRec():IG.tab==='conc'?igPaneConc():igPaneShare();$('#integ').innerHTML=h}
 function igPaneFolder(){
   const rows=sortedTeams().map(t=>{const k=igActiveKey(t.id),miss=[!t.prefix&&'prefixo',!t.slug&&'pasta'].filter(Boolean),kid=k?igParseKey(k.key).kid:'',r=db.integ.received[t.slug]||{};
     return`<div class="igrow"><div><div class="nm">${esc(t.name)} ${t.prefix?`<span class="ref">${esc(t.prefix)}</span>`:''}</div><div class="sub">${t.slug?`times/${esc(t.slug)}/`:'sem pasta'}${r.status?` · backlog ${esc(igFmtTs(r.status.at))}`:''}${r.metricas?` · métricas ${esc(igFmtTs(r.metricas.at))}`:''}</div>${miss.length?`<div class="sub" style="color:var(--late)">Falta definir ${miss.join(' e ')} do time.</div>`:''}</div>
-      <div>${k?`<span class="igkey">${esc(kid)}</span> <span class="muted small">desde ${esc(fmtShort(k.createdAt))}</span>`:'<span class="muted small">Sem chave</span>'}${(db.integ.keys[t.id]||[]).some(x=>x.revokedAt)?`<div class="sub">${(db.integ.keys[t.id]||[]).filter(x=>x.revokedAt).length} revogada(s)</div>`:''}</div>
-      <div class="acts">${miss.length?`<button class="btn sm" data-act="edit-team" data-id="${t.id}">Editar time</button>`:k?`<button class="btn sm" data-act="ig-copykey" data-id="${t.id}">${ic('copy','sm')} Copiar chave</button><button class="btn sm" data-act="ig-copymsg" data-id="${t.id}">${ic('mail','sm')} Mensagem para o time</button><button class="btn sm" data-act="qt-open" data-id="${t.id}">${ic('down','sm')} HTML do time</button><button class="btn sm danger" data-act="ig-revoke" data-id="${t.id}">Vazou: trocar chave</button>`:`<button class="btn sm pri" data-act="ig-newkey" data-id="${t.id}">${ic('lock','sm')} Gerar chave</button>`}</div></div>`}).join('');
+      <div>${k?`<span class="igkey">${esc(kid)}</span> <span class="muted small">desde ${esc(fmtShort(k.createdAt))}</span>`:'<span class="muted small">Sem chave</span>'}${(db.integ.keys[t.id]||[]).some(x=>x.revokedAt)?`<div class="sub">${(db.integ.keys[t.id]||[]).filter(x=>x.revokedAt).length} revogada(s)</div>`:''}<div class="sub">${finKeyActive(t.id)?`finanças <span class="igkey">${esc(igParseKey(finKeyActive(t.id).key).kid)}</span>${db.integ.fin[t.id]?` · plano revisão ${db.integ.fin[t.id].rev}`:''}`:'sem chave de finanças'}</div></div>
+      <div class="acts">${miss.length?`<button class="btn sm" data-act="edit-team" data-id="${t.id}">Editar time</button>`:k?`<button class="btn sm" data-act="ig-copykey" data-id="${t.id}">${ic('copy','sm')} Copiar chave</button><button class="btn sm" data-act="ig-copymsg" data-id="${t.id}">${ic('mail','sm')} Mensagem para o time</button><button class="btn sm" data-act="qt-open" data-id="${t.id}">${ic('down','sm')} HTML do time</button><button class="btn sm danger" data-act="ig-revoke" data-id="${t.id}">Vazou: trocar chave</button>`:`<button class="btn sm pri" data-act="ig-newkey" data-id="${t.id}">${ic('lock','sm')} Gerar chave</button>`}${t.slug?`<button class="btn sm" data-act="fin-key" data-id="${t.id}" title="Chave de finanças do time, gerada no Finanças do Grupo">${ic('chart','sm')} ${finKeyActive(t.id)?'Trocar chave de finanças':'Chave de finanças'}</button>`:''}</div></div>`}).join('');
   return`<div class="igg"><div class="card"><div class="lbl">Pasta de integração</div>
     <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><div class="grow">${IG.dir?`<b>${esc(IG.dirName)}</b> <span class="muted small">${IG.perm==='granted'?'conectada':'clique em Atualizar para liberar o acesso'}${IG.lastRead?' · lida '+esc(igFmtTs(IG.lastRead)):''}</span>`:'<span class="muted">Nenhuma pasta conectada.</span>'}
       <div class="muted small" style="margin-top:4px">Escolha a pasta sincronizada do SharePoint que contém <span class="igkey">central/</span> e <span class="igkey">times/</span>. A Central lê <span class="igkey">times/&lt;pasta&gt;/status.json</span> e <span class="igkey">metricas.json</span> e grava <span class="igkey">central/catalogo-&lt;pasta&gt;.json</span> só quando você compartilha.</div></div>
@@ -3528,6 +3597,9 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]
     case 'ig-files':$('#igFiles').click();break;
     case 'ig-apply':{const x=IG.inbox[+v];if(x){x.force=true;igApply([x])}break}
     case 'ig-apply-all':igApply(IG.inbox.filter(x=>!x.err&&x.state==='new'));break;
+    case 'fin-key':{const tm=igTeam(id);if(!tm)break;const txt=prompt(`Cole a chave de finanças do time ${tm.name} (GK1.${tm.slug}-fin-…). Ela é gerada no Finanças do Grupo › Times.`);if(!txt)break;
+      try{if(finAddKey(tm,txt,'colada')){changed();toast('Chave de finanças guardada. A Central lê o plano do time ao atualizar da pasta.');if(IG.dir)igReadAll(false)}else toast('Essa chave já estava cadastrada.')}catch(e){toast(e.message,7000)}break}
+    case 'fin-import':finImport();break;
     case 'ig-newkey':{const tm=igTeam(id);if(!tm)break;if(!tm.slug||!tm.prefix){toast('Defina prefixo e pasta do time.');break}igNewKey(tm);changed();toast('Chave gerada. Copie e envie ao time por Teams ou e-mail.');await f4Cofre('chave');break}
     case 'ig-copykey':{const k=igActiveKey(id);if(k){if(!await f4Cofre('chave'))break;await copyText(k.key);toast('Chave copiada. Envie por Teams ou e-mail, nunca pela pasta.')}break}
     case 'ig-copymsg':{const tm=igTeam(id),k=igActiveKey(id);if(tm&&k){await copyText(`Olá, time ${tm.name}!\n\nSegue a chave da integração com a Central de Gestão. Cadastre-a na ferramenta do time (Quadro do Time › Central › Chaves; ela fica guardada só no navegador) e não a coloque na pasta do SharePoint.\n\nChave: ${k.key}\nPasta do time: times/${tm.slug}/\nPrefixo dos códigos: ${tm.prefix}\nCatálogo da Central: central/catalogo-${tm.slug}.json\n\nO backlog (status.json) é publicado a cada mudança de card; as métricas (metricas.json), ao fechar a sprint, com confirmação. Se a chave vazar, me avise: eu gero outra e a antiga deixa de funcionar.`);toast('Mensagem copiada, com a chave')}break}
