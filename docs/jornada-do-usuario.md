@@ -29,11 +29,11 @@ A solução tem quatro papéis. A mesma pessoa pode ter mais de um (o gestor cos
 
 | Etapa | O que ele faz | Ferramenta | O que a solução garante | Ponto de atenção |
 |---|---|---|---|---|
-| **1. Montar** | Abre `inicio.html`, escolhe "Gestor" e "os dois", informa o grupo, escolhe a pasta local e a sincronizada, cria a senha | Assistente | Primeiro arquivo já cifrado, HTMLs certos gerados, hub e cartão "Onde fica cada coisa" | Guardar a senha no cofre antes de seguir; pasta local fora do OneDrive |
+| **1. Montar** | Descompacta o .zip, abre `inicio.html`, responde "lidero 2 ou mais times" e "os dois", cola a chave da liderança se recebeu, informa o grupo e os times, escolhe as pastas, cria a senha | Assistente | Primeiro arquivo já cifrado, HTMLs do perfil, chaves já nos arquivos, próximos passos do perfil | Guardar a senha no cofre antes de seguir; pasta local fora do OneDrive |
 | **2. Cadastrar times** | Cria cada time com prefixo (`PAG`) e pasta, gera a chave de tarefas e a de finanças | Central (Times, Integração) e Finanças do Grupo (Times) | Uma chave por time, aviso de cofre, prefixo travado após o primeiro código | Enviar a chave **por mensagem direta**, nunca na pasta |
-| **3. Equipar os times** | Gera o **HTML do time** (Quadro) e o **HTML de finanças do time** e envia ao responsável | Central, Finanças do Grupo | HTML pré-configurado; a chave pode ir junto ou à parte | O HTML não leva dados; a chave sim, se marcada |
+| **3. Equipar os times** | Manda o `inicio.html` e, à parte, a chave e o nome da pasta (ou gera o **HTML do time** e o **HTML de finanças do time**) | Assistente, Central, Finanças do Grupo | O time monta tudo sozinho a partir da chave | O HTML não leva dados; a chave vai por mensagem direta |
 | **4. Montar o portfólio** | Cadastra iniciativas, features e fases; clica **Compartilhar** | Central (Iniciativas, Integração) | Só sai o que ele revisou na tela de compartilhamento | Marcar o que não deve ir para o time |
-| **5. Abrir o dia** | Abre o hub, vê quais times publicaram, abre a Central | Hub → Central (Hoje) | Hoje mostra atrasos, 1:1, fóruns, iniciativas em risco e novidades dos times | Arquivos novos dos times passam por prévia |
+| **5. Abrir o dia** | Abre o hub, lê os cards da Visão dos times (dinheiro e atividade), abre a Central | Hub → Central (Hoje) | Cards de leitura no topo da Hoje; atrasos, 1:1, fóruns, iniciativas em risco e novidades dos times | Arquivos novos dos times passam por prévia |
 | **6. Trabalhar tarefas** | Registra demandas, delega, cobra | Central (Tarefas) | Aderência por pessoa e cobranças visíveis | |
 | **7. Conversar com pessoas** | Prepara e conduz o 1:1 em modo Em conversa, copia o resumo | Central (1:1) | Pauta montada a partir de quatro fontes; combinados registrados | |
 | **8. Conduzir fóruns** | Abre o fórum, discute a pauta, registra decisões e compromissos, compartilha os acordos | Central (Fóruns) | Pauta não discutida rola para a próxima; compromissos viram tarefas | |
@@ -42,13 +42,14 @@ A solução tem quatro papéis. A mesma pessoa pode ter mais de um (o gestor cos
 | **11. Usar agentes** | Depois de reuniões, copia o prompt certo, roda no agente, importa o JSON | Central (Importar e agentes) | Prévia antes de aplicar; reimportar não duplica | |
 | **12. Recados** | Deixa post-its para um ou vários times e vê quem leu | Hub | Cifrados por time; um time não vê o post-it do outro | Atraso normal da sincronização |
 | **13. Finanças** | Lê os planos novos dos times, revisa a prévia, olha o consolidado contra o orçamento, publica diretrizes, fecha versões | Finanças do Grupo (Painel) | Um time com problema nunca derruba a soma; "Saúde da soma" aponta o que falta; consolidado ano a ano | Informar orçamento e tetos de cada ano do horizonte |
+| **14. Subir para a liderança** | Publica o consolidado para a liderança e recebe o teto dela | Finanças do Grupo (Ajustes › Nível acima) | Só sobe o total por ano e por unidade, cifrado com a chave da liderança | A liderança precisa ler a mesma pasta compartilhada |
 
 ## 3. Jornada do responsável pelo time
 
 | Etapa | O que faz | Ferramenta | O que a solução garante | Ponto de atenção |
 |---|---|---|---|---|
-| **1. Receber** | Recebe o HTML do Quadro e a chave do gestor | Teams / e-mail | HTML já com nome, slug e pasta do time | Guardar a chave no cofre |
-| **2. Primeiro uso** | Abre o Quadro, cria a senha local, cola a chave, conecta a pasta sincronizada, diz quem é | Quadro | Senha obrigatória, aviso de cofre | Edge ou Chrome |
+| **1. Receber** | Recebe o `inicio.html` (ou o HTML do Quadro) e, à parte, a chave e o nome da pasta | Teams / e-mail | A chave define o time; nada a digitar de identificador | Guardar a chave no cofre |
+| **2. Primeiro uso** | No assistente: "lidero 1 time", cola a chave, escolhe as pastas e cria a senha; abre o Quadro já com a chave e diz quem é | Assistente → Quadro | Senha obrigatória, aviso de cofre, chave já no arquivo | Edge ou Chrome |
 | **3. Ligar ao portfólio** | Em Iniciativas, liga épicos às iniciativas da Central ou usa **Trazer** | Quadro | Códigos da Central entram nos cards | |
 | **4. Dia a dia** | Move cards, cria pela barra rápida, acompanha WIP e envelhecimento | Quadro | Backlog publicado sozinho a cada movimentação | |
 | **5. Recados** | Lê post-its no topo e clica **Vi** | Quadro | O gestor vê quem leu | |
@@ -95,12 +96,12 @@ Esta revisão olhou a solução como um todo em 24/11/2026. Os pontos abaixo nã
 
 | # | Atrito | Onde | Oportunidade |
 |---|---|---|---|
-| 1 | **Muitas senhas e chaves** para o gestor: senha da Central, do hub, de Finanças do Grupo, mais duas chaves por time | Gestor | Manter separado por segurança, mas o hub já importa times e chaves da Central; avaliar o mesmo para Finanças do Grupo |
-| 2 | ~~Finanças com 7 telas no time e 5 no grupo, com mais texto do que gráfico~~ | Finanças | **Resolvido na 1.2:** menu de 4 e 3 entradas, cards de leitura, curva acumulada e barras; planejamento multianual na 1.1. Próximo passo possível: levar as mesmas peças (`cardLeitura`, `barrasH`, `curvaAcumulada`) ao Hub e à Central |
-| 3 | **Três formulários da Central** ainda no padrão antigo (atualização de iniciativa, acordo e prévia de importação) | Central | Trazer para o padrão único da v15 |
-| 4 | **Primeiro uso do time** exige várias ações (senha, chave, pasta, "quem é você") | Quadro, Finanças do Time | Um passo a passo guiado de primeira abertura, como o do assistente |
+| 1 | **Muitas senhas e chaves** para o gestor: senha da Central, do hub, de Finanças do Grupo, mais duas chaves por time | Gestor | **Melhorou no Hub 1.2:** o hub importa times e chaves da Central e do Finanças do Grupo, e o assistente 2.0 já grava as chaves coladas. As senhas continuam separadas por segurança; a integração das finanças no hub/Central está em proposta |
+| 2 | ~~Finanças com 7 telas no time e 5 no grupo, com mais texto do que gráfico~~ | Finanças | **Resolvido na 1.2:** menu de 4 e 3 entradas, cards de leitura, curva acumulada e barras; planejamento multianual na 1.1. Feito depois: as mesmas peças estão no Hub 1.2 (Visão dos times) e na Hoje da Central 15.3 |
+| 3 | ~~Três formulários da Central no padrão antigo~~ | Central | **Resolvido na 15.4:** atualização de iniciativa, acordo e prévia da importação com pílulas, validação no campo, verbo no botão e Enter |
+| 4 | ~~Primeiro uso do time exige várias ações~~ | Quadro, Finanças do Time | **Resolvido no assistente 2.0:** onboarding por perfil (lidera times? finanças? chaves e pasta do líder), com as chaves já gravadas nos arquivos |
 | 5 | **Hub depende de estar na mesma pasta** dos HTMLs | Hub | Já avisa; o assistente já grava tudo junto. Manter a orientação no cartão "Onde fica cada coisa" |
-| 6 | **Times com ferramenta própria** não veem post-its sem adaptar | Caminho B | Incluir post-its no pacote para agentes dos times (`integracao-time/03`) |
+| 6 | ~~Times com ferramenta própria não veem post-its~~ | Caminho B | **Resolvido:** post-its no pacote para agentes dos times (`integracao-time/03`, seção 7.6) e no guia de adaptação (seção 3.3) |
 | 7 | **Documentação espalhada** entre repositório e pasta do projeto | Docs | Este conjunto (ADRs, funcionalidades, jornada, passo a passo) vira a porta de entrada; a visão geral aponta para ele |
 
 ---

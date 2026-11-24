@@ -12,6 +12,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
@@ -27,6 +29,22 @@ jobs:
           if ! git diff --quiet; then
             echo "::error::Os HTMLs montados não batem com financas/src/. Rode python3 tools/injetar_seguranca.py e faça commit."
             git diff --stat
+            exit 1
+          fi
+
+      - name: Documentação atualizada no mesmo PR (ADR-0022)
+        if: github.event_name == 'pull_request'
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          TITULO: ${{ github.event.pull_request.title }}
+        run: |
+          mudou=$(git diff --name-only "$BASE"...HEAD)
+          codigo=$(echo "$mudou" | grep -E '\.html$|^financas/src/|^ferramenta-time/.*\.html$|^tools/' || true)
+          docs=$(echo "$mudou" | grep -E '^docs/|^README\.md$|^ferramenta-time/.*\.md$|^financas/contrato/' || true)
+          if [ -n "$codigo" ] && [ -z "$docs" ]; then
+            case "$TITULO" in *"[sem-docs]"*) echo "PR marcado [sem-docs]: sem conferência."; exit 0;; esac
+            echo "::error::O PR muda ferramentas sem atualizar a documentação (docs/, README.md). Veja docs/adr/0022-documentacao-no-mesmo-pr.md. Para correção sem efeito para quem usa, ponha [sem-docs] no título."
+            echo "$codigo"
             exit 1
           fi
 
