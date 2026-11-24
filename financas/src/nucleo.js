@@ -360,9 +360,13 @@ function criarSenhaDlg(titulo = 'Crie a senha do arquivo') {
     aoFechar(d, () => { if (!fim) ok(null); });
   });
 }
-function pedirSenhaDlg(titulo, errou) {
+// { sessao: true } só ao abrir o próprio arquivo: usa uma vez a senha que o hub ou a Central passou (ADR-0029).
+function pedirSenhaDlg(titulo, errou, { sessao = false } = {}) {
+  const ss = window.gestaoSessao;
+  if (sessao && !errou) { const s = ss?.usar(); if (s) return Promise.resolve(s); }
+  const daSessao = sessao && errou && ss?.usada && !pedirSenhaDlg.avisou; if (daSessao) pedirSenhaDlg.avisou = true;
   return new Promise(ok => {
-    const d = modal(`<div class="mh"><h2>${esc(titulo)}</h2></div><div class="mb">${errou ? '<p class="latec small" style="margin-top:0">Senha incorreta.</p>' : ''}
+    const d = modal(`<div class="mh"><h2>${esc(titulo)}</h2></div><div class="mb">${daSessao ? '<p class="small muted" style="margin-top:0">A senha da sessão (do hub ou da Central) não abre este arquivo. Digite a senha dele.</p>' : errou ? '<p class="latec small" style="margin-top:0">Senha incorreta.</p>' : ''}
       <label class="field"><span>Senha</span><input class="sin" type="password" id="pw" autocomplete="current-password"></label>
       <p class="small muted">Esqueceu? A senha está no seu cofre de senhas. Sem ela não há como abrir o arquivo.</p></div>
       <div class="mf"><button class="btn" data-r="no">Cancelar</button><button class="btn pri" data-r="ok">Abrir</button></div>`);
@@ -442,13 +446,15 @@ async function validarPastaComum(raiz) {
   return { tem, nomeOk };
 }
 // Checagens indiretas de que a pasta "local" não está sincronizada (o navegador não mostra o caminho).
+// Desde 24/11/2026 (ADR-0008 revista) a pasta pessoal pode e deve ficar no OneDrive da pessoa, como backup.
+// O que não pode é ser a pasta compartilhada com os times: só esses sinais contam.
 async function suspeitaDeSincronizada(dir) {
   const sinais = [];
   if ([PASTA_COMUM, PASTA_COMUM_ANTIGA].includes(dir.name)) sinais.push('tem o nome da pasta compartilhada');
-  if (/onedrive|sharepoint/i.test(dir.name)) sinais.push('o nome lembra OneDrive/SharePoint');
-  try { for await (const [n] of dir.entries()) { if (/^desktop\.ini$/i.test(n)) sinais.push('tem desktop.ini'); if (n === 'times' || n === 'grupo') sinais.push('tem a estrutura da pasta compartilhada'); } } catch {}
+  try { for await (const [n] of dir.entries()) { if (['times', 'grupo', 'grupos'].includes(n)) sinais.push('tem a estrutura da pasta compartilhada (times/, grupo/)'); } } catch {}
   return [...new Set(sinais)];
 }
+const AVISO_PASTA_PESSOAL = 'O seu arquivo pessoal deve ficar numa pasta só sua (de preferência no seu OneDrive, como backup), nunca na pasta compartilhada com os times.';
 
 /* ---- Finanças 1.2: peças visuais comuns (cards de leitura, barras horizontais, curva acumulada) ---- */
 // Card de leitura: rótulo, número, medidor (pct de 0 a 1+, marca opcional) e uma frase que interpreta.

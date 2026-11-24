@@ -59,7 +59,7 @@
      (a mesma chave GK1.<grupo>-fin-… das Finanças do Grupo serve). Funciona em quantos níveis forem precisos.
    Notas das ausências ficam só no arquivo local cifrado. Conteúdo comum: gestao-ferias/1.
    ===================================================================== */
-const TOOL = 'ferias', TOOL_NOME = 'Mapa de Férias', TOOL_VERSION = '1.0.0';
+const TOOL = 'ferias', TOOL_NOME = 'Mapa de Férias', TOOL_VERSION = '1.1.0';
 const LOCAL_SCHEMA = 'gestao-ferias-local/1', FERIAS_SCHEMA = 'gestao-ferias/1';
 const PRESET = /*FERIAS-PRESET*/null/*FIM-FERIAS-PRESET*/;
 const TIPOS = { ferias: 'Férias', folga: 'Folga ou day off', treinamento: 'Treinamento ou evento', outro: 'Outra ausência' };
@@ -741,7 +741,7 @@ async function abrirPasta() {
 async function abrirArquivo(h, nome) {
   const texto = await lerTexto(h, nome);
   for (let i = 0; i < 3; i++) {
-    const s = await pedirSenhaDlg('Senha do Mapa de Férias', i > 0); if (s == null) return;
+    const s = await pedirSenhaDlg('Senha do Mapa de Férias', i > 0, { sessao: true }); if (s == null) return;
     try { const r = await decifrarLocal(texto, s); db = normalizar(r.dados); ctx = r.ctx; dirLocal = h; arquivo = nome; break; }
     catch (e) { if (e.code !== 'SENHA') return telaInicial(e.message); }
   }
@@ -762,7 +762,7 @@ function criarDlg(nivel) {
     <div class="f2"><label class="field"><span>${nivel === 'grupo' ? 'Nome do grupo (ex.: Tecnologia)' : 'Nome do time'}</span><input class="sin" id="cN" value="${esc(p.nome || '')}"></label>
     <label class="field"><span>Identificador (pasta)</span><input class="sin code" id="cS" value="${esc(p.slug || '')}"></label></div>
     <label class="field"><span>Seu nome</span><input class="sin" id="cP"></label>
-    <p class="small muted">${nivel === 'grupo' ? 'Use o mesmo identificador do grupo nas Finanças do Grupo: a liderança encontra o seu consolidado por ele.' : 'Use o mesmo identificador do time no Quadro e na Central (ex.: pagamentos).'} Depois você escolhe a pasta local (fora do OneDrive) e cria a senha.</p></div>
+    <p class="small muted">${nivel === 'grupo' ? 'Use o mesmo identificador do grupo nas Finanças do Grupo: a liderança encontra o seu consolidado por ele.' : 'Use o mesmo identificador do time no Quadro e na Central (ex.: pagamentos).'} Depois você escolhe a pasta local (só sua; de preferência no seu OneDrive) e cria a senha.</p></div>
     <div class="mf"><button class="btn" onclick="fecharModal()">Cancelar</button><button class="btn pri" id="cOk">Escolher pasta local</button></div>`);
   $('#cN', d).oninput = () => { $('#cS', d).value = slugify($('#cN', d).value); };
   $('#cOk', d).onclick = async () => {
@@ -778,7 +778,7 @@ async function escolherPastaLocal() {
   let h; try { h = await escolherPasta('ferias-local'); } catch { return null; }
   if (!await permissao(h)) return null;
   const s = await suspeitaDeSincronizada(h);
-  if (s.length) { const r = await perguntar('Esta pasta parece sincronizada', `<div class="cofre">A pasta <b>${esc(h.name)}</b> ${esc(s.join(', '))}. Dados individuais devem ficar fora do OneDrive.</div>`, [['no', 'Escolher outra'], ['ok', 'Usar mesmo assim']]); if (r !== 'ok') return escolherPastaLocal(); }
+  if (s.length) { const r = await perguntar('Esta parece ser a pasta compartilhada', `<div class="cofre">A pasta <b>${esc(h.name)}</b> ${esc(s.join(', '))}. ${AVISO_PASTA_PESSOAL}</div>`, [['no', 'Escolher outra'], ['ok', 'Usar mesmo assim']]); if (r !== 'ok') return escolherPastaLocal(); }
   return h;
 }
 async function criarArquivo({ nivel, nome, slug, pessoa }) {

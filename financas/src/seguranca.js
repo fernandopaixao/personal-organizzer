@@ -70,7 +70,7 @@
       <dt>Pasta sincronizada</dt><dd>${info.pastaComum ? e(info.pastaComum) : '<span style="color:#aab0bf">não ligada</span>'}</dd>${info.voce ? `<dt>Você neste computador</dt><dd>${e(info.voce)}</dd>` : ''}</dl>
       <div class="mp"><div><h4>Fica só neste computador</h4>${info.local.map(x => '• ' + e(x)).join('<br>')}</div><div><h4>Vai para a pasta sincronizada</h4>${info.comum.map(x => '• ' + e(x)).join('<br>')}</div></div>
       <h4 style="margin-top:16px">Ferramentas da solução</h4>${FERR.map(([n, a, t]) => `<div class="t"><b>${e(n)}</b> <code style="color:#aab0bf">${e(a)}</code>${n === info.ferramenta ? ' <b style="color:#223ad2">· você está aqui</b>' : ''}<br><span style="color:#6f7689">${e(t)}</span></div>`).join('')}
-      <p style="font-size:12px;color:#6f7689">Os HTMLs não guardam dados. Os dados ficam em arquivos cifrados: o individual numa pasta local fora do OneDrive, o comum na pasta sincronizada.</p></div>
+      <p style="font-size:12px;color:#6f7689">Os HTMLs não guardam dados. Os dados ficam em arquivos cifrados: o pessoal numa pasta só sua (de preferência no seu OneDrive, como backup), o comum na pasta sincronizada.</p></div>
       <div class="f"><button class="p" id="f4fecha">Fechar</button></div>`);
     d.querySelector('#f4fecha').onclick = () => d.close();
   };

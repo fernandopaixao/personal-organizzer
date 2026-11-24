@@ -1,6 +1,6 @@
 # Funcionalidades, usos e objetivos
 
-*24/11/2026 · Central v15.6, Quadro do Time 2.2, Hub 1.2, Finanças do Grupo 1.3 e do Time 1.2, assistente 2.1*
+*24/11/2026 · Central v15.7, Quadro do Time 2.2, Hub 1.3, Finanças do Grupo 1.4 e do Time 1.3, Mapa de Férias 1.1, assistente 2.2*
 
 Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. Para as regras técnicas por trás, veja as [decisões de arquitetura](adr/README.md). Para o caminho de quem usa, veja a [jornada do usuário](jornada-do-usuario.md) e o [passo a passo](passo-a-passo.md).
 
@@ -49,9 +49,9 @@ Todas têm, no topo, **Onde estou?** (qual ferramenta, qual arquivo, o que é lo
 | Perfil | **Você lidera times?** "Sim, lidero 2 ou mais times" (gestor), "Sim, lidero 1 time" (responsável) ou "Não, faço parte de um time" (membro). Depois, **o que quer organizar**: tarefas, finanças ou os dois (membro só tarefas) |
 | Chaves | **Seu líder compartilhou chaves de integração?** Cole as chaves (`GK1.…`, uma por linha) e o nome da pasta sincronizada que o líder indicou. O assistente diz o que cada chave é: tarefas do time (`<time>-AAMM`), finanças do time (`<time>-fin-AAMM`) ou, para o gestor, finanças da liderança (`<grupo>-fin-AAMM`, o "nível acima"). Chave que não serve ao perfil é mostrada como ignorada |
 | Dados | Nome, identificador, prefixo, ano fiscal e moeda. O identificador do time (ou do grupo, para o gestor com chave da liderança) **vem da chave e fica travado**, para casar com os arquivos do líder |
-| Pastas | Pasta **local** (fora do OneDrive) e pasta **sincronizada**; aviso automático se a local parecer sincronizada |
+| Pastas | Pasta **pessoal** (só sua, de preferência no seu OneDrive, como backup) e pasta **compartilhada**; aviso automático se a pessoal parecer ser a compartilhada |
 | Senha | Criação da senha com aviso de cofre |
-| Pronto | Grava os HTMLs do perfil, o primeiro arquivo cifrado de cada um **já com as chaves coladas**, o hub e o cartão "Onde fica cada coisa", e mostra os **próximos passos do perfil** (o gestor recebe a lista do que mandar a cada time) |
+| Pronto | Grava os HTMLs do perfil, o primeiro arquivo cifrado de cada um **já com as chaves coladas**, o hub e o cartão "Onde fica cada coisa". Explica os **dois tipos de arquivo** (pessoal × comum, por que em pastas separadas, ninguém lê sem a senha), mostra os **próximos passos do perfil** e o botão **Abrir o hub** (2.2), que abre o hub criado já com a senha da sessão |
 
 | Papel × uso | HTMLs gerados |
 |---|---|
@@ -73,7 +73,7 @@ Onde as chaves coladas vão parar: no hub (tarefas e finanças de cada time), no
 | Quadro do Time, Finanças do Time, Mapa de Férias e LEIA-ME de cada time | `para-os-times/<time>/` | A chave do time e a pasta sincronizada já configuradas |
 | Estrutura da pasta sincronizada | `times/<time>/…`, `grupos/<grupo>/ferias/` | Só pastas vazias |
 
-A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados), um desenho do que ficou em cada pasta, as chaves por time e um **checklist** (senha no cofre, pasta local fora do OneDrive, pasta compartilhada sincronizando, hub mostrando os times, pasta ligada na Central e no Finanças do Grupo, chaves no cofre, pastas enviadas aos times). O caminho normal também termina com o checklist do perfil. As marcações ficam só no navegador.
+A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados), um desenho do que ficou em cada pasta, as chaves por time e um **checklist** (senha no cofre, pasta pessoal só sua e no seu OneDrive, pasta compartilhada sincronizando, hub mostrando os times, pasta ligada na Central e no Finanças do Grupo, chaves no cofre, pastas enviadas aos times). O caminho normal também termina com o checklist do perfil. As marcações ficam só no navegador.
 
 **Quando usar:** uma vez, ou ao trocar de computador. O gestor manda a cada time a pasta `para-os-times/<time>/` (ou o mesmo `inicio.html`, com a chave por mensagem direta), e o time monta tudo sozinho.
 
@@ -92,10 +92,12 @@ A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados
 | **Visão dos times** | Cards de leitura (previsto dos times, realizado com marca do mês, times ativos na semana, post-its vistos) e barras do previsto por time com a marca do orçado | Ver dinheiro e atividade dos times sem abrir outra ferramenta |
 | **Finanças no card do time** | Previsto, realizado e orçado do ano do plano publicado pelo time | Saber se o time está dentro do plano |
 | **Times e chaves** | Cadastrar times e colar chaves (de tarefas e de finanças), ou **Importar da Central** e **Importar do Finanças do Grupo** (só leitura, com a senha de cada um) | Reaproveitar o que a Central e o Finanças do Grupo já têm, sem colar chave por chave |
+| **Hub da liderança (1.3)** | Importado do Finanças do Grupo da liderança, cada gestor par vira um card "gestor" com o consolidado que ele publica (`grupos/<grupo>/financas/`); o painel vira **Visão dos gestores** | A liderança vê cada gestor como uma linha, sem o detalhe dos times |
+| **Abrir sem redigitar a senha (1.3)** | As ferramentas abertas pelos links do hub recebem a senha da sessão ([ADR-0029](adr/0029-uma-senha-por-sessao.md)) | Uma senha por dia |
 
 ---
 
-## 5. Central de Gestão (v15.6)
+## 5. Central de Gestão (v15.7)
 
 **Objetivo:** concentrar o trabalho do gestor: o que ele faz, o que delegou, com quem conversa, em quais fóruns decide e como anda o portfólio.
 
@@ -142,6 +144,7 @@ Navegação em 8 páginas (teclas 1 a 8) e o botão **Importar e agentes** no to
 
 ### 5.8 Integração (8)
 - **Uso:** pasta e chaves (gerar, copiar, revogar; **chave de finanças** por time, colada ou importada com **Chaves do Finanças do Grupo**), arquivos recebidos (com prévia), **Conciliação** (unir épicos, trazer para a Central, ligar itens a features, códigos das finanças dos times sem iniciativa na Central) e **Compartilhar** (tela que mostra o que vai para cada time).
+- **Abrir o Finanças do Grupo (15.7):** botão em Integração e na aba Finanças da iniciativa; a senha da sessão vai junto.
 - **Objetivo:** manter a Central e os times falando a mesma língua, sem sobrescrever nada.
 
 ### 5.9 Importar e agentes
@@ -236,6 +239,7 @@ O grupo enxerga os anos do próprio horizonte **mais os anos publicados pelos ti
 | **Backup cifrado rotativo** | Ferramentas com arquivo local | 5 últimas versões em `backup/` e lembrete semanal de exportar |
 | **Detecção de cópias de conflito** | Todas que leem a pasta comum | Não perder dado escondido em `arquivo (1).json` |
 | **Reconhecer arquivo errado** | Todas | Dizer qual HTML abre aquele arquivo |
+| **Uma senha por sessão** | Hub, Central e assistente passam a senha; Finanças, Férias e Central recebem | Abrir pelo hub ou pela Central sem redigitar a senha. Só em memória, uma vez, para a janela recém-aberta ([ADR-0029](adr/0029-uma-senha-por-sessao.md)) |
 | **Tema claro, escuro ou automático** | Todas | Botão redondo no canto inferior direito; Automático segue o sistema. A escolha fica só neste computador e vale para todas as ferramentas abertas ([ADR-0027](adr/0027-tema-claro-escuro-compartilhado.md)) |
 | **Migração automática** | Central (e demais quando o formato muda) | Abrir arquivo antigo na versão nova, com backup |
 | **Pacote .zip** | `python3 tools/empacotar.py` (e a CI do repositório pessoal) | Levar a solução para a empresa num único arquivo: HTMLs lado a lado, contratos, documentação e LEIA-ME. Não passa pelo repositório da empresa |

@@ -20,7 +20,7 @@
    Dados individuais (lançamentos, notas, cenários) ficam no arquivo local cifrado.
    Só o plano agregado vai para a pasta sincronizada: times/<time>/financas/plano.json
    ===================================================================== */
-const TOOL = 'financas-time', TOOL_NOME = 'Finanças do Time', TOOL_VERSION = '1.2.0';
+const TOOL = 'financas-time', TOOL_NOME = 'Finanças do Time', TOOL_VERSION = '1.3.0';
 const LOCAL_SCHEMA = 'gestao-financas-local/1', PLANO_SCHEMA = 'gestao-financas-plano/1', DIRETRIZ_SCHEMA = 'gestao-financas-diretriz/1';
 const PRESET = /*FIN-PRESET*/null/*FIM-FIN-PRESET*/;
 const CATS_PADRAO = [
@@ -741,7 +741,7 @@ async function abrirPasta() {
 async function abrirArquivo(h, nome) {
   const texto = await lerTexto(h, nome);
   for (let i = 0; i < 3; i++) {
-    const s = await pedirSenhaDlg('Senha das Finanças do Time', i > 0); if (s == null) return;
+    const s = await pedirSenhaDlg('Senha das Finanças do Time', i > 0, { sessao: true }); if (s == null) return;
     try { const r = await decifrarLocal(texto, s); db = normalizar(r.dados); ctx = r.ctx; dirLocal = h; arquivo = nome; break; }
     catch (e) { if (e.code !== 'SENHA') return telaInicial(e.message); }
   }
@@ -763,7 +763,7 @@ async function criarDlg() {
     <div class="f2"><label class="field"><span>Identificador (usado nas pastas)</span><input class="sin code" id="cS" value="${esc(p.team?.slug || '')}" ${p.team ? 'disabled' : ''}></label>
     <label class="field"><span>Ano fiscal</span><input class="sin" type="number" id="cA" value="${p.ano || new Date().getFullYear()}"></label></div>
     <div class="f2"><label class="field"><span>Seu nome</span><input class="sin" id="cP"></label><label class="field"><span>Moeda</span><select class="sel" id="cM"><option>BRL</option><option>USD</option><option>EUR</option></select></label></div>
-    <p class="small muted">Depois você escolhe a pasta local (fora do OneDrive) e cria a senha.</p></div>
+    <p class="small muted">Depois você escolhe a pasta local (só sua; de preferência no seu OneDrive) e cria a senha.</p></div>
     <div class="mf"><button class="btn" id="cNo">Cancelar</button><button class="btn pri" id="cOk">Escolher pasta local</button></div>`);
   $('#cN', d).oninput = () => { if (!p.team) $('#cS', d).value = slugify($('#cN', d).value); };
   if (p.moeda) $('#cM', d).value = p.moeda;
@@ -783,7 +783,7 @@ async function escolherPastaLocal() {
   let h; try { h = await escolherPasta('fin-local'); } catch { return null; }
   if (!await permissao(h)) return null;
   const s = await suspeitaDeSincronizada(h);
-  if (s.length) { const r = await perguntar('Esta pasta parece sincronizada', `<div class="cofre">A pasta <b>${esc(h.name)}</b> ${esc(s.join(', '))}. Dados individuais devem ficar fora do OneDrive.</div>`, [['no', 'Escolher outra'], ['ok', 'Usar mesmo assim']]); if (r !== 'ok') return escolherPastaLocal(); }
+  if (s.length) { const r = await perguntar('Esta parece ser a pasta compartilhada', `<div class="cofre">A pasta <b>${esc(h.name)}</b> ${esc(s.join(', '))}. ${AVISO_PASTA_PESSOAL}</div>`, [['no', 'Escolher outra'], ['ok', 'Usar mesmo assim']]); if (r !== 'ok') return escolherPastaLocal(); }
   return h;
 }
 async function criarArquivo({ nome, slug, pessoa, ano, moeda }) {

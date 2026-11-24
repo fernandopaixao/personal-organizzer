@@ -400,6 +400,45 @@ svg.ch{max-height:280px}
   else montarBotao();
 })();
 </script>
+<script id="sessao">
+/* sessao 1.0 · uma senha por sessão (ADR-0029)
+   Quem abre (hub, Central) guarda só em memória a senha que abriu o próprio arquivo. Quando a pessoa clica num link
+   para outra ferramenta (target=_blank rel=opener), a janela nova pede a senha e o abridor responde uma vez, só nos
+   90 segundos seguintes ao clique e só para uma janela aberta por ele (e.source.opener === window).
+   A ferramenta aberta usa a senha só para abrir o próprio arquivo; se não servir, pede a senha como sempre.
+   Nada vai para disco, localStorage ou para a pasta. Injetado em todos os HTMLs pelo build, junto com o tema. */
+(() => {
+  if (window.gestaoSessao) return;
+  const SC = 'gestao-sessao/1', JANELA = 90e3;
+  let senha = null, cliqueEm = 0, recebida = null, usada = false;
+  document.addEventListener('click', e => {
+    const a = e.target && e.target.closest && e.target.closest('a[target="_blank"][rel~="opener"]');
+    if (a && senha) cliqueEm = Date.now();
+  }, true);
+  window.addEventListener('message', e => {
+    const m = e.data; if (!m || m.schema !== SC) return;
+    if (m.tipo === 'pedir') {
+      if (!senha || !cliqueEm || Date.now() - cliqueEm > JANELA) return;
+      let filha = false; try { filha = !!e.source && e.source.opener === window; } catch {}
+      if (!filha) return;
+      cliqueEm = 0;
+      try { e.source.postMessage({ schema: SC, tipo: 'senha', senha }, '*'); } catch {}
+    } else if (m.tipo === 'senha') {
+      if (!window.opener || e.source !== window.opener || recebida !== null || typeof m.senha !== 'string' || !m.senha) return;
+      recebida = m.senha.slice(0, 500);
+      window.dispatchEvent(new Event('gestao-sessao'));
+    }
+  });
+  if (window.opener) try { window.opener.postMessage({ schema: SC, tipo: 'pedir' }, '*'); } catch {}
+  window.gestaoSessao = {
+    definir(s) { senha = s ? String(s) : null; if (!s) cliqueEm = 0; },
+    get recebida() { return recebida; },
+    // Entrega a senha recebida uma única vez (para abrir o próprio arquivo).
+    usar() { if (recebida == null || usada) return null; usada = true; return recebida; },
+    get usada() { return usada; }
+  };
+})();
+</script>
 </head>
 <body>
 <div id="app"></div>
@@ -767,9 +806,13 @@ function criarSenhaDlg(titulo = 'Crie a senha do arquivo') {
     aoFechar(d, () => { if (!fim) ok(null); });
   });
 }
-function pedirSenhaDlg(titulo, errou) {
+// { sessao: true } só ao abrir o próprio arquivo: usa uma vez a senha que o hub ou a Central passou (ADR-0029).
+function pedirSenhaDlg(titulo, errou, { sessao = false } = {}) {
+  const ss = window.gestaoSessao;
+  if (sessao && !errou) { const s = ss?.usar(); if (s) return Promise.resolve(s); }
+  const daSessao = sessao && errou && ss?.usada && !pedirSenhaDlg.avisou; if (daSessao) pedirSenhaDlg.avisou = true;
   return new Promise(ok => {
-    const d = modal(`<div class="mh"><h2>${esc(titulo)}</h2></div><div class="mb">${errou ? '<p class="latec small" style="margin-top:0">Senha incorreta.</p>' : ''}
+    const d = modal(`<div class="mh"><h2>${esc(titulo)}</h2></div><div class="mb">${daSessao ? '<p class="small muted" style="margin-top:0">A senha da sessão (do hub ou da Central) não abre este arquivo. Digite a senha dele.</p>' : errou ? '<p class="latec small" style="margin-top:0">Senha incorreta.</p>' : ''}
       <label class="field"><span>Senha</span><input class="sin" type="password" id="pw" autocomplete="current-password"></label>
       <p class="small muted">Esqueceu? A senha está no seu cofre de senhas. Sem ela não há como abrir o arquivo.</p></div>
       <div class="mf"><button class="btn" data-r="no">Cancelar</button><button class="btn pri" data-r="ok">Abrir</button></div>`);
@@ -849,13 +892,15 @@ async function validarPastaComum(raiz) {
   return { tem, nomeOk };
 }
 // Checagens indiretas de que a pasta "local" não está sincronizada (o navegador não mostra o caminho).
+// Desde 24/11/2026 (ADR-0008 revista) a pasta pessoal pode e deve ficar no OneDrive da pessoa, como backup.
+// O que não pode é ser a pasta compartilhada com os times: só esses sinais contam.
 async function suspeitaDeSincronizada(dir) {
   const sinais = [];
   if ([PASTA_COMUM, PASTA_COMUM_ANTIGA].includes(dir.name)) sinais.push('tem o nome da pasta compartilhada');
-  if (/onedrive|sharepoint/i.test(dir.name)) sinais.push('o nome lembra OneDrive/SharePoint');
-  try { for await (const [n] of dir.entries()) { if (/^desktop\.ini$/i.test(n)) sinais.push('tem desktop.ini'); if (n === 'times' || n === 'grupo') sinais.push('tem a estrutura da pasta compartilhada'); } } catch {}
+  try { for await (const [n] of dir.entries()) { if (['times', 'grupo', 'grupos'].includes(n)) sinais.push('tem a estrutura da pasta compartilhada (times/, grupo/)'); } } catch {}
   return [...new Set(sinais)];
 }
+const AVISO_PASTA_PESSOAL = 'O seu arquivo pessoal deve ficar numa pasta só sua (de preferência no seu OneDrive, como backup), nunca na pasta compartilhada com os times.';
 
 /* ---- Finanças 1.2: peças visuais comuns (cards de leitura, barras horizontais, curva acumulada) ---- */
 // Card de leitura: rótulo, número, medidor (pct de 0 a 1+, marca opcional) e uma frase que interpreta.
@@ -906,7 +951,7 @@ const pctTxt = (a, b) => b ? Math.round(a / b * 100) + '%' : '—';
      (a mesma chave GK1.<grupo>-fin-… das Finanças do Grupo serve). Funciona em quantos níveis forem precisos.
    Notas das ausências ficam só no arquivo local cifrado. Conteúdo comum: gestao-ferias/1.
    ===================================================================== */
-const TOOL = 'ferias', TOOL_NOME = 'Mapa de Férias', TOOL_VERSION = '1.0.0';
+const TOOL = 'ferias', TOOL_NOME = 'Mapa de Férias', TOOL_VERSION = '1.1.0';
 const LOCAL_SCHEMA = 'gestao-ferias-local/1', FERIAS_SCHEMA = 'gestao-ferias/1';
 const PRESET = /*FERIAS-PRESET*/null/*FIM-FERIAS-PRESET*/;
 const TIPOS = { ferias: 'Férias', folga: 'Folga ou day off', treinamento: 'Treinamento ou evento', outro: 'Outra ausência' };
@@ -1588,7 +1633,7 @@ async function abrirPasta() {
 async function abrirArquivo(h, nome) {
   const texto = await lerTexto(h, nome);
   for (let i = 0; i < 3; i++) {
-    const s = await pedirSenhaDlg('Senha do Mapa de Férias', i > 0); if (s == null) return;
+    const s = await pedirSenhaDlg('Senha do Mapa de Férias', i > 0, { sessao: true }); if (s == null) return;
     try { const r = await decifrarLocal(texto, s); db = normalizar(r.dados); ctx = r.ctx; dirLocal = h; arquivo = nome; break; }
     catch (e) { if (e.code !== 'SENHA') return telaInicial(e.message); }
   }
@@ -1609,7 +1654,7 @@ function criarDlg(nivel) {
     <div class="f2"><label class="field"><span>${nivel === 'grupo' ? 'Nome do grupo (ex.: Tecnologia)' : 'Nome do time'}</span><input class="sin" id="cN" value="${esc(p.nome || '')}"></label>
     <label class="field"><span>Identificador (pasta)</span><input class="sin code" id="cS" value="${esc(p.slug || '')}"></label></div>
     <label class="field"><span>Seu nome</span><input class="sin" id="cP"></label>
-    <p class="small muted">${nivel === 'grupo' ? 'Use o mesmo identificador do grupo nas Finanças do Grupo: a liderança encontra o seu consolidado por ele.' : 'Use o mesmo identificador do time no Quadro e na Central (ex.: pagamentos).'} Depois você escolhe a pasta local (fora do OneDrive) e cria a senha.</p></div>
+    <p class="small muted">${nivel === 'grupo' ? 'Use o mesmo identificador do grupo nas Finanças do Grupo: a liderança encontra o seu consolidado por ele.' : 'Use o mesmo identificador do time no Quadro e na Central (ex.: pagamentos).'} Depois você escolhe a pasta local (só sua; de preferência no seu OneDrive) e cria a senha.</p></div>
     <div class="mf"><button class="btn" onclick="fecharModal()">Cancelar</button><button class="btn pri" id="cOk">Escolher pasta local</button></div>`);
   $('#cN', d).oninput = () => { $('#cS', d).value = slugify($('#cN', d).value); };
   $('#cOk', d).onclick = async () => {
@@ -1625,7 +1670,7 @@ async function escolherPastaLocal() {
   let h; try { h = await escolherPasta('ferias-local'); } catch { return null; }
   if (!await permissao(h)) return null;
   const s = await suspeitaDeSincronizada(h);
-  if (s.length) { const r = await perguntar('Esta pasta parece sincronizada', `<div class="cofre">A pasta <b>${esc(h.name)}</b> ${esc(s.join(', '))}. Dados individuais devem ficar fora do OneDrive.</div>`, [['no', 'Escolher outra'], ['ok', 'Usar mesmo assim']]); if (r !== 'ok') return escolherPastaLocal(); }
+  if (s.length) { const r = await perguntar('Esta parece ser a pasta compartilhada', `<div class="cofre">A pasta <b>${esc(h.name)}</b> ${esc(s.join(', '))}. ${AVISO_PASTA_PESSOAL}</div>`, [['no', 'Escolher outra'], ['ok', 'Usar mesmo assim']]); if (r !== 'ok') return escolherPastaLocal(); }
   return h;
 }
 async function criarArquivo({ nivel, nome, slug, pessoa }) {
