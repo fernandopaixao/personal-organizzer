@@ -1,6 +1,6 @@
 # Funcionalidades, usos e objetivos
 
-*24/11/2026 · Central v15.7, Quadro do Time 2.2, Hub 1.3.1, Finanças do Grupo 1.4.1 e do Time 1.3.1, Mapa de Férias 1.1.1, assistente 2.2.1*
+*24/11/2026 · Central v15.8, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.2, assistente 2.3*
 
 Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. Para as regras técnicas por trás, veja as [decisões de arquitetura](adr/README.md). Para o caminho de quem usa, veja a [jornada do usuário](jornada-do-usuario.md) e o [passo a passo](passo-a-passo.md).
 
@@ -62,6 +62,10 @@ Todas têm, no topo, **Onde estou?** (qual ferramenta, qual arquivo, o que é lo
 | Qualquer papel + férias | Mapa de Férias: no time, cada pessoa marca as suas; no gestor, os times entram como unidades |
 | Vários usos | A soma das linhas, cada HTML separado |
 
+**Quem lidera vários times (2.3):** o caminho normal faz o mesmo que o Estou com sorte nas chaves. O assistente gera a chave de tarefas e, com Finanças, a de finanças de cada time (reaproveita a de tarefas que você colou para um dos times), sugere o prefixo de quem não tem (`PAG`, `CAR`), grava tudo na Central, no Finanças do Grupo, no Mapa de Férias e no hub, e gera `para-os-times/<time>/`. A tela final mostra as chaves com os botões de copiar.
+
+**Tudo abre pronto (2.3, [ADR-0031](adr/0031-ferramentas-abrem-prontas.md)):** o assistente grava neste navegador onde ficou o arquivo de cada ferramenta e a pasta sincronizada. Ao abrir pelo hub, cada ferramenta abre sozinha o seu arquivo, com a senha da sessão e a pasta já ligada; a Central mostra **Continuar com gestao-….json** e já tem a pasta de integração. Ninguém escolhe pasta nem cola chave de novo neste computador.
+
 Onde as chaves coladas vão parar: no hub (tarefas e finanças de cada time), no Quadro (chave de tarefas), no Finanças do Time (chave de finanças) e no Finanças do Grupo (`acima`, a chave da liderança). Nenhuma chave vai para a pasta compartilhada.
 
 **Estou com sorte (2.1).** Para quem lidera times e quer tudo de uma vez. Uma tela só (grupo, times, seu nome, pasta, pasta sincronizada opcional e senha) e o assistente:
@@ -97,7 +101,10 @@ A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados
 
 ---
 
-## 5. Central de Gestão (v15.7)
+## 5. Central de Gestão (v15.8)
+
+**Chave de integração dentro do time (15.8).** Na visão do time, a aba **Integração** mostra a chave em destaque: **Gerar chave de integração** (um clique; se faltar, a Central sugere a pasta e o prefixo), **HTML do time (com a chave)**, **Copiar chave**, **Mensagem para o time**, **Chave de finanças** e **Vazou: trocar chave**, mais o que chega do time (backlog, métricas, plano). Time sem chave mostra o aviso com o botão também na **Visão do time** e no card da página Times.
+
 
 **Objetivo:** concentrar o trabalho do gestor: o que ele faz, o que delegou, com quem conversa, em quais fóruns decide e como anda o portfólio.
 

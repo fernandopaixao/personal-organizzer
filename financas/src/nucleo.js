@@ -64,6 +64,26 @@ const kv = (() => {
   return { get: k => tx('readonly', s => s.get(k)).catch(() => undefined), set: (k, v) => tx('readwrite', s => s.put(v, k)).catch(() => {}), del: k => tx('readwrite', s => s.delete(k)).catch(() => {}) };
 })();
 
+/* ---------------------- arquivo e pastas lembrados (ADR-0030) ---------------------- */
+// O assistente grava, neste navegador, onde ficou o arquivo de cada ferramenta e a pasta sincronizada;
+// cada ferramenta lê e abre sozinha. Nos testes automatizados (webdriver) só vale com window.__lembrar.
+const lembrarAtivo = () => !navigator.webdriver || window.__lembrar === true;
+async function lembrarArquivo(chave, dir, arquivo) { if (lembrarAtivo() && dir && arquivo) await kv.set('local:' + chave, { dir, arquivo }); }
+async function arquivoLembrado(chave) { if (!lembrarAtivo()) return null; const u = await kv.get('local:' + chave); return u?.dir && u.arquivo ? u : null; }
+async function pastaLembrada(chave) { if (!lembrarAtivo()) return null; return (await kv.get(chave)) || null; }
+function lembrarPasta(chave, h) { if (lembrarAtivo() && h) kv.set(chave, h); }
+// Na primeira abertura: se o navegador ainda tem a permissão da pasta, abre o último arquivo sem perguntar nada.
+async function abrirLembradoSePuder(chave, abrir) {
+  const u = await arquivoLembrado(chave); if (!u) return false;
+  try { if (!await permissao(u.dir, false) || !await lerTexto(u.dir, u.arquivo)) return false; } catch { return false; }
+  await abrir(u.dir, u.arquivo); return true;
+}
+// Botão "Abrir <arquivo>" da tela inicial (um clique libera a pasta quando a permissão expirou).
+function botaoUltimo(u) {
+  return u ? `<button class="opt" id="iUlt" style="margin-top:18px"><b>Abrir ${esc(u.arquivo)}</b><span>Pasta pessoal <span class="code">${esc(u.dir.name)}</span>, usada por último neste computador.</span></button>` : '';
+}
+function ligarUltimo(u, abrir, tela) { const b = document.getElementById('iUlt'); if (b && u) b.onclick = async () => { if (!await permissao(u.dir)) return tela('Sem permissão na pasta.'); await abrir(u.dir, u.arquivo); }; }
+
 /* ---------------------- identidade do computador (dispositivo) ---------------------- */
 // Identificador aleatório e curto, guardado no navegador. Junto com a pessoa forma o "dono"
 // de um arquivo comum: ana-k3f9. Nunca usa o nome real do computador.
