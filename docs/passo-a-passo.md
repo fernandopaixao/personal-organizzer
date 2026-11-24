@@ -17,6 +17,7 @@ Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é ind
 10. [Trocar de computador](#10-trocar-de-computador)
 11. [Uma chave vazou](#11-uma-chave-vazou)
 12. [Problemas comuns](#12-problemas-comuns)
+13. [Férias: do time à liderança](#13-férias-do-time-à-liderança)
 
 ---
 
@@ -177,3 +178,27 @@ Os outros times não são afetados.
 | Não consigo gravar | Navegador sem File System Access API ou pasta sem permissão | Use Edge ou Chrome e autorize a pasta de novo |
 | Quero a tela escura (ou ela ficou escura sem eu pedir) | O tema está em Automático e segue o sistema | Clique no botão redondo no canto inferior direito e escolha **Claro**, **Escuro** ou **Automático**. Fica salvo só neste computador e vale para todas as ferramentas |
 | Aviso de que a pasta local parece sincronizada | A pasta está dentro do OneDrive | Escolha uma pasta fora do OneDrive |
+
+---
+
+## 13. Férias: do time à liderança
+
+O **Mapa de Férias** (`ferias.html`) é apoio para enxergar e planejar ausências; o pedido oficial continua na ferramenta da empresa.
+
+**No time (cada pessoa, ou o responsável por todos)**
+1. Abra `ferias.html`, escolha **Sou de um time**, informe o nome e o identificador do time (o mesmo do Quadro, ex.: `pagamentos`) e o seu nome. Escolha a pasta local (fora do OneDrive) e crie a senha.
+2. **Ajustes:** ligue a pasta sincronizada e cole a **chave do time** (a mesma do Quadro).
+3. **Pessoas:** marque as suas férias pela barra rápida ("05/01 a 23/01 férias") ou por **+ Ausência**. Se for o responsável, cadastre também os colegas que não usam a ferramenta, com o mesmo nome que eles usariam.
+4. Pronto: a ferramenta publica sozinha a cada mudança. As notas ficam só no seu computador.
+
+**No gestor**
+1. Abra `ferias.html`, escolha **Sou gestor ou liderança** e use o mesmo identificador do grupo das Finanças do Grupo (ex.: `tecnologia`).
+2. **Unidades:** **Importar times do Hub** (traz os times e as chaves de tarefas) ou **+ Time** e cole a chave de cada um. Para gestores abaixo de você, **+ Grupo de outro gestor** (ou importe das Finanças do Grupo).
+3. **Diretos:** marque as suas férias e as de quem responde direto a você.
+4. **Mapa:** leia os cards, o mapa de calor (vermelho = acima do limite) e as semanas mais tranquilas; clique num dia para ver quem está fora. Ajuste o limite em **Ajustes**.
+5. **Nível acima:** em **Ajustes**, cole a chave que a sua liderança gerou para o seu grupo (ou **Trazer das Finanças do Grupo**: a mesma chave `GK1.<grupo>-fin-…` serve) e **Publicar consolidado para a liderança**, depois de conferir o que sobe. Quando o consolidado muda, o Mapa avisa para publicar de novo.
+
+**Na liderança**
+1. Crie o arquivo como gestor, com o seu identificador.
+2. **Unidades › + Grupo de outro gestor**, com o identificador do grupo dele. Se você já gerou a chave dele nas Finanças do Grupo, cole a mesma; senão, **Gerar chave para o gestor** e envie por mensagem direta.
+3. O consolidado do gestor entra como uma unidade, com a unidade de origem de cada pessoa.

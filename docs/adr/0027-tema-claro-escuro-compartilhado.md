@@ -3,7 +3,7 @@
 **Status:** aceita · **Data:** 24/11/2026 · **Origem:** pedido do Fernando ("Adiciona modo escuro na interface"); fonte em `financas/src/tema.js`
 
 ## Contexto
-Todas as ferramentas (hub, assistente, Central, Quadro do Time, Finanças do Grupo e do Time) usam a mesma identidade branco e azul, mas cada uma tem o próprio CSS, centenas de cores fixas (`#fff`, `#eceef4`...) e estilos inline e gráficos SVG montados pelo JavaScript. Reescrever o CSS de cada HTML para o escuro mexeria em arquivos que outras frentes estão mudando ao mesmo tempo, e qualquer tela nova teria de lembrar do escuro.
+Todas as ferramentas (hub, assistente, Central, Quadro do Time, Finanças do Grupo e do Time, Mapa de Férias) usam a mesma identidade branco e azul, mas cada uma tem o próprio CSS, centenas de cores fixas (`#fff`, `#eceef4`...) e estilos inline e gráficos SVG montados pelo JavaScript. Reescrever o CSS de cada HTML para o escuro mexeria em arquivos que outras frentes estão mudando ao mesmo tempo, e qualquer tela nova teria de lembrar do escuro.
 
 ## Decisão
 1. **Uma camada só**, `financas/src/tema.js`, injetada no `<head>` de cada HTML como `<script id="tema">` pelos scripts de build (`build_financas.py` para hub, assistente e finanças; `injetar_seguranca.py` para Central e Quadro). Nenhum HTML-fonte precisa de marcador; quem usa `nucleo()` no build ganha o tema de graça (inclusive ferramentas novas).
