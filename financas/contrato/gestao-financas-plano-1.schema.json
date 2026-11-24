@@ -13,7 +13,8 @@
     "source": { "type": "object", "required": ["team", "writer"], "properties": {
       "team": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
       "writer": { "type": "string", "pattern": "^[a-z0-9]+~[a-z0-9]+$" },
-      "tool": { "type": "string" }, "toolVersion": { "type": "string" } } },
+      "tool": { "type": "string" }, "toolVersion": { "type": "string" },
+      "level": { "enum": ["team", "group"], "description": "Desde 1.3: \"group\" quando é o consolidado de um grupo publicado para a liderança; ausente = plano de time. Em group, source.team é o slug do grupo." } } },
     "team": { "type": "object", "properties": { "name": { "type": "string" }, "slug": { "type": "string" } } },
     "fiscalYear": { "type": "integer", "description": "Ano base do plano (o ano em curso). \"totals\" é deste ano." },
     "fiscalYears": { "type": "array", "items": { "type": "integer" }, "description": "Desde 1.1 (multianual): anos do horizonte do plano. Ausente = só fiscalYear. As linhas trazem os meses de todos estes anos e os 12 meses seguintes." },
@@ -28,6 +29,7 @@
         "budget": { "type": "integer" }, "forecast": { "type": "integer" }, "actual": { "type": "integer" } } } } } } },
     "commitments": { "type": "array", "items": { "type": "object", "properties": { "name": { "type": "string" }, "line": { "type": "string" }, "monthly": { "type": "integer" }, "start": { "type": "string" }, "end": { "type": "string" } } } },
     "totals": { "type": "object", "properties": { "budget": { "type": "integer" }, "forecast": { "type": "integer" }, "actual": { "type": "integer" } } },
+    "units": { "type": "array", "description": "Desde Finanças do Grupo 1.3: só no consolidado que um grupo publica para a liderança (source.level = \"group\", em grupos/<grupo>/financas/plano.json). Unidades somadas: slug, name, kind (time|grupo), revision, generatedAt, planVersion.", "items": { "type": "object" } },
     "totalsByYear": { "type": "object", "description": "Desde 1.1: totais de cada ano de fiscalYears (ano → {budget, forecast, actual}). Conferência; o grupo soma pelos meses.", "propertyNames": { "pattern": "^\\d{4}$" }, "additionalProperties": { "type": "object", "properties": { "budget": { "type": "integer" }, "forecast": { "type": "integer" }, "actual": { "type": "integer" } } } },
     "directiveRevision": { "type": "integer" }
   }

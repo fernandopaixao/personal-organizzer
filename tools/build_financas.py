@@ -15,6 +15,15 @@ Este script só lê a Central e o Quadro; não altera esses arquivos.
 """
 import base64, gzip, hashlib, pathlib, re
 
+
+def gzip_estavel(dados: bytes) -> bytes:
+    """gzip com cabeçalho fixo (mtime 0, sem nome, OS=255): o mesmo resultado em qualquer versão do Python.
+    gzip.compress muda bytes do cabeçalho entre o 3.12 e o 3.13, e a CI compara os HTMLs montados."""
+    import struct, zlib
+    c = zlib.compressobj(9, zlib.DEFLATED, -15, 8, 0)
+    corpo = c.compress(dados) + c.flush()
+    return b'\x1f\x8b\x08\x00\x00\x00\x00\x00\x02\xff' + corpo + struct.pack('<II', zlib.crc32(dados) & 0xffffffff, len(dados) & 0xffffffff)
+
 RAIZ = pathlib.Path(__file__).resolve().parent.parent
 SRC = RAIZ / 'financas' / 'src'
 
@@ -29,7 +38,7 @@ def nucleo(html):
     return html.replace('/*NUCLEO-CSS*/', css, 1).replace('/*NUCLEO-JS*/', js, 1)
 
 def embutir(html, ident, conteudo: bytes, versao=''):
-    b64 = base64.b64encode(gzip.compress(conteudo, 9, mtime=0)).decode('ascii')
+    b64 = base64.b64encode(gzip_estavel(conteudo)).decode('ascii')
     sha = hashlib.sha256(conteudo).hexdigest()[:16]
     bloco = f'<script type="text/plain" id="{ident}" data-version="{versao}" data-sha256="{sha}">{b64}</script>'
     marca = f'<!--EMB:{ident}-->'
