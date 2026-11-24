@@ -37,6 +37,13 @@
 .tl th.hoje{color:var(--bv);font-weight:700}
 .rk{display:grid;grid-template-columns:1fr auto;gap:6px 12px;font-size:12.5px}.rk b{font-variant-numeric:tabular-nums}
 .pp{display:flex;flex-wrap:wrap;gap:6px}
+/* Dentro da Central (ADR-0033): menu em abas no topo, sem a barra lateral (a Central já tem a dela) */
+.embutido .rail{position:sticky;top:0;bottom:auto;width:auto;height:auto;flex-direction:row;justify-content:flex-start;gap:4px;padding:6px 0;border-right:0;border-top:0;border-bottom:1px solid var(--line);z-index:5}
+.embutido .rail .logo{display:none}
+.embutido .nv{width:auto;flex-direction:row;gap:6px;padding:6px 12px;font-size:12.5px}
+.embutido .nv .b{position:static;margin-left:2px}
+.embutido .main{margin-left:0;padding:0 2px 40px}
+.embutido #temaSel{display:none!important}
 </style>
 </head>
 <body>
@@ -59,9 +66,14 @@
      (a mesma chave GK1.<grupo>-fin-… das Finanças do Grupo serve). Funciona em quantos níveis forem precisos.
    Notas das ausências ficam só no arquivo local cifrado. Conteúdo comum: gestao-ferias/1.
    ===================================================================== */
-const TOOL = 'ferias', TOOL_NOME = 'Mapa de Férias', TOOL_VERSION = '1.2.0';
+const TOOL = 'ferias', TOOL_NOME = 'Mapa de Férias', TOOL_VERSION = '1.3.0';
 const LOCAL_SCHEMA = 'gestao-ferias-local/1', FERIAS_SCHEMA = 'gestao-ferias/1';
 const PRESET = /*FERIAS-PRESET*/null/*FIM-FERIAS-PRESET*/;
+// Dentro da Central de Gestão (ADR-0033): a Central abre esta ferramenta num quadro da própria página e entrega
+// os dados (guardados no arquivo cifrado da Central), os times com as chaves de tarefas e a pasta compartilhada.
+// Sem arquivo próprio, sem senha própria e sem outra pasta para escolher.
+const HOST = (() => { try { return window.frameElement && window.parent !== window && window.parent.FERIAS_HOST || null; } catch { return null; } })();
+if (HOST) document.documentElement.classList.add('embutido');
 // Onde o arquivo desta ferramenta ficou neste navegador (gravado pelo assistente ou na última abertura).
 const LEMBRAR = TOOL + ':' + (PRESET?.unidade?.slug || '');
 const TIPOS = { ferias: 'Férias', folga: 'Folga ou day off', treinamento: 'Treinamento ou evento', outro: 'Outra ausência' };
@@ -232,25 +244,26 @@ function agendarSalvar() {
   if (!ehGrupo() && raiz && chaveMinha() && db.ausencias.length + db.pessoas.length) { clearTimeout(pubT); pubT = setTimeout(() => { if (pendente()) publicar(false, true); }, 2500); }
 }
 async function salvar() {
+  if (HOST && db) { try { HOST.gravar(JSON.parse(JSON.stringify(db))); sujo = false; } catch (e) { toast('Não foi possível guardar na Central: ' + e.message, 6000); } renderTopo(); return; }
   if (!db || !ctx || !dirLocal || salvando) return;
   salvando = true;
   try { await gravarLocal(dirLocal, arquivo, await cifrarLocal(db, ctx)); sujo = false; }
   catch (e) { toast('Não foi possível salvar: ' + e.message, 6000); }
   finally { salvando = false; renderTopo(); }
 }
-window.addEventListener('beforeunload', e => { if (!db) return; if (sujo) { salvar(); e.preventDefault(); e.returnValue = ''; } if (raiz) subpasta(raiz, pastaPropria(), false).then(d => desmarcarAberto(d, writer())).catch(() => {}); });
+window.addEventListener('beforeunload', e => { if (!db) return; if (HOST) { if (sujo) salvar(); } else if (sujo) { salvar(); e.preventDefault(); e.returnValue = ''; } if (raiz) subpasta(raiz, pastaPropria(), false).then(d => desmarcarAberto(d, writer())).catch(() => {}); });
 
 /* --------------------------- pasta sincronizada --------------------------- */
 async function ligarPasta(h, silencioso = false) {
   if (!await permissao(h, !silencioso)) { if (!silencioso) toast('Sem permissão na pasta.'); return false; }
-  const v = await validarPastaComum(h);
+  const v = HOST ? { tem: true } : await validarPastaComum(h);
   if (!v.tem && !v.nomeOk && !silencioso) {
     const r = await perguntar('Esta é a pasta compartilhada?', `<p>A pasta <b class="code">${esc(h.name)}</b> ainda não tem a estrutura da solução (<span class="code">times/</span>, <span class="code">grupo/</span>).</p>
       <p class="muted small">Escolha a pasta raiz sincronizada pelo OneDrive (normalmente <span class="code">${PASTA_COMUM}</span>). Se for esta mesma, a ferramenta cria só <span class="code">${esc(pastaPropria().join('/'))}/</span> quando publicar.</p>`, [['no', 'Escolher outra'], ['ok', 'É esta', 'pri']]);
     if (r !== 'ok') return false;
   }
   raiz = h; db.pastaComum = h.name; agendarSalvar();
-  lembrarPasta('ferias-raiz:' + db.unidade.slug, h);
+  if (!HOST) lembrarPasta('ferias-raiz:' + db.unidade.slug, h);
   await lerPasta(silencioso);
   clearInterval(pollT); pollT = setInterval(() => lerPasta(true), 60000);
   clearInterval(abertoT); const marca = async () => marcarAberto(await subpasta(raiz, pastaPropria(), true), writer(), TOOL); marca(); abertoT = setInterval(marca, 60000);
@@ -364,19 +377,20 @@ function renderTopo() {
   const t = $('#topo'); if (!t || !db) return;
   const titulo = NAV().find(n => n[0] === view)?.[1] || '';
   const pend = pendente(), filtros = ['painel', 'calendario'].includes(view);
-  t.innerHTML = `<div><h1>${esc(titulo === 'Mapa' ? 'Mapa de ausências' : titulo)}</h1><div class="sub">${esc(db.unidade.nome)} · ${ehGrupo() ? 'gestor' : 'time'}</div></div>
+  t.innerHTML = `<div><h1>${esc(titulo === 'Mapa' ? 'Mapa de ausências' : titulo)}</h1><div class="sub">${esc(db.unidade.nome)} · ${HOST ? 'férias do grupo, dentro da Central' : ehGrupo() ? 'gestor' : 'time'}</div></div>
     ${filtros && ehGrupo() && db.unidades.length ? `<select class="sel" id="tUn" title="Unidade"><option value="">Todo o grupo</option><option value="." ${filtroUn === '.' ? 'selected' : ''}>Você e diretos</option>${db.unidades.map(u => `<option value="${esc(u.slug)}" ${filtroUn === u.slug ? 'selected' : ''}>${esc(u.nome)}</option>`).join('')}</select>` : ''}
     ${view === 'painel' ? `<select class="sel" id="tPer" title="Período">${[['prox3', 'Próximos 3 meses'], ['prox6', 'Próximos 6 meses'], ['ano', 'Este ano'], ['prox-ano', 'Próximo ano']].map(([k, n]) => `<option value="${k}" ${periodo === k ? 'selected' : ''}>${n}</option>`).join('')}</select>` : ''}
     <span class="grow"></span>
     <button class="pill" id="tPasta" title="${raiz ? 'Pasta sincronizada ligada' : 'Pasta sincronizada não ligada'}"><span class="led ${sujo || salvando || !raiz ? 'wait' : situacao.erro ? 'err' : ''}"></span>${sujo || salvando ? 'Salvando…' : 'Salvo e cifrado'}${raiz ? '' : ' · sem pasta'}</button>
     ${ehGrupo() ? `<button class="btn ${pend && chaveMinha() ? 'pri' : ''}" id="tPub" title="Publicar o consolidado para a sua liderança">${!chaveMinha() ? 'Nível acima' : pend ? 'Publicar para a liderança' : 'Publicado'}</button>` : `<button class="btn ${pend ? 'pri' : ''}" id="tPub">${pend ? 'Publicar' : 'Publicado'}</button>`}
     <button class="btn pri" id="tNova">+ Ausência</button>
-    <button class="btn ghost" id="tHub" title="Voltar ao Hub da solução">← Hub</button><button class="btn ghost" id="tOnde">Onde estou?</button>`;
+    ${HOST ? '' : '<button class="btn ghost" id="tHub" title="Voltar ao Hub da solução">← Hub</button><button class="btn ghost" id="tOnde">Onde estou?</button>'}`;
   if ($('#tUn')) $('#tUn').onchange = e => { filtroUn = e.target.value; render(); };
   if ($('#tPer')) $('#tPer').onchange = e => { periodo = e.target.value; render(); };
   $('#tPasta').onclick = () => { view = 'ajustes'; render(); };
   $('#tPub').onclick = () => !chaveMinha() && ehGrupo() ? (view = 'ajustes', render()) : publicarDlg();
   $('#tNova').onclick = () => ausenciaDlg(null);
+  if (HOST) return;
   $('#tHub').onclick = voltarAoHub;
   $('#tOnde').onclick = () => ondeEstou({ ferramenta: TOOL_NOME, versao: TOOL_VERSION, arquivo, pastaLocal: dirLocal?.name, pastaComum: raiz?.name, writer: writer(),
     local: ['Pessoas e ausências que você cadastra, com as notas', 'Chaves dos times e grupos (dentro do arquivo cifrado)', 'Últimos dados lidos da pasta', 'Cópias de segurança em backup/'],
@@ -592,16 +606,17 @@ async function ausenciaDlg(id, pre = {}) {
 
 /* --- Unidades (gestor): times e grupos de outros gestores --- */
 function vUnidades(el) {
-  el.innerHTML = `<div class="bar"><span class="muted">Times usam a <b>chave do time</b> (a mesma do Quadro). Grupos de outros gestores usam a chave que você gerou para eles (a mesma das Finanças do Grupo serve).</span><span class="grow"></span>
-      <button class="btn" id="uHub">Importar times do Hub</button><button class="btn" id="uFin">Importar grupos das Finanças do Grupo</button><button class="btn" id="uNovoG">+ Grupo de outro gestor</button><button class="btn pri" id="uNovo">+ Time</button></div>
-    ${db.unidades.map(u => { const c = u.chaves.filter(x => !x.revogada).at(-1), r = db.retratos[u.slug];
-      return `<div class="card"><div class="row"><h3>${esc(u.nome)}</h3><span class="code faint">${esc(pastaUnidade(u).join('/'))}</span>${u.tipo === 'grupo' ? '<span class="chip bv">grupo</span>' : ''}<span class="grow"></span>
+  el.innerHTML = `<div class="bar"><span class="muted">${HOST ? 'Os <b>times da Central</b> entram sozinhos, com a chave de tarefas cadastrada na Integração. Grupos de outros gestores usam a chave que você gerou para eles (a mesma das Finanças do Grupo serve).' : 'Times usam a <b>chave do time</b> (a mesma do Quadro). Grupos de outros gestores usam a chave que você gerou para eles (a mesma das Finanças do Grupo serve).'}</span><span class="grow"></span>
+      ${HOST ? '' : '<button class="btn" id="uHub">Importar times do Hub</button>'}<button class="btn" id="uFin">Importar grupos das Finanças do Grupo</button><button class="btn ${HOST ? 'pri' : ''}" id="uNovoG">+ Grupo de outro gestor</button>${HOST ? '' : '<button class="btn pri" id="uNovo">+ Time</button>'}</div>
+    ${db.unidades.map(u => { const c = u.chaves.filter(x => !x.revogada).at(-1), r = db.retratos[u.slug], daCentral = HOST && u.origem === 'central';
+      return `<div class="card"><div class="row"><h3>${esc(u.nome)}</h3><span class="code faint">${esc(pastaUnidade(u).join('/'))}</span>${u.tipo === 'grupo' ? '<span class="chip bv">grupo</span>' : ''}${daCentral ? '<span class="chip">time da Central</span>' : ''}<span class="grow"></span>
         ${c ? `<span class="chip ok code">${esc(c.kid)}</span>` : '<span class="chip late">sem chave</span>'}${r ? `<span class="chip">${r.pessoas.length} pessoas · ${r.ausencias.length} ausências</span>` : ''}</div>
         <p class="small muted" style="margin:8px 0">${u.status ? esc(u.status) : r ? `Lido ${fmtDataHora(r.lidoEm)} · ${r.writers.length} arquivo(s): ${r.writers.map(w => `<span class="code">${esc(w.writer)}</span> rev. ${w.revision}`).join(', ')}` : raiz ? 'Ainda não lido.' : 'Ligue a pasta sincronizada para ler.'}</p>
-        <div class="row"><button class="btn sm" data-ch="${esc(u.slug)}">${c ? 'Trocar chave' : 'Colar chave'}</button>${u.tipo === 'grupo' ? `<button class="btn sm" data-gk="${esc(u.slug)}">Gerar chave para o gestor</button>` : ''}${c ? `<button class="btn sm" data-cp="${esc(u.slug)}">Copiar chave</button>` : ''}<span class="grow"></span><button class="btn sm danger" data-rm="${esc(u.slug)}">Remover</button></div></div>`; }).join('') || '<div class="card empty">Nenhuma unidade. Adicione os times que você lidera e, se for liderança, os grupos dos gestores abaixo de você.</div>'}`;
-  $('#uNovo').onclick = () => unidadeDlg('time');
+        ${daCentral ? `<p class="small muted" style="margin:0">${c ? 'A chave vem da Integração da Central (aba Integração do time). Para trocar, gere ou cole a nova lá.' : 'Sem chave: gere ou cole a chave de tarefas do time na Central, aba Integração do time.'} Para tirar do mapa, tire a pasta do time na Central.</p>`
+          : `<div class="row"><button class="btn sm" data-ch="${esc(u.slug)}">${c ? 'Trocar chave' : 'Colar chave'}</button>${u.tipo === 'grupo' ? `<button class="btn sm" data-gk="${esc(u.slug)}">Gerar chave para o gestor</button>` : ''}${c ? `<button class="btn sm" data-cp="${esc(u.slug)}">Copiar chave</button>` : ''}<span class="grow"></span><button class="btn sm danger" data-rm="${esc(u.slug)}">Remover</button></div>`}</div>`; }).join('') || `<div class="card empty">${HOST ? 'Nenhuma unidade. Os times com pasta (identificador) na Central aparecem aqui sozinhos; se você for liderança, adicione os grupos dos gestores abaixo de você.' : 'Nenhuma unidade. Adicione os times que você lidera e, se for liderança, os grupos dos gestores abaixo de você.'}</div>`}`;
+  if ($('#uNovo')) $('#uNovo').onclick = () => unidadeDlg('time');
   $('#uNovoG').onclick = () => unidadeDlg('grupo');
-  $('#uHub').onclick = () => importarLocal('hub');
+  if ($('#uHub')) $('#uHub').onclick = () => importarLocal('hub');
   $('#uFin').onclick = () => importarLocal('financas-grupo');
   $$('[data-ch]', el).forEach(b => b.onclick = () => colarChaveUnidade(unPorSlug(b.dataset.ch)));
   $$('[data-gk]', el).forEach(b => b.onclick = () => gerarChaveUnidade(unPorSlug(b.dataset.gk)));
@@ -658,7 +673,7 @@ async function importarLocal(tool) {
   if (tool === 'financas-grupo' && obj.grupo?.slug === db.unidade.slug) for (const c of (obj.acima?.chaves || []).filter(c => !c.revogada)) { try { const k = lerChaveTexto(c.texto); if (chaveDoSlug(k.kid, db.unidade.slug) && !db.chaves.some(y => y.kid === k.kid)) { db.chaves.push({ kid: k.kid, texto: c.texto, em: new Date().toISOString(), origem: tool }); acima++; } } catch {} }
   obj = null;
   await carregarChaves(); agendarSalvar(); await lerPasta(true);
-  await perguntar('Importado', `<p>${nu} unidade(s) nova(s) e ${nk} chave(s) trazidas${acima ? ', além da chave da sua liderança' : ''}.</p><div class="cofre">As chaves agora também ficam dentro do arquivo do Mapa de Férias, cifrado com a <b>sua senha</b>. Ela deve estar no cofre de senhas.</div>`);
+  await perguntar('Importado', `<p>${nu} unidade(s) nova(s) e ${nk} chave(s) trazidas${acima ? ', além da chave da sua liderança' : ''}.</p><div class="cofre">As chaves agora também ficam dentro do arquivo ${HOST ? 'da Central' : 'do Mapa de Férias'}, cifrado com a <b>sua senha</b>. Ela deve estar no cofre de senhas.</div>`);
 }
 
 /* --- Ajustes --- */
@@ -666,7 +681,7 @@ function vAjustes(el) {
   const c = db.chaves.filter(x => !x.revogada).at(-1), pub = db.publicacao;
   el.innerHTML = `<div class="grid g2">
     <div class="card"><p class="lbl">1 · Pasta sincronizada (OneDrive)</p>
-      ${raiz ? `<p>Ligada: <span class="code">${esc(raiz.name)}/${esc(pastaPropria().join('/'))}/</span>${situacao.lidoEm ? ` · lida ${fmtDataHora(situacao.lidoEm)}` : ''}</p>` : `<p class="muted">Escolha a pasta raiz compartilhada, sincronizada pelo OneDrive (normalmente <span class="code">${PASTA_COMUM}</span>).</p>`}
+      ${raiz ? `<p>Ligada: <span class="code">${esc(raiz.name)}/${esc(pastaPropria().join('/'))}/</span>${situacao.lidoEm ? ` · lida ${fmtDataHora(situacao.lidoEm)}` : ''}${HOST ? '<br><span class="small muted">É a mesma pasta da Integração da Central.</span>' : ''}</p>` : HOST ? '<p class="muted">É a mesma pasta compartilhada da Integração da Central. Ligue aqui ou na aba Integração.</p>' : `<p class="muted">Escolha a pasta raiz compartilhada, sincronizada pelo OneDrive (normalmente <span class="code">${PASTA_COMUM}</span>).</p>`}
       <div class="row"><button class="btn ${raiz ? '' : 'pri'}" id="jPasta">${raiz ? 'Trocar pasta' : 'Ligar pasta'}</button>${raiz ? '<button class="btn" id="jLer">Ler agora</button>' : ''}</div>
       ${situacao.erro ? `<div class="banner warn" style="margin-top:10px">${esc(situacao.erro)}</div>` : ''}</div>
     <div class="card"><p class="lbl">2 · ${ehGrupo() ? 'Nível acima · sua liderança' : 'Chave do time'}</p>
@@ -685,11 +700,14 @@ function vAjustes(el) {
     <div class="card"><p class="lbl">${ehGrupo() ? 'Grupo' : 'Time'} e você</p>
       <div class="f2"><label class="field"><span>Nome</span><input class="sin" id="jN" value="${esc(db.unidade.nome)}"></label><label class="field"><span>Identificador (pasta)</span><input class="sin code" value="${esc(db.unidade.slug)}" disabled></label></div>
       <div class="f2"><label class="field"><span>Seu nome</span><input class="sin" id="jP" value="${esc(db.pessoa.nome)}"></label><label class="field"><span>Este computador</span><input class="sin" id="jD" value="${esc(dispositivo().nome)}" placeholder="Ex.: notebook do trabalho"></label></div></div>
-    <div class="card"><p class="lbl">Segurança</p><p class="small">Arquivo <span class="code">${esc(arquivo)}</span> cifrado com a sua senha (AES-256, PBKDF2 600 mil). As chaves ficam dentro dele.</p>
-      <div class="row"><button class="btn" id="jSenha">Trocar senha</button><button class="btn" id="jBk">Baixar cópia cifrada</button><button class="btn" id="jTeste">Testar minha senha</button></div>
+    ${HOST ? `<div class="card"><p class="lbl">Onde ficam os dados</p><p class="small">Dentro do arquivo da Central, cifrado com a senha dela. Não há arquivo nem senha só das férias. As notas das ausências nunca saem dele.</p>
+      <div class="row"><button class="btn" id="jAntigo">Trazer do Mapa de Férias separado</button></div>
+      <p class="small muted">Usava o Mapa de Férias como ferramenta à parte (<span class="code">ferias-&lt;grupo&gt;.json</span>)? Traga pessoas, ausências, feriados, grupos e chaves para cá. O arquivo antigo só é lido.</p>`
+    : `<div class="card"><p class="lbl">Segurança</p><p class="small">Arquivo <span class="code">${esc(arquivo)}</span> cifrado com a sua senha (AES-256, PBKDF2 600 mil). As chaves ficam dentro dele.</p>
+      <div class="row"><button class="btn" id="jSenha">Trocar senha</button><button class="btn" id="jBk">Baixar cópia cifrada</button><button class="btn" id="jTeste">Testar minha senha</button></div>`}
       <p class="small muted">Apoio para enxergar e planejar ausências: não substitui a ferramenta oficial de férias da empresa.</p></div>
   </div>`;
-  $('#jPasta').onclick = async () => { try { await ligarPasta(await escolherPasta('ferias-comum')); } catch (e) { if (e.name !== 'AbortError') toast(e.message); } };
+  $('#jPasta').onclick = async () => { try { const h = HOST ? await HOST.escolherPasta() : await escolherPasta('ferias-comum'); if (h) await ligarPasta(h, !!HOST); } catch (e) { if (e.name !== 'AbortError') toast(e.message); } };
   if ($('#jLer')) $('#jLer').onclick = () => lerPasta();
   $('#jChOk').onclick = async () => {
     const v = $('#jCh').value.trim(); if (!v) return;
@@ -707,6 +725,7 @@ function vAjustes(el) {
   $('#jN').onchange = e => { db.unidade.nome = clamp(e.target.value.trim(), 80) || db.unidade.nome; agendarSalvar(); };
   $('#jP').onchange = e => { db.pessoa.nome = clamp(e.target.value.trim(), 80) || db.pessoa.nome; const eu = pessoaPorId(db.eu); if (eu) eu.nome = db.pessoa.nome; agendarSalvar(); };
   $('#jD').onchange = e => nomearDispositivo(e.target.value.trim());
+  if (HOST) { $('#jAntigo').onclick = trazerArquivoAntigo; return; }
   $('#jSenha').onclick = async () => { const s = await criarSenhaDlg('Nova senha do arquivo'); if (!s) return; ctx = await novoCtx(s, TOOL); db.seg = { cofreConfirmadoEm: new Date().toISOString() }; await salvar(); toast('Senha trocada.'); };
   $('#jBk').onclick = async () => baixar(arquivo.replace(/\.json$/, '') + '-copia-' + hojeISO() + '.json', await cifrarLocal(db, ctx));
   $('#jTeste').onclick = async () => { const s = await pedirSenhaDlg('Testar minha senha'); if (s == null) return; if (await senhaConfere(s, ctx)) { db.seg.ultimoTesteEm = new Date().toISOString(); agendarSalvar(); toast('Senha correta.'); } else toast('Senha não confere. Troque a senha enquanto o arquivo está aberto.', 6000); };
@@ -800,7 +819,90 @@ async function criarArquivo({ nivel, nome, slug, pessoa }) {
   toast(nivel === 'grupo' ? 'Arquivo criado e cifrado. Agora adicione os times e grupos.' : 'Arquivo criado e cifrado. Agora marque as suas férias.', 5000);
   return true;
 }
-(async () => { if (!await abrirLembradoSePuder(LEMBRAR, abrirArquivo) || (!db && !$('#app').children.length)) telaInicial(); })();
+/* ------------------- dentro da Central de Gestão (ADR-0033) ------------------- */
+// Os times da Central (com pasta) viram unidades, com as chaves de tarefas da Integração. As chaves antigas ficam,
+// para ler arquivos publicados antes de uma troca de chave. Time que saiu da Central sai do mapa.
+function sincronizarUnidades() {
+  if (!HOST || !db) return false;
+  const antes = JSON.stringify(db.unidades), ts = (HOST.unidades() || []).filter(t => t?.slug && t.slug !== db.unidade.slug);
+  for (const t of ts) {
+    let u = unPorSlug(t.slug);
+    if (!u) { u = { nome: clamp(t.nome || t.slug, 80), slug: t.slug, tipo: 'time', chaves: [] }; db.unidades.push(u); }
+    u.origem = 'central'; u.tipo = 'time'; u.nome = clamp(t.nome || u.nome, 80);
+    const novas = [];
+    for (const c of t.chaves || []) { try { const k = lerChaveTexto(c.texto); if (chaveDoSlug(k.kid, u.slug)) novas.push({ kid: k.kid, texto: c.texto, em: c.em || '', origem: 'central' }); } catch {} }
+    u.chaves = [...u.chaves.filter(c => !novas.some(n => n.kid === c.kid)), ...novas];
+  }
+  const fora = db.unidades.filter(u => u.origem === 'central' && !ts.some(t => t.slug === u.slug));
+  for (const u of fora) delete db.retratos[u.slug];
+  db.unidades = db.unidades.filter(u => !fora.includes(u));
+  return JSON.stringify(db.unidades) !== antes;
+}
+async function aposAbrirEmbutido() {
+  if (sincronizarUnidades()) { sujo = true; salvar(); }
+  arquivo = HOST.nomeArquivo?.() || 'arquivo da Central';
+  await carregarChaves(); render();
+  const h = await HOST.pasta(false).catch(() => null);
+  if (h && h !== raiz) await ligarPasta(h, true);
+}
+// A Central chama quando a página Férias volta a aparecer: times e chaves podem ter mudado.
+window.feriasAtualizar = async () => {
+  if (!HOST || !db) return;
+  if (sincronizarUnidades()) { sujo = true; salvar(); }
+  await carregarChaves();
+  const h = await HOST.pasta(false).catch(() => null);
+  if (h && h !== raiz) await ligarPasta(h, true); else if (raiz) await lerPasta(true); else render();
+};
+function telaEmbutida(msg = '') {
+  const g = HOST.grupo?.() || {}, eu = HOST.pessoa?.() || '';
+  $('#app').innerHTML = `<div class="welcome"><div class="card">
+    <h2 style="margin:0">Férias e ausências do grupo</h2>
+    <div class="small muted">Os dias com mais e menos gente fora em todos os seus times, as suas férias e as dos seus diretos. Fica dentro da Central: mesmo arquivo, mesma senha.</div>
+    ${msg ? `<div class="banner warn" style="margin-top:12px">${esc(msg)}</div>` : ''}
+    <div class="f2" style="margin-top:16px"><label class="field"><span>Nome do grupo (ex.: Tecnologia)</span><input class="sin" id="eN" value="${esc(g.nome || '')}"></label>
+    <label class="field"><span>Identificador (pasta)</span><input class="sin code" id="eS" value="${esc(g.slug || '')}"></label></div>
+    <label class="field"><span>Seu nome</span><input class="sin" id="eP" value="${esc(eu)}"></label>
+    <p class="small muted">Use o mesmo identificador do grupo nas Finanças do Grupo: a liderança encontra o seu consolidado por ele. Os times da Central entram sozinhos, com as chaves da Integração.</p>
+    <div class="row"><button class="btn pri" id="eOk">Começar</button><span class="grow"></span><button class="btn" id="eAntigo">Trazer do Mapa de Férias separado</button></div>
+    <p class="small muted" style="margin-top:14px">Apoio para a visão do grupo: não substitui a ferramenta oficial de férias da empresa.</p>
+  </div></div>`;
+  $('#eN').oninput = () => { $('#eS').value = slugify($('#eN').value); };
+  $('#eOk').onclick = async () => {
+    const nome = $('#eN').value.trim(), slug = slugify($('#eS').value), pessoa = $('#eP').value.trim();
+    if (!nome || !slug || !pessoa) return toast('Preencha o nome do grupo, o identificador e o seu nome.');
+    db = novoDb({ nivel: 'grupo', nome, slug, pessoa }); view = 'unidades';
+    sincronizarUnidades(); sujo = true; await salvar(); await aposAbrirEmbutido();
+    toast('Pronto. Os times da Central já estão no mapa; marque as suas férias e as dos diretos.', 5000);
+  };
+  $('#eAntigo').onclick = trazerArquivoAntigo;
+}
+// Migração: o arquivo do Mapa de Férias separado (ferias-<grupo>.json) é lido com a senha dele e vem para a Central.
+async function trazerArquivoAntigo() {
+  if (!window.showOpenFilePicker) return toast('Use Edge ou Chrome.');
+  let fh; try { [fh] = await window.showOpenFilePicker({ id: 'ferias-antigo', types: [{ description: 'Mapa de Férias (ferias-<grupo>.json)', accept: { 'application/json': ['.json'] } }] }); } catch { return; }
+  const texto = await (await fh.getFile()).text();
+  try { const cab = lerCabecalhoLocal(texto); if (cab.app && cab.app !== TOOL) throw new Error('Este arquivo não é do Mapa de Férias.'); } catch (e) { return toast(e.message, 5000); }
+  let dados = null;
+  for (let i = 0; i < 3 && !dados; i++) {
+    const s = await pedirSenhaDlg('Senha do Mapa de Férias separado', i > 0); if (s == null) return;
+    try { dados = normalizar((await decifrarLocal(texto, s)).dados); } catch (e) { if (e.code !== 'SENHA') return toast(e.message, 6000); }
+  }
+  if (!dados) return toast('Senha incorreta.');
+  if (dados.nivel !== 'grupo') return toast('Este arquivo é do papel "time". Na Central entram as férias do gestor ou da liderança.', 6000);
+  if (db && (db.ausencias.length || db.pessoas.length > 1) && await perguntar('Substituir as férias da Central?', `<p>A Central já tem ${db.pessoas.length} pessoa(s) e ${db.ausencias.length} ausência(s). Trocar pelo conteúdo de <span class="code">${esc(fh.name)}</span>?</p>`, [['no', 'Cancelar'], ['ok', 'Substituir', 'danger']]) !== 'ok') return;
+  delete dados.pastaComum;
+  db = dados; sincronizarUnidades(); sujo = true; await salvar(); raiz = null;
+  await aposAbrirEmbutido();
+  toast(`Trazido de ${fh.name}: ${db.pessoas.length} pessoa(s), ${db.ausencias.length} ausência(s), ${db.unidades.length} unidade(s). O arquivo antigo não foi alterado.`, 7000);
+}
+async function iniciarEmbutido() {
+  let d = null; try { d = HOST.carregar(); } catch {}
+  if (!d) return telaEmbutida();
+  try { db = normalizar(d); } catch (e) { return telaEmbutida(e.message); }
+  await aposAbrirEmbutido();
+}
+if (HOST) iniciarEmbutido();
+else (async () => { if (!await abrirLembradoSePuder(LEMBRAR, abrirArquivo) || (!db && !$('#app').children.length)) telaInicial(); })();
 </script>
 </body>
 </html>

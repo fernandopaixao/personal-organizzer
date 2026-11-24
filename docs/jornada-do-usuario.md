@@ -111,17 +111,18 @@ Esta revisão olhou a solução como um todo em 24/11/2026. Os pontos abaixo nã
 
 ## 8. Jornada das férias (time, gestor e liderança)
 
-O Mapa de Férias é apoio para a visão do grupo; o pedido oficial de férias continua na ferramenta da empresa.
+O Mapa de Férias é apoio para a visão do grupo; o pedido oficial de férias continua na ferramenta da empresa. Desde a Central 15.9, o gestor e a liderança usam a página **Férias da Central** (mesmo arquivo e mesma senha; [ADR-0033](adr/0033-ferias-dentro-da-central.md)); o `ferias.html` à parte fica para as pessoas do time.
 
 | Etapa | Quem | O que faz | Ferramenta | Ponto de atenção |
 |---|---|---|---|---|
 | **1. Cadastrar** | Membro do time (ou o responsável) | Cria o próprio arquivo como "time", cola a chave do time e marca as férias | Mapa de Férias › Pessoas | Usar o mesmo nome em todos os arquivos para não duplicar a pessoa |
 | **2. Subir para o gestor** | Automático | Cada mudança publica `times/<time>/ferias/<pessoa>-<computador>.json` | Pasta sincronizada | Sem a chave do time, nada sobe (aviso no Mapa) |
-| **3. Enxergar o grupo** | Gestor | Soma os times, vê os dias com mais e menos gente fora, as semanas tranquilas e quem está fora em cada dia | Mapa, Calendário | Limite de pessoas fora ajustável (padrão 30%) |
+| **3. Enxergar o grupo** | Gestor | Abre a página Férias da Central: os times com pasta e chave na Integração já estão somados; vê os dias com mais e menos gente fora, as semanas tranquilas e quem está fora em cada dia | Central › Férias › Mapa, Calendário | Time sem pasta ou sem chave na Integração não aparece; limite de pessoas fora ajustável (padrão 30%) |
 | **4. Planejar** | Gestor e times | Ao marcar uma ausência, vê o impacto e pede sugestões de períodos com menos gente fora | Formulário de ausência | Apoio: o pedido oficial é feito na ferramenta da empresa |
-| **5. Cadastrar as próprias** | Gestor | Marca as próprias férias e as dos diretos | Diretos | Notas ficam só locais |
-| **6. Subir para a liderança** | Gestor | Cola a chave do grupo (a mesma das Finanças), confere e publica o consolidado | Ajustes › Nível acima | Opção de trocar nomes por "Pessoa N" |
-| **7. Visão da liderança** | Liderança | Cadastra cada gestor como unidade e soma tudo, em quantos níveis existirem | Unidades, Mapa | A liderança precisa ler a mesma pasta compartilhada |
+| **5. Cadastrar as próprias** | Gestor | Marca as próprias férias e as dos diretos | Central › Férias › Diretos | Notas ficam só no arquivo da Central. A página Hoje mostra quem está fora hoje |
+| **6. Subir para a liderança** | Gestor | Cola a chave do grupo (a mesma das Finanças), confere e publica o consolidado | Central › Férias › Ajustes | Opção de trocar nomes por "Pessoa N" |
+| **7. Visão da liderança** | Liderança | Na página Férias da própria Central, cadastra cada gestor como unidade e soma tudo, em quantos níveis existirem | Central › Férias › Unidades, Mapa | A liderança precisa ler a mesma pasta compartilhada |
+| **Mudança (15.9)** | Gestor que usava o Mapa separado | Central › Férias › **Trazer do Mapa de Férias separado**, escolhe `ferias-<grupo>.json` e digita a senha dele | Central › Férias | O arquivo antigo só é lido; depois pode ser guardado como cópia |
 
 ---
 

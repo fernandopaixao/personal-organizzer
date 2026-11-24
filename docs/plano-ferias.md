@@ -53,3 +53,16 @@ A liderança cadastra o grupo do gestor como uma **unidade** e soma o consolidad
 ## Gerado pelo assistente (24/11/2026)
 
 O `inicio.html` 2.1 gera o Mapa de Férias quando a pessoa marca "Férias" no perfil, e também no "Estou com sorte". No gestor, o arquivo `ferias-<grupo>.json` já sai com os times como unidades (cada uma com a chave de tarefas do time) e, se houver, a chave da liderança. No time, o arquivo sai com a chave do time. O `ferias.html` de `para-os-times/<time>/` leva a chave do time no preset (`chave`), e a ferramenta pede o aviso de cofre ao criar o arquivo.
+
+## Dentro da Central (1.3, Central 15.9, 24/11/2026)
+
+Pedido do Fernando: "Não trate férias como um item a parte. Trate como uma ferramenta incluída no módulo do gestor. O objetivo é reduzir e simplificar a quantidade de módulos a gerir." Decisão em [ADR-0033](adr/0033-ferias-dentro-da-central.md).
+
+- **Página Férias na Central** (menu Pessoas, tecla 5). O build (`tools/build_financas.py`) embute o Mapa de Férias montado na Central (`#feriasEmb`) e a Central o abre num quadro da própria página. O código é o mesmo do `ferias.html`: quando aberto pela Central (objeto `FERIAS_HOST`), entra no **modo embutido**.
+- **Modo embutido:** sem tela de arquivo e de senha; os dados ficam em `db.ferias` no arquivo da Central (formato `gestao-ferias-local/1`); os times com pasta e as chaves de tarefas ativas da Integração viram unidades (`origem: 'central'`) e acompanham a Central a cada vez que a página abre; a pasta compartilhada é a da Integração; o menu vira abas no topo; sem "← Hub", "Onde estou?" e seletor de tema próprios (a Central já tem).
+- **Migração:** **Trazer do Mapa de Férias separado** (primeira tela e Ajustes) lê o `ferias-<grupo>.json` com a senha dele e traz tudo; o arquivo antigo não é alterado. Arquivo do papel "time" é recusado.
+- **Hoje da Central:** cartão **Fora hoje** (você, diretos e o último retrato de cada time).
+- **Assistente 2.4:** o gestor que marca Férias recebe a Central com `db.ferias` pronto (grupo, times e chaves) e não recebe mais `ferias.html` nem `ferias-<grupo>.json`. Os times continuam recebendo `para-os-times/<time>/ferias.html`.
+- **Contrato:** nada muda. A página lê `times/<time>/ferias/` e publica em `grupos/<grupo>/ferias/` como antes.
+- **Teste:** seção 6 de `financas/testes/teste-ferias.js` (abre na Central, times e chave da Integração, lê o time, publica, nota fica na Central, "Fora hoje", time novo, migração do arquivo antigo) e o caminho do assistente no `teste-e2e.js`.
+- **Em aberto:** onde o time marca as férias (dentro do Quadro do Time, só pelo gestor ou no `ferias.html` à parte).

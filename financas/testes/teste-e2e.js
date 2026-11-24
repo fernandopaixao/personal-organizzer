@@ -497,7 +497,8 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   await ls.click('#sS'); await criarSenha(ls, SENHA2); await ls.waitForSelector('#sGo:not([disabled])');
   await ls.click('#sGo'); await cofre(ls); await ls.waitForSelector('.mapa-svg', { timeout: 30000 });
   const locS = await opfs(ls, async () => [await listar('LocalSorte'), await listar('LocalSorte/para-os-times'), await listar('LocalSorte/para-os-times/pagamentos')]);
-  ok(['hub.html', 'gestao_pessoal.html', 'financas_grupo.html', 'ferias.html', 'onde-fica-cada-coisa.html', 'hub-tecnologia.json', 'gestao-tecnologia.json', 'financas-grupo-tecnologia.json', 'ferias-tecnologia.json'].every(n => locS[0].includes(n)), 'Estou com sorte: ferramentas do gestor geradas na pasta');
+  ok(['hub.html', 'gestao_pessoal.html', 'financas_grupo.html', 'onde-fica-cada-coisa.html', 'hub-tecnologia.json', 'gestao-tecnologia.json', 'financas-grupo-tecnologia.json'].every(n => locS[0].includes(n)), 'Estou com sorte: ferramentas do gestor geradas na pasta');
+  ok(!locS[0].includes('ferias.html') && !locS[0].includes('ferias-tecnologia.json'), 'Estou com sorte: gestor não recebe Mapa de Férias à parte (férias ficam na Central, ADR-0033)');
   ok(locS[1].join() === 'cartoes,pagamentos' && ['quadro_pagamentos.html', 'financas_pagamentos.html', 'ferias.html', 'LEIA-ME.txt'].every(n => locS[2].includes(n)), 'Estou com sorte: Quadro, Finanças e Férias de cada time em para-os-times/<time>/');
   ok(/"chave":"GK1\.pagamentos-\d{4}\./.test(await opfs(ls, async () => ler('LocalSorte/para-os-times/pagamentos', 'ferias.html'))), 'Mapa de Férias do time leva a chave de tarefas do time');
   const qS = await opfs(ls, async () => ler('LocalSorte/para-os-times/pagamentos', 'quadro_pagamentos.html')), fS = await opfs(ls, async () => ler('LocalSorte/para-os-times/pagamentos', 'financas_pagamentos.html'));
@@ -511,6 +512,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   await cS.evaluate(() => { window.__abrir = { dir: 'LocalSorte', arq: 'gestao-tecnologia.json' }; });
   await cS.fill('#lockPass', SENHA2); await cS.click('#btnOpen'); await cS.waitForTimeout(1500);
   ok(await cS.evaluate(() => db.teams.map(t => t.prefix + ':' + t.slug).join() === 'PAG:pagamentos,CAR:cartoes' && db.teams.every(t => /^GK1\./.test(igActiveKey(t.id)?.key || '')) && db.settings.selfName === 'Fernando'), 'Central abre com os times, prefixos, pastas e chaves de tarefas');
+  ok(await cS.evaluate(() => db.ferias?.nivel === 'grupo' && db.ferias.unidade.slug === 'tecnologia' && db.ferias.unidades.map(u => u.slug + ':' + u.chaves.length).join() === 'pagamentos:1,cartoes:1'), 'Central já vem com as férias do grupo configuradas (times e chaves)');
   fs.writeFileSync(path.join(SAIDA, 'grupo_sorte.html'), await opfs(ls, async () => ler('LocalSorte', 'financas_grupo.html')));
   const gS = await nova('/financas/testes/saida/grupo_sorte.html', { 'fin-local': 'LocalSorte' });
   await gS.click('#iAbrir'); await senhaAbrir(gS, SENHA2); await gS.waitForSelector('#topo');
@@ -614,24 +616,24 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   ok(paraTimes[0].join() === 'cartoes,pagamentos' && ['quadro_pagamentos.html', 'financas_pagamentos.html', 'ferias.html', 'LEIA-ME.txt'].every(n => paraTimes[1].includes(n)), 'caminho normal do gestor também gera as chaves e para-os-times/<time>/');
   ok(await ap.evaluate(() => document.querySelectorAll('.tk').length === 2 && !/gere a chave/i.test(document.getElementById('wz').textContent)), 'tela final mostra as chaves de cada time e não pede para gerar chave à mão');
   const salvarP = async (arq, nome) => fs.writeFileSync(path.join(SAIDA, nome), await opfs(ap, async n => ler('LocalPronto', n), arq));
-  await salvarP('hub.html', 'pronto_hub.html'); await salvarP('financas_grupo.html', 'pronto_grupo.html'); await salvarP('ferias.html', 'pronto_ferias.html'); await salvarP('gestao_pessoal.html', 'pronto_central.html');
+  await salvarP('hub.html', 'pronto_hub.html'); await salvarP('financas_grupo.html', 'pronto_grupo.html'); await salvarP('gestao_pessoal.html', 'pronto_central.html');
+  ok(!(await opfs(ap, async () => listar('LocalPronto'))).some(n => /^ferias/.test(n)), 'gestor com Férias marcadas não recebe ferias.html nem ferias-<grupo>.json');
   // hub: abre direto o arquivo lembrado, já com os times, as chaves e a pasta sincronizada
   const hP = await novaP(SAIDA_URL + 'pronto_hub.html', {});
   await senhaAbrir(hP, SENHA2); await hP.waitForSelector('#topo'); await hP.waitForTimeout(500);
   ok(await hP.evaluate(() => __hub.db.times.every(t => t.chaves.length === 1) && raiz?.name === 'CompPronto'), 'hub abre sozinho o arquivo, com a chave de cada time e a pasta sincronizada ligada');
-  // Finanças do Grupo e Mapa de Férias: mesma coisa, sem escolher pasta
+  // Finanças do Grupo: mesma coisa, sem escolher pasta
   const gP = await novaP(SAIDA_URL + 'pronto_grupo.html', {});
   await senhaAbrir(gP, SENHA2); await gP.waitForSelector('#topo'); await gP.waitForTimeout(500);
   ok(await gP.evaluate(() => db.times.map(t => t.prefixo + ':' + t.chaves.length).join() === 'PAG:1,CAR:1' && raiz?.name === 'CompPronto'), 'Finanças do Grupo abre sozinho, com prefixos sugeridos, chaves de finanças e pasta ligada');
-  const fP = await novaP(SAIDA_URL + 'pronto_ferias.html', {});
-  await senhaAbrir(fP, SENHA2); await fP.waitForFunction(() => !!db, null, { timeout: 8000 }); await fP.waitForTimeout(500);
-  ok(await fP.evaluate(() => db.unidades.every(u => u.chaves.length === 1) && raiz?.name === 'CompPronto'), 'Mapa de Férias abre sozinho, com as chaves dos times e a pasta ligada');
   // Central: "Continuar com" o arquivo do assistente, pasta de integração já conectada, chaves de tarefas e de finanças
   const cP = await novaP(SAIDA_URL + 'pronto_central.html', {});
   await cP.waitForSelector('#btnLast:not(.hidden)', { timeout: 5000 });
   ok(/gestao-tecnologia\.json/.test(await cP.textContent('#btnLast')), 'Central oferece "Continuar com gestao-tecnologia.json" sem escolher arquivo');
   await cP.fill('#lockPass', SENHA2); await cP.click('#btnLast'); await cP.waitForFunction(() => !document.querySelector('#app').classList.contains('hidden'), null, { timeout: 8000 });
   ok(await cP.evaluate(async () => (await igLoadDir())?.name === 'CompPronto' && db.teams.map(t => t.prefix).join() === 'PAG,CAR' && db.teams.every(t => igActiveKey(t.id) && finKeyActive(t.id))), 'Central abre com a pasta de integração conectada, prefixos e as duas chaves de cada time');
+  await cP.click('[data-go="ferias"]'); await cP.waitForSelector('#ferias iframe'); const feP = await (await cP.$('#ferias iframe')).contentFrame(); await feP.waitForSelector('#tNova', { timeout: 8000 }); await cP.waitForTimeout(600);
+  ok(await feP.evaluate(() => db.unidade.slug === 'tecnologia' && db.unidades.every(u => u.chaves.length === 1 && u.origem === 'central') && raiz?.name === 'CompPronto'), 'página Férias da Central abre pronta: grupo, times com chave e a pasta da Integração, sem outra senha');
   // Central 15.8: botão em destaque para gerar a chave de integração dentro do time
   await cP.evaluate(() => { db.teams.push({ id: 'tmN', name: 'Pix Novo', prefix: '', slug: '', createdAt: Date.now() }); teamSel = 'tmN'; tmView = 'overview'; go('team'); });
   ok(await cP.evaluate(() => !!document.querySelector('#team .tmkey [data-act="tm-newkey"]') && !!document.querySelector('#team [data-act="tm-view"][data-v="integ"] .fdot')), 'time sem chave: aviso em destaque com "Gerar chave de integração" e ponto na aba Integração');
