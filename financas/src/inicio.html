@@ -136,7 +136,6 @@ async function escolherPastaLocalAssist() {
   if (!await permissao(h)) return null;
   const s = await suspeitaDeSincronizada(h);
   if (s.length) { if (await perguntar('Esta pasta parece sincronizada', `<div class="cofre">A pasta <b>${esc(h.name)}</b> ${esc(s.join(', '))}. Dados individuais devem ficar fora do OneDrive.</div>`, [['no', 'Escolher outra'], ['ok', 'Usar mesmo assim']]) !== 'ok') return null; }
-  else if (await perguntar('Confirme', `<p>Você conferiu no Explorador de Arquivos que <b class="code">${esc(h.name)}</b> não tem o ícone de nuvem do OneDrive?</p>`, [['no', 'Escolher outra'], ['ok', 'Conferi, não está', 'pri']]) !== 'ok') return null;
   return h;
 }
 

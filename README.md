@@ -31,6 +31,7 @@ A visão geral da solução (Central, Quadro do Time, integração, métricas e 
 
 - lista os HTMLs da pasta (Central, Finanças do Grupo, Quadros e Finanças de cada time, assistente) e abre cada um, sem ler os dados deles;
 - mostra por time quando o Quadro, o status, as métricas e o plano financeiro mudaram na pasta sincronizada;
+- todas as ferramentas têm o botão **← Hub** no topo para voltar a ele;
 - deixa **post-its para os times**: cada recado vai cifrado com a chave do time para `times/<time>/postits/<você>-<computador>.json` (um arquivo por autor, como o resto da solução) e aparece no topo do **Quadro do Time 2.2**. Quem lê clica em **Vi** e o hub mostra quem já viu.
 
 Tem o próprio arquivo cifrado (`hub-<nome>.json`, com os times e as chaves), criado pelo assistente ou pelo próprio hub. As chaves podem ser coladas ou importadas da Central. Detalhes em [`docs/plano-hub.md`](docs/plano-hub.md).

@@ -1962,7 +1962,16 @@ window.__qt = { PRESET, conectarPasta, get db() { return db; }, set db(v) { db =
     d.querySelector('#f4fecha').onclick = () => d.close();
   };
   window.f4Abrir = abrir;
-  window.f4BotaoOnde = (alvo, infoFn) => { const el = typeof alvo === 'string' ? document.getElementById(alvo) : alvo; if (!el || el.querySelector('.f4btn')) return; el.innerHTML = '<button type="button" class="f4btn" title="Qual ferramenta é esta, qual arquivo está aberto e o que é local ou compartilhado">Onde estou?</button>'; el.firstChild.onclick = () => f4OndeEstou(infoFn()); };
+  // Volta ao Hub da solução (hub.html, na mesma pasta). Se o hub já está aberto numa aba
+  // (ele se chama "gestao-hub"), só traz aquela aba para a frente, sem recarregar; senão abre o hub.
+  window.f4VoltarAoHub = function () {
+    let w = null; try { w = window.open('', 'gestao-hub'); } catch {}
+    if (!w) { location.href = 'hub.html'; return; }
+    let vazia = false; try { vazia = w.location.href === 'about:blank'; } catch {}
+    if (vazia) w.location.href = new URL('hub.html', location.href).href;
+    try { w.focus(); } catch {}
+  };
+  window.f4BotaoOnde = (alvo, infoFn) => { const el = typeof alvo === 'string' ? document.getElementById(alvo) : alvo; if (!el || el.querySelector('.f4btn')) return; el.innerHTML = '<button type="button" class="f4btn f4hub" title="Voltar ao Hub da solução (hub.html)">← Hub</button> <button type="button" class="f4btn" title="Qual ferramenta é esta, qual arquivo está aberto e o que é local ou compartilhado">Onde estou?</button>'; el.querySelector('.f4hub').onclick = f4VoltarAoHub; el.querySelector('.f4btn:not(.f4hub)').onclick = () => f4OndeEstou(infoFn()); };
 })();
 </script>
 <script id="f4quadro">

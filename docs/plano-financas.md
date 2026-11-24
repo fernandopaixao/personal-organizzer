@@ -150,7 +150,7 @@ Nome sugerido da pasta: `Gestao-Compartilhado` (substitui `Gestao-Integracao`; a
 
 ### 5.3 Garantir que o local é mesmo local
 Um ponto de atenção: com o "backup de pastas" do OneDrive ligado, `Documentos` e `Área de Trabalho` **também sincronizam**. Um arquivo "local" salvo ali vai para a nuvem e perde a proteção contra conflito.
-- O assistente recomenda uma pasta própria, por exemplo `C:\Users\<você>\GestaoLocal`, e explica com imagem como conferir se ela tem o ícone de nuvem do OneDrive.
+- O assistente recomenda uma pasta própria, por exemplo `C:\Users\<você>\GestaoLocal`, e avisa sozinho quando a pasta escolhida parece sincronizada (sem pedir confirmação manual desde 24/11/2026).
 - O navegador não revela o caminho completo de uma pasta, então a ferramenta não consegue checar isso sozinha com certeza. Ela faz duas checagens indiretas: avisa se a pasta escolhida tem o mesmo nome da pasta comum ou contém arquivos típicos do OneDrive (`desktop.ini`, cópias com nome de computador), e pede uma confirmação "conferi que esta pasta não está no OneDrive".
 - **Cópia de segurança do local**: como o local não vai para a nuvem, a ferramenta guarda as 5 últimas versões cifradas numa subpasta `backup/` e lembra, uma vez por semana, de exportar uma cópia cifrada para onde a pessoa preferir.
 

@@ -239,9 +239,10 @@ function renderTopo() {
   t.innerHTML = `<div><h1>${esc(NAV.find(n => n[0] === view)[1])}</h1><div class="sub">${esc(db.grupo.nome)} · ${db.ano} · ${esc(db.moeda)}</div></div><span class="grow"></span>
     <span class="pill"><span class="led ${sujo || salvando ? 'wait' : ''}"></span>${sujo || salvando ? 'Salvando…' : 'Salvo e cifrado'}</span>
     <button class="pill" id="tPasta"><span class="led ${raiz ? '' : 'wait'}"></span>${raiz ? 'Pasta ligada' : 'Ligar pasta'}</button>
-    ${raiz ? '<button class="btn" id="tLer">Ler pasta</button>' : ''}<button class="btn ghost" id="tOnde">Onde estou?</button>`;
+    ${raiz ? '<button class="btn" id="tLer">Ler pasta</button>' : ''}<button class="btn ghost" id="tHub" title="Voltar ao Hub da solução">← Hub</button><button class="btn ghost" id="tOnde">Onde estou?</button>`;
   $('#tPasta').onclick = async () => { try { await ligarPasta(await escolherPasta('fin-comum')); } catch (e) { if (e.name !== 'AbortError') toast(e.message); } };
   if ($('#tLer')) $('#tLer').onclick = () => lerPasta();
+  $('#tHub').onclick = voltarAoHub;
   $('#tOnde').onclick = () => ondeEstou({ ferramenta: TOOL_NOME, versao: TOOL_VERSION, arquivo, pastaLocal: dirLocal?.name, pastaComum: raiz?.name, writer: writer(),
     local: ['Orçamento aprovado do grupo e itens do grupo', 'Chaves de finanças de cada time', 'Retratos lidos dos times e versões do plano', 'Cópias de segurança em backup/'],
     comum: ['grupo/financas/diretriz-<time>.json (tetos, categorias, prazos)', 'Leitura de times/<time>/financas/plano.json'] });
@@ -484,7 +485,6 @@ async function escolherPastaLocal() {
   if (!await permissao(h)) return null;
   const s = await suspeitaDeSincronizada(h);
   if (s.length) { if (await perguntar('Esta pasta parece sincronizada', `<div class="cofre">A pasta <b>${esc(h.name)}</b> ${esc(s.join(', '))}.</div>`, [['no', 'Escolher outra'], ['ok', 'Usar mesmo assim']]) !== 'ok') return escolherPastaLocal(); }
-  else if (await perguntar('Confirme', `<p>Você conferiu que <b class="code">${esc(h.name)}</b> não está no OneDrive?</p>`, [['no', 'Escolher outra'], ['ok', 'Conferi, não está', 'pri']]) !== 'ok') return escolherPastaLocal();
   return h;
 }
 async function criarArquivo({ nome, pessoa, ano, moeda, dir, senha, times = [] }) {
