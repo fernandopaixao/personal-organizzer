@@ -15,8 +15,10 @@ O mesmo código (cripto, sincronização, aviso de cofre, "Onde estou?") precisa
 | `python3 tools/build_financas.py` | Monta Finanças do Grupo, Finanças do Time, hub e assistente a partir de `financas/src/`, embutindo a Central mais nova e o Quadro |
 | `python3 tools/embutir_quadro.py` | Embute o Quadro na Central (botão "HTML do time") |
 | `python3 tools/injetar_seguranca.py` | Reinjeta os blocos `<script id="f4…">`/`f5postits` na Central e no Quadro, reembute o Quadro e roda o build |
-| `node financas/testes/teste-e2e.js` | Teste ponta a ponta (73 verificações) |
+| `node financas/testes/teste-e2e.js` | Teste ponta a ponta (130+ verificações) |
+| `python3 tools/empacotar.py` | Gera o `.zip` da solução em `dist/` ([0024](0024-distribuicao-por-zip.md)) |
 
 ## Ao evoluir
 - **Nunca edite à mão** os blocos injetados nem as cópias embutidas: edite a fonte e rode `injetar_seguranca.py`.
 - Depois de mexer na Central ou no Quadro, rode `injetar_seguranca.py` e o teste e2e antes de abrir o PR.
+- O gzip embutido é estável entre versões do Python (`gzip_estavel()`); a CI usa Python 3.12 e confere que os HTMLs montados batem com a fonte.
