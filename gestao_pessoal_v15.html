@@ -95,6 +95,9 @@ button.chip:hover{background:#e9ebf4}
 .p3pi{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:10px;width:100%;text-align:left}.p3pi:hover{background:#f6f7fb}.p3pi.on{background:var(--bv-soft)}
 .p3pi .nm{display:block;font-weight:600;font-size:12.5px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.p3pi .st{display:block;font-size:11px;color:var(--muted)}.p3pi .late{color:var(--late)}
 .p3ring{flex:none}
+.fico{width:34px;height:34px;border-radius:10px;background:var(--bv-soft);color:var(--bv);display:grid;place-items:center;font-weight:700;font-size:11px;flex:none;letter-spacing:-.02em}.fico.xl{width:56px;height:56px;border-radius:16px;font-size:17px}.fico.all{background:#f0f1f6;color:var(--muted)}
+.p3pi .fn{min-width:20px;height:20px;border-radius:10px;background:var(--bv-soft);color:var(--bv);font-size:11px;font-weight:650;display:grid;place-items:center;padding:0 6px;flex:none}.p3pi.arq{opacity:.55}
+.fhero{margin-bottom:18px}.fhero .avs{display:flex}.fhero .avs .av{margin-left:-6px;border:2px solid #fff}.fhero .avs .av:first-child{margin-left:0}
 .p3hero{display:flex;gap:18px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 22px;flex-wrap:wrap}
 .p3hero h2{margin:0;font-family:var(--title);font-size:24px;font-weight:650;letter-spacing:-.02em}
 .p3meta{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap}
@@ -394,6 +397,8 @@ textarea.paste:focus{border-color:var(--bv)}
 .pr-list{display:grid;gap:8px}.pr{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center}
 .pr b{font-weight:600}.pr span{font-size:12px;color:var(--muted)}.pr .btn{grid-row:1/span 2;grid-column:2}
 /* Entrada e toast */
+.appver{font:600 12px var(--font,Inter);color:var(--bv);background:var(--bv-soft);border-radius:99px;padding:2px 8px;vertical-align:middle;letter-spacing:0}
+.railver{margin-top:auto;padding:10px 0 2px;font-size:10px;font-weight:650;color:var(--faint);letter-spacing:.02em}
 .lock{position:fixed;inset:0;display:grid;place-items:center;padding:20px;z-index:50;background:var(--bg)}
 .lockcard{background:#fff;border:1px solid var(--line);border-radius:22px;padding:34px;width:min(400px,100%);box-shadow:0 20px 60px rgba(20,30,70,.06)}
 .lockcard h1{margin:12px 0 6px;font-family:var(--title);font-size:21px;font-weight:600;letter-spacing:-.02em}
@@ -487,7 +492,7 @@ textarea.paste:focus{border-color:var(--bv)}
 @media(max-width:1500px){.g3{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)}.g3>:first-child{grid-row:span 2}}
 @media(max-width:1200px){.kpis.k5{grid-template-columns:repeat(2,minmax(0,1fr))}.oo{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}.oo .icol{grid-column:1/-1}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.board{grid-template-columns:repeat(2,minmax(0,1fr))}.hz{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:900px){
-  .rail{top:auto;right:0;width:auto;height:64px;flex-direction:row;justify-content:space-around;padding:4px 4px;border-right:0;border-top:1px solid var(--line)}.rail .logo{display:none}.rail{justify-content:flex-start;overflow-x:auto;gap:0}.nv{width:auto;min-width:56px;flex:1 0 56px;padding:6px 2px;font-size:9.5px}.nvg,.nvt{display:none}
+  .rail{top:auto;right:0;width:auto;height:64px;flex-direction:row;justify-content:space-around;padding:4px 4px;border-right:0;border-top:1px solid var(--line)}.rail .logo,.rail .railver{display:none}.rail{justify-content:flex-start;overflow-x:auto;gap:0}.nv{width:auto;min-width:56px;flex:1 0 56px;padding:6px 2px;font-size:9.5px}.nvg,.nvt{display:none}
   .main{margin-left:0;padding:0 16px 90px}.top{flex-wrap:wrap}.quick{flex:1 1 100%;order:3;max-width:none}
   .g2,.g2e,.g3,.oo,.hz,.form,.tf-grid,.tf-row{grid-template-columns:1fr}.g3>:first-child{grid-row:auto}.tf-side{border-left:0;border-top:1px solid var(--line);border-radius:0}
   .ld{grid-template-columns:auto 70px 1fr 24px}.ld .xp{grid-column:1/-1}
@@ -567,7 +572,7 @@ textarea.paste:focus{border-color:var(--bv)}
 <div class="lock" id="lock">
   <div class="lockcard">
     <div class="logo" style="margin:0">CG</div>
-    <h1>Central de Gestão</h1>
+    <h1>Central de Gestão <span class="appver" title="Versão desta Central">v15.2</span></h1>
     <div class="muted small">Seus dados ficam em um arquivo JSON criptografado (AES-GCM 256, chave derivada da senha), separado deste HTML. Este arquivo não guarda nenhum dado.</div>
     <div class="field"><label for="lockPass">Senha</label><input type="password" id="lockPass" autocomplete="off" placeholder="Mínimo de 8 caracteres"></div>
     <div class="stack2">
@@ -581,7 +586,7 @@ textarea.paste:focus{border-color:var(--bv)}
   </div>
 </div>
 <div class="hidden" id="app">
-  <nav class="rail"><div class="logo">CG</div><div id="nav" style="display:contents"></div></nav>
+  <nav class="rail"><div class="logo">CG</div><div id="nav" style="display:contents"></div><div class="railver" title="Versão desta Central">v15.2</div></nav>
   <main class="main"><div class="wrap">
     <div class="top">
       <h1 id="pageTitle"></h1>
@@ -789,7 +794,7 @@ const horizon=d=>{const n=dayDiff(today(),d);if(n<0)return'atrasada';if(n===0)re
 const KINDS={geral:'Geral',forte:'Ponto forte',desenv:'Desenvolvimento'};
 /* ============ Estado e migração (dados desacoplados, versionados e aditivos) ============ */
 const ME='me';
-const DB_VERSION=15;
+const DB_VERSION=15,APP_VERSION='15.2'; /* versão exibida na página (rail e tela de senha); DB_VERSION é a do arquivo de dados */
 const emptyDb=()=>({version:DB_VERSION,settings:{selfName:'Eu',hideFeedback:false,staffForumId:''},people:[],teams:[],initiatives:[],tasks:[],notes:[],cycles:[],staffs:[],weeklyReports:[],dateLog:[],forums:[],agendaItems:[],agreements:[],meetings:[],ooSessions:[]});
 let db=emptyDb();
 let password='',handle=null,dirty=false,saveTimer=null,pendingMigration=false;
@@ -1491,7 +1496,7 @@ function staffMinutes(){
   return L.join('\n');
 }
 /* ============ Fóruns: pautas acumuladas por data, reunião e acordos ============ */
-let fView='agenda',fSel='',openMeet=null,shMode='meeting',shDate='',shNext=true;
+let fQ='',fView='agenda',fSel='',openMeet=null,shMode='meeting',shDate='',shNext=true;
 const fc={text:'',forumId:'',date:'',owner:ME,min:''};
 const wdLong=d=>parseD(d).toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
 const wdShort=d=>parseD(d).toLocaleDateString('pt-BR',{weekday:'short'}).replace('.','');
@@ -1639,9 +1644,31 @@ function renderForum(){
   if(fSel&&!forumById(fSel))fSel='';
   const fs=db.forums.slice().sort((a,b)=>(a.archived-b.archived)||a.name.localeCompare(b.name,'pt-BR')),T=today();
   const cnt=f=>db.agendaItems.filter(a=>a.forumId===f.id&&a.status==='open').length;
-  $('#forum').innerHTML=`<div class="bar no-print"><span class="grow"></span>${fSel?`<button class="btn sm" data-act="edit-forum" data-id="${fSel}">${ic('edit','sm')} Editar fórum</button>`:''}<button class="btn pri" data-act="new-forum">${ic('plus','sm')} Fórum</button></div>
-    ${fs.length?`<div class="prail no-print" style="margin-top:-4px">${fView==='share'&&shMode==='meeting'?'':`<button class="tp ${!fSel?'on':''}" data-act="f-sel" data-id="">Todos</button>`}${fs.map(f=>{const n=cnt(f),nx=occFrom(f,T);return`<button class="tp ${fSel===f.id?'on':''}" data-act="f-sel" data-id="${f.id}" title="${esc(CAD[f.cadence]+(f.archived?' · arquivado':' · próxima '+fmtShort(nx)))}" style="${f.archived?'opacity:.55':''}"><span class="fdot"></span>${esc(f.name)}${n?`<span class="n">${n}</span>`:''}</button>`}).join('')}</div>`:''}
-    ${fView==='agenda'?forumAgendaHTML():forumShareHTML()}`;
+  const semTodos=fView==='share'&&shMode==='meeting';
+  if(!fs.length){$('#forum').innerHTML=fView==='agenda'?forumAgendaHTML():forumShareHTML();return}
+  $('#forum').innerHTML=`<div class="p3">${forumList(fs,cnt,semTodos)}<div class="p3main">${fSel?forumHero(forumById(fSel),cnt):''}
+    ${fView==='agenda'?forumAgendaHTML():forumShareHTML()}</div></div>`;
+}
+/* Lista lateral de fóruns, no mesmo padrão da lista de pessoas do 1:1 */
+const fInitials=n=>{const w=String(n||'').replace(/[·\-–—:|]/g,' ').trim().split(/\s+/).filter(Boolean);return((w[0]||'?')[0]+(w.length>1?w[w.length-1][0]:(w[0]||'')[1]||'')).toUpperCase()};
+function forumList(fs,cnt,semTodos){
+  const T=today(),q=plain(fQ),vis=fs.filter(f=>!q||plain(f.name+' '+(f.purpose||'')+' '+teamName(f.teamId)).includes(q)).map(f=>({f,nx:occFrom(f,T)}));
+  const at=vis.filter(x=>!x.f.archived),wk=at.filter(x=>x.nx<=addD(T,7)).sort((a,b)=>a.nx.localeCompare(b.nx)||(a.f.time||'').localeCompare(b.f.time||'')),rest=at.filter(x=>!wk.includes(x)).sort((a,b)=>a.nx.localeCompare(b.nx)),arq=vis.filter(x=>x.f.archived);
+  const row=x=>{const n=cnt(x.f),st=x.f.archived?'arquivado':`${x.nx===T?'hoje':esc(wdShort(x.nx)+' '+fmtShort(x.nx))}${x.f.time?' · '+esc(x.f.time):''} · ${esc(CAD[x.f.cadence]||'').toLowerCase()}`;
+    return`<button class="p3pi ${fSel===x.f.id?'on':''} ${x.f.archived?'arq':''}" data-act="f-sel" data-id="${x.f.id}"><span class="fico">${esc(fInitials(x.f.name))}</span><span class="grow" style="min-width:0"><span class="nm">${esc(x.f.name)}</span><span class="st">${st}</span></span>${n?`<span class="fn" title="${n} pauta${n>1?'s':''} em aberto">${n}</span>`:''}</button>`};
+  const grp=(l,a)=>a.length?`<div class="lbl" style="margin:14px 8px 4px">${l}</div>${a.map(row).join('')}`:'';
+  const tot=db.agendaItems.filter(a=>a.status==='open'&&forumById(a.forumId)&&!forumById(a.forumId).archived).length;
+  return`<aside class="p3list no-print"><input class="sin" id="fSearch" placeholder="Buscar fórum" value="${esc(fQ)}" autocomplete="off">
+    ${semTodos?'':`<button class="p3pi ${!fSel?'on':''}" data-act="f-sel" data-id="" style="margin-top:8px"><span class="fico all">${ic('chat','sm')}</span><span class="grow" style="min-width:0"><span class="nm">Todos os fóruns</span><span class="st">próximas reuniões de todos</span></span>${tot?`<span class="fn">${tot}</span>`:''}</button>`}
+    ${grp('Nos próximos 7 dias',wk)}${grp('Próximas semanas',rest)}${grp('Arquivados',arq)}${vis.length?'':'<div class="muted small" style="padding:8px">Nenhum fórum encontrado.</div>'}
+    <div style="margin-top:14px"><button class="btn sm" data-act="new-forum">${ic('plus','sm')} Fórum</button></div></aside>`;
+}
+function forumHero(f,cnt){
+  if(!f)return'';const T=today(),nx=occFrom(f,T),ps=(f.participants||[]),n=cnt(f);
+  return`<div class="p3hero fhero no-print"><span class="fico xl">${esc(fInitials(f.name))}</span><div style="min-width:0"><h2>${esc(f.name)}</h2><div class="p3meta"><span class="muted">${esc(CAD[f.cadence]||'')}${f.duration?' · '+f.duration+' min':''}</span>${f.teamId?`<button class="chip bv" data-act="open-team" data-id="${f.teamId}">${esc(teamName(f.teamId))}</button>`:''}${f.archived?'<span class="chip">arquivado</span>':''}${n?`<span class="chip">${n} pauta${n>1?'s':''} em aberto</span>`:''}
+    ${ps.length?`<span class="avs" title="${esc(ps.map(id=>id===ME?'Eu':nameOf(id)).join(', '))}">${ps.slice(0,8).map(id=>av(id,'xs')).join('')}</span>${ps.length>8?`<span class="muted small">+${ps.length-8}</span>`:''}`:''}</div>${f.purpose?`<div class="muted small" style="margin-top:6px;max-width:640px">${esc(f.purpose)}</div>`:''}</div>
+    <span class="grow"></span>${f.archived?'':`<div class="p3next">${ic('clock','sm')}<span>próxima <b>${nx===T?'hoje':esc(wdShort(nx)+' '+fmtShort(nx))}${f.time?' '+esc(f.time):''}</b></span></div><button class="btn" data-act="open-meet" data-f="${f.id}" data-d="${nx}">Abrir a próxima reunião</button>`}
+    <button class="ib" data-act="edit-forum" data-id="${f.id}" title="Editar fórum">${ic('edit')}</button></div>`;
 }
 /* ---- Cadastro de fórum ---- */
 function openForum(f){
@@ -3326,6 +3353,7 @@ document.addEventListener('change',e=>{const el=e.target;if(el.dataset?.calch!=n
 document.addEventListener('input',e=>{
   const el=e.target,m=(el.id||'').match(/^(cp|cf)-(text|date|person)$/);if(m)comp[m[1]][m[2]]=el.value;
   if(el.id==='taskSearch'){tQuery=el.value;renderTasks()}
+  if(el.id==='fSearch'){fQ=el.value;renderForum();const s=$('#fSearch');if(s){s.focus();s.setSelectionRange(s.value.length,s.value.length)}}
   if(el.id==='ooSearch'){ooQ=el.value;renderOO();const s=$('#ooSearch');if(s){s.focus();s.setSelectionRange(s.value.length,s.value.length)}}
   if(el.id==='ooNote'){const p=person(selectedPerson),s=p&&ooLiveOf(p.id);if(s){s.drafts=s.drafts||{};s.drafts[s.cur||'_']=el.value}}
   if(el.dataset?.sf){const st=getStaff(true);st[el.dataset.sf]=el.value;touch()}
@@ -3623,7 +3651,7 @@ initLock();
 <script id="f4central">
 /* ---------- Central · aviso de cofre, lembrete de teste da senha e "Onde estou?" ---------- */
 function f4infoCentral() {
-  return { ferramenta: 'Central de Gestão', versao: 'v' + DB_VERSION, arquivo: handle?.name || (db ? 'aberto sem vínculo (salvar baixa uma cópia)' : ''), pastaComum: (typeof IG !== 'undefined' && IG.dirName) || '',
+  return { ferramenta: 'Central de Gestão', versao: 'v' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : DB_VERSION), arquivo: handle?.name || (db ? 'aberto sem vínculo (salvar baixa uma cópia)' : ''), pastaComum: (typeof IG !== 'undefined' && IG.dirName) || '',
     local: ['Seu arquivo de dados (cifrado com a senha), numa pasta fora do OneDrive', 'As chaves dos times (dentro do arquivo cifrado)'],
     comum: ['central/catalogo-<time>.json: iniciativas e features de cada time', 'Leitura de times/<time>/status.json e metricas.json'] };
 }
