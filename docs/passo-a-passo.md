@@ -1,6 +1,6 @@
 # Passo a passo · como lidar com a solução
 
-*24/11/2026 · Central v15.5, Quadro do Time 2.2, Hub 1.2, Finanças do Grupo 1.3 e do Time 1.2, assistente 2.1*
+*24/11/2026 · Central v15.6, Quadro do Time 2.2, Hub 1.2, Finanças do Grupo 1.3 e do Time 1.2, assistente 2.1*
 
 Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é independente. Antes de começar: use **Edge ou Chrome** e tenha à mão um **cofre de senhas** (o gerenciador de senhas da empresa).
 
@@ -147,12 +147,14 @@ Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é ind
 4. **Liderança:** em **Painel › Planos recebidos**, aplique o consolidado do gestor; ele soma ano a ano como uma unidade.
 5. **Liderança:** defina o teto do gestor por ano e **Publicar diretriz**; o gestor vê o teto no card do nível acima.
 
-**Ver as finanças dos times na Central (15.5, só leitura)**
+**Ver as finanças dos times na Central (15.5 e 15.6, só leitura)**
 1. Na Central, vá em **Integração › Pasta e chaves** e confira se a pasta compartilhada está conectada.
 2. Clique **Chaves do Finanças do Grupo**, escolha o arquivo `financas-grupo-<grupo>.json` e digite a senha dele. A Central só lê as chaves de finanças dos times; os times entram pela pasta (`pagamentos`, `cartoes`…). Para um time só, use **Chave de finanças** na linha do time e cole a chave `GK1.<time>-fin-…`.
 3. A Central lê o plano publicado por cada time e o teto da diretriz. Depois disso, **Atualizar da pasta** traz os planos novos.
 4. Leia o card **Finanças dos times** na Hoje e a linha de finanças no card de cada time. Na reunião de status, o bloco **Finanças** aparece quando o time passou do teto ou não publica o plano há mais de 35 dias.
-5. Para mudar orçamento, teto ou plano, continue no Finanças do Grupo ou no Finanças do Time: a Central não grava nada de finanças.
+5. **Custo por iniciativa (15.6):** no Finanças do Time, marque cada linha do plano com o código da iniciativa (`PAG-042`) ou da feature (`PAG-042.F2`). Na Central, a lista de Iniciativas mostra o previsto do ano ao lado do código, e o painel da iniciativa ganha a aba **Finanças**: orçado, previsto, realizado e folga, com uma barra por time. A soma inclui todos os times que marcaram linhas com o código.
+6. Em **Integração › Conciliação**, o cartão **Códigos nas finanças do time sem iniciativa na Central** lista os códigos que não batem com nenhuma iniciativa. Corrija o código no Finanças do Time, ou crie ou una a iniciativa na Central.
+7. Para mudar orçamento, teto ou plano, continue no Finanças do Grupo ou no Finanças do Time: a Central não grava nada de finanças.
 
 ## 9. Atualizar para uma versão nova
 

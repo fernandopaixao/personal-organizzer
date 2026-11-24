@@ -4,7 +4,7 @@ Ferramenta de gestão pessoal em um único arquivo HTML, sem servidor e sem inst
 
 - **Abrir:** dê dois cliques em `gestao_pessoal_v15.html` (Chrome ou Edge recomendados, para salvar direto no arquivo e usar a pasta de integração).
 - **Dados:** ficam num arquivo JSON separado, criptografado com AES-GCM 256 e senha. O HTML não guarda nenhum dado, então pode ser atualizado à vontade.
-- **Versão atual:** Central 15.5. A Central lê as finanças dos times, só para leitura, com a chave de finanças de cada time ([ADR-0028](docs/adr/0028-financas-na-central-so-leitura.md)).
+- **Versão atual:** Central 15.6. A Central lê as finanças dos times e o custo de cada iniciativa, só para leitura, com a chave de finanças de cada time ([ADR-0028](docs/adr/0028-financas-na-central-so-leitura.md)).
 - **Atualizar de versão:** abra o arquivo de dados atual na versão nova. A migração é automática e um backup do arquivo anterior é baixado.
 
 ## Telas
@@ -15,7 +15,7 @@ Ferramenta de gestão pessoal em um único arquivo HTML, sem servidor e sem inst
 | 2 | Tarefas | Vistas Minhas, Delegadas (com aderência e cobranças) e Todas |
 | 3 | 1:1 | **Pessoa 360**: pauta, trabalho, iniciativas, feedback, histórico e perfil da pessoa; modo **Em conversa** com cronômetro, anotações, combinados e resumo para copiar |
 | 4 | Feedback | Ciclos e evidências de feedback por pessoa |
-| 5 | Iniciativas | Lista, Semana, Horizonte, Linha do tempo (fases sobrepostas) e Dependências |
+| 5 | Iniciativas | Lista, Semana, Horizonte, Linha do tempo (fases sobrepostas) e Dependências; aba Finanças com o custo da iniciativa somando os times |
 | 6 | Fóruns | Pautas, Acordos e Staff (semana dos times) |
 | 7 | Times | Cadastro dos times, métricas publicadas pelos times, finanças de cada time (só leitura, 15.5) e visão de cada time (backlog, features, reunião de status) |
 | 8 | Integração | Pasta e chaves, arquivos recebidos, conciliação e compartilhamento com os times |
