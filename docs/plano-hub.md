@@ -74,3 +74,10 @@ Em `financas/contrato/`: `gestao-postits-1.schema.json` e `gestao-postits-vistos
 - **Atraso do OneDrive:** um post-it leva o tempo da sincronização (normalmente segundos, às vezes minutos) para chegar.
 - **Metadados visíveis:** quem tem acesso à pasta vê os nomes dos arquivos (`fernando-k3f9a.json`) e quando mudaram, mas não o conteúdo.
 - **Times com ferramenta própria** (caminho B) só veem post-its se adaptarem a leitura; o contrato está em `financas/contrato/`.
+
+## 10. Hub 1.2 (24/11/2026): finanças dos times e importação do Finanças do Grupo
+
+- **Importar do Finanças do Grupo:** o hub abre o arquivo do Finanças do Grupo com a senha dele, só para ler, e traz os times e as chaves de finanças ativas para `times[].chavesFin`. A chave de finanças também pode ser colada em Ajustes de cada time.
+- **Plano de cada time:** com a chave de finanças, o hub lê `times/<time>/financas/plano.json` (`gestao-financas-plano/1`, com `totalsByYear`) pelo mesmo `lerEnvelopes` das outras ferramentas e mostra previsto, realizado e orçado no card do time.
+- **Visão dos times:** cards de leitura (previsto dos times, realizado com a marca do mês, times ativos na semana, post-its vistos) e barras do previsto por time com a marca do orçado. O ano é o corrente; se nenhum time publicou o ano corrente, o hub usa o ano base mais recente publicado.
+- Nada muda nas regras: o hub continua só lendo arquivos dos times, e as chaves ficam só dentro do arquivo cifrado do hub.

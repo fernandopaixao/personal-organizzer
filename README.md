@@ -10,7 +10,7 @@ Ferramenta de gestão pessoal em um único arquivo HTML, sem servidor e sem inst
 
 | Tecla | Página | Para quê |
 |---|---|---|
-| 1 | Hoje | Tarefas do dia, atrasos, 1:1 da semana, fóruns dos próximos 7 dias, iniciativas pedindo atenção e novidades dos times |
+| 1 | Hoje | Cards de leitura (dia, delegadas, iniciativas, rituais), tarefas do dia, atrasos, 1:1 da semana, fóruns dos próximos 7 dias, iniciativas pedindo atenção e novidades dos times |
 | 2 | Tarefas | Vistas Minhas, Delegadas (com aderência e cobranças) e Todas |
 | 3 | 1:1 | **Pessoa 360**: pauta, trabalho, iniciativas, feedback, histórico e perfil da pessoa; modo **Em conversa** com cronômetro, anotações, combinados e resumo para copiar |
 | 4 | Feedback | Ciclos e evidências de feedback por pessoa |
@@ -20,6 +20,10 @@ Ferramenta de gestão pessoal em um único arquivo HTML, sem servidor e sem inst
 | 8 | Integração | Pasta e chaves, arquivos recebidos, conciliação e compartilhamento com os times |
 
 **Documentação:** [funcionalidades, usos e objetivos](docs/funcionalidades.md) · [jornada do usuário](docs/jornada-do-usuario.md) · [passo a passo](docs/passo-a-passo.md) · [decisões de arquitetura (ADRs)](docs/adr/README.md), com o checklist para funcionalidades novas.
+
+**Regra:** toda funcionalidade nova atualiza a documentação no mesmo PR ([ADR-0022](docs/adr/0022-documentacao-no-mesmo-pr.md)); a CI confere e o template de PR traz o checklist.
+
+**Levar para a empresa:** `python3 tools/empacotar.py` gera `dist/gestao-solucao-AAAA-MM-DD.zip` com tudo lado a lado, a documentação e um LEIA-ME. A CI do repositório pessoal gera o mesmo .zip como artefato de cada PR e da `main` ([ADR-0024](docs/adr/0024-distribuicao-por-zip.md)).
 
 A visão geral da solução (Central, Quadro do Time, integração, métricas e agentes) está em [`docs/visao-geral-da-solucao.md`](docs/visao-geral-da-solucao.md). O plano da versão atual está em [`docs/plano-v15.md`](docs/plano-v15.md). As versões anteriores ficam em `legacy/` como referência.
 
@@ -36,12 +40,14 @@ A visão geral da solução (Central, Quadro do Time, integração, métricas e 
 - todas as ferramentas têm o botão **← Hub** no topo para voltar a ele;
 - deixa **post-its para os times**: cada recado vai cifrado com a chave do time para `times/<time>/postits/<você>-<computador>.json` (um arquivo por autor, como o resto da solução) e aparece no topo do **Quadro do Time 2.2**. Quem lê clica em **Vi** e o hub mostra quem já viu.
 
-Tem o próprio arquivo cifrado (`hub-<nome>.json`, com os times e as chaves), criado pelo assistente ou pelo próprio hub. As chaves podem ser coladas ou importadas da Central. Detalhes em [`docs/plano-hub.md`](docs/plano-hub.md).
+- mostra a **Visão dos times** (1.2): cards de leitura e barras com o previsto, o realizado e o orçado de cada time, lidos do plano financeiro que o time publica.
+
+Tem o próprio arquivo cifrado (`hub-<nome>.json`, com os times e as chaves), criado pelo assistente ou pelo próprio hub. As chaves podem ser coladas ou importadas da Central (tarefas) e do Finanças do Grupo (finanças). Detalhes em [`docs/plano-hub.md`](docs/plano-hub.md).
 
 ## Início da solução e finanças
 
-- [`inicio.html`](inicio.html) é o **assistente**: pergunta o papel (gestor, responsável ou membro de um time) e o uso (finanças, tarefas ou os dois), cria o primeiro arquivo já cifrado, gera os HTMLs certos (cada um desacoplado, com o próprio arquivo), o hub e o cartão `onde-fica-cada-coisa.html`.
-- [`financas/financas_grupo.html`](financas/financas_grupo.html) é o **consolidado**: soma os planos publicados pelos times, compara com o orçamento do grupo, publica diretrizes (tetos e categorias) e gera o HTML de finanças de cada time.
+- [`inicio.html`](inicio.html) é o **assistente** (2.0): pergunta se você lidera times (2 ou mais, 1, ou nenhum), o que quer organizar (tarefas, finanças) e se o seu líder compartilhou chaves e qual a pasta; lê as chaves, trava o identificador do time ou grupo a partir delas, cria o primeiro arquivo de cada ferramenta já cifrado e com as chaves, o hub e o cartão `onde-fica-cada-coisa.html`, e mostra os próximos passos do perfil ([ADR-0023](docs/adr/0023-onboarding-por-perfil-e-chave.md)).
+- [`financas/financas_grupo.html`](financas/financas_grupo.html) é o **consolidado** (1.3): soma os planos publicados pelos times, compara com o orçamento do grupo, publica diretrizes (tetos e categorias), gera o HTML de finanças de cada time e, se a liderança também usa a solução, publica o consolidado para ela e recebe o teto de volta (consolidação em níveis, [ADR-0025](docs/adr/0025-consolidacao-em-niveis.md)).
 - [`financas/financas_time.html`](financas/financas_time.html) é o **apoio do time**: lançamentos, contratos recorrentes, plano mensal e multianual, fechamento do mês, previsão rolante e cenários, com painel de cards e gráficos.
 - Regras: tudo cifrado; dado individual fica numa pasta local fora do OneDrive; só o pedaço comum vai para a pasta sincronizada (`Gestao-Compartilhado`), com um único dono por arquivo e detecção de cópias de conflito do OneDrive.
 - A Central e o Quadro (2.2) seguem as mesmas regras: senha obrigatória, aviso de cofre, botão "Onde estou?" e, no Quadro, um arquivo por pessoa em `times/<time>/quadro/`. Depois de mudar a Central ou o Quadro, rode `python3 tools/injetar_seguranca.py` (reinjeta o bloco comum, reembute o Quadro e remonta o assistente).

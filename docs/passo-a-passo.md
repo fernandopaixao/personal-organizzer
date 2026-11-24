@@ -1,6 +1,6 @@
 # Passo a passo · como lidar com a solução
 
-*24/11/2026 · Central v15.2, Quadro do Time 2.2, Hub 1.1, Finanças 1.2*
+*24/11/2026 · Central v15.4, Quadro do Time 2.2, Hub 1.2, Finanças do Grupo 1.3 e do Time 1.2, assistente 2.0*
 
 Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é independente. Antes de começar: use **Edge ou Chrome** e tenha à mão um **cofre de senhas** (o gerenciador de senhas da empresa).
 
@@ -22,15 +22,19 @@ Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é ind
 
 ## 1. Montar a solução pela primeira vez
 
+0. Descompacte o **.zip da solução** (`gestao-solucao-AAAA-MM-DD.zip`) numa pasta qualquer; ele traz o `inicio.html`, as ferramentas, a documentação e um LEIA-ME.
 1. Crie uma **pasta local** fora do OneDrive, por exemplo `C:\Users\<você>\GestaoLocal`. Evite `Documentos` e `Área de Trabalho` se o backup de pastas do OneDrive estiver ligado.
 2. Garanta que a **biblioteca do SharePoint** do grupo (`Gestao-Compartilhado`) está sincronizada no seu computador pelo OneDrive.
 3. Copie `inicio.html` para a pasta local e abra com dois cliques.
-4. Responda **Qual é o seu papel?** e **O que você quer organizar?**.
-5. Preencha **Sobre o grupo** (ou **Sobre o time**): nome, slug, prefixo de código, ano fiscal e moeda.
-6. Em **Onde guardar**, escolha a pasta local e a pasta sincronizada. Se a ferramenta avisar que a pasta local parece sincronizada, escolha outra.
-7. Em **Senha**, crie a senha, **guarde no cofre** e marque "Já guardei no cofre".
-8. Em **Pronto**, a pasta local passa a ter os HTMLs, os arquivos cifrados, o `hub.html` e o `onde-fica-cada-coisa.html`.
-9. Abra o `hub.html`. A partir de agora ele é a sua tela inicial.
+4. **Perfil:** responda **Você lidera times?** (2 ou mais, 1, ou não) e **O que você quer organizar?** (tarefas, finanças ou os dois).
+5. **Chaves:** se o seu líder mandou chaves (`GK1.…`), escolha **Sim, recebi**, cole uma por linha, clique **Conferir chaves** e informe o nome da pasta sincronizada que ele indicou. O assistente mostra o que cada chave é. Sem chave, escolha **Não, ainda não**: dá para colar depois dentro de cada ferramenta.
+6. **Dados:** nome, prefixo de código, ano fiscal e moeda. Com chave, o identificador já vem dela e fica travado. O gestor lista os times que lidera.
+7. Em **Pastas**, escolha a pasta local e a pasta sincronizada. Se a ferramenta avisar que a pasta local parece sincronizada, escolha outra.
+8. Em **Senha**, crie a senha, **guarde no cofre** e marque "Já guardei no cofre".
+9. Em **Pronto**, a pasta local passa a ter os HTMLs, os arquivos cifrados (já com as chaves coladas), o `hub.html` e o `onde-fica-cada-coisa.html`. Siga os **próximos passos** que a tela mostra para o seu perfil.
+10. Abra o `hub.html`. A partir de agora ele é a sua tela inicial.
+
+**Gestor: equipar cada time com o assistente.** Depois de gerar as chaves dos times (seção 2), mande a cada time o `inicio.html` e, por mensagem direta, a chave e o nome da pasta sincronizada. O responsável abre o assistente, escolhe "Sim, lidero 1 time", cola a chave e sai com o Quadro e/ou o Finanças do Time prontos. É o caminho recomendado; gerar o HTML do time pela Central (seção 2) continua valendo.
 
 ## 2. Cadastrar um time e entregar a ferramenta
 
@@ -39,12 +43,13 @@ Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é ind
 2. Em **Integração › Pasta e chaves**, clique **Gerar chave** para o time e **guarde no cofre**.
 3. Em **Times**, abra o time e clique **HTML do time** (a tela mostra o aviso de cofre). Prefira enviar a chave separada do HTML.
 4. Envie o HTML ao responsável e, **à parte, por mensagem direta no Teams ou por e-mail**, o texto da chave (`GK1.…`). Nunca coloque a chave na pasta compartilhada.
-5. No hub, **Importar times e chaves da Central** para poder mandar post-its a esse time.
+5. No hub, **Importar da Central** para poder mandar post-its a esse time.
 
 **Finanças (Finanças do Time)**
 1. No Finanças do Grupo, **Times**: cadastre o time, defina o **teto de cada ano** e a diretriz, e clique **Gerar chave** (chave de finanças, diferente da de tarefas).
 2. **Publicar diretriz** para que o time veja tetos e categorias.
-3. **Gerar HTML** de finanças do time e envie ao responsável financeiro, com a chave à parte.
+3. **Gerar HTML** de finanças do time e envie ao responsável financeiro, com a chave à parte (ou mande o `inicio.html` com a chave, como na seção 1).
+4. No hub, **Importar do Finanças do Grupo**: os times e as chaves de finanças entram no hub, que passa a mostrar o plano de cada time na **Visão dos times**.
 
 ## 3. Primeiro uso do Quadro do Time (time)
 
@@ -127,9 +132,16 @@ Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é ind
 3. **Painel › Consolidado:** escolha o ano no topo e leia os cards e as barras por time; a tabela **Por ano** mostra o horizonte inteiro; exporte CSV se precisar.
 4. **Painel › Versões:** ao aprovar um orçamento ou reforecast, **Fechar versão**; depois, compare com hoje no ano em exibição.
 
+**Consolidar em níveis (gestor → liderança)**
+1. **Liderança:** em **Times › + Grupo de outro gestor**, cadastre o gestor com o mesmo identificador do grupo dele, gere a chave de finanças dele e mande por mensagem direta.
+2. **Gestor:** cole a chave em **Ajustes › Nível acima · sua liderança** (se você montou pelo assistente com essa chave, ela já está lá).
+3. **Gestor:** clique **Publicar para a liderança**, confira o que sobe (totais por ano e unidades que entram ou ficam de fora) e confirme.
+4. **Liderança:** em **Painel › Planos recebidos**, aplique o consolidado do gestor; ele soma ano a ano como uma unidade.
+5. **Liderança:** defina o teto do gestor por ano e **Publicar diretriz**; o gestor vê o teto no card do nível acima.
+
 ## 9. Atualizar para uma versão nova
 
-1. Baixe o HTML novo e **substitua** o antigo na pasta local (mesmo nome, se possível, para o hub encontrar).
+1. Baixe o **.zip** novo e **substitua** os HTMLs antigos na pasta local (mesmo nome, se possível, para o hub encontrar).
 2. Abra e escolha **o mesmo arquivo de dados** de sempre.
 3. Se o formato mudou, a ferramenta migra sozinha e **baixa um backup** do arquivo anterior. Guarde o backup até confirmar que está tudo certo.
 4. Confira a versão em **Onde estou?** (a Central também mostra na barra lateral).

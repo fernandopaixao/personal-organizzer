@@ -1,6 +1,6 @@
 # Funcionalidades, usos e objetivos
 
-*24/11/2026 · Central v15.2, Quadro do Time 2.2, Hub 1.1, Finanças do Grupo e do Time 1.2, assistente `inicio.html`*
+*24/11/2026 · Central v15.4, Quadro do Time 2.2, Hub 1.2, Finanças do Grupo 1.3 e do Time 1.2, assistente 2.0*
 
 Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. Para as regras técnicas por trás, veja as [decisões de arquitetura](adr/README.md). Para o caminho de quem usa, veja a [jornada do usuário](jornada-do-usuario.md) e o [passo a passo](passo-a-passo.md).
 
@@ -43,12 +43,12 @@ Todas têm, no topo, **Onde estou?** (qual ferramenta, qual arquivo, o que é lo
 
 | Passo | O que acontece |
 |---|---|
-| Papel | Gestor de vários times, responsável por um time ou membro de um time |
-| Uso | Finanças, tarefas ou os dois |
-| Sobre o grupo / time | Nome, slug, prefixo de código, ano fiscal e moeda, pessoas |
-| Onde guardar | Pasta **local** (fora do OneDrive) e pasta **sincronizada**; aviso automático se a local parecer sincronizada |
-| Senha | Criação da senha com aviso de cofre; para o gestor, geração das chaves dos times |
-| Pronto | Grava os HTMLs certos, o primeiro arquivo cifrado de cada um, o hub e o cartão "Onde fica cada coisa" |
+| Perfil | **Você lidera times?** "Sim, lidero 2 ou mais times" (gestor), "Sim, lidero 1 time" (responsável) ou "Não, faço parte de um time" (membro). Depois, **o que quer organizar**: tarefas, finanças ou os dois (membro só tarefas) |
+| Chaves | **Seu líder compartilhou chaves de integração?** Cole as chaves (`GK1.…`, uma por linha) e o nome da pasta sincronizada que o líder indicou. O assistente diz o que cada chave é: tarefas do time (`<time>-AAMM`), finanças do time (`<time>-fin-AAMM`) ou, para o gestor, finanças da liderança (`<grupo>-fin-AAMM`, o "nível acima"). Chave que não serve ao perfil é mostrada como ignorada |
+| Dados | Nome, identificador, prefixo, ano fiscal e moeda. O identificador do time (ou do grupo, para o gestor com chave da liderança) **vem da chave e fica travado**, para casar com os arquivos do líder |
+| Pastas | Pasta **local** (fora do OneDrive) e pasta **sincronizada**; aviso automático se a local parecer sincronizada |
+| Senha | Criação da senha com aviso de cofre |
+| Pronto | Grava os HTMLs do perfil, o primeiro arquivo cifrado de cada um **já com as chaves coladas**, o hub e o cartão "Onde fica cada coisa", e mostra os **próximos passos do perfil** (o gestor recebe a lista do que mandar a cada time) |
 
 | Papel × uso | HTMLs gerados |
 |---|---|
@@ -58,7 +58,9 @@ Todas têm, no topo, **Onde estou?** (qual ferramenta, qual arquivo, o que é lo
 | Responsável ou membro + tarefas | Quadro do Time |
 | Os dois | A soma das linhas, cada HTML separado |
 
-**Quando usar:** uma vez, ou ao trocar de computador.
+Onde as chaves coladas vão parar: no hub (tarefas e finanças de cada time), no Quadro (chave de tarefas), no Finanças do Time (chave de finanças) e no Finanças do Grupo (`acima`, a chave da liderança). Nenhuma chave vai para a pasta compartilhada.
+
+**Quando usar:** uma vez, ou ao trocar de computador. O gestor manda o mesmo `inicio.html` (está no .zip da solução) a cada time, com a chave por mensagem direta, e o time monta tudo sozinho.
 
 ---
 
@@ -72,17 +74,20 @@ Todas têm, no topo, **Onde estou?** (qual ferramenta, qual arquivo, o que é lo
 | **Situação por time** | Quando o Quadro, o status, as métricas e o plano financeiro mudaram na pasta | Saber se o time está publicando |
 | **Post-its para os times** | Recado curto, com cor, destinatário opcional e "mostrar até"; um ou vários times | Comunicar sem reunião nem e-mail; aparece no topo do Quadro |
 | **"Visto por…"** | Mostra quem clicou **Vi** no Quadro | Confirmar leitura |
-| **Times e chaves** | Cadastrar times e colar chaves, ou **Importar da Central** (só leitura) | Reaproveitar o que a Central já tem |
+| **Visão dos times** | Cards de leitura (previsto dos times, realizado com marca do mês, times ativos na semana, post-its vistos) e barras do previsto por time com a marca do orçado | Ver dinheiro e atividade dos times sem abrir outra ferramenta |
+| **Finanças no card do time** | Previsto, realizado e orçado do ano do plano publicado pelo time | Saber se o time está dentro do plano |
+| **Times e chaves** | Cadastrar times e colar chaves (de tarefas e de finanças), ou **Importar da Central** e **Importar do Finanças do Grupo** (só leitura, com a senha de cada um) | Reaproveitar o que a Central e o Finanças do Grupo já têm, sem colar chave por chave |
 
 ---
 
-## 5. Central de Gestão (v15.2)
+## 5. Central de Gestão (v15.4)
 
 **Objetivo:** concentrar o trabalho do gestor: o que ele faz, o que delegou, com quem conversa, em quais fóruns decide e como anda o portfólio.
 
 Navegação em 8 páginas (teclas 1 a 8) e o botão **Importar e agentes** no topo.
 
 ### 5.1 Hoje (1)
+- **Cards de leitura no topo:** o dia (feitas de quantas, atrasadas), delegadas no prazo, iniciativas em andamento em dia e rituais dos próximos 7 dias. Cada card abre a página dona do dado.
 - **Uso:** abrir o dia. Tarefas do dia e atrasadas, 1:1 da semana, fóruns dos próximos 7 dias, iniciativas pedindo atenção e o cartão **Dos times** (arquivos novos, alertas, épicos sem vínculo, times sem chave).
 - **Objetivo:** responder "o que pede atenção agora" sem navegar.
 
@@ -106,12 +111,12 @@ Navegação em 8 páginas (teclas 1 a 8) e o botão **Importar e agentes** no to
 
 ### 5.5 Iniciativas (5)
 - **Vistas:** Lista (feito × prazo, fases, próxima feature, painel com abas), Semana (features e backlog da semana), Horizonte, Linha do tempo (fases sobrepostas) e Dependências.
-- **Uso:** cadastrar iniciativas e features com código (`PAG-042`, `PAG-042.F2`), agrupar features em fases, registrar a atualização de uma linha (diário de bordo), ver o **downstream** dos times abaixo de cada feature.
+- **Uso:** cadastrar iniciativas e features com código (`PAG-042`, `PAG-042.F2`), agrupar features em fases, registrar a atualização de uma linha (diário de bordo, num formulário no lugar que mostra a última atualização e só habilita **Registrar atualização** com texto), ver o **downstream** dos times abaixo de cada feature.
 - **Objetivo:** ver o portfólio e o que está atrasando, com o dado do time chegando sozinho.
 
 ### 5.6 Fóruns (6)
 - **Abas:** Pautas, Acordos e Staff. Lista lateral para escolher o fórum, com busca.
-- **Uso:** fóruns recorrentes com pauta por data (o que não foi discutido passa para a próxima), decisões e compromissos (que viram tarefas), folha de acordos para copiar, imprimir ou baixar; Staff mostra a semana dos times.
+- **Uso:** fóruns recorrentes com pauta por data (o que não foi discutido passa para a próxima), decisões e compromissos (que viram tarefas) num único formulário com pílulas **Compromisso / Decisão**, validação no campo e Enter para registrar (o mesmo na reunião de status do time), folha de acordos para copiar, imprimir ou baixar; Staff mostra a semana dos times.
 - **Objetivo:** reuniões com pauta pronta e acordos que não se perdem.
 
 ### 5.7 Times (7)
@@ -123,7 +128,7 @@ Navegação em 8 páginas (teclas 1 a 8) e o botão **Importar e agentes** no to
 - **Objetivo:** manter a Central e os times falando a mesma língua, sem sobrescrever nada.
 
 ### 5.9 Importar e agentes
-- **Uso:** copiar um prompt pronto (com o contexto atual) para o agente de reuniões, chats e e-mails; colar o JSON `gestao-import/3` que ele devolve; revisar a prévia; aplicar. Também lê `.ics` do Outlook para séries de reuniões.
+- **Uso:** copiar um prompt pronto (com o contexto atual) para o agente de reuniões, chats e e-mails; colar o JSON `gestao-import/3` que ele devolve; revisar a prévia (contadores de novos, atualizados, iguais e ignorados que filtram a lista, itens agrupados por tipo, avisos destacados, erro explicado no lugar); aplicar com **Importar N itens**. Também lê `.ics` do Outlook para séries de reuniões.
 - **Prompts:** demandas, delegação, iniciativas e fases, features de uma iniciativa, status, ata (decisões e compromissos), staff, pautas, preparar 1:1, pessoas e times, conciliação, métricas de time sem ferramenta.
 - **Objetivo:** transformar o que foi dito em reuniões e mensagens em tarefas e pautas sem digitar.
 
@@ -189,6 +194,18 @@ Menu com 3 entradas.
 | **Times** | Por time: teto por ano e diretriz, gerar/copiar/revogar a chave de finanças, **Publicar diretriz**, **Gerar HTML** de finanças do time | Orientar e equipar os times |
 | **Ajustes** | Nome do grupo, ano base e horizonte, orçamento aprovado por ano, versão pedida aos times, centros de custo, itens do grupo (reservas e rateios), categorias OPEX/CAPEX, trocar senha, baixar cópia cifrada | Configurar |
 
+**Consolidação em níveis (1.3).** Um gestor de vários times pode encaminhar o próprio consolidado para a liderança, que também usa o Finanças do Grupo:
+
+| Quem | Onde | O que faz |
+|---|---|---|
+| Liderança | **Times › + Grupo de outro gestor** | Cadastra o gestor como uma unidade (mesmo identificador do grupo dele) e gera a chave de finanças dele (`<grupo>-fin-AAMM`) |
+| Gestor | **Ajustes › Nível acima · sua liderança** | Cola a chave da liderança (ou ela já vem do assistente). Chave de outro grupo é recusada |
+| Gestor | **Publicar para a liderança** | Confere o que sobe (totais por ano, unidades que entram e as que ficam de fora) e publica `grupos/<grupo>/financas/plano.json` |
+| Liderança | **Painel › Planos recebidos** | Aplica o consolidado do gestor, que soma ano a ano como uma unidade |
+| Liderança → gestor | **Publicar diretriz** | O teto por ano desce em `grupos/<grupo>/financas/diretriz.json` e aparece no card do gestor |
+
+Detalhes em [`plano-financas.md`](plano-financas.md), seção 14, e na [ADR-0025](adr/0025-consolidacao-em-niveis.md).
+
 O grupo enxerga os anos do próprio horizonte **mais os anos publicados pelos times**. Um plano de outro ano não é mais descartado: soma no ano a que se refere. Arquivos e planos 1.0 abrem sem perguntar nada (o orçamento e os tetos antigos viram os do ano base).
 
 ## 8. Funcionalidades transversais
@@ -203,3 +220,4 @@ O grupo enxerga os anos do próprio horizonte **mais os anos publicados pelos ti
 | **Detecção de cópias de conflito** | Todas que leem a pasta comum | Não perder dado escondido em `arquivo (1).json` |
 | **Reconhecer arquivo errado** | Todas | Dizer qual HTML abre aquele arquivo |
 | **Migração automática** | Central (e demais quando o formato muda) | Abrir arquivo antigo na versão nova, com backup |
+| **Pacote .zip** | `python3 tools/empacotar.py` (e a CI do repositório pessoal) | Levar a solução para a empresa num único arquivo: HTMLs lado a lado, contratos, documentação e LEIA-ME. Não passa pelo repositório da empresa |
