@@ -1,6 +1,8 @@
 # Visão geral da solução · Central de Gestão, Quadro do Time e integração
 
-*24/11/2026 · estado atual: Central v15, Quadro do Time 2.2 e Hub 1.0 (detalhes em `docs/plano-v15.md` e `docs/plano-hub.md`)*
+*24/11/2026 · estado atual: Central v15.2, Quadro do Time 2.2, Hub 1.1 e Finanças do Grupo e do Time 1.0 (detalhes em `docs/plano-v15.md`, `docs/plano-hub.md` e `docs/plano-financas.md`)*
+
+> **Por onde começar:** [funcionalidades, usos e objetivos](funcionalidades.md) · [jornada do usuário](jornada-do-usuario.md) · [passo a passo](passo-a-passo.md) · [decisões de arquitetura (ADRs)](adr/README.md)
 
 Este documento explica a solução como um todo: quais ferramentas existem, para quem é cada uma, como os dados circulam entre elas e onde está a documentação detalhada de cada parte. É o ponto de partida para quem chega agora; os detalhes técnicos ficam nos documentos citados em cada seção.
 
@@ -27,7 +29,7 @@ A solução é um pequeno ecossistema de **ferramentas HTML de arquivo único**,
                                  ▼ lê catálogo   │ publica backlog e métricas
                  ┌────────────────────────────────────────────────────────┐
                  │  Ferramenta de cada time                                │
-                 │  Quadro do Time 2.0 (pronto) ou ferramenta própria      │
+                 │  Quadro do Time 2.2 (pronto) ou ferramenta própria      │
                  │  adaptada ao contrato                                   │
                  └────────────────────────────────────────────────────────┘
 
@@ -39,7 +41,9 @@ A solução é um pequeno ecossistema de **ferramentas HTML de arquivo único**,
 |---|---|---|---|
 | **Hub da solução** | Tela inicial do dia a dia: abre as outras ferramentas e deixa post-its cifrados para os times, que aparecem no Quadro | Fernando (e quem quiser) | Repositório: `hub.html`, plano em `docs/plano-hub.md` |
 | **Central de Gestão v15** | Gestão pessoal e de portfólio do gestor: tarefas, delegação, iniciativas e features, rituais, pessoas, métricas e integração com os times | Fernando | Repositório: `gestao_pessoal_v15.html`, plano em `docs/plano-v15.md`. Projeto: `gestao-v15/` |
-| **Quadro do Time 2.0** | Quadro de cards, backlog, sprints, iniciativas ligadas à Central e métricas de fluxo do time | Cada time | Repositório e projeto: `ferramenta-time/` (HTML, guia, telas) |
+| **Quadro do Time 2.2** | Quadro de cards, backlog, sprints, iniciativas ligadas à Central e métricas de fluxo do time | Cada time | Repositório e projeto: `ferramenta-time/` (HTML, guia, telas) |
+| **Finanças do Grupo e do Time** | Plano financeiro de cada time (lançamentos locais, plano agregado publicado) e consolidado do grupo contra o orçamento. Interface em revisão | Fernando (grupo) e responsável financeiro de cada time | Repositório: `financas/`, plano em `docs/plano-financas.md` |
+| **Assistente inicial** | Monta a solução para o papel da pessoa e cria os primeiros arquivos cifrados | Quem está começando | Repositório: `inicio.html` |
 | **Integração** | Pasta SharePoint, contratos JSON versionados, envelope cifrado, chaves por time | Central e ferramentas dos times | Projeto: `integracao-time/` (documentos 00 a 06, `contrato/`, `exemplos/`) |
 | **Agentes do Fernando** | Agentes com acesso a reuniões, chats e e-mails que geram arquivos de importação para a Central | Fernando | Projeto: `integracao-time/06-prompts-para-agentes.md` |
 | **Ferramenta de feedbacks** | Ferramenta separada para registrar feedbacks | Fernando | Fora deste repositório. Sem integração (seção 10) |
@@ -54,6 +58,11 @@ A solução é um pequeno ecossistema de **ferramentas HTML de arquivo único**,
 4. **Migração aditiva.** Cada versão nova abre o arquivo da anterior, migra sozinha e baixa um backup do original. Versões antigas ficam em `legacy/`.
 5. **Entrada de fora é só dado.** Nada que vem de um time ou de um agente vira HTML ou código. Textos são escapados, links só `https://`, tamanhos limitados.
 6. **Nada muda sem o gestor ver.** Importações e arquivos dos times passam por uma prévia antes de serem aplicados.
+7. **Dado individual local, pedaço comum sincronizado.** Cada ferramenta guarda o detalhe numa pasta local fora do OneDrive; na pasta sincronizada vai só o que o outro lado precisa, de preferência agregado (desde 23/11/2026).
+8. **Um escritor por arquivo.** Cada arquivo comum tem um único dono (pessoa + computador), é um retrato completo com revisão sempre maior, e cópias de conflito do OneDrive são detectadas e resolvidas.
+9. **HTMLs desacoplados.** Nenhuma ferramenta lê o arquivo de dados de outra; elas só se encontram pela pasta comum.
+
+Cada princípio tem uma decisão registrada em [`docs/adr/`](adr/README.md).
 
 ---
 
@@ -115,7 +124,7 @@ Documento detalhado: `integracao-time/04-modelo-iniciativa-feature.md`.
 
 ---
 
-## 5. Quadro do Time (2.0)
+## 5. Quadro do Time (2.2)
 
 A ferramenta pronta para os times. Também é um HTML único (`ferramenta-time/quadro_do_time_v1.html`), aberto no Edge ou Chrome.
 
@@ -131,8 +140,9 @@ A ferramenta pronta para os times. Também é um HTML único (`ferramenta-time/q
 | **Ajustes** | Nome do time, pessoas (desativar quem saiu), colunas (compromisso e início), senha, cópia de segurança |
 
 Como funciona por dentro:
-- Os dados ficam em `quadro-<slug>.json`, numa **pasta do time** (nunca dentro de `Gestao-Integracao`), com senha opcional.
-- Várias pessoas abrem o mesmo arquivo: a ferramenta salva sozinha, confere o arquivo a cada 20 s e une as mudanças card a card (vence a alteração mais recente).
+- Cada pessoa tem o próprio arquivo local, **sempre cifrado com senha** (obrigatória desde o Quadro 2.1), e publica as próprias alterações em `times/<time>/quadro/<pessoa>-<computador>.json`, cifrado com a chave do time.
+- Quem abre o Quadro lê os arquivos de todos a cada 20 s e une as mudanças card a card (vence a alteração mais recente). Ninguém grava o arquivo de outra pessoa, então o OneDrive não gera cópias de conflito. O antigo `quadro-<slug>.json` compartilhado continua sendo aberto e migrado.
+- No topo do quadro aparecem os **post-its** deixados pelo hub; **Vi** grava o recibo de leitura.
 - O catálogo da Central fica guardado cifrado no navegador.
 
 **Times com ferramenta própria** não precisam trocar: o guia `ferramenta-time/guia-adaptacao-times.md` explica o caminho B (adaptar a ferramenta atual copiando as funções do Quadro), e o pacote `integracao-time/03-pacote-para-agentes-do-time.md` traz o contrato completo, código de referência, checklist e um prompt pronto para o agente de desenvolvimento do time.
@@ -142,6 +152,8 @@ Como funciona por dentro:
 ## 6. Integração pela pasta SharePoint
 
 ### 6.1 A pasta
+
+Desde 23/11/2026 o nome recomendado é `Gestao-Compartilhado` (biblioteca SharePoint sincronizada pelo cliente do OneDrive); `Gestao-Integracao` continua aceito. A pasta também recebe finanças (`grupo/financas/`, `times/<time>/financas/`), o Quadro por pessoa (`times/<time>/quadro/`) e os post-its (`times/<time>/postits/`); a árvore completa está na [ADR-0004](adr/0004-troca-por-arquivos-na-pasta-sincronizada.md).
 
 ```
 Gestao-Integracao/                      (administrada pelo Fernando)
@@ -283,6 +295,11 @@ Faz parte do ecossistema uma **ferramenta de feedbacks**, usada para registrar e
 
 | Documento | Conteúdo |
 |---|---|
+| `docs/funcionalidades.md` (repositório) | O que cada ferramenta faz, para quê e quando usar |
+| `docs/jornada-do-usuario.md` (repositório) | Jornada por papel (gestor, responsável, membro, financeiro) e atritos observados |
+| `docs/passo-a-passo.md` (repositório) | Procedimentos: montar, cadastrar time, rotina, rituais, finanças, atualizar, trocar de computador, chave vazada |
+| `docs/adr/` (repositório) | Decisões de arquitetura (ADRs) e checklist para funcionalidades novas |
+| `docs/plano-financas.md` (repositório) | Finanças do grupo e do time, assistente, regras de sincronização |
 | `README.md` (repositório) | Como abrir a Central e lista de telas |
 | `docs/plano-hub.md` (repositório) | Hub da solução e post-its para os times (contratos `gestao-postits/1` e `gestao-postits-vistos/1`) |
 | `docs/plano-v15.md` (repositório) | O que mudou na v15 e no Quadro 2.0 |

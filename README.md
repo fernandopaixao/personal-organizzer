@@ -19,6 +19,8 @@ Ferramenta de gestão pessoal em um único arquivo HTML, sem servidor e sem inst
 | 7 | Times | Cadastro dos times, métricas publicadas pelos times e visão de cada time (backlog, features, reunião de status) |
 | 8 | Integração | Pasta e chaves, arquivos recebidos, conciliação e compartilhamento com os times |
 
+**Documentação:** [funcionalidades, usos e objetivos](docs/funcionalidades.md) · [jornada do usuário](docs/jornada-do-usuario.md) · [passo a passo](docs/passo-a-passo.md) · [decisões de arquitetura (ADRs)](docs/adr/README.md), com o checklist para funcionalidades novas.
+
 A visão geral da solução (Central, Quadro do Time, integração, métricas e agentes) está em [`docs/visao-geral-da-solucao.md`](docs/visao-geral-da-solucao.md). O plano da versão atual está em [`docs/plano-v15.md`](docs/plano-v15.md). As versões anteriores ficam em `legacy/` como referência.
 
 ## Ferramenta dos times
