@@ -20,7 +20,7 @@
    Dados individuais (lançamentos, notas, cenários) ficam no arquivo local cifrado.
    Só o plano agregado vai para a pasta sincronizada: times/<time>/financas/plano.json
    ===================================================================== */
-const TOOL = 'financas-time', TOOL_NOME = 'Finanças do Time', TOOL_VERSION = '1.0.0';
+const TOOL = 'financas-time', TOOL_NOME = 'Finanças do Time', TOOL_VERSION = '1.2.0';
 const LOCAL_SCHEMA = 'gestao-financas-local/1', PLANO_SCHEMA = 'gestao-financas-plano/1', DIRETRIZ_SCHEMA = 'gestao-financas-diretriz/1';
 const PRESET = /*FIN-PRESET*/null/*FIM-FIN-PRESET*/;
 const CATS_PADRAO = [
@@ -37,7 +37,7 @@ let salvarT = null, salvando = false, sujo = false;
 function novoDb({ nome, slug, ano, moeda, pessoa }) {
   return {
     schema: LOCAL_SCHEMA, version: 1, tool: TOOL, criadoEm: new Date().toISOString(),
-    team: { nome, slug, prefixo: '' }, ano: +ano, moeda: moeda || 'BRL',
+    team: { nome, slug, prefixo: '' }, ano: +ano, anos: [+ano], moeda: moeda || 'BRL',
     pessoa: { nome: pessoa, slug: slugify(pessoa).split('-')[0] || 'eu' },
     categorias: CATS_PADRAO.map(c => ({ ...c })), centros: [],
     linhas: [], compromissos: [], lancamentos: [], fechados: [], cenarios: [],
@@ -51,12 +51,22 @@ function normalizar(d) {
   d.categorias ??= CATS_PADRAO.map(c => ({ ...c })); d.centros ??= []; d.linhas ??= []; d.compromissos ??= []; d.lancamentos ??= [];
   d.fechados ??= []; d.cenarios ??= []; d.chaves ??= []; d.publicacao ??= { revision: 0 }; d.seg ??= {}; d.versaoPlano ??= 'Orçamento original';
   for (const l of d.linhas) { l.orcado ??= {}; l.previsto ??= {}; }
+  // Planejamento multianual (1.1): "ano" é o ano base; "anos" é o horizonte do plano. Arquivos antigos têm só o ano base.
+  d.anos = [...new Set([...(Array.isArray(d.anos) ? d.anos : []), d.ano].map(Number).filter(a => a > 2000 && a < 2100))].sort();
   return d;
 }
 const writer = () => `${db.pessoa.slug}~${dispositivo().id}`;
 const catPorId = id => db.categorias.find(c => c.id === id);
 const linhaPorId = id => db.linhas.find(l => l.id === id);
-const mesesAno = () => mesesDoAno(db.ano);
+const anoV = () => (anoVista && db.anos.includes(anoVista)) ? anoVista : db.ano;      // ano em exibição
+const mesesAno = (ano = anoV()) => mesesDoAno(ano);
+const todosMeses = () => db.anos.flatMap(a => mesesDoAno(a));
+// Tetos da diretriz para um ano: byYear (multianual) ou, no ano base da diretriz, caps/capTotal.
+function tetosDoAno(a = anoV()) {
+  const d = db.diretriz; if (!d) return { caps: {}, capTotal: 0 };
+  const y = d.byYear?.[a]; if (y) return { caps: y.caps || {}, capTotal: y.capTotal || 0 };
+  return (d.fiscalYear ?? db.ano) === a ? { caps: d.caps || {}, capTotal: d.capTotal || 0 } : { caps: {}, capTotal: 0 };
+}
 const fechado = m => db.fechados.includes(m);
 function realizado(lid, m) { let s = 0; for (const x of db.lancamentos) if (x.linha === lid && x.data.slice(0, 7) === m) s += x.valor; return s; }
 function comprometido(lid, m) { let s = 0; for (const c of db.compromissos) if (c.linha === lid && c.inicio <= m && (!c.fim || m <= c.fim)) s += c.valor; return s; }
@@ -77,7 +87,7 @@ const fm = c => fmtMoeda(c, db.moeda);
 
 /* ----------------------------- plano publicado ----------------------------- */
 function montarPlano(meta) {
-  const ms = mesesAno(), prox = Array.from({ length: 12 }, (_, i) => somaMeses(`${db.ano}-12`, i + 1));
+  const ms = todosMeses(), ult = Math.max(...db.anos), prox = Array.from({ length: 12 }, (_, i) => somaMeses(`${ult}-12`, i + 1));
   const lines = db.linhas.map(l => {
     const c = catPorId(l.cat) || { id: l.cat, tipo: 'OPEX' };
     const months = {};
@@ -87,16 +97,17 @@ function montarPlano(meta) {
     }
     return { id: l.id, name: clamp(l.nome, 120), category: c.id, kind: c.tipo, costCenter: l.centro || undefined, initiative: l.iniciativa || undefined, supplier: l.fornecedor || undefined, months };
   });
-  const t = totais();
+  const t = totais(mesesAno(db.ano));
+  const porAno = Object.fromEntries(db.anos.map(a => { const x = totais(mesesAno(a)); return [a, { budget: x.orcado, forecast: x.previsto, actual: x.realizado }]; }));
   return {
     schema: PLANO_SCHEMA, ...meta,
     source: { team: db.team.slug, tool: TOOL, toolVersion: TOOL_VERSION },
     team: { name: db.team.nome, slug: db.team.slug },
-    fiscalYear: db.ano, currency: db.moeda, planVersion: db.versaoPlano, closedMonths: [...db.fechados].sort(),
+    fiscalYear: db.ano, fiscalYears: [...db.anos], currency: db.moeda, planVersion: db.versaoPlano, closedMonths: [...db.fechados].sort(),
     categories: db.categorias.map(c => ({ id: c.id, name: c.nome, kind: c.tipo })),
     lines,
     commitments: db.compromissos.map(c => ({ name: clamp(c.nome, 120), line: c.linha, monthly: c.valor, start: c.inicio, end: c.fim || undefined })),
-    totals: { budget: t.orcado, forecast: t.previsto, actual: t.realizado },
+    totals: { budget: t.orcado, forecast: t.previsto, actual: t.realizado }, totalsByYear: porAno,
     directiveRevision: db.diretriz?.revision || undefined
   };
 }
@@ -207,12 +218,13 @@ function alertas() {
   if (ms.includes(m) && +hoje.slice(8) > 10 && !db.lancamentos.some(x => x.data.startsWith(m))) out.push(['', `Nenhum lançamento em ${nomeMes(m)} até agora.`]);
   const t = totais();
   if (t.orcado && t.previsto > t.orcado * 1.05) out.push(['late', `Previsto do ano ${fm(t.previsto)} está ${Math.round((t.previsto / t.orcado - 1) * 100)}% acima do orçado (${fm(t.orcado)}).`]);
-  const caps = db.diretriz?.caps || {};
+  const { caps, capTotal } = tetosDoAno();
   for (const [cat, teto] of Object.entries(caps)) {
     const v = totais(ms, l => l.cat === cat).previsto;
     if (teto && v > teto) out.push(['late', `${catPorId(cat)?.nome || cat}: previsto ${fm(v)} acima do teto do grupo (${fm(teto)}).`]);
   }
-  if (db.diretriz?.capTotal && t.previsto > db.diretriz.capTotal) out.push(['late', `Previsto total acima do teto do grupo (${fm(db.diretriz.capTotal)}).`]);
+  if (capTotal && t.previsto > capTotal) out.push(['late', `Previsto total de ${anoV()} acima do teto do grupo (${fm(capTotal)}).`]);
+  for (const a of db.anos.filter(a => a > db.ano)) if (!db.linhas.some(l => mesesAno(a).some(m => l.orcado[m] || l.previsto[m]))) { out.push(['', `${a} está no horizonte do plano, mas ainda não tem orçado nem previsto.`, 'anos']); break; }
   for (const c of db.compromissos) if (c.fim && c.fim >= m && c.fim <= somaMeses(m, 2)) out.push(['', `Contrato "${c.nome}" termina em ${nomeMes(c.fim)}: renovar ou encerrar?`]);
   for (const l of db.linhas) for (const mm of ms.filter(fechado)) { const o = orcado(l, mm), r = realizado(l.id, mm); if (o && r > o * 1.1) { out.push(['', `${l.nome}: realizado de ${nomeMes(mm)} ${Math.round((r / o - 1) * 100)}% acima do orçado.`]); break; } }
   if (db.publicacao.revision && db.publicacao.assinatura !== assinaturaPlano()) out.push(['', 'Há mudanças no plano ainda não publicadas para o grupo.', 'publicar']);
@@ -233,11 +245,14 @@ const ICONES = {
   grupo: '<svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>',
   ajustes: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.6-2-3.4-2.4 1a7 7 0 0 0-1.7-1L14.5 3h-4l-.4 2.6a7 7 0 0 0-1.7 1L6 5.6l-2 3.4L6 10.6a7 7 0 0 0 0 2.8L4 15l2 3.4 2.4-1a7 7 0 0 0 1.7 1l.4 2.6h4l.4-2.6a7 7 0 0 0 1.7-1l2.4 1 2-3.4-2-1.6c.1-.3.1-.7.1-1z"/></svg>'
 };
-const NAV = [['resumo', 'Resumo'], ['lancamentos', 'Lança-mentos'], ['plano', 'Plano'], ['compromissos', 'Contratos'], ['futuro', 'Futuro'], ['grupo', 'Grupo'], ['ajustes', 'Ajustes']];
+// 1.2: quatro entradas no menu; as telas irmãs viram abas no topo (menos navegação).
+const NAV = [['resumo', 'Painel', ['resumo', 'futuro'], 'resumo'], ['lancamentos', 'Lançamentos', ['lancamentos'], 'lancamentos'], ['plano', 'Plano', ['plano', 'compromissos'], 'plano'], ['grupo', 'Ajustes', ['grupo', 'ajustes'], 'ajustes']];
+const SUB = { resumo: 'Hoje', futuro: 'Futuro e cenários', plano: 'Plano mês a mês', compromissos: 'Contratos', grupo: 'Grupo e pasta', ajustes: 'Time e segurança' };
+const pai = v => NAV.find(n => n[2].includes(v)) || NAV[0];
 function render() {
   if (!db) return;
   const nAl = alertas().filter(a => a[0] === 'late').length;
-  $('#app').innerHTML = `<nav class="rail"><div class="logo">FIN</div>${NAV.map(([k, n]) => `<button class="nv ${view === k ? 'on' : ''}" data-v="${k}">${ICONES[k]}${n}${k === 'resumo' && nAl ? `<span class="b">${nAl}</span>` : ''}</button>`).join('')}</nav>
+  $('#app').innerHTML = `<nav class="rail"><div class="logo">FIN</div>${NAV.map(([k, n, , ic]) => `<button class="nv ${pai(view)[0] === k ? 'on' : ''}" data-v="${k}">${ICONES[ic]}${n}${k === 'resumo' && nAl ? `<span class="b">${nAl}</span>` : ''}</button>`).join('')}</nav>
     <main class="main"><header class="top" id="topo"></header><div id="pg"></div></main>`;
   $$('.nv').forEach(b => b.onclick = () => { view = b.dataset.v; render(); });
   renderTopo();
@@ -246,45 +261,92 @@ function render() {
 function renderTopo() {
   const t = $('#topo'); if (!t) return;
   const pend = db.publicacao.assinatura !== assinaturaPlano();
-  t.innerHTML = `<div><h1>${esc(NAV.find(n => n[0] === view)[1].replace('-', ''))}</h1><div class="sub">${esc(db.team.nome)} · ${db.ano} · ${esc(db.moeda)}</div></div><span class="grow"></span>
-    <span class="pill"><span class="led ${sujo || salvando ? 'wait' : ''}"></span>${sujo || salvando ? 'Salvando…' : 'Salvo e cifrado'}</span>
-    <button class="pill" id="tPasta"><span class="led ${raiz ? (situacao.erro || situacao.conflitos.length ? 'err' : '') : 'wait'}"></span>${raiz ? 'Pasta ligada' : 'Pasta não ligada'}</button>
+  const kids = pai(view)[2];
+  t.innerHTML = `<div><h1>${esc(pai(view)[1])}</h1><div class="sub">${esc(db.team.nome)} · ${esc(db.moeda)}</div></div>${seletorAno()}<span class="grow"></span>
+    <button class="pill" id="tPasta" title="${raiz ? 'Pasta sincronizada ligada' : 'Pasta sincronizada não ligada'}"><span class="led ${sujo || salvando || !raiz ? 'wait' : situacao.erro || situacao.conflitos.length ? 'err' : ''}"></span>${sujo || salvando ? 'Salvando…' : 'Salvo e cifrado'}${raiz ? '' : ' · sem pasta'}</button>
     <button class="btn ${pend ? 'pri' : ''}" id="tPub">${pend ? 'Publicar para o grupo' : 'Publicado'}</button>
-    <button class="btn ghost" id="tHub" title="Voltar ao Hub da solução">← Hub</button><button class="btn ghost" id="tOnde">Onde estou?</button>`;
+    <button class="btn ghost" id="tHub" title="Voltar ao Hub da solução">← Hub</button><button class="btn ghost" id="tOnde">Onde estou?</button>
+    ${kids.length > 1 ? `<div class="subnav">${kids.map(k => `<button data-v="${k}" class="${view === k ? 'on' : ''}">${SUB[k]}</button>`).join('')}</div>` : ''}`;
+  $$('.subnav [data-v]', t).forEach(b => b.onclick = () => { view = b.dataset.v; render(); });
   $('#tPasta').onclick = () => { view = 'grupo'; render(); };
+  ligarSeletorAno();
   $('#tPub').onclick = () => publicar();
   $('#tHub').onclick = voltarAoHub;
   $('#tOnde').onclick = () => ondeEstou({ ferramenta: TOOL_NOME, versao: TOOL_VERSION, arquivo, pastaLocal: dirLocal?.name, pastaComum: raiz ? `${raiz.name}/times/${db.team.slug}/financas/` : '', writer: writer(),
     local: ['Lançamentos detalhados e observações', 'Cenários "e se" não aplicados', 'Chaves do time (dentro do arquivo cifrado)', 'Cópias de segurança em backup/'],
     comum: ['plano.json: plano agregado por mês e linha (orçado, previsto, realizado)', 'Leitura da diretriz do grupo (tetos e categorias)'] });
 }
+function seletorAno() {
+  if (!['resumo', 'lancamentos', 'plano', 'compromissos', 'futuro'].includes(view)) return '';
+  return `<select class="sel" id="tAno" title="Ano em exibição">${db.anos.map(a => `<option value="${a}" ${a === anoV() ? 'selected' : ''}>${a}${a === db.ano ? ' (base)' : ''}</option>`).join('')}<option value="+">+ Adicionar ano…</option></select>`;
+}
+function ligarSeletorAno() {
+  const s = $('#tAno'); if (!s) return;
+  s.onchange = () => { if (s.value === '+') { s.value = String(anoV()); return novoAnoDlg(); } anoVista = +s.value; render(); };
+}
+// Novo ano no horizonte: vazio ou copiado do ano anterior (previsto ou orçado), com reajuste.
+async function novoAnoDlg() {
+  const prox = Math.max(...db.anos) + 1, ant = Math.min(...db.anos) - 1;
+  const r = await perguntar('Adicionar ano ao plano', `<div class="f2"><label class="field"><span>Ano</span><select class="sel" id="naA"><option value="${prox}">${prox} (depois do último)</option><option value="${ant}">${ant} (antes do primeiro)</option></select></label>
+    <label class="field"><span>Começar com</span><select class="sel" id="naM"><option value="prev">Previsto do ano anterior</option><option value="orc">Orçado do ano anterior</option><option value="vazio">Vazio</option></select></label></div>
+    <label class="field"><span>Reajuste sobre o ano anterior (%)</span><input class="sin" id="naR" value="0" inputmode="decimal"></label>
+    <p class="small muted">O valor entra como <b>orçado</b> do novo ano, mês a mês. Contratos sem fim continuam valendo e geram o previsto sozinhos. Dá para ajustar tudo depois na aba Plano.</p>`, [['no', 'Cancelar'], ['ok', 'Adicionar', 'pri']]);
+  if (r !== 'ok') return;
+  const ano = +document.getElementById('naA').value, modo = document.getElementById('naM').value, pct = Number(String(document.getElementById('naR').value).replace(',', '.')) || 0;
+  adicionarAno(ano, modo, pct); anoVista = ano; view = 'plano'; modoPlano = 'orcado'; agendarSalvar();
+  toast(`${ano} adicionado ao plano.`);
+}
+function adicionarAno(ano, modo = 'vazio', pct = 0) {
+  if (db.anos.includes(ano)) return;
+  const ref = ano > db.anos[0] ? ano - 1 : ano + 1;
+  if (modo !== 'vazio' && db.anos.includes(ref)) for (const l of db.linhas) for (let i = 0; i < 12; i++) {
+    const mRef = `${ref}-${pad2(i + 1)}`, m = `${ano}-${pad2(i + 1)}`;
+    const v = modo === 'orc' ? orcado(l, mRef) : previsto(l, mRef);
+    if (v) l.orcado[m] = Math.round(v * (1 + pct / 100));
+  }
+  db.anos = [...db.anos, ano].sort();
+}
 function kpi(rot, val, cls = '') { return `<div class="kpi ${cls}"><span>${rot}</span><b>${val}</b></div>`; }
 
-/* --- Resumo --- */
+/* --- Painel (Hoje): cards de leitura e gráficos, pouco texto --- */
+function leituraTeto(t) {
+  const { capTotal } = tetosDoAno();
+  if (capTotal) return cardLeitura({ k: `Teto do grupo · ${anoV()}`, v: fm(capTotal), pct: t.previsto / capTotal, s: t.previsto > capTotal ? `<b>${fm(t.previsto - capTotal)}</b> acima do teto` : `Folga de <b>${fm(capTotal - t.previsto)}</b> (${pctTxt(t.previsto, capTotal)} usado)`, tag: t.previsto > capTotal ? '<span class="tag late">acima</span>' : '' });
+  const prox = anoV() + 1;
+  if (db.anos.includes(prox)) { const tp = totais(mesesAno(prox)); const v = t.previsto ? Math.round((tp.previsto / t.previsto - 1) * 100) : 0; return cardLeitura({ k: `Previsto em ${prox}`, v: fm(tp.previsto), pct: t.previsto ? tp.previsto / Math.max(tp.previsto, t.previsto) : 0, s: `${v > 0 ? '+' : ''}${v}% sobre ${anoV()}` }); }
+  return cardLeitura({ k: 'Próximo ano', v: '<span class="faint">—</span>', s: `<button class="btn sm" data-ac="novoano">+ Planejar ${Math.max(...db.anos) + 1}</button>` });
+}
 function vResumo(el) {
   const t = totais(), m = mesAtual(), ms = mesesAno(), ate = ms.filter(x => x <= m);
   const ytd = totais(ate), mm = ms.includes(m) ? totais([m]) : null;
-  const al = alertas();
+  const al = alertas(), folga = t.orcado - t.previsto;
+  const idx = ms.indexOf(m), passado = idx < 0 ? (ms[0] < m ? ms.length - 1 : -1) : idx;
+  const serie = f => ms.map(x => db.linhas.reduce((s2, l) => s2 + f(l, x), 0));
   el.innerHTML = `${barraRapida()}
-    <div class="kpis">${kpi('Orçado no ano', fm(t.orcado))}${kpi('Previsto no ano', fm(t.previsto), t.orcado && t.previsto > t.orcado ? 'alert' : '')}
-      ${kpi('Realizado até ' + nomeMes(m), fm(ytd.realizado))}${kpi('Saldo previsto', fm(t.orcado - t.previsto), t.orcado - t.previsto < 0 ? 'alert' : '')}
-      ${mm ? kpi(`${nomeMes(m)}: realizado / previsto`, `${fmtCurto(mm.realizado)} / ${fmtCurto(mm.previsto)}`) : ''}</div>
-    <div class="grid g2">
-      <div class="card"><p class="lbl">Pedindo atenção <span class="n">${al.length}</span></p>${al.length ? al.map(([c, txt, acao]) => `<div class="al"><span class="dot ${c}"></span><div class="grow">${esc(txt)}</div>${acao ? `<button class="btn sm" data-ac="${acao}">${acao === 'fechar' ? 'Fechar mês' : 'Publicar'}</button>` : ''}</div>`).join('') : '<div class="empty">Tudo em ordem.</div>'}</div>
-      <div class="card"><p class="lbl">Por categoria no ano</p>${tabelaCategorias()}</div>
+    <div class="inss">
+      ${cardLeitura({ hi: true, k: `Previsto em ${anoV()}`, v: fm(t.previsto), pct: t.orcado ? t.previsto / t.orcado : null, s: t.orcado ? (folga >= 0 ? `Folga de <b>${fm(folga)}</b> no orçado de ${fmtCurto(t.orcado)}` : `<b>${fm(-folga)}</b> acima do orçado de ${fmtCurto(t.orcado)}`) : 'Sem orçado ainda' })}
+      ${cardLeitura({ k: `Realizado até ${nomeMes(ate.at(-1) || m)}`, v: fm(ytd.realizado), pct: t.previsto ? ytd.realizado / t.previsto : null, marca: ms.length ? ate.length / ms.length : null, s: `<b>${pctTxt(ytd.realizado, t.previsto)}</b> do previsto do ano · ${ate.length} de 12 meses` })}
+      ${mm ? cardLeitura({ k: `Mês de ${nomeMes(m)}`, v: fm(mm.realizado), pct: mm.previsto ? mm.realizado / mm.previsto : null, s: mm.realizado ? `de <b>${fmtCurto(mm.previsto)}</b> previstos` : `Nenhum lançamento · <b>${fmtCurto(mm.previsto)}</b> previstos`, tag: fechado(m) ? '<span class="tag">fechado</span>' : '' }) : cardLeitura({ k: 'Orçado do ano', v: fm(t.orcado), s: `${db.linhas.length} linha(s) no plano` })}
+      ${leituraTeto(t)}
     </div>
-    <div class="card"><p class="lbl">Ano mês a mês</p>${grafico(ms)}</div>
-    <div class="card"><p class="lbl">Últimos lançamentos</p>${tabelaLanc(db.lancamentos.slice().sort((a, b) => b.data.localeCompare(a.data)).slice(0, 8))}</div>`;
+    ${al.length ? `<div class="card flat"><p class="lbl">Pedindo atenção <span class="tag ${al.some(a => a[0] === 'late') ? 'late' : ''}">${al.length}</span></p>${al.map(([c, txt, acao]) => `<div class="al compact"><span class="dot ${c}"></span><div class="grow">${esc(txt)}</div>${acao ? `<button class="btn sm" data-ac="${acao}">${acao === 'fechar' ? 'Fechar mês' : acao === 'anos' ? 'Ver anos' : 'Publicar'}</button>` : ''}</div>`).join('')}</div>` : ''}
+    <div class="g21">
+      <div class="card"><p class="lbl">Curva do ano · acumulado</p>${db.linhas.length ? curvaAcumulada(ms, [
+        { nome: 'Orçado', cor: 'var(--faint)', v: serie(orcado), tracejada: true, fina: true },
+        { nome: 'Previsto', cor: 'var(--bv-mid)', v: serie(previsto), area: true },
+        { nome: 'Realizado', cor: 'var(--bv-deep)', v: serie((l, x) => realizado(l.id, x)), ate: passado }], fmtCurto, idx) : '<div class="empty">Crie as linhas do plano na aba Plano.</div>'}</div>
+      <div class="card"><p class="lbl">Onde vai o dinheiro</p>${tabelaCategorias()}</div>
+    </div>`;
   ligarBarraRapida(el);
-  $$('[data-ac]', el).forEach(b => b.onclick = () => b.dataset.ac === 'fechar' ? fecharMesDlg() : publicar());
-  ligarTabelaLanc(el);
+  $$('[data-ac]', el).forEach(b => b.onclick = () => b.dataset.ac === 'fechar' ? fecharMesDlg() : b.dataset.ac === 'anos' ? (modoPlano = 'anos', view = 'plano', render()) : b.dataset.ac === 'novoano' ? novoAnoDlg() : publicar());
 }
+// Categorias em barras: previsto (azul), orçado (marca preta) e teto do grupo (marca vermelha).
 function tabelaCategorias() {
-  const ms = mesesAno(), caps = db.diretriz?.caps || {};
-  const linhas = db.categorias.map(c => ({ c, t: totais(ms, l => l.cat === c.id) })).filter(x => x.t.orcado || x.t.previsto || x.t.realizado || caps[x.c.id]);
+  const ms = mesesAno(), caps = tetosDoAno().caps;
+  const linhas = db.categorias.map(c => ({ c, t: totais(ms, l => l.cat === c.id) })).filter(x => x.t.orcado || x.t.previsto || x.t.realizado || caps[x.c.id]).sort((a, b) => b.t.previsto - a.t.previsto);
   if (!linhas.length) return '<div class="empty">Crie as linhas do plano na aba Plano.</div>';
-  return `<div class="scroll"><table class="t"><tr><th>Categoria</th><th class="n">Orçado</th><th class="n">Previsto</th><th class="n">Realizado</th>${Object.keys(caps).length ? '<th class="n">Teto do grupo</th>' : ''}</tr>
-    ${linhas.map(({ c, t }) => `<tr><td>${esc(c.nome)} <span class="chip">${c.tipo}</span></td><td class="n">${fm(t.orcado)}</td><td class="n ${t.previsto > t.orcado ? 'latec' : ''}">${fm(t.previsto)}</td><td class="n">${fm(t.realizado)}</td>${Object.keys(caps).length ? `<td class="n ${caps[c.id] && t.previsto > caps[c.id] ? 'latec' : ''}">${caps[c.id] ? fm(caps[c.id]) : '—'}</td>` : ''}</tr>`).join('')}</table></div>`;
+  return barrasH(linhas.map(({ c, t }) => ({ nome: esc(c.nome), valor: t.previsto, ref: t.orcado, cap: caps[c.id], rotulo: `${fmtCurto(t.previsto)}${t.orcado && t.previsto > t.orcado ? ' <span class="tag late">+' + pctTxt(t.previsto - t.orcado, t.orcado) + '</span>' : ''}`, titulo: `${c.nome} (${c.tipo}): previsto ${fm(t.previsto)} · orçado ${fm(t.orcado)} · realizado ${fm(t.realizado)}${caps[c.id] ? ' · teto ' + fm(caps[c.id]) : ''}` })), fm)
+    + `<div class="legend" style="margin-top:12px"><span><i style="background:var(--bv)"></i>Previsto</span><span><i style="background:var(--ink);width:2px"></i>Orçado</span>${Object.keys(caps).length ? '<span><i style="background:var(--late);width:2px"></i>Teto do grupo</span>' : ''}</div>`;
 }
 function grafico(ms, extras = {}) {
   const dados = ms.map(m => { let o = 0, p = 0, r = 0; for (const l of db.linhas) { o += orcado(l, m); p += previsto(l, m) + (extras[m] || 0); r += realizado(l.id, m); } return { m, o, p, r }; });
@@ -292,17 +354,17 @@ function grafico(ms, extras = {}) {
   const W = 760, H = 200, pl = 8, bw = (W - pl * 2) / dados.length, y = v => H - 24 - (v / max) * (H - 40);
   const bars = dados.map((d, i) => {
     const x = pl + i * bw + bw * 0.18, w = bw * 0.64, f = fechado(d.m);
-    return `<rect x="${x}" y="${y(d.p)}" width="${w}" height="${H - 24 - y(d.p)}" rx="3" fill="${f ? 'var(--bv)' : 'var(--bv-mid)'}"><title>${nomeMes(d.m)}: previsto ${fm(d.p)} · realizado ${fm(d.r)} · orçado ${fm(d.o)}</title></rect>
+    return `<rect x="${x}" y="${y(d.p)}" width="${w}" height="${H - 24 - y(d.p)}" rx="3" fill="${f ? 'var(--bv-deep)' : 'var(--bv-mid)'}" opacity="${f ? 1 : .75}"><title>${nomeMes(d.m)}: previsto ${fm(d.p)} · realizado ${fm(d.r)} · orçado ${fm(d.o)}</title></rect>
       ${d.o ? `<line x1="${x - 3}" x2="${x + w + 3}" y1="${y(d.o)}" y2="${y(d.o)}" stroke="var(--ink)" stroke-width="2"/>` : ''}
       <text x="${x + w / 2}" y="${H - 8}" text-anchor="middle" font-size="10.5" fill="var(--muted)">${nomeMes(d.m)}</text>`;
   }).join('');
   return `<svg class="ch" viewBox="0 0 ${W} ${H}" role="img" aria-label="Previsto e orçado por mês">${bars}</svg>
-    <div class="legend"><span><i style="background:var(--bv)"></i>Realizado (mês fechado)</span><span><i style="background:var(--bv-mid)"></i>Previsto</span><span><i style="background:var(--ink);height:2px"></i>Orçado</span></div>`;
+    <div class="legend"><span><i style="background:var(--bv-deep)"></i>Realizado (mês fechado)</span><span><i style="background:var(--bv-mid)"></i>Previsto</span><span><i style="background:var(--ink);height:2px"></i>Orçado</span></div>`;
 }
 
 /* --- Lançamentos --- */
 function barraRapida() {
-  return `<div class="quick"><span class="pl">+</span><input id="qk" placeholder="Novo lançamento: Licença Datadog 12.400 #licencas 05/03 PAG-042"><div class="hint">Valor em reais, <b>#linha</b> ou <b>#categoria</b>, data dd/mm (padrão hoje) e código de iniciativa. Enter abre a confirmação.</div></div>`;
+  return `<div class="quick"><span class="pl">+</span><input id="qk" placeholder="Novo lançamento: Licença Datadog 12.400 #licencas 05/03 PAG-042" title="Valor em reais, #linha ou #categoria, data dd/mm (padrão hoje) e código de iniciativa. Enter abre a confirmação."></div>`;
 }
 function ligarBarraRapida(el) { const i = $('#qk', el); if (i) i.onkeydown = e => { if (e.key === 'Enter' && i.value.trim()) { lancDlg(null, interpretar(i.value)); i.value = ''; } }; }
 function interpretar(txt) {
@@ -387,7 +449,8 @@ function importarCsvDlg() {
 
 /* --- Plano --- */
 function vPlano(el) {
-  const ms = mesesAno(), cap = { orcado: 'Orçado', previsto: 'Previsto', realizado: 'Realizado', desvio: 'Previsto − orçado' };
+  if (modoPlano === 'anos') return vPlanoAnos(el);
+  const ms = mesesAno(), cap = { orcado: 'Orçado', previsto: 'Previsto', realizado: 'Realizado', desvio: 'Previsto − orçado', anos: 'Todos os anos' };
   const editavel = modoPlano === 'orcado' || modoPlano === 'previsto';
   const val = (l, m) => modoPlano === 'orcado' ? orcado(l, m) : modoPlano === 'previsto' ? previsto(l, m) : modoPlano === 'realizado' ? realizado(l.id, m) : previsto(l, m) - orcado(l, m);
   const cel = (l, m) => {
@@ -399,7 +462,7 @@ function vPlano(el) {
   const tot = ms.map(m => db.linhas.reduce((s, l) => s + val(l, m), 0));
   el.innerHTML = `<div class="bar"><div class="sg">${Object.entries(cap).map(([k, n]) => `<button class="${modoPlano === k ? 'on' : ''}" data-m="${k}">${n}</button>`).join('')}</div>
     <span class="chip">${esc(db.versaoPlano)}</span><span class="grow"></span><button class="btn" id="pFech">Fechar mês</button><button class="btn pri" id="pNova">+ Linha</button></div>
-    ${modoPlano === 'previsto' ? '<div class="banner">Previsto automático: mês fechado = realizado; mês aberto = valor digitado, senão contratos, senão orçado (nunca menos que o já realizado). Valores em cinza são automáticos.</div>' : ''}
+    ${modoPlano === 'previsto' ? '<p class="small muted" style="margin:-6px 0 12px">Em cinza, o previsto automático (contratos ou orçado; mês fechado usa o realizado). Digite para ajustar.</p>' : ''}
     <div class="card scroll"><table class="t"><tr><th>Linha</th>${ms.map(m => `<th class="n">${nomeMes(m)}${fechado(m) ? ' ✓' : ''}</th>`).join('')}<th class="n">Ano</th></tr>
     ${db.categorias.map(c => { const ls = db.linhas.filter(l => l.cat === c.id); if (!ls.length) return ''; return `<tr><td colspan="${ms.length + 2}" class="lbl" style="padding-top:14px;margin:0">${esc(c.nome)} · ${c.tipo}</td></tr>` + ls.map(l => `<tr><td><button class="bvc" data-e="${l.id}" style="text-align:left">${esc(l.nome)}</button>${l.iniciativa ? ` <span class="code faint">${esc(l.iniciativa)}</span>` : ''}</td>${ms.map(m => cel(l, m)).join('')}<td class="n"><b>${fmtCurto(ms.reduce((s, m) => s + val(l, m), 0))}</b></td></tr>`).join(''); }).join('')}
     ${db.linhas.length ? `<tr class="tot"><td>Total</td>${tot.map(v => `<td class="n">${fmtCurto(v)}</td>`).join('')}<td class="n">${fmtCurto(tot.reduce((a, b) => a + b, 0))}</td></tr>` : `<tr><td colspan="14" class="empty">Nenhuma linha ainda. Uma linha é um item do orçamento, como "Squad terceirizado" ou "Licenças de observabilidade".</td></tr>`}
@@ -415,6 +478,23 @@ function vPlano(el) {
     agendarSalvar();
   });
 }
+// Plano entre anos: cada linha com orçado e previsto de cada ano do horizonte.
+function vPlanoAnos(el) {
+  const cap = { orcado: 'Orçado', previsto: 'Previsto', realizado: 'Realizado', desvio: 'Previsto − orçado', anos: 'Todos os anos' };
+  const tl = (l, a) => { let o = 0, p = 0, r = 0; for (const m of mesesAno(a)) { o += orcado(l, m); p += previsto(l, m); r += realizado(l.id, m); } return { o, p, r }; };
+  const tot = db.anos.map(a => db.linhas.reduce((s, l) => { const x = tl(l, a); return { o: s.o + x.o, p: s.p + x.p }; }, { o: 0, p: 0 }));
+  el.innerHTML = `<div class="bar"><div class="sg">${Object.entries(cap).map(([k, n]) => `<button class="${modoPlano === k ? 'on' : ''}" data-m="${k}">${n}</button>`).join('')}</div>
+    <span class="chip">${db.anos.length} ano(s): ${db.anos[0]}–${db.anos.at(-1)}</span><span class="grow"></span><button class="btn" id="pAno">+ Ano</button><button class="btn pri" id="pNova">+ Linha</button></div>
+    <div class="card scroll"><table class="t"><tr><th>Linha</th>${db.anos.map(a => `<th class="n" colspan="2" style="text-align:center"><button class="bvc" data-va="${a}">${a}</button>${a === db.ano ? ' <span class="faint">base</span>' : ''}</th>`).join('')}</tr>
+    <tr><th></th>${db.anos.map(() => '<th class="n">Orçado</th><th class="n">Previsto</th>').join('')}</tr>
+    ${db.categorias.map(c => { const ls = db.linhas.filter(l => l.cat === c.id); if (!ls.length) return ''; return `<tr><td colspan="${db.anos.length * 2 + 1}" class="lbl" style="padding-top:14px;margin:0">${esc(c.nome)} · ${c.tipo}</td></tr>` + ls.map(l => `<tr><td><button class="bvc" data-e="${l.id}" style="text-align:left">${esc(l.nome)}</button></td>${db.anos.map(a => { const x = tl(l, a); return `<td class="n">${x.o ? fmtCurto(x.o) : '—'}</td><td class="n ${x.p > x.o && x.o ? 'latec' : ''}">${x.p ? fmtCurto(x.p) : '—'}</td>`; }).join('')}</tr>`).join(''); }).join('')}
+    ${db.linhas.length ? `<tr class="tot"><td>Total</td>${tot.map(t => `<td class="n">${fmtCurto(t.o)}</td><td class="n">${fmtCurto(t.p)}</td>`).join('')}</tr>` : `<tr><td colspan="${db.anos.length * 2 + 1}" class="empty">Nenhuma linha ainda.</td></tr>`}
+    </table></div><p class="small muted">Clique num ano para editar mês a mês. "+ Ano" acrescenta um ano ao horizonte, vazio ou a partir do anterior com reajuste.</p>`;
+  $$('[data-m]', el).forEach(b => b.onclick = () => { modoPlano = b.dataset.m; render(); });
+  $$('[data-va]', el).forEach(b => b.onclick = () => { anoVista = +b.dataset.va; modoPlano = 'orcado'; render(); });
+  $$('[data-e]', el).forEach(b => b.onclick = () => linhaDlg(b.dataset.e));
+  $('#pAno').onclick = novoAnoDlg; $('#pNova').onclick = () => linhaDlg(null);
+}
 function linhaDlg(id) {
   const l = id ? linhaPorId(id) : { nome: '', cat: db.categorias[0]?.id, centro: '', iniciativa: '', fornecedor: '', orcado: {}, previsto: {} };
   const d = modal(`<div class="mh"><h2>${id ? 'Linha do plano' : 'Nova linha do plano'}</h2></div><div class="mb">
@@ -423,8 +503,9 @@ function linhaDlg(id) {
     <label class="field"><span>Centro de custo</span><input class="sin" id="nCC" list="ccs" value="${esc(l.centro || '')}"><datalist id="ccs">${db.centros.map(c => `<option value="${esc(c)}">`).join('')}</datalist></label></div>
     <div class="f2"><label class="field"><span>Iniciativa (opcional)</span><input class="sin" id="nI" value="${esc(l.iniciativa || '')}" placeholder="PAG-042"></label>
     <label class="field"><span>Fornecedor (opcional)</span><input class="sin" id="nF" value="${esc(l.fornecedor || '')}"></label></div>
-    <div class="f2"><label class="field"><span>Orçado mensal (preenche o ano)</span><input class="sin" id="nOM" placeholder="Deixe vazio para manter"></label>
-    <label class="field"><span>A partir de</span><select class="sel" id="nOD">${mesesAno().map(m => `<option value="${m}">${nomeMes(m)}</option>`).join('')}</select></label></div></div>
+    <div class="f2"><label class="field"><span>Orçado mensal (preenche ${anoV()})</span><input class="sin" id="nOM" placeholder="Deixe vazio para manter"></label>
+    <label class="field"><span>A partir de</span><select class="sel" id="nOD">${mesesAno().map(m => `<option value="${m}">${nomeMes(m)}</option>`).join('')}</select></label></div>
+    ${db.anos.some(a => a > anoV()) ? `<label class="row small"><input type="checkbox" id="nOS"> <span>Repetir nos anos seguintes do plano (${db.anos.filter(a => a > anoV()).join(', ')})</span></label>` : ''}</div>
     <div class="mf">${id ? '<button class="btn danger" id="nX">Excluir linha</button><span class="grow"></span>' : ''}<button class="btn" id="nNo">Cancelar</button><button class="btn pri" id="nOk">Salvar</button></div>`);
   $('#nNo', d).onclick = fecharModal;
   if (id) $('#nX', d).onclick = async () => {
@@ -438,7 +519,7 @@ function linhaDlg(id) {
     Object.assign(l, { nome, cat: $('#nC', d).value, centro: clamp($('#nCC', d).value.trim(), 40), iniciativa: clamp($('#nI', d).value.trim().toUpperCase(), 20), fornecedor: clamp($('#nF', d).value.trim(), 80) });
     if (l.centro && !db.centros.includes(l.centro)) db.centros.push(l.centro);
     const om = $('#nOM', d).value.trim();
-    if (om) { const v = parseValor(om); if (v == null) return toast('Orçado mensal inválido.'); for (const m of mesesAno()) if (m >= $('#nOD', d).value) l.orcado[m] = v; }
+    if (om) { const v = parseValor(om); if (v == null) return toast('Orçado mensal inválido.'); for (const m of mesesAno()) if (m >= $('#nOD', d).value) l.orcado[m] = v; if ($('#nOS', d)?.checked) for (const a of db.anos.filter(a => a > anoV())) for (const m of mesesAno(a)) l.orcado[m] = v; }
     if (!id) db.linhas.push({ id: uid('N'), ...l });
     fecharModal(); agendarSalvar();
   };
@@ -460,14 +541,14 @@ async function fecharMesDlg() {
 function vComp(el) {
   const m = mesAtual();
   el.innerHTML = `<div class="bar"><span class="muted">Contratos e custos recorrentes geram o previsto dos meses seguintes sozinhos.</span><span class="grow"></span><button class="btn pri" id="cNovo">+ Contrato</button></div>
-    <div class="card">${db.compromissos.length ? `<div class="scroll"><table class="t"><tr><th>Contrato</th><th>Linha</th><th class="n">Mensal</th><th>Início</th><th>Fim</th><th class="n">Restante no ano</th></tr>
-    ${db.compromissos.map(c => { const rest = mesesAno().filter(x => x >= m && x >= c.inicio && (!c.fim || x <= c.fim)).length * c.valor; return `<tr data-k="${c.id}" style="cursor:pointer"><td>${esc(c.nome)}${c.fim && c.fim <= somaMeses(m, 2) && c.fim >= m ? ' <span class="chip late">vence logo</span>' : ''}</td><td>${esc(linhaPorId(c.linha)?.nome || '—')}</td><td class="n">${fm(c.valor)}</td><td>${nomeMes(c.inicio)} ${c.inicio.slice(0, 4)}</td><td>${c.fim ? nomeMes(c.fim) + ' ' + c.fim.slice(0, 4) : 'sem fim'}</td><td class="n">${fm(rest)}</td></tr>`; }).join('')}</table></div>` : '<div class="empty">Nenhum contrato. Exemplos: squad terceirizado, licenças anuais pagas por mês, aluguel de ambiente.</div>'}</div>`;
+    <div class="card">${db.compromissos.length ? `<div class="scroll"><table class="t"><tr><th>Contrato</th><th>Linha</th><th class="n">Mensal</th><th>Início</th><th>Fim</th><th class="n">Restante em ${anoV()}</th><th class="n">Restante no plano</th></tr>
+    ${db.compromissos.map(c => { const cobre = x => x >= m && x >= c.inicio && (!c.fim || x <= c.fim), rest = mesesAno().filter(cobre).length * c.valor, restT = todosMeses().filter(cobre).length * c.valor; return `<tr data-k="${c.id}" style="cursor:pointer"><td>${esc(c.nome)}${c.fim && c.fim <= somaMeses(m, 2) && c.fim >= m ? ' <span class="chip late">vence logo</span>' : ''}</td><td>${esc(linhaPorId(c.linha)?.nome || '—')}</td><td class="n">${fm(c.valor)}</td><td>${nomeMes(c.inicio)} ${c.inicio.slice(0, 4)}</td><td>${c.fim ? nomeMes(c.fim) + ' ' + c.fim.slice(0, 4) : 'sem fim'}</td><td class="n">${fm(rest)}</td><td class="n">${fm(restT)}</td></tr>`; }).join('')}</table></div>` : '<div class="empty">Nenhum contrato. Exemplos: squad terceirizado, licenças anuais pagas por mês, aluguel de ambiente.</div>'}</div>`;
   $('#cNovo').onclick = () => compDlg(null);
   $$('[data-k]', el).forEach(r => r.onclick = () => compDlg(r.dataset.k));
 }
 function compDlg(id) {
   if (!db.linhas.length) return toast('Crie uma linha do plano primeiro (aba Plano).');
-  const c = id ? db.compromissos.find(x => x.id === id) : { nome: '', linha: '', valor: null, inicio: mesAtual(), fim: `${db.ano}-12` };
+  const c = id ? db.compromissos.find(x => x.id === id) : { nome: '', linha: '', valor: null, inicio: mesAtual(), fim: `${Math.max(...db.anos)}-12` };
   const d = modal(`<div class="mh"><h2>${id ? 'Contrato' : 'Novo contrato'}</h2></div><div class="mb">
     <label class="field"><span>Nome</span><input class="sin" id="kN" value="${esc(c.nome)}"></label>
     <div class="f2"><label class="field"><span>Valor mensal</span><input class="sin" id="kV" value="${c.valor != null ? (c.valor / 100).toLocaleString('pt-BR') : ''}"></label>
@@ -499,15 +580,18 @@ function vFuturo(el) {
   const cen = db.cenarios.find(c => c.id === cenarioSel), ex = ajustesCenario(cen);
   const restAno = base.filter(x => x >= m), t = totais(), tr = totais(restAno);
   const delta = Object.entries(ex).filter(([k]) => base.includes(k)).reduce((s, [, v]) => s + v, 0);
-  el.innerHTML = `<div class="kpis">${kpi('Previsto até o fim do ano', fm(tr.previsto))}${kpi('Previsto no ano (realizado + previsto)', fm(t.previsto))}${kpi('Orçado no ano', fm(t.orcado))}
-    ${cen ? kpi(`Com o cenário "${esc(cen.nome)}"`, fm(t.previsto + delta), t.previsto + delta > t.orcado ? 'alert' : '') : ''}</div>
+  el.innerHTML = `<div class="inss">${cardLeitura({ hi: true, k: `Ainda por vir em ${anoV()}`, v: fm(tr.previsto), pct: t.previsto ? tr.previsto / t.previsto : null, s: `${restAno.length} mes(es) abertos · <b>${pctTxt(tr.previsto, t.previsto)}</b> do ano` })}
+    ${cardLeitura({ k: 'Ano inteiro (realizado + previsto)', v: fm(t.previsto), pct: t.orcado ? t.previsto / t.orcado : null, s: t.orcado ? `${pctTxt(t.previsto, t.orcado)} do orçado de <b>${fmtCurto(t.orcado)}</b>` : 'Sem orçado' })}
+    ${cen ? cardLeitura({ k: `Com "${esc(cen.nome)}"`, v: fm(t.previsto + delta), pct: t.orcado ? (t.previsto + delta) / t.orcado : null, s: `${delta > 0 ? '+' : ''}${fm(delta)} no ano`, tag: t.orcado && t.previsto + delta > t.orcado ? '<span class="tag late">acima</span>' : '' }) : cardLeitura({ k: 'Cenários', v: String(db.cenarios.length), s: db.cenarios.length ? 'Escolha um no gráfico para simular' : 'Simule contratações ou cortes abaixo' })}</div>
     <div class="card"><div class="row"><p class="lbl" style="margin:0">Próximos 12 meses</p><span class="grow"></span>
       <select class="sel" id="fC"><option value="">Sem cenário</option>${db.cenarios.map(c => `<option value="${c.id}" ${c.id === cenarioSel ? 'selected' : ''}>${esc(c.nome)}</option>`).join('')}</select></div>${grafico(horizonte, ex)}
       <p class="small muted">Meses do próximo ano usam contratos e valores digitados no plano daquele ano (se houver).</p></div>
+    <div class="card"><div class="row"><p class="lbl" style="margin:0">Vários anos</p><span class="grow"></span><button class="btn sm" id="fAno">+ Ano</button></div>${graficoAnos(ex)}</div>
     <div class="card"><div class="row"><p class="lbl" style="margin:0">Cenários "e se"</p><span class="grow"></span><button class="btn pri sm" id="fNovo">+ Cenário</button></div>
     <p class="small muted">Cenários ficam só neste computador. "Aplicar ao previsto" soma os ajustes no previsto dos meses abertos, e aí entram na próxima publicação.</p>
     ${db.cenarios.length ? db.cenarios.map(c => { const d2 = Object.entries(ajustesCenario(c)).filter(([k]) => base.includes(k)).reduce((s, [, v]) => s + v, 0); return `<div class="al"><span class="dot"></span><div class="grow"><b>${esc(c.nome)}</b> · ${c.ajustes.length} ajuste(s) · efeito no ano <b class="${d2 > 0 ? 'latec' : 'okc'}">${d2 > 0 ? '+' : ''}${fm(d2)}</b><br><span class="small muted">${c.ajustes.map(a => `${esc(linhaPorId(a.linha)?.nome || '?')}: ${a.valor > 0 ? '+' : ''}${fm(a.valor)}/mês de ${nomeMes(a.de)} a ${nomeMes(a.ate || a.de)}`).join(' · ')}</span></div><button class="btn sm" data-ce="${c.id}">Editar</button><button class="btn sm" data-ca="${c.id}">Aplicar ao previsto</button></div>`; }).join('') : '<div class="empty">Ex.: "Contratar 2 pessoas em março", "Cortar licença X em julho".</div>'}</div>`;
   $('#fC').onchange = e => { cenarioSel = e.target.value; render(); };
+  $('#fAno').onclick = novoAnoDlg;
   $('#fNovo').onclick = () => cenarioDlg(null);
   $$('[data-ce]', el).forEach(b => b.onclick = () => cenarioDlg(b.dataset.ce));
   $$('[data-ca]', el).forEach(b => b.onclick = async () => {
@@ -517,9 +601,20 @@ function vFuturo(el) {
     agendarSalvar(); toast('Cenário aplicado ao previsto.');
   });
 }
+function graficoAnos(ex = {}) {
+  const dados = db.anos.map(a => { const t = totais(mesesAno(a)); const d = Object.entries(ex).filter(([k]) => k.startsWith(a + '-')).reduce((s, [, v]) => s + v, 0); return { a, ...t, cen: t.previsto + d }; });
+  const max = Math.max(1, ...dados.map(d => Math.max(d.orcado, d.previsto, d.cen)));
+  const W = 760, H = 190, bw = Math.min(160, (W - 16) / Math.max(dados.length, 1)), y = v => H - 26 - (v / max) * (H - 44);
+  const svg = dados.map((d, i) => { const x = 8 + i * bw + bw * 0.2, w = bw * 0.6; return `<rect x="${x}" y="${y(d.previsto)}" width="${w}" height="${H - 26 - y(d.previsto)}" rx="4" fill="var(--bv-mid)"><title>${d.a}: previsto ${fm(d.previsto)} · orçado ${fm(d.orcado)} · realizado ${fm(d.realizado)}</title></rect>
+    ${d.orcado ? `<line x1="${x - 4}" x2="${x + w + 4}" y1="${y(d.orcado)}" y2="${y(d.orcado)}" stroke="var(--ink)" stroke-width="2"/>` : ''}${d.cen !== d.previsto ? `<line x1="${x - 4}" x2="${x + w + 4}" y1="${y(d.cen)}" y2="${y(d.cen)}" stroke="var(--late)" stroke-width="2" stroke-dasharray="4 3"/>` : ''}
+    <text x="${x + w / 2}" y="${H - 8}" text-anchor="middle" font-size="11" fill="var(--muted)">${d.a}</text>`; }).join('');
+  const tab = `<div class="scroll"><table class="t"><tr><th>Ano</th><th class="n">Orçado</th><th class="n">Previsto</th><th class="n">Realizado</th><th class="n">Previsto × ano anterior</th></tr>${dados.map((d, i) => { const pr = dados[i - 1]; const v = pr && pr.previsto ? Math.round((d.previsto / pr.previsto - 1) * 100) : null; return `<tr><td>${d.a}${d.a === db.ano ? ' <span class="faint small">base</span>' : ''}</td><td class="n">${fm(d.orcado)}</td><td class="n ${d.orcado && d.previsto > d.orcado ? 'latec' : ''}">${fm(d.previsto)}</td><td class="n">${fm(d.realizado)}</td><td class="n">${v == null ? '—' : (v > 0 ? '+' : '') + v + '%'}</td></tr>`; }).join('')}
+    <tr class="tot"><td>Horizonte</td><td class="n">${fm(dados.reduce((s, d) => s + d.orcado, 0))}</td><td class="n">${fm(dados.reduce((s, d) => s + d.previsto, 0))}</td><td class="n">${fm(dados.reduce((s, d) => s + d.realizado, 0))}</td><td></td></tr></table></div>`;
+  return `<svg class="ch" viewBox="0 0 ${W} ${H}" role="img" aria-label="Previsto e orçado por ano">${svg}</svg><div class="legend"><span><i style="background:var(--bv-mid)"></i>Previsto</span><span><i style="background:var(--ink);height:2px"></i>Orçado</span>${Object.keys(ex).length ? '<span><i style="background:var(--late);height:2px"></i>Com o cenário</span>' : ''}</div>${tab}`;
+}
 function cenarioDlg(id) {
   if (!db.linhas.length) return toast('Crie linhas do plano primeiro.');
-  const c = id ? JSON.parse(JSON.stringify(db.cenarios.find(x => x.id === id))) : { nome: '', ajustes: [{ linha: db.linhas[0].id, valor: 0, de: mesAtual(), ate: `${db.ano}-12` }] };
+  const c = id ? JSON.parse(JSON.stringify(db.cenarios.find(x => x.id === id))) : { nome: '', ajustes: [{ linha: db.linhas[0].id, valor: 0, de: mesAtual(), ate: `${Math.max(...db.anos)}-12` }] };
   const desenhar = () => {
     const d = modal(`<div class="mh"><h2>${id ? 'Editar cenário' : 'Novo cenário'}</h2></div><div class="mb">
       <label class="field"><span>Nome</span><input class="sin" id="eN" value="${esc(c.nome)}" placeholder="Contratar 2 pessoas em março"></label>
@@ -530,7 +625,7 @@ function cenarioDlg(id) {
       <button class="btn sm" id="eAdd">+ Ajuste</button></div>
       <div class="mf">${id ? '<button class="btn danger" id="eX">Excluir</button><span class="grow"></span>' : ''}<button class="btn" id="eNo">Cancelar</button><button class="btn pri" id="eOk">Salvar</button></div>`, 'wide');
     const ler = () => { c.nome = $('#eN', d).value; $$('[data-a]', d).forEach(i => { const [k, f] = i.dataset.a.split('|'); c.ajustes[k][f] = f === 'valor' ? (parseValor(i.value) ?? 0) : i.value; }); };
-    $('#eAdd', d).onclick = () => { ler(); c.ajustes.push({ linha: db.linhas[0].id, valor: 0, de: mesAtual(), ate: `${db.ano}-12` }); desenhar(); };
+    $('#eAdd', d).onclick = () => { ler(); c.ajustes.push({ linha: db.linhas[0].id, valor: 0, de: mesAtual(), ate: `${Math.max(...db.anos)}-12` }); desenhar(); };
     $$('[data-rm]', d).forEach(b => b.onclick = () => { ler(); c.ajustes.splice(+b.dataset.rm, 1); desenhar(); });
     $('#eNo', d).onclick = fecharModal;
     if (id) $('#eX', d).onclick = () => { db.cenarios = db.cenarios.filter(x => x.id !== id); if (cenarioSel === id) cenarioSel = ''; fecharModal(); agendarSalvar(); };
@@ -559,7 +654,7 @@ function vGrupo(el) {
       <p class="small muted">A chave fica dentro do seu arquivo cifrado. Guarde-a também no cofre de senhas.</p></div>
     <div class="card"><p class="lbl">3 · Diretriz do grupo</p>
       ${dir ? `<p>Revisão ${dir.revision} de ${fmtDataHora(dir.generatedAt)} · ${esc(dir.planVersion || '')}</p>
-        <div class="small">${dir.capTotal ? `Teto total: <b>${fm(dir.capTotal)}</b><br>` : ''}${Object.entries(dir.caps || {}).map(([k, v]) => `${esc(catPorId(k)?.nome || k)}: ${fm(v)}`).join(' · ')}${dir.publishBy ? `<br>Publicar até ${fmtData(dir.publishBy)}` : ''}${dir.note ? `<br><span class="muted">${esc(dir.note)}</span>` : ''}</div>`
+        <div class="small">${db.anos.map(a => { const t = tetosDoAno(a); return t.capTotal || Object.keys(t.caps).length ? `<b>${a}</b>: ${t.capTotal ? `teto total ${fm(t.capTotal)}` : ''}${Object.entries(t.caps).map(([k, v]) => ` · ${esc(catPorId(k)?.nome || k)} ${fm(v)}`).join('')}<br>` : ''; }).join('')}${dir.publishBy ? `<br>Publicar até ${fmtData(dir.publishBy)}` : ''}${dir.note ? `<br><span class="muted">${esc(dir.note)}</span>` : ''}</div>`
         : `<p class="muted">${situacao.diretrizInvalida ? 'Diretriz encontrada, mas não abriu: ' + esc(situacao.diretrizInvalida) : 'Nenhuma diretriz do grupo ainda. Quando o gestor publicar, ela aparece aqui com tetos e categorias.'}</p>`}</div>
     <div class="card"><p class="lbl">4 · Publicação do plano</p>
       <p>${db.publicacao.revision ? `Última publicação: revisão ${db.publicacao.revision}, ${fmtDataHora(db.publicacao.em)}` : 'Ainda não publicado.'} ${pend ? '<span class="chip late">mudanças não publicadas</span>' : db.publicacao.revision ? '<span class="chip ok">em dia</span>' : ''}</p>
@@ -588,9 +683,10 @@ function vAjustes(el) {
   el.innerHTML = `<div class="grid g2">
     <div class="card"><p class="lbl">Time e ano</p>
       <label class="field"><span>Nome do time</span><input class="sin" id="aN" value="${esc(db.team.nome)}"></label>
-      <div class="f2"><label class="field"><span>Identificador (slug)</span><input class="sin code" value="${esc(db.team.slug)}" disabled></label><label class="field"><span>Ano fiscal</span><input class="sin" type="number" id="aA" value="${db.ano}"></label></div>
+      <div class="f2"><label class="field"><span>Identificador (slug)</span><input class="sin code" value="${esc(db.team.slug)}" disabled></label><label class="field"><span>Ano base (o ano em curso)</span><select class="sel" id="aA">${db.anos.map(a => `<option ${a === db.ano ? 'selected' : ''}>${a}</option>`).join('')}</select></label></div>
       <div class="f2"><label class="field"><span>Seu nome</span><input class="sin" id="aP" value="${esc(db.pessoa.nome)}"></label><label class="field"><span>Este computador</span><input class="sin" id="aD" value="${esc(dispositivo().nome)}" placeholder="Ex.: notebook do trabalho"></label></div>
-      <p class="small muted">Trocar o ano mostra outro ano do mesmo arquivo; nada é apagado.</p></div>
+      <p class="lbl" style="margin-top:10px">Anos do plano</p><div class="row">${db.anos.map(a => `<span class="chip">${a}${a === db.ano ? ' · base' : ` <button data-ra="${a}" title="Tirar do horizonte (os valores ficam guardados)">×</button>`}</span>`).join(' ')}<button class="btn sm" id="aAno">+ Ano</button></div>
+      <p class="small muted">Os anos do horizonte vão juntos na publicação para o grupo. Tirar um ano não apaga os valores: ele volta igual se for adicionado de novo.</p></div>
     <div class="card"><p class="lbl">Categorias</p>
       ${db.categorias.map(c => `<div class="row" style="margin-bottom:6px"><input class="sin grow" data-cn="${c.id}" value="${esc(c.nome)}" ${c.doGrupo ? 'disabled title="Definida pelo grupo"' : ''}><select class="sel" data-ct="${c.id}" ${c.doGrupo ? 'disabled' : ''}><option ${c.tipo === 'OPEX' ? 'selected' : ''}>OPEX</option><option ${c.tipo === 'CAPEX' ? 'selected' : ''}>CAPEX</option></select>${c.doGrupo ? '<span class="chip bv">grupo</span>' : ''}</div>`).join('')}
       <div class="row"><input class="sin grow" id="aNC" placeholder="Nova categoria"><button class="btn" id="aNCb">Adicionar</button></div></div>
@@ -602,7 +698,9 @@ function vAjustes(el) {
       ${db.fechados.length ? db.fechados.map(m => `<span class="chip">${nomeMes(m)} ${m.slice(0, 4)} <button data-rf="${m}" title="Reabrir">×</button></span>`).join(' ') : '<div class="empty">Nenhum.</div>'}</div>
   </div>`;
   $('#aN').onchange = e => { db.team.nome = clamp(e.target.value.trim(), 80) || db.team.nome; agendarSalvar(); };
-  $('#aA').onchange = e => { const a = +e.target.value; if (a > 2000 && a < 2100) { db.ano = a; agendarSalvar(); } };
+  $('#aA').onchange = e => { db.ano = +e.target.value; agendarSalvar(); };
+  $('#aAno').onclick = novoAnoDlg;
+  $$('[data-ra]', el).forEach(b => b.onclick = () => { const a = +b.dataset.ra; db.anos = db.anos.filter(x => x !== a); if (anoVista === a) anoVista = null; agendarSalvar(); });
   $('#aP').onchange = e => { db.pessoa.nome = clamp(e.target.value.trim(), 80); agendarSalvar(); };
   $('#aD').onchange = e => { nomearDispositivo(e.target.value.trim()); };
   $$('[data-cn]', el).forEach(i => i.onchange = () => { catPorId(i.dataset.cn).nome = clamp(i.value.trim(), 60); agendarSalvar(); });
@@ -698,6 +796,7 @@ async function criarArquivo({ nome, slug, pessoa, ano, moeda }) {
   if (PRESET) {
     if (Array.isArray(PRESET.categorias) && PRESET.categorias.length) { db.categorias = PRESET.categorias.map(c => ({ id: slugify(c.id || c.nome), nome: clamp(c.nome, 60), tipo: c.tipo === 'CAPEX' ? 'CAPEX' : 'OPEX', doGrupo: true })); }
     if (Array.isArray(PRESET.centros)) db.centros = PRESET.centros.map(x => clamp(x, 40));
+    if (Array.isArray(PRESET.anos)) db.anos = [...new Set([...db.anos, ...PRESET.anos.map(Number).filter(a => a >= db.ano && a < 2100)])].sort();
     db.team.prefixo = clamp(PRESET.team?.prefixo || '', 5);
     if (PRESET.chave) { if (await avisoCofre('chave', `<p class="small">Chave do time: <span class="code">${esc(lerChaveTexto(PRESET.chave).kid)}</span>. Copie-a para o cofre:</p><input class="sin code" style="width:100%" readonly value="${esc(PRESET.chave)}" onclick="this.select()">`)) db.chaves.push({ kid: lerChaveTexto(PRESET.chave).kid, texto: PRESET.chave, em: new Date().toISOString(), origem: 'preset' }); }
   }

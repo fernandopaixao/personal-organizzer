@@ -254,8 +254,8 @@ Em 23/11/2026 o Fernando pediu para implementar sem responder às perguntas abai
 |---|---|---|
 | F0 núcleo comum | Feito | `financas/src/nucleo.js` e `nucleo.css`, injetados pelo build em cada HTML |
 | F1 assistente | Feito | `inicio.html` (raiz do repositório). Gera Finanças do Grupo/Time, Central e Quadro, cria o primeiro arquivo cifrado de cada um e o cartão `onde-fica-cada-coisa.html` |
-| F2 Finanças do Time | Feito | `financas/financas_time.html` (1.0.0) |
-| F3 Finanças do Grupo | Feito | `financas/financas_grupo.html` (1.0.0), com "HTML de finanças do time" |
+| F2 Finanças do Time | Feito | `financas/financas_time.html` (1.1.0, multianual: seção 12) |
+| F3 Finanças do Grupo | Feito | `financas/financas_grupo.html` (1.1.0, multianual: seção 12), com "HTML de finanças do time" |
 | F4 Central e Quadro | Feito sobre a Central v15 e o Quadro 2.0 (que vira 2.1.0): senha obrigatória no Quadro (quadros antigos sem senha pedem uma ao abrir), aviso de cofre ao criar senha, gerar/copiar chave e gerar "HTML do time" com chave, lembrete de teste da senha, botão "Onde estou?" nas duas, e Quadro com **um arquivo por pessoa e computador** em `times/<time>/quadro/<pessoa>-<computador>.json` (cifrado com a chave do time, unido item a item a cada 20 s) | `financas/src/seguranca.js`, `central-f4.js`, `quadro-f4.js`, injetados por `python3 tools/injetar_seguranca.py` |
 | F5 documentação e testes | Feito para F0 a F3 | `financas/testes/teste-e2e.js` (53 verificações), contratos em `financas/contrato/` |
 
@@ -267,3 +267,55 @@ O teste também cobre o F4: quadro antigo sem senha passa a ser cifrado, senha c
 
 Limites conhecidos desta versão: o navegador não revela o caminho completo da pasta, então a checagem "a pasta local não está no OneDrive" é indireta (nome, `desktop.ini`, estrutura) mais a confirmação da pessoa; lançamentos de várias pessoas do mesmo time (seção 6.3) ficam para quando houver demanda; o arquivo antigo compartilhado do Quadro continua funcionando (união a cada 20 s), mas o recomendado agora é o arquivo local de cada pessoa mais a pasta sincronizada; e o nome da pasta comum recomendado é `Gestao-Compartilhado`, mas `Gestao-Integracao` continua aceito.
 | Hub e post-its (24/11/2026) | Feito | `hub.html` (fonte `financas/src/hub.html`), post-its em `times/<time>/postits/` e Quadro 2.2 (`financas/src/quadro-postits.js`). Ver `docs/plano-hub.md` |
+
+## 12. Planejamento multianual (24/11/2026, Finanças 1.1.0)
+
+Pedido: "Permita planejamento financeiro multi anual", nas Finanças do Time e do Grupo, com o consolidado do grupo somando os anos dos times.
+
+**Modelo.** O ano fiscal continua existindo como **ano base** (o ano em curso: meses fechados, realizado, alertas). Ao lado dele há o **horizonte** (`anos`), a lista de anos planejados. Os valores já eram guardados por mês (`AAAA-MM`), então nada muda no formato dos valores: um ano a mais é só mais meses.
+
+**Finanças do Time**
+- Seletor de ano no topo (Resumo, Lançamentos, Plano, Contratos, Futuro) e "+ Adicionar ano…": o ano novo começa vazio ou com o previsto/orçado do ano anterior, com reajuste em %.
+- Plano ganha a visão "Todos os anos" (linhas × anos, orçado e previsto). Clicar num ano abre o mês a mês daquele ano.
+- "Orçado mensal" de uma linha pode repetir nos anos seguintes do plano. Contratos novos terminam, por padrão, no fim do último ano.
+- Futuro ganha o card "Vários anos": gráfico e tabela por ano, variação contra o ano anterior e total do horizonte (o cenário "e se" aparece em cada ano).
+- Alertas: teto do grupo do ano em exibição e aviso quando um ano futuro do horizonte ainda está vazio.
+- Ajustes: ano base (escolhido entre os anos do plano) e lista de anos; tirar um ano do horizonte não apaga os valores.
+
+**Finanças do Grupo**
+- Orçamento aprovado por ano (`orcamento.porAno`) e teto de cada time por ano (`times[].tetos[ano]`), editados no ano escolhido no topo.
+- O grupo enxerga os anos do próprio horizonte **mais os anos publicados pelos times**. O consolidado soma cada ano separado, pelos meses daquele ano.
+- Consolidado: seletor de ano e a visão "Por ano" (time × ano, total, orçamento aprovado e saldo de cada ano).
+- Saúde da soma avisa quando o plano de um time não cobre o ano em exibição. Versões guardam todos os anos e comparam no ano em exibição. CSV exporta todos os anos.
+
+**Contratos (compatíveis com 1.0).**
+- Plano: `fiscalYear` (ano base) e `totals` (do ano base) continuam; entram `fiscalYears` e `totalsByYear`. As linhas levam os meses de todos os anos do horizonte e os 12 meses seguintes.
+- Diretriz: `caps`/`capTotal` continuam sendo os do ano base; entram `fiscalYears` e `byYear` (ano → `{caps, capTotal}`).
+- Preset do HTML do time leva `anos`.
+- Um plano 1.0 (sem `fiscalYears`) soma no ano dele. Arquivos locais 1.0 abrem sem perguntar nada: o horizonte vira só o ano base, e o orçamento e os tetos antigos viram os do ano base.
+- Antes, o grupo **descartava** da soma um plano de ano diferente do seu; agora todo plano na mesma moeda entra, cada ano no seu lugar.
+
+Teste: seção 10 de `financas/testes/teste-e2e.js` (adicionar 2027 com reajuste, publicar, grupo somar 2026 e 2027, teto por ano na diretriz, migração de arquivos 1.0).
+
+## 13. Interface das finanças (24/11/2026, Finanças 1.2.0)
+
+Pedido: telas minimalistas, com mais gráficos do que texto, em branco e azul com destaques discretos, menos navegação e cards que ajudem a interpretar.
+
+- **Menos navegação.** O Time passou de 7 para 4 entradas no menu e o Grupo de 5 para 3. As telas irmãs viraram abas no topo:
+  - Time: **Painel** (Hoje, Futuro e cenários), **Lançamentos**, **Plano** (Plano mês a mês, Contratos), **Ajustes** (Grupo e pasta, Time e segurança).
+  - Grupo: **Painel** (Consolidado, Planos recebidos, Versões), **Times**, **Ajustes**.
+- **Cards de leitura.** Cada card traz o número, um medidor e uma frase que interpreta:
+  - previsto contra o orçado, com a folga ou o excesso;
+  - realizado contra o previsto, com a marca de quanto do ano já passou;
+  - o mês atual;
+  - o teto do grupo, ou o ano seguinte do plano.
+  
+  O card principal fica em azul cheio.
+- **Gráficos no lugar de tabelas.**
+  - Curva do ano acumulada (orçado, previsto e realizado, com a linha de "hoje").
+  - "Onde vai o dinheiro": barras por categoria, com marca do orçado e do teto.
+  - No Grupo, barras por time com a marca do orçado e do teto.
+  
+  As tabelas detalhadas continuam no Grupo (Por time, categoria, iniciativa, OPEX × CAPEX, Por ano) e no Plano.
+- **Cores.** Só tons de azul nos gráficos (o realizado em azul escuro). O vermelho fica para o que passou do orçado ou do teto. A barra de status junta "salvo e cifrado" e a pasta num único indicador.
+- As peças visuais ficam em `nucleo.js` (`cardLeitura`, `barrasH`, `curvaAcumulada`) e `nucleo.css`, para reaproveitar no Hub e nas próximas telas.

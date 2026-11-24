@@ -87,7 +87,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   await t.fill('#qk', 'Fatura squad janeiro 48.500 #squad 15/01'); await t.press('#qk', 'Enter');
   ok(await t.inputValue('#lV') === '48.500' && await t.inputValue('#lDt') === '2026-01-15', 'barra rápida interpreta valor e data');
   await t.click('#lOk');
-  await t.click('[data-v="compromissos"]'); await t.click('#cNovo'); await t.fill('#kN', 'Datadog'); await t.fill('#kV', '13.000'); await t.selectOption('#kL', { label: 'Licenças de observabilidade' }); await t.fill('#kI', '2026-03'); await t.fill('#kF', '2026-12'); await t.click('#kOk');
+  await t.click('[data-v="plano"]'); await t.click('[data-v="compromissos"]'); await t.click('#cNovo'); await t.fill('#kN', 'Datadog'); await t.fill('#kV', '13.000'); await t.selectOption('#kL', { label: 'Licenças de observabilidade' }); await t.fill('#kI', '2026-03'); await t.fill('#kF', '2026-12'); await t.click('#kOk');
   const tot = await t.evaluate(() => totais());
   ok(tot.orcado === (50000 * 12 + 12000 * 12) * 100, 'orçado do ano = soma das linhas');
   ok(tot.previsto === (50000 * 12 + 12000 * 2 + 13000 * 10) * 100, 'previsto usa contratos nos meses cobertos');
@@ -102,7 +102,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   ok(!JSON.stringify(pl).includes('Fatura squad'), 'lançamentos individuais não vão no plano publicado');
 
   console.log('3. Grupo lê a pasta, prévia e soma');
-  await g.click('[data-v="revisar"]'); await g.click('#tLer'); await g.waitForTimeout(500);
+  await g.click('[data-v="consolidado"]'); await g.click('[data-v="revisar"]'); await g.click('#tLer'); await g.waitForTimeout(500);
   ok(await g.evaluate(() => pendentes.length) === 1, 'plano novo aparece na prévia');
   await g.click('[data-ap="pagamentos"]');
   const cons = await g.evaluate(() => consolidado().total);
@@ -318,6 +318,50 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   await qb.evaluate(async () => { await piLer(); render(); }); await qb.setViewportSize({ width: 1280, height: 760 });
   await qb.screenshot({ path: path.join(SAIDA, 'quadro-postits.png') });
   await h.waitForTimeout(3600); await h.evaluate(() => __hub.atualizar()); await h.screenshot({ path: path.join(SAIDA, 'hub.png'), fullPage: true });
+
+  console.log('10. Planejamento multianual: time planeja 2027, grupo soma os anos');
+  await t2.bringToFront(); await t2.evaluate(() => { view = 'resumo'; render(); });
+  const prev2026dez = await t2.evaluate(() => previsto(db.linhas[0], '2026-12'));
+  await t2.selectOption('#tAno', '+'); await t2.waitForSelector('#naA');
+  await t2.selectOption('#naA', '2027'); await t2.selectOption('#naM', 'prev'); await t2.fill('#naR', '10'); await btn(t2, 'ok'); await t2.waitForTimeout(300);
+  ok(await t2.evaluate(() => db.anos.join(',')) === '2026,2027', 'time adiciona 2027 ao horizonte do plano');
+  ok(await t2.evaluate(() => db.linhas[0].orcado['2027-01']) === Math.round(prev2026dez * 1.1), '2027 começa com o previsto de 2026 + 10% de reajuste');
+  ok(await t2.evaluate(() => anoV() === 2027 && view === 'plano' && totais().orcado > 0), 'o ano novo vira o ano em exibição, com orçado');
+  await t2.evaluate(() => { modoPlano = 'anos'; render(); });
+  ok(/2026[\s\S]*2027/.test(await t2.textContent('#pg')) && await t2.evaluate(() => !!document.querySelector('[data-va="2027"]')), 'aba Plano mostra a visão "Todos os anos"');
+  await t2.evaluate(() => { view = 'futuro'; render(); });
+  ok(/Vários anos/.test(await t2.textContent('#pg')) && /Horizonte/.test(await t2.textContent('#pg')), 'Futuro mostra o total de cada ano e do horizonte');
+  ok(await t2.evaluate(() => db.ano === 2026 && totais(mesesAno(2026)).orcado === (50000 * 12 + 12000 * 12) * 100), 'ano base continua 2026, com os valores de antes');
+  await t2.evaluate(() => { view = 'grupo'; render(); }); await t2.click('#gPasta'); await t2.waitForTimeout(500);
+  await t2.click('#tPub'); await t2.waitForTimeout(600); if (await t2.evaluate(() => document.querySelector('#dlg')?.open)) { await btn(t2, 'ok'); await t2.waitForTimeout(600); }
+  ok(JSON.parse(await opfs(t2, async () => ler('Gestao-Compartilhado/times/pagamentos/financas', 'plano.json'))).revision > 2, 'plano multianual publicado na pasta');
+  const pl2 = await t2.evaluate(() => montarPlano({ revision: 0, generatedAt: '', hlc: '' }));
+  ok(pl2.fiscalYear === 2026 && pl2.fiscalYears.join(',') === '2026,2027' && pl2.totalsByYear[2027].forecast > 0 && pl2.totals.budget === pl2.totalsByYear[2026].budget, 'plano publicado leva fiscalYears e totalsByYear (fiscalYear e totals continuam do ano base)');
+  ok(pl2.lines.every(l => Object.keys(l.months).some(m => m.startsWith('2027-'))), 'plano publicado leva os meses de 2027 de cada linha');
+  await g.bringToFront(); await g.click('[data-v="consolidado"]'); await g.click('#tLer'); await g.waitForTimeout(500); await g.evaluate(() => aplicar()); await g.waitForTimeout(100);
+  const tAnos = await t2.evaluate(() => [2026, 2027].map(a => totais(mesesAno(a)).previsto));
+  const gAnos = await g.evaluate(() => [2026, 2027].map(a => consolidado(mesesAno(a)).porTime.find(x => x.t.slug === 'pagamentos').tot.previsto));
+  ok(gAnos.join() === tAnos.join(), 'grupo soma o time ano a ano: ' + gAnos.map(v => v / 100).join(' | '));
+  ok(await g.evaluate(() => anosG().join(',')) === '2026,2027', 'grupo enxerga 2027 porque o time publicou 2027');
+  await g.selectOption('#tAno', '2027'); await g.evaluate(() => { agrupar = 'anos'; render(); });
+  ok(/Previsto por ano/.test(await g.textContent('#pg')) && /Previsto em 2027/.test(await g.textContent('#pg')), 'consolidado tem seletor de ano e a visão "Por ano"');
+  await g.evaluate(() => { const t = timePorSlug('pagamentos'); tetoEditavel(t, 2027).total = 80000000; db.anos = [2026, 2027]; db.orcamento.porAno[2027] = 300000000; });
+  const dir27 = await g.evaluate(() => montarDiretriz(timePorSlug('pagamentos'), { revision: 1, generatedAt: '', hlc: '' }));
+  ok(dir27.capTotal === 100000000 && dir27.byYear[2027].capTotal === 80000000 && dir27.fiscalYears.join(',') === '2026,2027', 'diretriz leva o teto de cada ano (byYear), mantendo o do ano base');
+  await g.evaluate(() => publicarDiretriz(timePorSlug('pagamentos'))); await g.waitForTimeout(400);
+  await t2.bringToFront(); await t2.evaluate(() => { view = 'grupo'; render(); }); await t2.click('#gLer'); await t2.waitForTimeout(400);
+  ok(await t2.evaluate(() => tetosDoAno(2027).capTotal === 80000000 && tetosDoAno(2026).capTotal === 100000000), 'time lê o teto de cada ano');
+  ok(await t2.evaluate(() => alertas().some(a => /de 2027 acima do teto/.test(a[1]))), 'alerta de teto vale para o ano em exibição (2027)');
+  const compatT = await t2.evaluate(() => { const d = structuredClone(db); delete d.anos; return normalizar(d).anos.join(','); });
+  ok(compatT === '2026', 'arquivo do time sem "anos" (1.0) abre com o ano base');
+  const compatG = await g.evaluate(() => { const d = structuredClone(db); delete d.anos; delete d.orcamento.porAno; d.orcamento.total = 5; for (const t of d.times) { delete t.tetos; t.teto = { total: 7, caps: {} }; } const n = normalizar(d); return n.anos.join(',') === String(n.ano) && n.orcamento.porAno[n.ano] === 5 && n.times.every(t => t.tetos[n.ano].total === 7); });
+  ok(compatG, 'arquivo do grupo 1.0 migra orçamento e teto para o ano base');
+  ok(await g.evaluate(() => anosPlano({ fiscalYear: 2026 }).join() === '2026' && somavel({ fiscalYear: 2026, currency: db.moeda })), 'plano 1.0 (sem fiscalYears) continua somando no ano dele');
+  await g.evaluate(() => { anoVista = null; agrupar = 'anos'; view = 'consolidado'; render(); });
+  await g.setViewportSize({ width: 1280, height: 860 }); await g.screenshot({ path: path.join(SAIDA, 'grupo-anos.png'), fullPage: true });
+  await t2.evaluate(() => { anoVista = null; view = 'plano'; modoPlano = 'anos'; render(); }); await t2.setViewportSize({ width: 1280, height: 860 }); await t2.screenshot({ path: path.join(SAIDA, 'time-anos.png') });
+  await t2.evaluate(() => { view = 'futuro'; render(); }); await t2.screenshot({ path: path.join(SAIDA, 'time-futuro-anos.png'), fullPage: true });
+  await g.evaluate(() => { agrupar = 'time'; });
 
   for (const [p, n] of [[g, 'grupo-consolidado'], [t2, 'time-resumo']]) { await p.setViewportSize({ width: 1280, height: 860 }); await p.evaluate(() => { view = typeof vCons === 'function' ? 'consolidado' : 'resumo'; render(); }); await p.screenshot({ path: path.join(SAIDA, n + '.png') }); }
   await t2.evaluate(() => { view = 'plano'; render(); }); await t2.screenshot({ path: path.join(SAIDA, 'time-plano.png') });
