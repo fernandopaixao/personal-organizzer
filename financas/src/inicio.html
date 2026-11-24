@@ -38,7 +38,7 @@ const PAPEIS = [
 const USOS = [['financas', 'Finanças', 'Orçado, previsto e realizado; contratos; previsão do ano.'], ['tarefas', 'Tarefas', 'Iniciativas, quadro, backlog e acompanhamento.']];
 // O que cada combinação gera. Cada HTML é desacoplado e tem o próprio arquivo de dados.
 function plano() {
-  const g = st.papel === 'gestor', out = [];
+  const g = st.papel === 'gestor', out = [{ id: 'hb', nome: 'Hub da solução', desc: 'Tela inicial do dia a dia: abre as outras ferramentas e deixa post-its para os times.', html: 'hub.html' }];
   if (st.usos.includes('financas')) out.push(g ? { id: 'fg', nome: 'Finanças do Grupo', desc: 'Consolidado: soma os planos publicados pelos times.', html: 'financas_grupo.html' }
                                              : { id: 'ft', nome: 'Finanças do Time', desc: 'Dia a dia e futuro das finanças do time.', html: `financas_${st.dados.slug || '<time>'}.html` });
   if (st.usos.includes('tarefas')) out.push(g ? { id: 'ct', nome: 'Central de Gestão', desc: 'Tarefas consolidado: iniciativas, times, rituais e pessoas.', html: 'gestao_pessoal.html' }
@@ -91,7 +91,8 @@ function desenhar() {
 }
 function proximos() {
   const g = st.papel === 'gestor', l = [];
-  l.push('Abra cada HTML com dois cliques (Edge ou Chrome), escolha a pasta local e digite a senha.');
+  l.push('Abra o hub.html (Edge ou Chrome) como tela inicial: ele mostra as ferramentas desta pasta e abre cada uma. Em cada ferramenta, escolha a pasta local e digite a senha.');
+  l.push(g ? 'No hub, importe os times e as chaves da Central (ou cole a chave de cada time) para deixar post-its que aparecem no Quadro de cada time.' : 'No hub, cole a chave de tarefas do time para deixar post-its que aparecem no Quadro do time.');
   if (st.usos.includes('financas') && g) l.push('Em Finanças do Grupo › Times: gere a chave de finanças de cada time (guarde no cofre), envie por mensagem direta e use "HTML de finanças do time" para mandar a ferramenta pré-configurada.');
   if (st.usos.includes('financas') && !g) l.push('Em Finanças do Time › Grupo: ligue a pasta sincronizada e cole a chave de finanças que o gestor enviar. Depois crie as linhas do plano e publique.');
   if (st.usos.includes('tarefas') && g) l.push('Na Central, cadastre os times em Pessoas e gere o HTML do Quadro de cada time.');
@@ -149,6 +150,13 @@ async function criarTudo() {
   };
   const seg = { cofreConfirmadoEm: agora };
   for (const x of plano()) {
+    if (x.id === 'hb') {
+      const times = g ? d.times : [{ nome: d.nome, slug: d.slug, prefixo: d.prefixo }];
+      const db = { schema: 'gestao-hub-local/1', version: 1, tool: 'hub', criadoEm: agora, nome: d.nome, pessoa: { nome: d.pessoa, slug: slugify(d.pessoa).replace(/-/g, '').slice(0, 16) || 'eu' },
+        times: times.map(t => ({ nome: t.nome, slug: t.slug, prefixo: t.prefixo || '', chaves: [] })), notas: {}, publicacao: {}, pastaComum: '', seg };
+      await salvarNovo('hub.html', await lerEmbutido('hubEmb'), 'HB', 'Hub da solução: abra este primeiro, todo dia. Ele leva às outras ferramentas e deixa post-its para os times.');
+      await salvarNovo(`hub-${d.slug}.json`, await cifrarLocal(db, await novoCtx(st.senha, 'hub')), 'DB', 'Dados do hub (times, chaves e seus post-its), cifrados com a sua senha.');
+    }
     if (x.id === 'fg') {
       const db = { schema: 'gestao-financas-local/1', version: 1, tool: 'financas-grupo', criadoEm: agora, grupo: { nome: d.nome, slug: d.slug }, ano: d.ano, moeda: d.moeda, pessoa: { nome: d.pessoa, slug: slugify(d.pessoa).split('-')[0] || 'gestor' },
         orcamento: { total: 0 }, itens: [], times: d.times.map(t => ({ nome: t.nome, slug: t.slug, prefixo: t.prefixo, chaves: [], teto: { total: 0, caps: {} }, diretriz: {} })), retratos: {}, versoes: [], centros: [], seg };
@@ -179,7 +187,7 @@ async function criarTudo() {
     await subpasta(st.raiz, ['grupo', 'financas'], true);
     const slugs = g ? d.times.map(t => t.slug) : [d.slug];
     for (const s of slugs) await subpasta(st.raiz, ['times', s, 'financas'], true);
-    if (!await lerTexto(st.raiz, 'LEIA-ME.md')) await gravarSeguro(st.raiz, 'LEIA-ME.md', `# ${PASTA_COMUM}\n\nPasta compartilhada da solução (sincronizada pelo OneDrive). Tudo aqui é cifrado com a chave de cada time; nunca coloque senhas ou chaves aqui.\n\n- grupo/: só as ferramentas do gestor escrevem.\n- times/<time>/: só as ferramentas do time escrevem.\n- Arquivos com nome de computador no final são cópias de conflito do OneDrive: as ferramentas resolvem sozinhas.\n`);
+    if (!await lerTexto(st.raiz, 'LEIA-ME.md')) await gravarSeguro(st.raiz, 'LEIA-ME.md', `# ${PASTA_COMUM}\n\nPasta compartilhada da solução (sincronizada pelo OneDrive). Tudo aqui é cifrado com a chave de cada time; nunca coloque senhas ou chaves aqui.\n\n- grupo/: só as ferramentas do gestor escrevem.\n- times/<time>/: as ferramentas do time escrevem; o hub escreve só os post-its, em postits/<pessoa>-<computador>.json (um arquivo por autor).\n- Arquivos com nome de computador no final são cópias de conflito do OneDrive: as ferramentas resolvem sozinhas.\n`);
   }
   st.senha = null; // não fica em memória depois de usada
 }
@@ -205,6 +213,7 @@ function cartao() {
 <h2>Pasta sincronizada (${esc(st.raiz?.name || PASTA_COMUM)}) · OneDrive / SharePoint</h2><table>
 <tr><td><code>grupo/financas/diretriz-&lt;time&gt;.json</code></td><td>Tetos e categorias do grupo para cada time. Só o gestor escreve.</td></tr>
 <tr><td><code>times/&lt;time&gt;/financas/plano.json</code></td><td>Plano financeiro agregado do time. Só o responsável do time escreve.</td></tr>
+<tr><td><code>times/&lt;time&gt;/postits/&lt;pessoa&gt;-&lt;computador&gt;.json</code></td><td>Post-its deixados pelo hub para o time (um arquivo por autor). O Quadro mostra e grava quem viu em <code>postits/vistos/</code>.</td></tr>
 <tr><td><code>central/catalogo-&lt;time&gt;.json</code>, <code>times/&lt;time&gt;/status.json</code></td><td>Troca de tarefas entre a Central e o Quadro.</td></tr></table>
 <h2>Regras que evitam conflito</h2><div class="g"><div>Cada arquivo comum tem <b>um único dono</b> (pessoa e computador). A ferramenta não grava no arquivo de outra pessoa.</div><div>Cópias de conflito do OneDrive (<code>plano-NOTEBOOK.json</code>, <code>plano (1).json</code>) são detectadas: vale a de maior revisão.</div><div>Gravação atômica e conferida; arquivo pela metade não decifra e é ignorado.</div><div>Trocou de computador? Abra a ferramenta no novo e escolha "Assumir a publicação".</div></div>
 <h2>Se trocar de computador</h2><p>Copie a pasta local inteira (ou uma cópia cifrada baixada em Ajustes) para o novo computador, abra os HTMLs e use a senha do cofre.</p></body></html>`;
@@ -219,5 +228,6 @@ desenhar();
 <!--EMB:finGrupoEmb-->
 <!--EMB:centralEmb-->
 <!--EMB:quadroEmb-->
+<!--EMB:hubEmb-->
 </body>
 </html>

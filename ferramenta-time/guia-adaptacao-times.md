@@ -164,6 +164,10 @@ O pacote 03 descreve **o que** implementar. O Quadro do Time é uma **implementa
 
 ---
 
+### 3.x Post-its do gestor (opcional)
+
+O Hub da solução deixa recados para o time em `times/<time>/postits/<pessoa>-<computador>.json`, cifrados com a mesma chave do time (`gestao-envelope/1`, conteúdo `gestao-postits/1`, schema em `financas/contrato/`). O Quadro 2.2 já mostra esses post-its no topo do quadro. Uma ferramenta própria pode fazer o mesmo: ler todos os `.json` dessa pasta, decifrar, ficar com a maior `revision` de cada `source.writer` e ignorar os que têm `expiresAt` no passado. Para avisar que viu, grave só o arquivo da pessoa em `postits/vistos/<pessoa>-<computador>.json` (`gestao-postits-vistos/1`).
+
 ## 4. Como testar (vale para A e para B)
 
 1. **Exemplos cifrados:** cadastre a chave **pública de exemplo** `GK1.pagamentos-2611.AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8` e decifre os três arquivos de `integracao-time/exemplos/cifrados/`. O resultado deve ser idêntico aos de `exemplos/conteudo/`. Com outra chave, a mensagem deve ser "Falha ao decifrar: chave errada ou arquivo alterado". Nunca use essa chave com dados reais.

@@ -1,6 +1,6 @@
 # Visão geral da solução · Central de Gestão, Quadro do Time e integração
 
-*23/11/2026 · estado atual: Central v15 e Quadro do Time 2.0 (detalhes em `docs/plano-v15.md`)*
+*24/11/2026 · estado atual: Central v15, Quadro do Time 2.2 e Hub 1.0 (detalhes em `docs/plano-v15.md` e `docs/plano-hub.md`)*
 
 Este documento explica a solução como um todo: quais ferramentas existem, para quem é cada uma, como os dados circulam entre elas e onde está a documentação detalhada de cada parte. É o ponto de partida para quem chega agora; os detalhes técnicos ficam nos documentos citados em cada seção.
 
@@ -37,6 +37,7 @@ A solução é um pequeno ecossistema de **ferramentas HTML de arquivo único**,
 
 | Peça | O que é | Quem usa | Onde está |
 |---|---|---|---|
+| **Hub da solução** | Tela inicial do dia a dia: abre as outras ferramentas e deixa post-its cifrados para os times, que aparecem no Quadro | Fernando (e quem quiser) | Repositório: `hub.html`, plano em `docs/plano-hub.md` |
 | **Central de Gestão v15** | Gestão pessoal e de portfólio do gestor: tarefas, delegação, iniciativas e features, rituais, pessoas, métricas e integração com os times | Fernando | Repositório: `gestao_pessoal_v15.html`, plano em `docs/plano-v15.md`. Projeto: `gestao-v15/` |
 | **Quadro do Time 2.0** | Quadro de cards, backlog, sprints, iniciativas ligadas à Central e métricas de fluxo do time | Cada time | Repositório e projeto: `ferramenta-time/` (HTML, guia, telas) |
 | **Integração** | Pasta SharePoint, contratos JSON versionados, envelope cifrado, chaves por time | Central e ferramentas dos times | Projeto: `integracao-time/` (documentos 00 a 06, `contrato/`, `exemplos/`) |
@@ -272,6 +273,8 @@ Faz parte do ecossistema uma **ferramenta de feedbacks**, usada para registrar e
 | Fernando | Ao abrir a Central | Revisar o que os times publicaram (prévia), conciliar épicos e itens sem vínculo |
 | Fernando | Reunião de status | A atualização do time vem pré-preenchida; o downstream aparece abaixo de cada feature |
 | Fernando | Quando muda o portfólio | Revisar a tela de compartilhamento e clicar **Compartilhar** |
+| Fernando | Todo dia | Abrir o `hub.html`, ir para a ferramenta do momento e deixar post-its para os times quando precisar |
+| Time | Ao abrir o Quadro | Ler os post-its no topo do quadro e clicar **Vi** |
 | Fernando | Depois de reuniões | Copiar o prompt certo, rodar no agente e importar o JSON com prévia |
 
 ---
@@ -281,6 +284,7 @@ Faz parte do ecossistema uma **ferramenta de feedbacks**, usada para registrar e
 | Documento | Conteúdo |
 |---|---|
 | `README.md` (repositório) | Como abrir a Central e lista de telas |
+| `docs/plano-hub.md` (repositório) | Hub da solução e post-its para os times (contratos `gestao-postits/1` e `gestao-postits-vistos/1`) |
 | `docs/plano-v15.md` (repositório) | O que mudou na v15 e no Quadro 2.0 |
 | `docs/plano-v14.md` (repositório) | O que mudou na v14 |
 | `ferramenta-time/guia-adaptacao-times.md` | Quadro do Time (caminho A) e adaptação de ferramentas próprias (caminho B) |

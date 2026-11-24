@@ -165,7 +165,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   await a.click('#sC'); await criarSenha(a); await a.click('#prox');
   await a.waitForSelector('#mapa2', { timeout: 30000 });
   const loc = await opfs(a, async () => listar('LocalInicio'));
-  ok(['financas_cartoes.html', 'financas-cartoes.json', 'quadro_cartoes.html', 'quadro-cartoes.json', 'onde-fica-cada-coisa.html'].every(n => loc.includes(n)), 'arquivos criados: ' + loc.join(', '));
+  ok(['financas_cartoes.html', 'financas-cartoes.json', 'quadro_cartoes.html', 'quadro-cartoes.json', 'onde-fica-cada-coisa.html', 'hub.html', 'hub-cartoes.json'].every(n => loc.includes(n)), 'arquivos criados: ' + loc.join(', '));
   ok((await opfs(a, async () => listar('Gestao-Compartilhado/times'))).includes('cartoes'), 'estrutura criada na pasta comum');
   const cart = await opfs(a, async () => ler('LocalInicio', 'onde-fica-cada-coisa.html'));
   ok(/cofre de senhas/.test(cart) && !cart.includes(SENHA), 'cartão "onde fica cada coisa" com aviso de cofre e sem senha');
@@ -189,7 +189,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   await a2.click('#pL'); await btn(a2, 'ok'); await a2.click('#prox'); await a2.click('#sC'); await criarSenha(a2, SENHA2); await a2.click('#prox');
   await a2.waitForSelector('#mapa2', { timeout: 30000 });
   const loc2 = await opfs(a2, async () => listar('LocalGestor2'));
-  ok(['financas_grupo.html', 'financas-grupo-tecnologia.json', 'gestao_pessoal.html', 'gestao-tecnologia.json'].every(n => loc2.includes(n)), 'arquivos do gestor: ' + loc2.join(', '));
+  ok(['financas_grupo.html', 'financas-grupo-tecnologia.json', 'gestao_pessoal.html', 'gestao-tecnologia.json', 'hub.html', 'hub-tecnologia.json'].every(n => loc2.includes(n)), 'arquivos do gestor: ' + loc2.join(', '));
   fs.writeFileSync(path.join(SAIDA, 'financas_grupo_gerado.html'), await opfs(a2, async () => ler('LocalGestor2', 'financas_grupo.html')));
   const g2 = await nova('/financas/testes/saida/financas_grupo_gerado.html', { 'fin-local': 'LocalGestor2' });
   await g2.click('#iAbrir'); await senhaAbrir(g2, SENHA2); await g2.waitForSelector('#topo');
@@ -246,6 +246,76 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   ok(!(await opfs(qc, async () => listar('Gestao-Compartilhado/times/cartoes/quadro'))).includes('caio-aaaaa-NOTEBOOK01.json'), 'cópia de conflito do próprio arquivo apagada depois de unida');
   await qb.evaluate(() => f4sincronizar()); await qb.waitForTimeout(300);
   ok(/Mais um/.test(await titulos(qb)), 'mudança nova chega para a outra pessoa');
+
+  console.log('9. Hub da solução: ferramentas, chaves e post-its para os times');
+  fs.writeFileSync(path.join(SAIDA, 'hub_gerado.html'), await opfs(a2, async () => ler('LocalGestor2', 'hub.html')));
+  const h = await nova('/financas/testes/saida/hub_gerado.html', { 'fin-local': 'LocalGestor2', 'fin-comum': 'Gestao-Compartilhado' });
+  await h.click('#iAbrir'); await senhaAbrir(h, SENHA2); await h.waitForSelector('#topo');
+  ok(await h.evaluate(() => __hub.db.times.map(t => t.slug).join(',')) === 'pagamentos,cartoes', 'hub abre o arquivo criado pelo assistente, com os times do grupo');
+  const titulosF = await h.evaluate(() => __hub.ferramentas.map(f => f.titulo).join(' | '));
+  ok(/Central de Gestão/.test(titulosF) && /Finanças do Grupo/.test(titulosF) && !/Hub/.test(titulosF), 'hub encontra as ferramentas da pasta local: ' + titulosF);
+  ok(await h.evaluate(() => [...document.querySelectorAll('a.tool')].every(a => !/^[a-z]+:/i.test(a.getAttribute('href')))), 'links das ferramentas são relativos (abrem o HTML ao lado do hub)');
+  const cabHub = JSON.parse(await opfs(h, async () => ler('LocalGestor2', 'hub-tecnologia.json')));
+  ok(cabHub.schema === 'gestao-local-cifrado/1' && cabHub.app === 'hub' && !JSON.stringify(cabHub).includes('pagamentos'), 'arquivo local do hub cifrado com a senha');
+  // a) chave colada à mão (com aviso de cofre)
+  const chavePag = await h.evaluate(() => gerarChaveTexto('pagamentos-2611'));
+  await h.click('[data-ch="pagamentos"]'); await h.fill('#kT', 'GK1.errada'); await btn(h, 'ok');
+  ok(/Chave inválida/.test(await h.textContent('#kM')), 'chave inválida recusada no lugar');
+  await h.fill('#kT', chavePag); await btn(h, 'ok'); await cofre(h); await h.waitForTimeout(400);
+  ok(await h.evaluate(() => !!chaveDoTime(timePorSlug('pagamentos'))), 'chave do time cadastrada depois do aviso de cofre');
+  // b) times e chaves importados da Central (só leitura do arquivo dela)
+  const chavePix = await h.evaluate(() => gerarChaveTexto('pix-2611'));
+  await h.evaluate(async ([senha, kc, kp]) => {
+    const obj = { version: 15, teams: [{ id: 't1', name: 'Cartões', slug: 'cartoes', prefix: 'CAR' }, { id: 't2', name: 'Pix', slug: 'pix' }, { id: 't3', name: 'Sem pasta' }], integ: { keys: { t1: [{ key: kc }], t2: [{ key: kp }, { key: gerarChaveTexto('pix-2510'), revokedAt: '2026-10-01' }] } } };
+    const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12)), key = await chaveDaSenha(senha, salt);
+    const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, te.encode(JSON.stringify(obj))));
+    const d = await (await navigator.storage.getDirectory()).getDirectoryHandle('LocalGestor2'), w = await (await d.getFileHandle('gestao-central-teste.json', { create: true })).createWritable();
+    await w.write(JSON.stringify({ encrypted: true, format: 'gestao-cripto/2', iterations: 600000, salt: b64.enc(salt), iv: b64.enc(iv), data: b64.enc(ct) })); await w.close();
+    window.__abrir = { dir: 'LocalGestor2', arq: 'gestao-central-teste.json' };
+  }, [SENHA, chaveTime, chavePix]);
+  await h.click('#aImp'); await senhaAbrir(h, SENHA); await h.waitForSelector('#dlg .cofre');
+  ok(/1 time\(s\) novo\(s\) e 2 chave\(s\)/.test(await h.textContent('#dlg')) && /Sem pasta/.test(await h.textContent('#dlg')), 'importa times e chaves ativas da Central (revogada e time sem pasta ficam de fora)');
+  await btn(h, 'ok');
+  ok(await h.evaluate(() => __hub.db.times.map(t => t.slug + ':' + t.chaves.length).join(',')) === 'pagamentos:1,cartoes:1,pix:1', 'times e chaves no hub: pagamentos, cartões e pix');
+  // c) liga a pasta sincronizada e publica um post-it para dois times
+  await h.click('#bPasta'); await h.waitForTimeout(400);
+  await h.click('[data-novo="cartoes"]'); await h.fill('#nT', 'Atualizem o status da CAR-7 antes do comitê.'); await h.fill('#nP', 'Bia');
+  await h.check('.tchk input[value="pagamentos"]'); await h.click('#nOk'); await h.waitForTimeout(1500);
+  const disp = await h.evaluate(() => dispositivo().id), arqHub = `fernando-${disp}.json`;
+  for (const tm of ['cartoes', 'pagamentos']) ok((await opfs(h, async c => listar(c), `Gestao-Compartilhado/times/${tm}/postits`)).includes(arqHub), `post-it publicado em times/${tm}/postits/${arqHub}`);
+  const envPi = JSON.parse(await opfs(h, async (c, n) => ler(c, n), 'Gestao-Compartilhado/times/cartoes/postits', arqHub));
+  ok(envPi.schema === 'gestao-envelope/1' && envPi.content === 'gestao-postits/1' && envPi.kid.startsWith('cartoes') && envPi.writer === 'fernando~' + disp && !JSON.stringify(envPi).includes('CAR-7'), 'post-it cifrado com a chave do time e com o dono no cabeçalho');
+  // d) o Quadro do time mostra o post-it e grava quem viu no próprio arquivo
+  await qc.evaluate(async () => { view = 'board'; await piLer(); render(); });
+  ok(await qc.evaluate(() => piNotas.length === 1 && /CAR-7/.test(document.querySelector('.pi-strip')?.textContent || '') && /Para Bia/.test(document.querySelector('.pi-strip').textContent)), 'Quadro do Time mostra o post-it recebido no topo do quadro');
+  await qc.click('[data-pi="vi"]'); await qc.waitForTimeout(600);
+  ok((await opfs(qc, async () => listar('Gestao-Compartilhado/times/cartoes/postits/vistos'))).includes('caio-aaaaa.json'), 'Quadro grava o recibo em postits/vistos/caio-aaaaa.json');
+  ok(await qc.evaluate(() => !/CAR-7/.test(document.querySelector('.pi-strip')?.textContent || '')), 'post-it visto sai da faixa (fica em "ver os já vistos")');
+  await qb.evaluate(async () => { view = 'board'; await piLer(); render(); });
+  ok(await qb.evaluate(() => piNotas.length === 1 && !!document.querySelector('[data-pi="vi"]')), 'a outra pessoa do time também recebe, ainda não visto');
+  await h.evaluate(() => __hub.atualizar()); await h.waitForTimeout(300);
+  ok(/visto por caio/.test(await h.textContent('[data-time="cartoes"]')), 'hub mostra quem já viu o post-it');
+  // e) cópia de conflito do OneDrive do arquivo do hub: resolvida na próxima publicação
+  await h.evaluate(async n => { const d = await subpasta(raiz, ['times', 'cartoes', 'postits']); await gravarSeguro(d, n.replace('.json', '-NOTEBOOK01.json'), await lerTexto(d, n)); }, arqHub);
+  const rev0 = await h.evaluate(() => __hub.db.publicacao.cartoes.revision);
+  await h.evaluate(async () => { const n = notasDe('cartoes')[0]; n.texto += ' Obrigado!'; n.atualizadoEm = new Date().toISOString(); await publicar('cartoes'); });
+  const lst = await opfs(h, async () => listar('Gestao-Compartilhado/times/cartoes/postits'));
+  ok(!lst.some(n => /NOTEBOOK01/.test(n)) && await h.evaluate(() => __hub.db.publicacao.cartoes.revision) === rev0 + 1, 'cópia de conflito apagada e revisão sobe: ' + lst.join(', '));
+  // f) post-it vencido não é publicado; removido some do Quadro
+  await h.evaluate(async () => { notasDe('cartoes').push({ id: 'pi-velho', texto: 'Velho', cor: 'rosa', expira: '2000-01-01', criadoEm: '2000-01-01', atualizadoEm: '2000-01-01' }); await publicar('cartoes'); });
+  await qc.evaluate(() => piLer());
+  ok(await qc.evaluate(() => piNotas.length === 1 && /Obrigado/.test(piNotas[0].texto)), 'Quadro recebe a edição e não recebe post-it vencido');
+  await h.evaluate(async () => { __hub.db.notas.cartoes = []; await publicar('cartoes'); });
+  await qc.evaluate(() => piLer());
+  ok(await qc.evaluate(() => piNotas.length === 0 && !document.querySelector('.pi-strip')), 'post-it removido no hub some do Quadro');
+  ok(await qb.evaluate(() => /Onde estou/.test(document.getElementById('ondeEstou')?.textContent || '')) && /postits/.test(await qb.evaluate(() => JSON.stringify(f4info()))), '"Onde estou?" do Quadro cita os post-its');
+  await h.setViewportSize({ width: 1280, height: 900 }); await h.evaluate(() => { notasDe('pagamentos').push({ id: 'pi-x', texto: 'Retro na sexta: tragam os números de incidentes do mês.', cor: 'verde', para: '', expira: '', criadoEm: new Date().toISOString(), atualizadoEm: new Date().toISOString() }); render(); });
+  await h.evaluate(async () => { await publicar('pagamentos'); });
+  await qb.evaluate(async () => { localStorage.removeItem(piChaveVistos()); await piLer(); render(); });
+  await h.evaluate(async () => { notasDe('cartoes').push({ id: 'pi-y', texto: 'Parabéns pela entrega do cartão virtual! 🎉', cor: 'azul', para: '', expira: '', criadoEm: new Date().toISOString(), atualizadoEm: new Date().toISOString() }, { id: 'pi-z', texto: 'Bia, pode apresentar o resultado do piloto na quinta?', cor: 'amarelo', para: 'Bia', expira: '2099-12-01', criadoEm: new Date().toISOString(), atualizadoEm: new Date().toISOString() }); await publicar('cartoes'); });
+  await qb.evaluate(async () => { await piLer(); render(); }); await qb.setViewportSize({ width: 1280, height: 760 });
+  await qb.screenshot({ path: path.join(SAIDA, 'quadro-postits.png') });
+  await h.waitForTimeout(3600); await h.evaluate(() => __hub.atualizar()); await h.screenshot({ path: path.join(SAIDA, 'hub.png'), fullPage: true });
 
   for (const [p, n] of [[g, 'grupo-consolidado'], [t2, 'time-resumo']]) { await p.setViewportSize({ width: 1280, height: 860 }); await p.evaluate(() => { view = typeof vCons === 'function' ? 'consolidado' : 'resumo'; render(); }); await p.screenshot({ path: path.join(SAIDA, n + '.png') }); }
   await t2.evaluate(() => { view = 'plano'; render(); }); await t2.screenshot({ path: path.join(SAIDA, 'time-plano.png') });
