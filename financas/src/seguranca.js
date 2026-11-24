@@ -56,6 +56,7 @@
     if (r === 'falhou') abrir(`<div class="h">Senha não confere</div><div class="b"><div class="cofre">Você não lembrou a senha. Enquanto o arquivo ainda está aberto, <b>troque a senha</b> e guarde a nova no cofre.</div></div><div class="f"><button class="p" onclick="this.closest('dialog').close()">Entendi</button></div>`);
   };
   const FERR = [
+    ['Hub da solução', 'hub.html', 'Tela inicial do dia a dia: abre as outras ferramentas e deixa post-its para os times.'],
     ['Início da solução', 'inicio.html', 'Assistente: pergunta o uso, cria o primeiro arquivo e gera os HTMLs.'],
     ['Finanças do Grupo', 'financas_grupo.html', 'Consolidado das finanças: soma os planos publicados pelos times.'],
     ['Finanças do Time', 'financas_<time>.html', 'Dia a dia e futuro das finanças de um time.'],

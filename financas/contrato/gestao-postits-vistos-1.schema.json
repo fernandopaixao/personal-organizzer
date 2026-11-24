@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "gestao-postits-vistos/1",
+  "title": "Recibo de leitura de post-its de uma pessoa do time (conteúdo decifrado do envelope gestao-envelope/1)",
+  "description": "Arquivo times/<time>/postits/vistos/<pessoa>-<computador>.json, cifrado com a chave do time. Gravado pelo Quadro do Time quando a pessoa clica em \"Vi\". Um arquivo por pessoa e computador; lista só os post-its ainda ativos.",
+  "type": "object",
+  "required": ["schema", "revision", "generatedAt", "source", "seen"],
+  "properties": {
+    "schema": { "const": "gestao-postits-vistos/1" },
+    "revision": { "type": "integer", "minimum": 1 },
+    "generatedAt": { "type": "string" },
+    "source": {
+      "type": "object", "required": ["team", "writer"],
+      "properties": { "team": { "type": "string" }, "writer": { "type": "string" }, "tool": { "type": "string" }, "toolVersion": { "type": "string" },
+        "author": { "type": "object", "properties": { "name": { "type": "string" } } } }
+    },
+    "seen": { "type": "array", "items": { "type": "object", "required": ["id", "at"], "properties": { "id": { "type": "string" }, "at": { "type": "string" } } } }
+  }
+}

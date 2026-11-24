@@ -382,6 +382,7 @@ async function lembreteTesteSenha(seg, ctx) {
 
 // "Onde estou?": qual ferramenta é esta, qual arquivo está aberto, o que é local e o que é comum.
 const FERRAMENTAS = [
+  ['Hub da solução', 'hub.html', 'Tela inicial do dia a dia: abre as outras ferramentas e deixa post-its para os times.'],
   ['Início da solução', 'inicio.html', 'Assistente: pergunta o uso, cria o primeiro arquivo e gera os HTMLs.'],
   ['Finanças do Grupo', 'financas_grupo.html', 'Consolidado: soma os planos publicados pelos times. Uso do gestor.'],
   ['Finanças do Time', 'financas_<time>.html', 'Dia a dia e futuro das finanças de um time. Publica o plano para o grupo.'],

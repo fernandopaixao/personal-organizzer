@@ -105,7 +105,7 @@ async function f4senhaConfere(s) {
 function f4info() {
   return { ferramenta: 'Quadro do Time', versao: TOOL_VERSION, arquivo: db?.demo ? 'exemplo em memória' : fileHandle?.name, pastaComum: rootMem ? `${rootMem.name}/times/${db?.team.slug || '?'}/` : '', voce: f4eu() ? f4writer() : '',
     local: ['Arquivo do quadro (cifrado com a senha), numa pasta fora do OneDrive', 'Chaves do time (no navegador, não exportáveis)'],
-    comum: [`quadro/${f4eu() ? f4arquivo() : '<você>.json'}: seu retrato do quadro (só você grava)`, 'Arquivos das outras pessoas do time, unidos a cada 20 s', 'status.json e metricas.json para a Central'] };
+    comum: [`quadro/${f4eu() ? f4arquivo() : '<você>.json'}: seu retrato do quadro (só você grava)`, 'Arquivos das outras pessoas do time, unidos a cada 20 s', 'status.json e metricas.json para a Central', 'Leitura de postits/: post-its deixados para o time pelo Hub', `postits/vistos/${f4eu() ? f4arquivo() : '<você>.json'}: quais post-its você já viu (só você grava)`] };
 }
 // Ganchos nas funções do Quadro (as chamadas resolvem o nome na hora, então a troca vale para todos).
 {

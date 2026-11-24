@@ -6,6 +6,7 @@ da senha e "Onde estou?") e os ganchos de cada ferramenta na Central e no Quadro
 
 - Central (gestao_pessoal_v*.html mais nova): <script id="f4seg"> + <script id="f4central"> (financas/src/central-f4.js)
 - Quadro (ferramenta-time/quadro_do_time_v1.html): <script id="f4seg"> + <script id="f4quadro"> (financas/src/quadro-f4.js)
+  + <script id="f5postits"> (financas/src/quadro-postits.js: post-its recebidos do Hub)
 Pode rodar quantas vezes quiser: os blocos são substituídos. Depois atualiza a cópia do Quadro embutida
 na Central (tools/embutir_quadro.py) e remonta finanças e assistente (tools/build_financas.py).
 """
@@ -29,7 +30,7 @@ def injetar(arq, blocos):
 
 def main():
     cs = sorted(RAIZ.glob('gestao_pessoal_v*.html'), key=lambda p: int(re.search(r'v(\d+)', p.name).group(1)))
-    injetar(RAIZ / 'ferramenta-time' / 'quadro_do_time_v1.html', [('f4seg', 'seguranca.js'), ('f4quadro', 'quadro-f4.js')])
+    injetar(RAIZ / 'ferramenta-time' / 'quadro_do_time_v1.html', [('f4seg', 'seguranca.js'), ('f4quadro', 'quadro-f4.js'), ('f5postits', 'quadro-postits.js')])
     injetar(cs[-1], [('f4seg', 'seguranca.js'), ('f4central', 'central-f4.js')])
     for t in ['embutir_quadro.py', 'build_financas.py']:
         subprocess.run([sys.executable, str(RAIZ / 'tools' / t)], check=True)

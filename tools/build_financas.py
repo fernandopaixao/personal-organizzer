@@ -6,7 +6,8 @@
 - injeta o núcleo comum (financas/src/nucleo.css e nucleo.js) em cada HTML;
 - financas/financas_time.html   ← src/time.html
 - financas/financas_grupo.html  ← src/grupo.html (+ Finanças do Time embutido, para gerar o HTML de cada time)
-- inicio.html                   ← src/inicio.html (+ Finanças do Time, Finanças do Grupo, Central e Quadro embutidos)
+- hub.html                      ← src/hub.html (tela inicial do dia a dia, sem nada embutido)
+- inicio.html                   ← src/inicio.html (+ Finanças do Time, Finanças do Grupo, Central, Quadro e Hub embutidos)
 
 Os HTMLs embutidos vão em gzip + base64 dentro de <script type="text/plain" id="...">.
 Rode de novo sempre que a Central (gestao_pessoal_v*.html, a mais nova) ou o Quadro mudarem.
@@ -45,14 +46,17 @@ def main():
     grupo = nucleo((SRC / 'grupo.html').read_text(encoding='utf-8'))
     grupo, _ = embutir(grupo, 'finTimeEmb', tempo.encode('utf-8'), versao(tempo))
     (RAIZ / 'financas' / 'financas_grupo.html').write_text(grupo, encoding='utf-8')
+    hub = nucleo((SRC / 'hub.html').read_text(encoding='utf-8'))
+    (RAIZ / 'hub.html').write_text(hub, encoding='utf-8')
     ini = nucleo((SRC / 'inicio.html').read_text(encoding='utf-8'))
     c = central(); q = RAIZ / 'ferramenta-time' / 'quadro_do_time_v1.html'
     ini, _ = embutir(ini, 'finTimeEmb', tempo.encode('utf-8'), versao(tempo))
     ini, _ = embutir(ini, 'finGrupoEmb', grupo.encode('utf-8'), versao(grupo))
     ini, _ = embutir(ini, 'centralEmb', c.read_bytes(), c.stem)
     ini, _ = embutir(ini, 'quadroEmb', q.read_bytes(), versao(q.read_text(encoding='utf-8')))
+    ini, _ = embutir(ini, 'hubEmb', hub.encode('utf-8'), versao(hub))
     (RAIZ / 'inicio.html').write_text(ini, encoding='utf-8')
-    for p in [RAIZ / 'financas' / 'financas_time.html', RAIZ / 'financas' / 'financas_grupo.html', RAIZ / 'inicio.html']:
+    for p in [RAIZ / 'financas' / 'financas_time.html', RAIZ / 'financas' / 'financas_grupo.html', RAIZ / 'hub.html', RAIZ / 'inicio.html']:
         print(f'{p.relative_to(RAIZ)}: {p.stat().st_size // 1024} KB')
     print(f'Central embutida: {c.name}; Quadro: {q.name}')
 
