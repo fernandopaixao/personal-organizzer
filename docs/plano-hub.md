@@ -1,6 +1,6 @@
 # Hub da solução e post-its para os times
 
-*24/11/2026 · Hub 1.0.0 e Quadro do Time 2.2.0*
+*24/11/2026 · Hub 1.1.0 e Quadro do Time 2.2.0*
 
 ## 1. O que é
 
@@ -8,6 +8,10 @@ O **Hub da solução** (`hub.html`) é a tela inicial do dia a dia. Ele faz duas
 
 1. **Leva às outras ferramentas.** Lista os HTMLs que estão na pasta local (Central, Finanças do Grupo, Quadros e Finanças de cada time, assistente, cartão "Onde fica cada coisa") e abre cada um numa aba nova. Também mostra, por time, quando o Quadro, o status, as métricas e o plano financeiro foram atualizados na pasta sincronizada.
 2. **Deixa post-its para os times.** Recados curtos, com cor, destinatário opcional e prazo, que aparecem no topo do Quadro do Time. Quem lê clica em **Vi**, e o hub mostra "visto por …".
+
+### Voltar ao hub
+
+Central, Quadro do Time e Finanças do Grupo e do Time têm o botão **← Hub** no topo (ao lado de "Onde estou?"). O hub dá à própria aba o nome `gestao-hub` e abre as ferramentas no mesmo grupo de abas, então o botão só traz a aba do hub de volta para a frente, sem recarregar nem pedir a senha de novo. Se o hub não estiver aberto, o botão abre o `hub.html` da mesma pasta.
 
 ## 2. Por que um hub novo e não o `inicio.html`
 

@@ -404,6 +404,15 @@ async function abertosEmOutros(dir, writer) {
 async function desmarcarAberto(dir, writer) { try { await dir?.removeEntry(`.aberto-${writer.replace('~', '-')}.json`); } catch {} }
 
 /* ------------------------------- interface comum ------------------------------- */
+// Volta ao Hub da solução (hub.html, na mesma pasta). Se o hub já está aberto numa aba
+// (ele se chama "gestao-hub"), só traz aquela aba para a frente, sem recarregar; senão abre o hub.
+function voltarAoHub() {
+  let w = null; try { w = window.open('', 'gestao-hub'); } catch {}
+  if (!w) { location.href = 'hub.html'; return; }
+  let vazia = false; try { vazia = w.location.href === 'about:blank'; } catch {}
+  if (vazia) w.location.href = new URL('hub.html', location.href).href;
+  try { w.focus(); } catch {}
+}
 function toast(msg, ms = 3400) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), ms); }
 function dlg() { let d = $('#dlg'); if (!d) { d = document.createElement('dialog'); d.id = 'dlg'; document.body.appendChild(d); } return d; }
 function modal(html, cls = '') { const d = dlg(); d.className = cls; d.innerHTML = html; if (!d.open) d.showModal(); return d; }
@@ -786,9 +795,10 @@ function renderTopo() {
     <span class="pill"><span class="led ${sujo || salvando ? 'wait' : ''}"></span>${sujo || salvando ? 'Salvando…' : 'Salvo e cifrado'}</span>
     <button class="pill" id="tPasta"><span class="led ${raiz ? (situacao.erro || situacao.conflitos.length ? 'err' : '') : 'wait'}"></span>${raiz ? 'Pasta ligada' : 'Pasta não ligada'}</button>
     <button class="btn ${pend ? 'pri' : ''}" id="tPub">${pend ? 'Publicar para o grupo' : 'Publicado'}</button>
-    <button class="btn ghost" id="tOnde">Onde estou?</button>`;
+    <button class="btn ghost" id="tHub" title="Voltar ao Hub da solução">← Hub</button><button class="btn ghost" id="tOnde">Onde estou?</button>`;
   $('#tPasta').onclick = () => { view = 'grupo'; render(); };
   $('#tPub').onclick = () => publicar();
+  $('#tHub').onclick = voltarAoHub;
   $('#tOnde').onclick = () => ondeEstou({ ferramenta: TOOL_NOME, versao: TOOL_VERSION, arquivo, pastaLocal: dirLocal?.name, pastaComum: raiz ? `${raiz.name}/times/${db.team.slug}/financas/` : '', writer: writer(),
     local: ['Lançamentos detalhados e observações', 'Cenários "e se" não aplicados', 'Chaves do time (dentro do arquivo cifrado)', 'Cópias de segurança em backup/'],
     comum: ['plano.json: plano agregado por mês e linha (orçado, previsto, realizado)', 'Leitura da diretriz do grupo (tetos e categorias)'] });
@@ -1216,12 +1226,11 @@ async function criarDlg() {
 // Usado também pelo assistente (inicio.html) com a mesma lógica.
 async function escolherPastaLocal() {
   await perguntar('Pasta local', `<p>Escolha uma pasta <b>deste computador</b> que <b>não</b> esteja no OneDrive. Ela guarda seus dados individuais cifrados.</p>
-    <div class="banner warn">Atenção: com o backup de pastas do OneDrive ligado, <b>Documentos</b> e <b>Área de Trabalho</b> também sincronizam. Prefira algo como <span class="code">C:\\Users\\voce\\GestaoLocal</span> e confira no Explorador de Arquivos que a pasta não tem o ícone de nuvem.</div>`, [['ok', 'Escolher pasta', 'pri']]);
+    <div class="banner warn">Atenção: com o backup de pastas do OneDrive ligado, <b>Documentos</b> e <b>Área de Trabalho</b> também sincronizam. Prefira algo como <span class="code">C:\\Users\\voce\\GestaoLocal</span>.</div>`, [['ok', 'Escolher pasta', 'pri']]);
   let h; try { h = await escolherPasta('fin-local'); } catch { return null; }
   if (!await permissao(h)) return null;
   const s = await suspeitaDeSincronizada(h);
   if (s.length) { const r = await perguntar('Esta pasta parece sincronizada', `<div class="cofre">A pasta <b>${esc(h.name)}</b> ${esc(s.join(', '))}. Dados individuais devem ficar fora do OneDrive.</div>`, [['no', 'Escolher outra'], ['ok', 'Usar mesmo assim']]); if (r !== 'ok') return escolherPastaLocal(); }
-  else if (await perguntar('Confirme', `<p>Você conferiu que <b class="code">${esc(h.name)}</b> não está no OneDrive?</p>`, [['no', 'Escolher outra'], ['ok', 'Conferi, não está', 'pri']]) !== 'ok') return escolherPastaLocal();
   return h;
 }
 async function criarArquivo({ nome, slug, pessoa, ano, moeda }) {

@@ -52,7 +52,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   console.log('1. Finanças do Grupo: criar arquivo, time, chave, diretriz e HTML do time');
   const g = await nova('/financas/financas_grupo.html', { 'fin-local': 'LocalGestor', 'fin-comum': 'Gestao-Compartilhado' });
   await g.click('#iNovo'); await g.fill('#cN', 'Tecnologia'); await g.fill('#cP', 'Fernando'); await g.fill('#cA', '2026'); await g.click('#cOk');
-  await btn(g, 'ok'); await btn(g, 'ok'); await criarSenha(g);
+  await btn(g, 'ok'); await criarSenha(g);
   await g.waitForSelector('#tNovo');
   ok((await opfs(g, async () => listar('LocalGestor'))).includes('financas-grupo-tecnologia.json'), 'arquivo do grupo criado na pasta local');
   const cab = JSON.parse(await opfs(g, async () => ler('LocalGestor', 'financas-grupo-tecnologia.json')));
@@ -78,7 +78,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   const t = await nova('/financas/testes/saida/financas_pagamentos.html', { 'fin-local': 'LocalAna', 'fin-comum': 'Gestao-Compartilhado' });
   ok(/Pré-configurado pelo gestor/.test(await t.textContent('body')), 'tela inicial mostra pré-configuração');
   await t.click('#iNovo'); ok(await t.isDisabled('#cN'), 'nome do time travado pela pré-configuração');
-  await t.fill('#cP', 'Ana Souza'); await t.click('#cOk'); await btn(t, 'ok'); await btn(t, 'ok'); await criarSenha(t);
+  await t.fill('#cP', 'Ana Souza'); await t.click('#cOk'); await btn(t, 'ok'); await criarSenha(t);
   await cofre(t); // chave do preset
   await t.waitForSelector('#pNova');
   await t.click('#pNova'); await t.fill('#nN', 'Squad terceirizado'); await t.selectOption('#nC', 'terceiros'); await t.fill('#nI', 'PAG-042'); await t.fill('#nOM', '50.000'); await t.click('#nOk');
@@ -161,7 +161,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   await a.click('[data-u="financas"]'); await a.click('[data-u="tarefas"]');
   ok((await a.textContent('#wz')).includes('Finanças do Time') && (await a.textContent('#wz')).includes('Quadro do Time'), 'mostra os HTMLs que serão gerados');
   await a.click('#prox'); await a.fill('#dN', 'Cartões'); await a.fill('#dPx', 'CAR'); await a.fill('#dP', 'Caio'); await a.click('#prox');
-  await a.click('#pL'); await btn(a, 'ok'); await a.click('#pC'); await a.click('#prox');
+  await a.click('#pL'); await a.waitForSelector('#pL ~ .chip'); await a.click('#pC'); await a.click('#prox');
   await a.click('#sC'); await criarSenha(a); await a.click('#prox');
   await a.waitForSelector('#mapa2', { timeout: 30000 });
   const loc = await opfs(a, async () => listar('LocalInicio'));
@@ -186,7 +186,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   const a2 = await nova('/inicio.html', { 'fin-local': 'LocalGestor2', 'fin-comum': 'Gestao-Compartilhado' });
   await a2.click('#prox'); await a2.click('[data-p="gestor"]'); await a2.click('#prox'); await a2.click('[data-u="financas"]'); await a2.click('[data-u="tarefas"]'); await a2.click('#prox');
   await a2.fill('#dN', 'Tecnologia'); await a2.fill('#dT', 'Pagamentos PAG\nCartões CAR'); await a2.fill('#dP', 'Fernando'); await a2.click('#prox');
-  await a2.click('#pL'); await btn(a2, 'ok'); await a2.click('#prox'); await a2.click('#sC'); await criarSenha(a2, SENHA2); await a2.click('#prox');
+  await a2.click('#pL'); await a2.waitForSelector('#pL ~ .chip'); await a2.click('#prox'); await a2.click('#sC'); await criarSenha(a2, SENHA2); await a2.click('#prox');
   await a2.waitForSelector('#mapa2', { timeout: 30000 });
   const loc2 = await opfs(a2, async () => listar('LocalGestor2'));
   ok(['financas_grupo.html', 'financas-grupo-tecnologia.json', 'gestao_pessoal.html', 'gestao-tecnologia.json', 'hub.html', 'hub-tecnologia.json'].every(n => loc2.includes(n)), 'arquivos do gestor: ' + loc2.join(', '));
@@ -201,7 +201,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   ok(await c.evaluate(() => !document.querySelector('#app').classList.contains('hidden')), 'Central abre o arquivo cifrado criado pelo assistente');
 
   ok(await c.evaluate(() => /Onde estou/.test(document.getElementById('ondeEstou')?.textContent || '')), 'Central mostra o botão "Onde estou?"');
-  await c.click('#ondeEstou .f4btn'); ok(/Central de Gestão/.test(await c.textContent('#f4dlg')) && /gestao-tecnologia\.json/.test(await c.textContent('#f4dlg')), '"Onde estou?" da Central mostra ferramenta e arquivo');
+  await c.click('#ondeEstou .f4btn:not(.f4hub)'); ok(/Central de Gestão/.test(await c.textContent('#f4dlg')) && /gestao-tecnologia\.json/.test(await c.textContent('#f4dlg')), '"Onde estou?" da Central mostra ferramenta e arquivo');
   await c.click('#f4fecha');
 
   console.log('8. Quadro 2.1: senha obrigatória e um arquivo por pessoa');
@@ -247,6 +247,8 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   await qb.evaluate(() => f4sincronizar()); await qb.waitForTimeout(300);
   ok(/Mais um/.test(await titulos(qb)), 'mudança nova chega para a outra pessoa');
 
+  ok(!/Conferi, não está/.test(fs.readFileSync(path.join(RAIZ, 'inicio.html'), 'utf8') + fs.readFileSync(path.join(RAIZ, 'financas', 'financas_time.html'), 'utf8') + fs.readFileSync(path.join(RAIZ, 'financas', 'financas_grupo.html'), 'utf8') + fs.readFileSync(path.join(RAIZ, 'hub.html'), 'utf8')), 'sem a pergunta de confirmar o ícone do OneDrive');
+  ok(await c.evaluate(() => /Hub/.test(document.querySelector('#ondeEstou .f4hub')?.textContent || '')) && await t2.evaluate(() => !!document.getElementById('tHub')) && await g2.evaluate(() => !!document.getElementById('tHub')) && await qb.evaluate(() => !!document.querySelector('#ondeEstou .f4hub')), 'botão "← Hub" na Central, no Quadro e nas Finanças do Grupo e do Time');
   console.log('9. Hub da solução: ferramentas, chaves e post-its para os times');
   fs.writeFileSync(path.join(SAIDA, 'hub_gerado.html'), await opfs(a2, async () => ler('LocalGestor2', 'hub.html')));
   const h = await nova('/financas/testes/saida/hub_gerado.html', { 'fin-local': 'LocalGestor2', 'fin-comum': 'Gestao-Compartilhado' });

@@ -436,6 +436,15 @@ async function abertosEmOutros(dir, writer) {
 async function desmarcarAberto(dir, writer) { try { await dir?.removeEntry(`.aberto-${writer.replace('~', '-')}.json`); } catch {} }
 
 /* ------------------------------- interface comum ------------------------------- */
+// Volta ao Hub da solução (hub.html, na mesma pasta). Se o hub já está aberto numa aba
+// (ele se chama "gestao-hub"), só traz aquela aba para a frente, sem recarregar; senão abre o hub.
+function voltarAoHub() {
+  let w = null; try { w = window.open('', 'gestao-hub'); } catch {}
+  if (!w) { location.href = 'hub.html'; return; }
+  let vazia = false; try { vazia = w.location.href === 'about:blank'; } catch {}
+  if (vazia) w.location.href = new URL('hub.html', location.href).href;
+  try { w.focus(); } catch {}
+}
 function toast(msg, ms = 3400) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), ms); }
 function dlg() { let d = $('#dlg'); if (!d) { d = document.createElement('dialog'); d.id = 'dlg'; document.body.appendChild(d); } return d; }
 function modal(html, cls = '') { const d = dlg(); d.className = cls; d.innerHTML = html; if (!d.open) d.showModal(); return d; }
@@ -593,7 +602,8 @@ async function suspeitaDeSincronizada(dir) {
       O Quadro do Time mostra os post-its e grava quem já viu em times/<time>/postits/vistos/<pessoa>-<computador>.json.
    O arquivo local do hub (times, chaves e seus post-its) é cifrado com a sua senha e fica fora do OneDrive.
    ===================================================================== */
-const TOOL = 'hub', TOOL_NOME = 'Hub da solução', TOOL_VERSION = '1.0.0';
+const TOOL = 'hub', TOOL_NOME = 'Hub da solução', TOOL_VERSION = '1.1.0';
+try { window.name = 'gestao-hub'; } catch {}   // o botão "← Hub" das ferramentas volta para esta aba sem recarregar
 const LOCAL_SCHEMA = 'gestao-hub-local/1', POSTITS = 'gestao-postits/1', VISTOS = 'gestao-postits-vistos/1';
 const CORES = [['amarelo', 'Amarelo'], ['rosa', 'Rosa'], ['verde', 'Verde'], ['azul', 'Azul'], ['lilas', 'Lilás']];
 const MAX_TEXTO = 500;
@@ -806,7 +816,7 @@ function renderTopo() {
 function render() {
   if (!db) return;
   const ph = pastaDoHub(), mesma = !ph || !dirLocal || ph.nome === dirLocal.name;
-  const ferr = ferramentas.map(f => `<a class="tool" href="${encodeURI(f.arquivo)}" target="_blank" rel="noopener" data-f="${esc(f.arquivo)}"><span class="ic ${f.cls}">${esc(f.ic)}</span>
+  const ferr = ferramentas.map(f => `<a class="tool" href="${encodeURI(f.arquivo)}" target="_blank" rel="opener" data-f="${esc(f.arquivo)}"><span class="ic ${f.cls}">${esc(f.ic)}</span>
     <span style="min-width:0;flex:1"><b>${esc(f.titulo)}${f.time?.nome ? ' · ' + esc(f.time.nome) : ''}</b><span class="small muted">${esc(f.desc)}</span><span class="code">${esc(f.arquivo)}</span></span><span class="go">Abrir ↗</span></a>`).join('');
   $('#app').innerHTML = `<div class="hub"><header class="top" id="topo"></header>
     ${ph && /onedrive|sharepoint/i.test(ph.caminho) ? '<div class="banner warn">Este hub está numa pasta sincronizada pelo OneDrive. O arquivo de dados dele (com as chaves dos times) deve ficar numa pasta local, fora do OneDrive.</div>' : ''}
@@ -834,7 +844,7 @@ function timeHtml(t) {
   const estado = !k ? '<span class="chip late">sem chave do time</span>' : pe?.erro ? `<span class="chip late" title="${esc(pe.erro)}">não publicado: ${esc(pe.erro)}</span>` : pe?.pendente ? '<span class="chip">publicando…</span>' : pb?.revision ? `<span class="chip ok" title="Revisão ${pb.revision}">publicado ${esc(fmtDataHora(pb.em))}</span>` : '';
   return `<div class="card team" data-time="${esc(t.slug)}"><div class="hd"><h3>${esc(t.nome)}</h3><span class="chip code">times/${esc(t.slug)}/</span>${t.prefixo ? `<span class="chip bv">${esc(t.prefixo)}</span>` : ''}
     ${k ? `<span class="chip bv code" title="Chave do time (tarefas)">${esc(k.kid)}</span>` : ''}${estado}<span class="grow"></span>
-    ${qd ? `<a class="btn sm" href="${encodeURI(qd.arquivo)}" target="_blank" rel="noopener">Quadro ↗</a>` : ''}${fn ? `<a class="btn sm" href="${encodeURI(fn.arquivo)}" target="_blank" rel="noopener">Finanças ↗</a>` : ''}</div>
+    ${qd ? `<a class="btn sm" href="${encodeURI(qd.arquivo)}" target="_blank" rel="opener">Quadro ↗</a>` : ''}${fn ? `<a class="btn sm" href="${encodeURI(fn.arquivo)}" target="_blank" rel="opener">Finanças ↗</a>` : ''}</div>
     ${raiz ? `<p class="act">Quadro atualizado ${tempo(a.quadro)} · status para a Central ${tempo(a.status)} · métricas ${tempo(a.metricas)} · plano financeiro ${tempo(a.plano)}</p>` : ''}
     ${!k ? `<div class="banner warn">Para deixar post-its, cole a chave de tarefas do time (a mesma do Quadro) em <b>Ajustes</b>, ou importe da Central. <button class="btn sm" data-ch="${esc(t.slug)}">Colar chave</button></div>` : ''}
     ${r.erros?.length ? `<div class="banner warn" title="${esc(r.erros.join('\n'))}">${r.erros.length} arquivo(s) de post-it não abriram com a chave cadastrada (chave antiga ou arquivo incompleto).</div>` : ''}
@@ -1048,7 +1058,6 @@ async function escolherPastaLocal() {
   if (!await permissao(h)) return null;
   const s = await suspeitaDeSincronizada(h);
   if (s.length) { const r = await perguntar('Esta pasta parece sincronizada', `<div class="cofre">A pasta <b>${esc(h.name)}</b> ${esc(s.join(', '))}. Dados individuais devem ficar fora do OneDrive.</div>`, [['no', 'Escolher outra'], ['ok', 'Usar mesmo assim']]); if (r !== 'ok') return escolherPastaLocal(); }
-  else if (await perguntar('Confirme', `<p>Você conferiu que <b class="code">${esc(h.name)}</b> não está no OneDrive?</p>`, [['no', 'Escolher outra'], ['ok', 'Conferi, não está', 'pri']]) !== 'ok') return escolherPastaLocal();
   return h;
 }
 async function criarArquivo({ nome, pessoa }) {

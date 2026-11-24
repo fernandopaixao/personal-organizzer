@@ -295,6 +295,15 @@ async function abertosEmOutros(dir, writer) {
 async function desmarcarAberto(dir, writer) { try { await dir?.removeEntry(`.aberto-${writer.replace('~', '-')}.json`); } catch {} }
 
 /* ------------------------------- interface comum ------------------------------- */
+// Volta ao Hub da solução (hub.html, na mesma pasta). Se o hub já está aberto numa aba
+// (ele se chama "gestao-hub"), só traz aquela aba para a frente, sem recarregar; senão abre o hub.
+function voltarAoHub() {
+  let w = null; try { w = window.open('', 'gestao-hub'); } catch {}
+  if (!w) { location.href = 'hub.html'; return; }
+  let vazia = false; try { vazia = w.location.href === 'about:blank'; } catch {}
+  if (vazia) w.location.href = new URL('hub.html', location.href).href;
+  try { w.focus(); } catch {}
+}
 function toast(msg, ms = 3400) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), ms); }
 function dlg() { let d = $('#dlg'); if (!d) { d = document.createElement('dialog'); d.id = 'dlg'; document.body.appendChild(d); } return d; }
 function modal(html, cls = '') { const d = dlg(); d.className = cls; d.innerHTML = html; if (!d.open) d.showModal(); return d; }
