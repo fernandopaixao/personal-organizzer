@@ -319,3 +319,25 @@ Pedido: telas minimalistas, com mais gráficos do que texto, em branco e azul co
   As tabelas detalhadas continuam no Grupo (Por time, categoria, iniciativa, OPEX × CAPEX, Por ano) e no Plano.
 - **Cores.** Só tons de azul nos gráficos (o realizado em azul escuro). O vermelho fica para o que passou do orçado ou do teto. A barra de status junta "salvo e cifrado" e a pasta num único indicador.
 - As peças visuais ficam em `nucleo.js` (`cardLeitura`, `barrasH`, `curvaAcumulada`) e `nucleo.css`, para reaproveitar no Hub e nas próximas telas.
+
+## 14. Consolidação em níveis (24/11/2026, Finanças do Grupo 1.3.0)
+
+Pedido: um gestor de vários times encaminha o consolidado para a liderança, que também usa as Finanças do Grupo para consolidar vários gestores.
+
+**Como funciona**
+1. **A liderança cadastra o gestor.** Na aba Times, ela usa "+ Grupo de outro gestor", com o mesmo identificador do grupo do gestor (ex.: `tecnologia`), e gera a chave: `GK1.<grupo>-fin-AAMM.<43>`. A chave segue por mensagem direta, sempre com o aviso de cofre.
+2. **O gestor cola a chave.** O campo fica em Ajustes > "Nível acima · sua liderança". Uma chave de outro grupo é recusada.
+3. **O gestor publica para a liderança.** Antes de publicar, ele confere o que sobe: totais por ano, as unidades que entram e as que ficam de fora (sem plano aplicado ou com plano ainda não revisado).
+   - O arquivo vai para `grupos/<grupo>/financas/plano.json`: um envelope `gestao-envelope/1` com conteúdo `gestao-financas-plano/1`, `source.level = "group"` e `units`.
+   - Vai uma linha por unidade × categoria (× OPEX/CAPEX) mais os itens do grupo, mês a mês e com todos os anos. Os nomes das linhas dos times não vão.
+   - Quando o consolidado muda depois da última publicação, o Painel mostra um aviso com o botão para publicar de novo.
+4. **A liderança soma o gestor como uma unidade.** O consolidado do gestor aparece em Planos recebidos, é aplicado e somado ano a ano, como o plano de um time. Funciona em quantos níveis forem precisos.
+5. **A diretriz desce.** A liderança publica o teto por ano em `grupos/<grupo>/financas/diretriz.json`. O gestor vê o teto no card de orçamento do Painel e, na aba Times, quanto dos tetos das suas unidades já foi repartido.
+
+**Regras mantidas:** tudo cifrado, um único dono por arquivo (o gestor dono do `plano.json`, a liderança dona do `diretriz.json`), revisão crescente, cópias de conflito do OneDrive resolvidas pela maior revisão.
+
+**Premissa:** a liderança precisa ler a mesma pasta compartilhada (ou uma biblioteca do SharePoint sincronizada com a mesma estrutura).
+
+**Arquivo local:** `db.acima = { chaves, publicacao, diretriz }` no gestor, e `db.times[].tipo = 'time' | 'grupo'` na liderança. Arquivos 1.2 abrem com `tipo: 'time'` e sem nível acima. O onboarding pode gravar `db.acima.chaves` com `origem: 'onboarding'`.
+
+Teste: seção 11 de `financas/testes/teste-e2e.js`.

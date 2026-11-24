@@ -624,7 +624,7 @@ const pctTxt = (a, b) => b ? Math.round(a / b * 100) + '%' : '—';
    compara com o orçamento do grupo e publica diretrizes grupo/financas/diretriz-<time>.json.
    Orçamento aprovado, itens do grupo, chaves e versões ficam no arquivo local cifrado.
    ===================================================================== */
-const TOOL = 'financas-grupo', TOOL_NOME = 'Finanças do Grupo', TOOL_VERSION = '1.2.0';
+const TOOL = 'financas-grupo', TOOL_NOME = 'Finanças do Grupo', TOOL_VERSION = '1.3.0';
 const LOCAL_SCHEMA = 'gestao-financas-local/1', PLANO_SCHEMA = 'gestao-financas-plano/1', DIRETRIZ_SCHEMA = 'gestao-financas-diretriz/1';
 const PRESET = /*FING-PRESET*/null/*FIM-FING-PRESET*/;
 const CATS_PADRAO = [
@@ -639,7 +639,7 @@ let view = 'consolidado', anoVista = null, pendentes = [], saude = {}, salvarT =
 function novoDb({ nome, ano, moeda, pessoa }) {
   return { schema: LOCAL_SCHEMA, version: 1, tool: TOOL, criadoEm: new Date().toISOString(), grupo: { nome, slug: slugify(nome) }, ano: +ano, anos: [+ano], moeda,
     pessoa: { nome: pessoa, slug: slugify(pessoa).split('-')[0] || 'gestor' }, categorias: CATS_PADRAO.map(c => ({ ...c })), centros: [],
-    orcamento: { total: 0, porAno: {}, nota: '' }, itens: [], times: [], retratos: {}, versoes: [], seg: {} };
+    orcamento: { total: 0, porAno: {}, nota: '' }, itens: [], times: [], retratos: {}, versoes: [], seg: {}, acima: { chaves: [], publicacao: {}, diretriz: null } };
 }
 function normalizar(d) {
   if (d?.schema !== LOCAL_SCHEMA || d.tool !== TOOL) throw new Error('Este arquivo não é das Finanças do Grupo.');
@@ -649,13 +649,18 @@ function normalizar(d) {
   // Arquivos 1.0 tinham um ano só: o orçamento e o teto antigos viram os do ano base.
   d.anos = [...new Set([...(Array.isArray(d.anos) ? d.anos : []), d.ano].map(Number).filter(a => a > 2000 && a < 2100))].sort();
   d.orcamento.porAno ??= {}; if (d.orcamento.total && d.orcamento.porAno[d.ano] == null) d.orcamento.porAno[d.ano] = d.orcamento.total;
-  for (const t of d.times) { t.tetos ??= {}; if ((t.teto.total || Object.keys(t.teto.caps || {}).length) && !t.tetos[d.ano]) t.tetos[d.ano] = structuredClone(t.teto); }
+  // Consolidação em níveis (1.3): unidades podem ser times ou grupos de outros gestores; "acima" liga este grupo à liderança.
+  d.acima ??= { chaves: [], publicacao: {}, diretriz: null }; d.acima.chaves ??= []; d.acima.publicacao ??= {};
+  for (const t of d.times) { t.tipo ??= 'time'; t.tetos ??= {}; if ((t.teto.total || Object.keys(t.teto.caps || {}).length) && !t.tetos[d.ano]) t.tetos[d.ano] = structuredClone(t.teto); }
   return d;
 }
 const writer = () => `${db.pessoa.slug}~${dispositivo().id}`;
 const fm = c => fmtMoeda(c, db.moeda);
 const catPorId = id => db.categorias.find(c => c.id === id);
 const timePorSlug = s => db.times.find(t => t.slug === s);
+const ehGrupo = t => t?.tipo === 'grupo';
+// Pasta de cada unidade: times/<time>/financas (plano de time) ou grupos/<grupo>/financas (consolidado de outro gestor).
+const pastaUnidade = t => ehGrupo(t) ? ['grupos', t.slug, 'financas'] : ['times', t.slug, 'financas'];
 // Anos que o grupo enxerga: o horizonte do grupo mais os anos publicados pelos times.
 const anosPlano = p => (Array.isArray(p?.fiscalYears) && p.fiscalYears.length ? p.fiscalYears : p?.fiscalYear ? [p.fiscalYear] : []).map(Number);
 const anosG = () => [...new Set([...db.anos, ...Object.values(db.retratos).flatMap(r => anosPlano(r.payload))])].sort();
@@ -733,7 +738,7 @@ async function lerPasta(silencioso = false) {
     const s = saude[t.slug] = { avisos: [], copias: [] };
     const ch = await chavesDoTime(t);
     if (!ch.size) { s.avisos.push('sem chave de finanças'); continue; }
-    const dir = await subpasta(raiz, ['times', t.slug, 'financas'], false);
+    const dir = await subpasta(raiz, pastaUnidade(t), false);
     if (!dir) { s.avisos.push('ainda não publicou'); continue; }
     const r = await lerEnvelopes(dir, 'plano', ch, { team: t.slug, content: PLANO_SCHEMA });
     s.copias = r.copias.map(c => c.nome);
@@ -754,6 +759,7 @@ async function lerPasta(silencioso = false) {
     const fora = (r.payload.lines || []).filter(l => !catPorId(l.category)).length;
     if (fora) s.avisos.push(`${fora} linha(s) com categoria fora da lista do grupo (somadas em "Outras")`);
   }
+  await lerAcima();
   if (!silencioso) toast(pendentes.length ? `${pendentes.length} plano(s) novo(s) para revisar.` : 'Pasta lida. Nada novo.');
   render();
 }
@@ -790,9 +796,9 @@ function montarDiretriz(t, meta) {
 async function publicarDiretriz(t, assumir = false) {
   if (!raiz) return toast('Ligue a pasta sincronizada primeiro.');
   const c = chaveAtualTexto(t); if (!c) return toast(`Gere a chave de finanças do time ${t.nome} primeiro.`);
-  const k = lerChaveTexto(c.texto), dir = await subpasta(raiz, ['grupo', 'financas'], true);
+  const k = lerChaveTexto(c.texto), dir = await subpasta(raiz, ehGrupo(t) ? pastaUnidade(t) : ['grupo', 'financas'], true);
   try {
-    const r = await publicarUnico({ dir, base: `diretriz-${t.slug}`, chave: { kid: k.kid, key: await importarChave(k.raw) }, team: t.slug, writer: writer(), assumir, ultimaRevisao: t.diretriz.revision || 0,
+    const r = await publicarUnico({ dir, base: ehGrupo(t) ? 'diretriz' : `diretriz-${t.slug}`, chave: { kid: k.kid, key: await importarChave(k.raw) }, team: t.slug, writer: writer(), assumir, ultimaRevisao: t.diretriz.revision || 0,
       montar: { schema: DIRETRIZ_SCHEMA, payload: meta => montarDiretriz(t, meta) } });
     t.diretriz = { revision: r.revision, em: r.generatedAt }; agendarSalvar();
     toast(`Diretriz publicada para ${t.nome} (revisão ${r.revision}).`);
@@ -801,11 +807,94 @@ async function publicarDiretriz(t, assumir = false) {
     if (e.code !== 'DONO' && e.code !== 'DISPOSITIVO') toast('Não foi possível publicar: ' + e.message, 6000);
   }
 }
+/* ---------------- nível acima: consolidado para a liderança (1.3) ---------------- */
+// O gestor publica o consolidado do grupo em grupos/<grupo>/financas/plano.json, no mesmo formato do plano de um time
+// (gestao-financas-plano/1, source.level = "group"), cifrado com a chave que a liderança gerou para este grupo.
+// Vai uma linha por unidade × categoria, mês a mês, sem os nomes das linhas dos times. Só entra o que já foi aplicado na revisão.
+async function chavesAcima() {
+  const m = new Map();
+  for (const c of db.acima.chaves.filter(c => !c.revogada)) { try { const k = lerChaveTexto(c.texto); m.set(k.kid, await importarChave(k.raw)); } catch {} }
+  return m;
+}
+const chaveAcimaTexto = () => (db.acima ??= { chaves: [], publicacao: {}, diretriz: null }).chaves.filter(c => !c.revogada).at(-1);
+async function cadastrarChaveAcima(texto, origem = 'colada') {
+  const k = lerChaveTexto(texto);
+  if (!k.kid.startsWith(db.grupo.slug + '-')) throw new Error(`Esta chave é de "${k.kid.split('-fin')[0]}", não do grupo "${db.grupo.slug}". Peça à liderança a chave gerada para o identificador ${db.grupo.slug}.`);
+  if (!db.acima.chaves.some(c => c.kid === k.kid)) db.acima.chaves.push({ kid: k.kid, texto: texto.trim(), em: new Date().toISOString(), origem });
+  agendarSalvar(); return k.kid;
+}
+function montarConsolidado(meta) {
+  const linhas = new Map(), unidades = [], outras = { id: 'outras', nome: 'Outras', tipo: 'OPEX' };
+  const add = (id, nome, c, kind, months) => {
+    const l = linhas.get(id) || { id, name: clamp(nome, 120), category: c.id, kind, months: {} };
+    for (const [m, v] of Object.entries(months || {})) { const x = l.months[m] ??= { budget: 0, forecast: 0, actual: 0 }; x.budget += +v.budget || 0; x.forecast += +v.forecast || 0; x.actual += +v.actual || 0; }
+    linhas.set(id, l);
+  };
+  for (const t of db.times) {
+    const p = db.retratos[t.slug]?.payload; if (!somavel(p)) continue;
+    unidades.push({ slug: t.slug, name: t.nome, kind: t.tipo || 'time', revision: p.revision, generatedAt: p.generatedAt, planVersion: p.planVersion || undefined });
+    for (const l of p.lines || []) { const c = catPorId(l.category) || catPorId('outras') || outras; add(`${t.slug}:${c.id}:${l.kind === 'CAPEX' ? 'C' : 'O'}`, `${t.nome} · ${c.nome}`, c, l.kind === 'CAPEX' ? 'CAPEX' : 'OPEX', l.months); }
+  }
+  for (const i of db.itens) {
+    const c = catPorId(i.cat) || outras, months = {};
+    for (const m of new Set([...Object.keys(i.orcado || {}), ...Object.keys(i.previsto || {}), ...Object.keys(i.realizado || {})])) months[m] = { budget: i.orcado?.[m] || 0, forecast: i.previsto?.[m] ?? i.orcado?.[m] ?? 0, actual: i.realizado?.[m] || 0 };
+    add(`grupo:${c.id}`, `Itens do grupo · ${c.nome}`, c, c.tipo, months);
+  }
+  for (const l of linhas.values()) for (const [m, v] of Object.entries(l.months)) if (!v.budget && !v.forecast && !v.actual) delete l.months[m];
+  const anos = anosG(), tt = a => consolidado(mesesAno(a)).total, t0 = tt(db.ano);
+  return { schema: PLANO_SCHEMA, ...meta, source: { team: db.grupo.slug, tool: TOOL, toolVersion: TOOL_VERSION, level: 'group' },
+    team: { name: db.grupo.nome, slug: db.grupo.slug }, fiscalYear: db.ano, fiscalYears: anos, currency: db.moeda, planVersion: db.versaoAtual || 'Orçamento original', closedMonths: [],
+    categories: db.categorias.map(c => ({ id: c.id, name: c.nome, kind: c.tipo })), lines: [...linhas.values()].filter(l => Object.keys(l.months).length), commitments: [], units: unidades,
+    totals: { budget: t0.orcado, forecast: t0.previsto, actual: t0.realizado },
+    totalsByYear: Object.fromEntries(anos.map(a => { const x = tt(a); return [a, { budget: x.orcado, forecast: x.previsto, actual: x.realizado }]; })),
+    directiveRevision: db.acima.diretriz?.revision || undefined };
+}
+const assinaturaAcima = () => JSON.stringify(montarConsolidado({ revision: 0, generatedAt: '', hlc: '' }));
+const acimaPendente = () => !!chaveAcimaTexto() && db.acima.publicacao.assinatura !== assinaturaAcima();
+// "Você decide o que sobe": mostra o que vai, por ano e por unidade, e o que ficou de fora, antes de publicar.
+async function publicarAcimaDlg() {
+  if (!raiz) return toast('Ligue a pasta sincronizada primeiro.');
+  if (!chaveAcimaTexto()) return toast('Cadastre a chave que a sua liderança gerou para este grupo (Ajustes).');
+  const p = montarConsolidado({ revision: 0, generatedAt: '', hlc: '' }), fora = db.times.filter(t => !somavel(db.retratos[t.slug]?.payload));
+  const r = await perguntar('Publicar consolidado para a liderança', `<p class="small muted" style="margin-top:0">Vai cifrado com a chave <span class="code">${esc(chaveAcimaTexto().kid)}</span> para <span class="code">grupos/${esc(db.grupo.slug)}/financas/plano.json</span>: uma linha por unidade e categoria, mês a mês, sem os nomes das linhas dos times.</p>
+    <table class="t"><tr><th>Ano</th><th class="n">Orçado</th><th class="n">Previsto</th><th class="n">Realizado</th></tr>${p.fiscalYears.map(a => `<tr><td>${a}</td><td class="n">${fm(p.totalsByYear[a].budget)}</td><td class="n"><b>${fm(p.totalsByYear[a].forecast)}</b></td><td class="n">${fm(p.totalsByYear[a].actual)}</td></tr>`).join('')}</table>
+    <p class="small" style="margin-top:12px">Entram: ${p.units.map(u => `<b>${esc(u.name)}</b> (rev. ${u.revision})`).join(', ') || '<span class="faint">nenhum time</span>'}${db.itens.length ? ' e os itens do grupo' : ''}.</p>
+    ${fora.length ? `<p class="small latec">Ficam de fora (sem plano aplicado): ${fora.map(t => esc(t.nome)).join(', ')}.</p>` : ''}${pendentes.length ? `<p class="small latec">Há ${pendentes.length} plano(s) novo(s) ainda não aplicado(s): eles não sobem até você aplicar.</p>` : ''}`, [['no', 'Cancelar'], ['ok', 'Publicar', 'pri']]);
+  if (r === 'ok') return publicarAcima();
+}
+async function publicarAcima(assumir = false) {
+  const k = lerChaveTexto(chaveAcimaTexto().texto), dir = await subpasta(raiz, ['grupos', db.grupo.slug, 'financas'], true);
+  try {
+    const assinatura = assinaturaAcima();
+    const r = await publicarUnico({ dir, base: 'plano', chave: { kid: k.kid, key: await importarChave(k.raw) }, team: db.grupo.slug, writer: writer(), assumir, ultimaRevisao: db.acima.publicacao.revision || 0,
+      montar: { schema: PLANO_SCHEMA, payload: meta => montarConsolidado(meta) } });
+    db.acima.publicacao = { revision: r.revision, em: r.generatedAt, assinatura }; agendarSalvar();
+    toast(`Consolidado publicado para a liderança (revisão ${r.revision}).`);
+  } catch (e) {
+    if ((e.code === 'DONO' || e.code === 'DISPOSITIVO') && await perguntar('Assumir a publicação?', `<p>${esc(e.message)}</p><p class="small muted">Cada arquivo comum tem um único dono. Assuma só se você trocou de computador ou combinou com o outro dono.</p>`, [['no', 'Cancelar'], ['ok', 'Assumir e publicar', 'pri']]) === 'ok') return publicarAcima(true);
+    if (e.code !== 'DONO' && e.code !== 'DISPOSITIVO') toast('Não foi possível publicar: ' + e.message, 6000);
+  }
+}
+// Diretriz da liderança para este grupo: grupos/<grupo>/financas/diretriz.json (teto por ano).
+async function lerAcima() {
+  if (!raiz || !chaveAcimaTexto()) return;
+  const ch = await chavesAcima(), dir = await subpasta(raiz, ['grupos', db.grupo.slug, 'financas'], false);
+  const r = await lerEnvelopes(dir, 'diretriz', ch, { team: db.grupo.slug, content: DIRETRIZ_SCHEMA });
+  const p = r.melhor?.payload;
+  if (p && (!db.acima.diretriz || p.revision > db.acima.diretriz.revision || (p.revision === db.acima.diretriz.revision && p.generatedAt !== db.acima.diretriz.generatedAt))) {
+    db.acima.diretriz = p; agendarSalvar(); toast(`Diretriz da liderança lida (revisão ${p.revision}).`);
+  }
+}
+function tetoAcima(a = anoV()) {
+  const d = db.acima?.diretriz; if (!d) return 0;
+  const y = d.byYear?.[a]; if (y) return y.capTotal || 0;
+  return d.fiscalYear === a ? d.capTotal || 0 : 0;
+}
 async function gerarChave(t) {
   const kid = `${t.slug}-fin-${String(new Date().getFullYear()).slice(2)}${pad2(new Date().getMonth() + 1)}`;
   const kidFinal = t.chaves.some(c => c.kid === kid) ? kid + '-' + (t.chaves.length + 1) : kid;
   const texto = gerarChaveTexto(kidFinal);
-  if (!await avisoCofre('chave', `<p class="small">Chave de finanças do time <b>${esc(t.nome)}</b> (diferente da chave de tarefas e da sua senha):</p><input class="sin code" style="width:100%" readonly value="${esc(texto)}" onclick="this.select()"><div class="row" style="margin-top:6px"><button class="btn sm" onclick="navigator.clipboard?.writeText('${texto}');toast('Chave copiada.')">Copiar</button></div>`)) return false;
+  if (!await avisoCofre('chave', `<p class="small">${ehGrupo(t) ? `Chave do grupo <b>${esc(t.nome)}</b>: o gestor cola em Ajustes &gt; Nível acima das Finanças do Grupo dele` : `Chave de finanças do time <b>${esc(t.nome)}</b> (diferente da chave de tarefas e da sua senha)`}:</p><input class="sin code" style="width:100%" readonly value="${esc(texto)}" onclick="this.select()"><div class="row" style="margin-top:6px"><button class="btn sm" onclick="navigator.clipboard?.writeText('${texto}');toast('Chave copiada.')">Copiar</button></div>`)) return false;
   t.chaves.push({ kid: kidFinal, texto, em: new Date().toISOString() }); agendarSalvar();
   return true;
 }
@@ -867,7 +956,7 @@ function renderTopo() {
   if ($('#tAno')) $('#tAno').onchange = e => { anoVista = +e.target.value; render(); };
   $('#tOnde').onclick = () => ondeEstou({ ferramenta: TOOL_NOME, versao: TOOL_VERSION, arquivo, pastaLocal: dirLocal?.name, pastaComum: raiz?.name, writer: writer(),
     local: ['Orçamento aprovado do grupo e itens do grupo', 'Chaves de finanças de cada time', 'Retratos lidos dos times e versões do plano', 'Cópias de segurança em backup/'],
-    comum: ['grupo/financas/diretriz-<time>.json (tetos, categorias, prazos)', 'Leitura de times/<time>/financas/plano.json'] });
+    comum: ['grupo/financas/diretriz-<time>.json (tetos, categorias, prazos)', `grupos/${db.grupo.slug}/financas/plano.json: consolidado para a liderança (se houver)`, 'grupos/<grupo>/financas/: diretriz para grupos de outros gestores e leitura do consolidado deles', 'Leitura de times/<time>/financas/plano.json'] });
 }
 const kpi = (r, v, c = '') => `<div class="kpi ${c}"><span>${r}</span><b>${v}</b></div>`;
 
@@ -880,24 +969,26 @@ function vCons(el) {
   const idx = ms.indexOf(m), passado = idx < 0 ? (ms[0] < m ? ms.length - 1 : -1) : idx;
   const serie = k => ms.map(x => consolidado([x]).total[k]);
   el.innerHTML = `${pendentes.length ? `<div class="banner">${pendentes.length} plano(s) novo(s) na pasta. <button class="btn sm pri" id="cRev">Revisar</button></div>` : ''}
+    ${acimaPendente() ? `<div class="banner">O consolidado mudou desde a última publicação para a liderança. <button class="btn sm pri" id="cAcima">Publicar para a liderança</button></div>` : ''}
     <div class="inss">
       ${cardLeitura({ hi: true, k: `Previsto em ${a}`, v: fm(c.total.previsto), pct: orc ? c.total.previsto / orc : null, s: orc ? (orc >= c.total.previsto ? `Saldo de <b>${fm(orc - c.total.previsto)}</b> no orçamento aprovado` : `<b>${fm(c.total.previsto - orc)}</b> acima do orçamento aprovado`) : `Orçamento aprovado de ${a}: <b>definir em Ajustes</b>` })}
-      ${cardLeitura({ k: `Orçamento aprovado ${a}`, v: orc ? fm(orc) : '<span class="faint">definir</span>', pct: orc ? c.total.orcado / orc : null, s: `Times + grupo orçaram <b>${fmtCurto(c.total.orcado)}</b>${orc ? ` (${pctTxt(c.total.orcado, orc)})` : ''}` })}
+      ${cardLeitura({ k: `Orçamento aprovado ${a}`, v: orc ? fm(orc) : '<span class="faint">definir</span>', pct: orc ? c.total.orcado / orc : null, s: `Times + grupo orçaram <b>${fmtCurto(c.total.orcado)}</b>${orc ? ` (${pctTxt(c.total.orcado, orc)})` : ''}${tetoAcima() ? ` · teto da liderança <b>${fmtCurto(tetoAcima())}</b>` : ''}`, marca: orc && tetoAcima() ? tetoAcima() / orc : null })}
       ${cardLeitura({ k: `Realizado até ${nomeMes(ytd().at(-1) || m)}`, v: fm(y.total.realizado), pct: c.total.previsto ? y.total.realizado / c.total.previsto : null, marca: ytd().length / 12, s: `<b>${pctTxt(y.total.realizado, c.total.previsto)}</b> do previsto · ${ytd().length} de 12 meses` })}
-      ${cardLeitura({ k: 'Times na soma', v: `${somados.length}<span class="faint" style="font-size:15px"> / ${db.times.length}</span>`, pct: db.times.length ? somados.length / db.times.length : null, s: semPlano.length ? `Sem plano: <b>${semPlano.map(t => esc(t.nome)).join(', ')}</b>` : desv && desv.d > 0 ? `Maior desvio: <b>${esc(desv.t.nome)}</b> +${fmtCurto(desv.d)}` : 'Todos dentro do orçado', tag: semPlano.length ? '<span class="tag late">faltam</span>' : '' })}
+      ${cardLeitura({ k: `${db.times.some(ehGrupo) ? 'Unidades' : 'Times'} na soma`, v: `${somados.length}<span class="faint" style="font-size:15px"> / ${db.times.length}</span>`, pct: db.times.length ? somados.length / db.times.length : null, s: semPlano.length ? `Sem plano: <b>${semPlano.map(t => esc(t.nome)).join(', ')}</b>` : desv && desv.d > 0 ? `Maior desvio: <b>${esc(desv.t.nome)}</b> +${fmtCurto(desv.d)}` : 'Todos dentro do orçado', tag: semPlano.length ? '<span class="tag late">faltam</span>' : '' })}
     </div>
     <div class="g21">
       <div class="card"><p class="lbl">Curva do ano · acumulado</p>${curvaAcumulada(ms, [
         ...(orc ? [{ nome: 'Orçamento aprovado', cor: 'var(--faint)', v: ms.map(() => orc / 12), tracejada: true, fina: true }] : [{ nome: 'Orçado', cor: 'var(--faint)', v: serie('orcado'), tracejada: true, fina: true }]),
         { nome: 'Previsto', cor: 'var(--bv-mid)', v: serie('previsto'), area: true },
         { nome: 'Realizado', cor: 'var(--bv-deep)', v: serie('realizado'), ate: passado }], fmtCurto, idx)}</div>
-      <div class="card"><p class="lbl">Times · previsto de ${a}</p>${barrasH([...c.porTime.filter(x => x.ok).map(({ t, tot }) => ({ nome: `<button class="bvc" data-tm="${t.slug}">${esc(t.nome)}</button>`, valor: tot.previsto, ref: tot.orcado, cap: tetoAno(t).total, rotulo: `${fmtCurto(tot.previsto)}${tetoAno(t).total && tot.previsto > tetoAno(t).total ? ' <span class="tag late">teto</span>' : ''}`, titulo: `${t.nome}: previsto ${fm(tot.previsto)} · orçado ${fm(tot.orcado)}${tetoAno(t).total ? ' · teto ' + fm(tetoAno(t).total) : ''}` })).sort((p, q) => q.valor - p.valor), ...(db.itens.length ? [{ nome: '<i>Itens do grupo</i>', valor: c.itens.previsto, ref: c.itens.orcado, cor: 'var(--bv-mid)' }] : [])], fm)}
+      <div class="card"><p class="lbl">${db.times.some(ehGrupo) ? 'Unidades' : 'Times'} · previsto de ${a}</p>${barrasH([...c.porTime.filter(x => x.ok).map(({ t, tot }) => ({ nome: `<button class="bvc" data-tm="${t.slug}">${esc(t.nome)}</button>`, valor: tot.previsto, ref: tot.orcado, cap: tetoAno(t).total, rotulo: `${fmtCurto(tot.previsto)}${tetoAno(t).total && tot.previsto > tetoAno(t).total ? ' <span class="tag late">teto</span>' : ''}`, titulo: `${t.nome}: previsto ${fm(tot.previsto)} · orçado ${fm(tot.orcado)}${tetoAno(t).total ? ' · teto ' + fm(tetoAno(t).total) : ''}` })).sort((p, q) => q.valor - p.valor), ...(db.itens.length ? [{ nome: '<i>Itens do grupo</i>', valor: c.itens.previsto, ref: c.itens.orcado, cor: 'var(--bv-mid)' }] : [])], fm)}
         <div class="legend" style="margin-top:12px"><span><i style="background:var(--bv)"></i>Previsto</span><span><i style="background:var(--ink);width:2px"></i>Orçado</span><span><i style="background:var(--late);width:2px"></i>Teto</span></div></div>
     </div>
     <div class="card"><div class="row"><div class="sg">${Object.entries(dims).map(([k, n]) => `<button class="${agrupar === k ? 'on' : ''}" data-g="${k}">${n}</button>`).join('')}</div><span class="grow"></span><button class="btn sm" id="cCsv">Exportar CSV</button></div>
       <div style="margin-top:12px">${tabelaAgrupada(agrupar)}</div></div>
     <div class="card"><p class="lbl">Previsto por mês, empilhado por time</p>${graficoTimes()}</div>`;
   if ($('#cRev')) $('#cRev').onclick = () => { view = 'revisar'; render(); };
+  if ($('#cAcima')) $('#cAcima').onclick = publicarAcimaDlg;
   $$('[data-g]', el).forEach(b => b.onclick = () => { agrupar = b.dataset.g; render(); });
   $('#cCsv').onclick = exportarCsv;
   $$('[data-tm]', el).forEach(b => b.onclick = () => detalheTime(b.dataset.tm));
@@ -984,12 +1075,15 @@ function vRevisar(el) {
 
 /* --- Times --- */
 function vTimes(el) {
-  el.innerHTML = `<div class="bar"><span class="muted">Cada time tem uma chave de finanças própria, diferente da chave de tarefas.</span><span class="grow"></span><button class="btn pri" id="tNovo">+ Time</button></div>
-    ${db.times.map(t => { const c = chaveAtualTexto(t); return `<div class="card"><div class="row"><h3>${esc(t.nome)}</h3><span class="code faint">${esc(t.slug)}</span>${t.prefixo ? `<span class="chip">${esc(t.prefixo)}</span>` : ''}<span class="grow"></span>
+  const tA = tetoAcima(), somaTetos = db.times.reduce((s2, t) => s2 + (tetoAno(t).total || 0), 0);
+  el.innerHTML = `<div class="bar"><span class="muted">Cada unidade tem uma chave própria. Times publicam o plano; grupos de outros gestores publicam o consolidado deles.</span><span class="grow"></span><button class="btn" id="tNovoG">+ Grupo de outro gestor</button><button class="btn pri" id="tNovo">+ Time</button></div>
+    ${tA ? `<div class="card flat">${cardLeitura({ k: `Teto da liderança · ${anoV()}`, v: fm(tA), pct: somaTetos / tA, s: somaTetos > tA ? `Os tetos das unidades somam <b>${fm(somaTetos)}</b>: <b>${fm(somaTetos - tA)}</b> acima do teto da liderança` : `Os tetos das unidades somam <b>${fm(somaTetos)}</b> · falta repartir <b>${fm(tA - somaTetos)}</b>` }).replace('class="ins', 'style="border:0;padding:0" class="ins')}</div>` : ''}
+    ${db.times.map(t => { const c = chaveAtualTexto(t); return `<div class="card"><div class="row"><h3>${esc(t.nome)}</h3><span class="code faint">${esc(pastaUnidade(t).slice(0, 2).join('/'))}</span>${ehGrupo(t) ? '<span class="chip bv">grupo</span>' : ''}${t.prefixo ? `<span class="chip">${esc(t.prefixo)}</span>` : ''}<span class="grow"></span>
       ${c ? `<span class="chip ok">chave ${esc(c.kid)}</span>` : '<span class="chip late">sem chave</span>'}${t.diretriz.revision ? `<span class="chip">diretriz rev. ${t.diretriz.revision}</span>` : ''}</div>
       <div class="row" style="margin-top:10px"><button class="btn sm" data-ed="${t.slug}">Teto e diretriz</button>${c ? `<button class="btn sm" data-cp="${t.slug}">Copiar chave</button><button class="btn sm danger" data-rv="${t.slug}">Revogar chave</button>` : `<button class="btn sm pri" data-gk="${t.slug}">Gerar chave</button>`}
-      <button class="btn sm" data-ht="${t.slug}">HTML de finanças do time</button><button class="btn sm" data-pd="${t.slug}" ${c && raiz ? '' : 'disabled'}>Publicar diretriz</button></div></div>`; }).join('') || '<div class="card empty">Nenhum time. Adicione os times que vão publicar plano financeiro.</div>'}`;
+      ${ehGrupo(t) ? '' : `<button class="btn sm" data-ht="${t.slug}">HTML de finanças do time</button>`}<button class="btn sm" data-pd="${t.slug}" ${c && raiz ? '' : 'disabled'}>Publicar diretriz</button></div></div>`; }).join('') || '<div class="card empty">Nenhum time. Adicione os times que vão publicar plano financeiro.</div>'}`;
   $('#tNovo').onclick = () => timeDlg(null);
+  $('#tNovoG').onclick = () => timeDlg(null, 'grupo');
   $$('[data-ed]', el).forEach(b => b.onclick = () => timeDlg(b.dataset.ed));
   $$('[data-gk]', el).forEach(b => b.onclick = () => gerarChave(timePorSlug(b.dataset.gk)));
   $$('[data-cp]', el).forEach(b => b.onclick = async () => { const t = timePorSlug(b.dataset.cp); if (!await avisoCofre('chave')) return; try { await navigator.clipboard.writeText(chaveAtualTexto(t).texto); toast('Chave copiada. Envie por mensagem direta.'); } catch { modal(`<div class="mh"><h2>Chave</h2></div><div class="mb"><input class="sin code" style="width:100%" readonly value="${esc(chaveAtualTexto(t).texto)}"></div><div class="mf"><button class="btn pri" onclick="fecharModal()">Fechar</button></div>`); } });
@@ -997,10 +1091,10 @@ function vTimes(el) {
   $$('[data-ht]', el).forEach(b => b.onclick = () => htmlDoTime(timePorSlug(b.dataset.ht)));
   $$('[data-pd]', el).forEach(b => b.onclick = () => publicarDiretriz(timePorSlug(b.dataset.pd)));
 }
-function timeDlg(slug) {
-  const t = slug ? timePorSlug(slug) : { nome: '', slug: '', prefixo: '', chaves: [], teto: { total: 0, caps: {} }, tetos: {}, diretriz: {}, publishBy: '', nota: '' };
+function timeDlg(slug, tipo = 'time') {
+  const t = slug ? timePorSlug(slug) : { nome: '', slug: '', tipo, prefixo: '', chaves: [], teto: { total: 0, caps: {} }, tetos: {}, diretriz: {}, publishBy: '', nota: '' };
   const v = c => c ? (c / 100).toLocaleString('pt-BR') : '';
-  const d = modal(`<div class="mh"><h2>${slug ? esc(t.nome) : 'Novo time'}</h2></div><div class="mb">
+  const d = modal(`<div class="mh"><h2>${slug ? esc(t.nome) : ehGrupo(t) ? 'Novo grupo de outro gestor' : 'Novo time'}</h2></div><div class="mb">${ehGrupo(t) && !slug ? '<p class="small muted" style="margin-top:0">Use como identificador o mesmo do grupo do gestor (aparece em Ajustes das Finanças do Grupo dele). Depois gere a chave e envie a ele por mensagem direta.</p>' : ''}
     <div class="f2"><label class="field"><span>Nome</span><input class="sin" id="mN" value="${esc(t.nome)}"></label><label class="field"><span>Identificador (pasta)</span><input class="sin code" id="mS" value="${esc(t.slug)}" ${slug ? 'disabled' : ''}></label></div>
     <div class="f2"><label class="field"><span>Prefixo de código (opcional)</span><input class="sin" id="mP" value="${esc(t.prefixo || '')}" maxlength="5"></label><label class="field"><span>Publicar plano até</span><input class="sin" type="date" id="mD" value="${esc(t.publishBy || '')}"></label></div>
     <p class="lbl">Teto de ${anoV()} (vai na diretriz; troque o ano no topo para os outros anos)</p>
@@ -1059,6 +1153,13 @@ function vAjustes(el) {
       <button class="btn sm" id="gItem">+ Item mensal</button></div>
     <div class="card"><p class="lbl">Categorias do grupo</p>${db.categorias.map(c => `<div class="row" style="margin-bottom:6px"><input class="sin grow" data-cn="${c.id}" value="${esc(c.nome)}"><select class="sel" data-ct="${c.id}"><option ${c.tipo === 'OPEX' ? 'selected' : ''}>OPEX</option><option ${c.tipo === 'CAPEX' ? 'selected' : ''}>CAPEX</option></select></div>`).join('')}
       <div class="row"><input class="sin grow" id="gNC" placeholder="Nova categoria"><button class="btn" id="gNCb">Adicionar</button></div><p class="small muted">Linhas dos times com categoria fora desta lista são somadas em "Outras" e aparecem na saúde da soma.</p></div>
+    <div class="card"><p class="lbl">Nível acima · sua liderança</p>${(() => { const c = chaveAcimaTexto(), pub = db.acima.publicacao, d = db.acima.diretriz; return `
+      ${c ? `<p>Chave <span class="code">${esc(c.kid)}</span> · ${pub.revision ? `publicado na revisão ${pub.revision}, ${fmtDataHora(pub.em)} ${acimaPendente() ? '<span class="chip late">mudou desde então</span>' : '<span class="chip ok">em dia</span>'}` : 'ainda não publicado'}</p>`
+        : `<p class="small muted" style="margin-top:0">Se a sua liderança também usa as Finanças do Grupo, ela cadastra este grupo (identificador <span class="code">${esc(db.grupo.slug)}</span>), gera uma chave e envia por mensagem direta. Cole aqui uma vez.</p>`}
+      <div class="row"><input class="sin grow" id="gAc" type="password" placeholder="GK1.${esc(db.grupo.slug)}-fin-…"><button class="btn" id="gAcOk">Cadastrar</button></div>
+      ${d ? `<p class="small" style="margin-top:10px">Diretriz da liderança, revisão ${d.revision}: ${[...new Set([...(d.fiscalYears || []), d.fiscalYear])].filter(Boolean).sort().map(a => tetoAcima(a) ? `<b>${a}</b> teto ${fm(tetoAcima(a))}` : '').filter(Boolean).join(' · ') || 'sem teto'}${d.note ? `<br><span class="muted">${esc(d.note)}</span>` : ''}</p>` : ''}
+      <div class="row" style="margin-top:10px"><button class="btn pri" id="gAcPub" ${c && raiz ? '' : 'disabled'}>Publicar consolidado para a liderança</button></div>
+      <p class="small muted">Vai cifrado para <span class="code">grupos/${esc(db.grupo.slug)}/financas/plano.json</span>: uma linha por time e categoria, mês a mês, de todos os anos. Você confere antes o que sobe.</p>`; })()}</div>
     <div class="card"><p class="lbl">Segurança</p><p class="small">Arquivo <span class="code">${esc(arquivo)}</span> cifrado com a sua senha. As chaves dos times ficam dentro dele.</p>
       <div class="row"><button class="btn" id="gSenha">Trocar senha</button><button class="btn" id="gBk">Baixar cópia cifrada</button></div>
       <p class="small muted">A pasta local guarda as 5 últimas versões em <span class="code">backup/</span>; baixe uma cópia cifrada de vez em quando.</p></div></div>`;
@@ -1077,6 +1178,13 @@ function vAjustes(el) {
   $$('[data-cn]', el).forEach(i => i.onchange = () => { catPorId(i.dataset.cn).nome = clamp(i.value.trim(), 60); agendarSalvar(); });
   $$('[data-ct]', el).forEach(i => i.onchange = () => { catPorId(i.dataset.ct).tipo = i.value; agendarSalvar(); });
   $('#gNCb').onclick = () => { const n = $('#gNC').value.trim(), id = slugify(n); if (!id || catPorId(id)) return; db.categorias.push({ id, nome: clamp(n, 60), tipo: 'OPEX' }); agendarSalvar(); };
+  $('#gAcOk').onclick = async () => {
+    const v = $('#gAc').value.trim(); if (!v) return;
+    try { lerChaveTexto(v); } catch (e) { return toast(e.message, 5000); }
+    if (!await avisoCofre('chave')) return;
+    try { const kid = await cadastrarChaveAcima(v); toast('Chave da liderança cadastrada: ' + kid); await lerAcima(); } catch (e) { toast(e.message, 6000); }
+  };
+  $('#gAcPub').onclick = publicarAcimaDlg;
   $('#gSenha').onclick = async () => { const s = await criarSenhaDlg('Nova senha do arquivo'); if (!s) return; ctx = await novoCtx(s, TOOL); db.seg = { cofreConfirmadoEm: new Date().toISOString() }; await salvar(); toast('Senha trocada.'); };
   $('#gBk').onclick = async () => baixar(arquivo.replace(/\.json$/, '') + '-copia-' + hojeISO() + '.json', await cifrarLocal(db, ctx));
 }
