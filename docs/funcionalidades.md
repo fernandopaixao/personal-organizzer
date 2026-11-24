@@ -221,5 +221,5 @@ Apoio para **enxergar e planejar as ausências** do time e do grupo. Não substi
 
 **Planejar:** ao marcar uma ausência, o formulário mostra quantas outras pessoas já estão fora e se algum dia passa do limite, e sugere os três períodos com menos gente fora nos próximos seis meses.
 
-**Níveis:** cada membro do time publica o que cadastrou em `times/<time>/ferias/` (sozinho, a cada mudança, com a chave do time); o gestor soma os times, cadastra as próprias férias e as dos diretos e publica o consolidado em `grupos/<grupo>/ferias/` depois de conferir; a liderança cadastra o grupo do gestor como unidade e soma do mesmo jeito ([ADR-0022](adr/0022-consolidacao-em-niveis.md)).
+**Níveis:** cada membro do time publica o que cadastrou em `times/<time>/ferias/` (sozinho, a cada mudança, com a chave do time); o gestor soma os times, cadastra as próprias férias e as dos diretos e publica o consolidado em `grupos/<grupo>/ferias/` depois de conferir; a liderança cadastra o grupo do gestor como unidade e soma do mesmo jeito ([ADR-0025](adr/0025-consolidacao-em-niveis.md) e [ADR-0026](adr/0026-ferias-em-niveis.md)).
 

@@ -12,7 +12,7 @@ Uma ferramenta nova e desacoplada, `ferias.html` (título **Mapa de Férias**), 
 | **Time** (cada membro ou o responsável) | As próprias férias e, se quiser, as dos colegas | O mapa do time, somando o que cada membro publicou | Sozinho, a cada mudança: `times/<time>/ferias/<pessoa>-<computador>.json` |
 | **Gestor ou liderança** | As próprias férias e as dos diretos (quem não está num time) | O mapa do grupo inteiro: times, grupos de outros gestores, você e diretos | Por botão, depois de conferir: `grupos/<grupo>/ferias/<pessoa>-<computador>.json` |
 
-A liderança cadastra o grupo do gestor como uma **unidade** e soma o consolidado dele como se fosse um time. Funciona em quantos níveis forem precisos ([ADR-0022](adr/0022-consolidacao-em-niveis.md)).
+A liderança cadastra o grupo do gestor como uma **unidade** e soma o consolidado dele como se fosse um time. Funciona em quantos níveis forem precisos ([ADR-0025](adr/0025-consolidacao-em-niveis.md) e [ADR-0026](adr/0026-ferias-em-niveis.md)).
 
 ## 2. Telas
 - **Mapa** (padrão): cards de leitura (fora hoje, pico do período, dias acima do limite, dias úteis sem ninguém fora), lista "Pedindo atenção", **mapa de calor** dos meses (cada dia colorido pela quantidade de pessoas fora; vermelho acima do limite; clique abre quem está fora), **semanas mais cheias** e **mais tranquilas** e barras **por unidade** (ou por pessoa, no time). Filtros no topo: unidade e período (próximos 3 ou 6 meses, este ano, próximo ano).

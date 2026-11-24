@@ -56,7 +56,3 @@ Tem o próprio arquivo cifrado (`hub-<nome>.json`, com os times e as chaves), cr
 - o gestor publica o consolidado para a liderança em `grupos/<grupo>/ferias/`, com a mesma chave do grupo das Finanças do Grupo, e a liderança soma os gestores do mesmo jeito, em quantos níveis forem precisos.
 
 Plano e decisões em [`docs/plano-ferias.md`](docs/plano-ferias.md); teste com `node financas/testes/teste-ferias.js`.
-
-## Regras do repositório
-
-[`CLAUDE.md`](CLAUDE.md): toda funcionalidade nova atualiza a documentação no mesmo PR (funcionalidades, passo a passo, jornada, visão geral, README e ADRs).

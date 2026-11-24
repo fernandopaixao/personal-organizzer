@@ -29,8 +29,7 @@ Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequê
 | [0019](0019-edge-e-chrome-file-system-access.md) | Edge/Chrome | File System Access API |
 | [0020](0020-principios-de-interface.md) | Princípios de interface | Um destaque azul, modal para criar, painel para ver |
 | [0021](0021-feedbacks-fora-da-integracao.md) | Feedbacks fora | Ferramenta de feedbacks sem integração |
-| [0022](0022-consolidacao-em-niveis.md) | Consolidação em níveis | Cada nível soma os de baixo e publica para o de cima; uma chave por grupo para todos os assuntos |
-| [0023](0023-documentacao-no-mesmo-pr.md) | Documentação no mesmo PR | Toda funcionalidade nova atualiza os documentos no mesmo PR (`CLAUDE.md`) |
+| [0026](0026-ferias-em-niveis.md) | Férias em níveis | Mapa de Férias: chave do time no time, chave do grupo entre níveis, um arquivo por pessoa |
 
 ## Checklist para uma funcionalidade nova
 
@@ -43,8 +42,7 @@ Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequê
 7. **Entrada externa:** escapar, validar, prévia antes de aplicar ([0013](0013-downstream-previa-e-conciliacao.md), [0015](0015-agentes-por-arquivo.md)).
 8. **Interface:** um destaque, gráfico antes de texto, criar em modal, ver em painel, sem página nova se uma existente é a dona do dado ([0020](0020-principios-de-interface.md)).
 9. **Build e teste:** editar a fonte, rodar `python3 tools/injetar_seguranca.py` (Central/Quadro) ou `python3 tools/build_financas.py`, e `node financas/testes/teste-e2e.js` ([0017](0017-build-embutir-e-injetar.md)).
-10. **Documentar no mesmo PR (obrigatório, [0023](0023-documentacao-no-mesmo-pr.md)):** plano do recurso em `docs/`, ADR nova se a decisão vale para mais de uma ferramenta, e atualizar [funcionalidades](../funcionalidades.md), o [passo a passo](../passo-a-passo.md), a [jornada](../jornada-do-usuario.md), a [visão geral](../visao-geral-da-solucao.md) e o README. A lista completa está em `CLAUDE.md`.
-11. **Consolidação?** Se o dado sobe de nível (time → gestor → liderança), siga a [0022](0022-consolidacao-em-niveis.md).
+10. **Documentar:** plano do recurso em `docs/`, ADR nova se a decisão vale para mais de uma ferramenta, e atualizar [funcionalidades](../funcionalidades.md) e o [passo a passo](../passo-a-passo.md).
 
 ## Como escrever uma ADR nova
 Copie uma existente, numere em sequência, use **Status** (proposta, aceita, substituída por ADR-xxxx), data e origem. Não apague ADRs antigas: marque como substituídas.
