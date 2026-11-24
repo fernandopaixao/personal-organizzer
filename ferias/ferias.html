@@ -512,6 +512,26 @@ const kv = (() => {
   return { get: k => tx('readonly', s => s.get(k)).catch(() => undefined), set: (k, v) => tx('readwrite', s => s.put(v, k)).catch(() => {}), del: k => tx('readwrite', s => s.delete(k)).catch(() => {}) };
 })();
 
+/* ---------------------- arquivo e pastas lembrados (ADR-0030) ---------------------- */
+// O assistente grava, neste navegador, onde ficou o arquivo de cada ferramenta e a pasta sincronizada;
+// cada ferramenta lê e abre sozinha. Nos testes automatizados (webdriver) só vale com window.__lembrar.
+const lembrarAtivo = () => !navigator.webdriver || window.__lembrar === true;
+async function lembrarArquivo(chave, dir, arquivo) { if (lembrarAtivo() && dir && arquivo) await kv.set('local:' + chave, { dir, arquivo }); }
+async function arquivoLembrado(chave) { if (!lembrarAtivo()) return null; const u = await kv.get('local:' + chave); return u?.dir && u.arquivo ? u : null; }
+async function pastaLembrada(chave) { if (!lembrarAtivo()) return null; return (await kv.get(chave)) || null; }
+function lembrarPasta(chave, h) { if (lembrarAtivo() && h) kv.set(chave, h); }
+// Na primeira abertura: se o navegador ainda tem a permissão da pasta, abre o último arquivo sem perguntar nada.
+async function abrirLembradoSePuder(chave, abrir) {
+  const u = await arquivoLembrado(chave); if (!u) return false;
+  try { if (!await permissao(u.dir, false) || !await lerTexto(u.dir, u.arquivo)) return false; } catch { return false; }
+  await abrir(u.dir, u.arquivo); return true;
+}
+// Botão "Abrir <arquivo>" da tela inicial (um clique libera a pasta quando a permissão expirou).
+function botaoUltimo(u) {
+  return u ? `<button class="opt" id="iUlt" style="margin-top:18px"><b>Abrir ${esc(u.arquivo)}</b><span>Pasta pessoal <span class="code">${esc(u.dir.name)}</span>, usada por último neste computador.</span></button>` : '';
+}
+function ligarUltimo(u, abrir, tela) { const b = document.getElementById('iUlt'); if (b && u) b.onclick = async () => { if (!await permissao(u.dir)) return tela('Sem permissão na pasta.'); await abrir(u.dir, u.arquivo); }; }
+
 /* ---------------------- identidade do computador (dispositivo) ---------------------- */
 // Identificador aleatório e curto, guardado no navegador. Junto com a pessoa forma o "dono"
 // de um arquivo comum: ana-k3f9. Nunca usa o nome real do computador.
@@ -1001,9 +1021,11 @@ const pctTxt = (a, b) => b ? Math.round(a / b * 100) + '%' : '—';
      (a mesma chave GK1.<grupo>-fin-… das Finanças do Grupo serve). Funciona em quantos níveis forem precisos.
    Notas das ausências ficam só no arquivo local cifrado. Conteúdo comum: gestao-ferias/1.
    ===================================================================== */
-const TOOL = 'ferias', TOOL_NOME = 'Mapa de Férias', TOOL_VERSION = '1.1.1';
+const TOOL = 'ferias', TOOL_NOME = 'Mapa de Férias', TOOL_VERSION = '1.2.0';
 const LOCAL_SCHEMA = 'gestao-ferias-local/1', FERIAS_SCHEMA = 'gestao-ferias/1';
 const PRESET = /*FERIAS-PRESET*/null/*FIM-FERIAS-PRESET*/;
+// Onde o arquivo desta ferramenta ficou neste navegador (gravado pelo assistente ou na última abertura).
+const LEMBRAR = TOOL + ':' + (PRESET?.unidade?.slug || '');
 const TIPOS = { ferias: 'Férias', folga: 'Folga ou day off', treinamento: 'Treinamento ou evento', outro: 'Outra ausência' };
 const DIAS_SEM = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
 
@@ -1190,7 +1212,7 @@ async function ligarPasta(h, silencioso = false) {
     if (r !== 'ok') return false;
   }
   raiz = h; db.pastaComum = h.name; agendarSalvar();
-  if (!navigator.webdriver) kv.set('ferias-raiz:' + db.unidade.slug, h);
+  lembrarPasta('ferias-raiz:' + db.unidade.slug, h);
   await lerPasta(silencioso);
   clearInterval(pollT); pollT = setInterval(() => lerPasta(true), 60000);
   clearInterval(abertoT); const marca = async () => marcarAberto(await subpasta(raiz, pastaPropria(), true), writer(), TOOL); marca(); abertoT = setInterval(marca, 60000);
@@ -1653,12 +1675,14 @@ function vAjustes(el) {
 }
 
 /* ---------------------------- abertura e criação ---------------------------- */
-function telaInicial(msg = '') {
+async function telaInicial(msg = '') {
+  const ult = await arquivoLembrado(LEMBRAR);
   $('#app').innerHTML = `<div class="welcome"><div class="card">
     <div class="row"><div class="logo" style="margin:0">FÉR</div><div><h2 style="margin:0">Mapa de Férias</h2><div class="small muted">Enxergar e planejar as ausências do time e do grupo</div></div></div>
     ${PRESET?.unidade ? `<div class="banner" style="margin-top:16px">Pré-configurado para <b>${esc(PRESET.unidade.nome)}</b>.${PRESET.chave ? ' A chave do time vem junto: você vai guardá-la no cofre ao criar o arquivo.' : ''}</div>` : ''}
     ${msg ? `<div class="banner warn" style="margin-top:12px">${esc(msg)}</div>` : ''}
     ${avisoFS()}
+    ${botaoUltimo(ult)}
     <p class="lbl" style="margin-top:20px">É a primeira vez?</p>
     <button class="opt" id="iTime"><b>Sou de um time</b><span>Cadastro as minhas férias (e, se quiser, as do time). Elas somam com as dos colegas e chegam ao gestor.</span></button>
     <button class="opt" id="iGrupo"><b>Sou gestor ou liderança</b><span>Vejo os dias com mais e menos gente fora em todos os meus times e grupos, cadastro as minhas e as dos diretos e publico para a minha liderança.</span></button>
@@ -1668,7 +1692,7 @@ function telaInicial(msg = '') {
   </div></div>`;
   $('#iTime').onclick = () => criarDlg('time');
   $('#iGrupo').onclick = () => criarDlg('grupo');
-  $('#iAbrir').onclick = abrirPasta;
+  $('#iAbrir').onclick = abrirPasta; ligarUltimo(ult, abrirArquivo, telaInicial);
 }
 async function abrirPasta() {
   let h; try { h = await escolherPasta('ferias-local'); } catch (e) { if (e.name !== 'AbortError') toast(e.message); return; }
@@ -1694,7 +1718,8 @@ async function aposAbrir() {
   await carregarChaves();
   render();
   if (await lembreteTesteSenha(db.seg, ctx)) agendarSalvar();
-  if (!navigator.webdriver) { const h = await kv.get('ferias-raiz:' + db.unidade.slug); if (h && await permissao(h, false)) await ligarPasta(h, true); }
+  lembrarArquivo(LEMBRAR, dirLocal, arquivo);
+  { const h = await pastaLembrada('ferias-raiz:' + db.unidade.slug); if (h && await permissao(h, false)) await ligarPasta(h, true); }
 }
 function criarDlg(nivel) {
   if (semFS()) return;
@@ -1715,8 +1740,7 @@ function criarDlg(nivel) {
   };
 }
 async function escolherPastaLocal() {
-  await perguntar('Pasta local', `<p>Escolha uma pasta <b>deste computador</b> que <b>não</b> esteja no OneDrive. Ela guarda seus dados cifrados (pode ser a mesma das outras ferramentas).</p>
-    <div class="banner warn">Com o backup de pastas do OneDrive ligado, <b>Documentos</b> e <b>Área de Trabalho</b> também sincronizam. Prefira algo como <span class="code">C:\\Users\\voce\\GestaoLocal</span>.</div>`, [['ok', 'Escolher pasta', 'pri']]);
+  await perguntar('Pasta local', `<p>Escolha a sua <b>pasta pessoal</b>: só sua, de preferência no <b>seu OneDrive</b> (backup se trocar de computador), como <span class="code">OneDrive - Empresa\\GestaoPessoal</span>. Pode ser a mesma das outras ferramentas. Nunca a pasta compartilhada com os times.</p><div class="banner">O arquivo é cifrado com a sua senha: no OneDrive, ninguém consegue ler sem ela.</div>`, [['ok', 'Escolher pasta', 'pri']]);
   let h; try { h = await escolherPasta('ferias-local'); } catch { return null; }
   if (!await permissao(h)) return null;
   const s = await suspeitaDeSincronizada(h);
@@ -1738,7 +1762,7 @@ async function criarArquivo({ nivel, nome, slug, pessoa }) {
   toast(nivel === 'grupo' ? 'Arquivo criado e cifrado. Agora adicione os times e grupos.' : 'Arquivo criado e cifrado. Agora marque as suas férias.', 5000);
   return true;
 }
-telaInicial();
+(async () => { if (!await abrirLembradoSePuder(LEMBRAR, abrirArquivo) || (!db && !$('#app').children.length)) telaInicial(); })();
 </script>
 </body>
 </html>

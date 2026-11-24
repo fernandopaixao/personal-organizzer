@@ -204,7 +204,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   await a2.click('#prox'); await a2.click('[data-p="gestor"]'); await a2.click('[data-u="financas"]'); await a2.click('[data-u="tarefas"]'); await a2.click('#prox');
   const kAcima = await a2.evaluate(() => gerarChaveTexto('tecnologia-fin-2611'));
   await a2.click('[data-k="sim"]'); await a2.fill('#kT', kAcima + '\n' + await a2.evaluate(() => gerarChaveTexto('pagamentos-2611'))); await a2.click('#kLer');
-  ok(/nível acima/.test(await a2.textContent('#wz')) && /será ignorada/.test(await a2.textContent('#wz')), 'gestor: chave de finanças da liderança vira "nível acima"; chave de tarefas de time é ignorada');
+  ok(/nível acima/.test(await a2.textContent('#wz')) && /reaproveitada/.test(await a2.textContent('#wz')), 'gestor: chave de finanças da liderança vira "nível acima"; chave de tarefas de um time é reaproveitada');
   await a2.click('#prox'); await cofre(a2);
   await a2.fill('#dN', 'Tecnologia'); await a2.fill('#dT', 'Pagamentos PAG\nCartões CAR'); await a2.fill('#dP', 'Fernando'); await a2.click('#prox');
   await a2.click('#pL'); await a2.waitForSelector('#pL ~ .chip'); await a2.click('#prox'); await a2.click('#sC'); await criarSenha(a2, SENHA2); await a2.click('#prox');
@@ -290,6 +290,9 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   const h = await nova(SAIDA_URL + 'hub_gerado.html', { 'fin-local': 'LocalGestor2', 'fin-comum': 'Gestao-Compartilhado' });
   await h.click('#iAbrir'); await senhaAbrir(h, SENHA2); await h.waitForSelector('#topo');
   ok(await h.evaluate(() => __hub.db.times.map(t => t.slug).join(',')) === 'pagamentos,cartoes', 'hub abre o arquivo criado pelo assistente, com os times do grupo');
+  ok(await h.evaluate(() => __hub.db.times.every(t => t.chaves.length === 1)) && await h.evaluate(() => __hub.db.times[0].chaves[0].kid) === 'pagamentos-2611', 'hub já vem com a chave de cada time (a colada no assistente foi reaproveitada)');
+  // daqui em diante o teste refaz o caminho manual (colar e importar chaves): começa sem as chaves geradas
+  await h.evaluate(async () => { __hub.db.times.forEach(t => { t.chaves = []; t.chavesFin = []; }); await carregarChaves(); render(); });
   const titulosF = await h.evaluate(() => __hub.ferramentas.map(f => f.titulo).join(' | '));
   ok(/Central de Gestão/.test(titulosF) && /Finanças do Grupo/.test(titulosF) && !/Hub/.test(titulosF), 'hub encontra as ferramentas da pasta local: ' + titulosF);
   ok(await h.evaluate(() => [...document.querySelectorAll('a.tool')].every(a => !/^[a-z]+:/i.test(a.getAttribute('href')))), 'links das ferramentas são relativos (abrem o HTML ao lado do hub)');
@@ -515,6 +518,8 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
 
   console.log('16. Central 15.5: finanças dos times, só leitura');
   await c.bringToFront(); await c.evaluate(() => { window.__M = { 'gestao-integracao': 'Gestao-Compartilhado' }; });
+  ok(await c.evaluate(() => db.teams.every(t => /-fin-/.test(finKeyActive(t.id)?.key || '') && igActiveKey(t.id))), 'Central do assistente já vem com a chave de tarefas e a de finanças de cada time');
+  await c.evaluate(() => { db.integ.finKeys = {}; }); // daqui em diante: o caminho manual (importar do Finanças do Grupo)
   await c.evaluate(() => igPickDir()); await c.waitForTimeout(600);
   ok(await c.evaluate(() => !Object.keys(db.integ.fin).length), 'sem chave de finanças, a Central não lê planos');
   ok(await c.evaluate(() => { try { finAddKey(db.teams.find(t => t.slug === 'pagamentos'), 'GK1.pagamentos-2611.' + 'A'.repeat(43)); return false; } catch (e) { return /chave de tarefas/.test(e.message); } }), 'recusa chave de tarefas no lugar da de finanças');
@@ -592,6 +597,51 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   ok(await hp.evaluate(() => /Hub da solução/.test(document.title + document.body.textContent) && gestaoSessao.recebida) === SENHA2, 'botão "Abrir o hub" abre o hub criado na pasta, já com a senha da sessão');
   await hp.close();
   await ls.screenshot({ path: path.join(SAIDA, 'inicio-dois-arquivos.png'), fullPage: true });
+
+  console.log('20. Assistente 2.3: cada arquivo gerado abre pronto (chaves, arquivo e pasta lembrados)');
+  // Contexto novo (IndexedDB limpo) e com os handles guardados de verdade: as ferramentas lembram arquivo e pasta.
+  const ctxP = await browser.newContext({ colorScheme: ESCURO ? 'dark' : 'light' });
+  const novaP = async (url, mapa) => { const p = await ctxP.newPage(); p.on('pageerror', e => erros.push(url + ': ' + e.message));
+    await p.addInitScript(stub(mapa).replace('const put0', 'window.__lembrar = true; const put0').replace('IDBObjectStore.prototype.put = function', 'IDBObjectStore.prototype.__p = function')); await p.goto(base + url); return p; };
+  const ap = await novaP('/inicio.html', { 'fin-local': 'LocalPronto', 'fin-comum': 'CompPronto' });
+  await ap.click('#prox'); await ap.click('[data-p="gestor"]'); for (const u of ['financas', 'tarefas', 'ferias']) await ap.click(`[data-u="${u}"]`); await ap.click('#prox');
+  await ap.click('[data-k="nao"]'); await ap.click('#prox');
+  await ap.fill('#dN', 'Tecnologia'); await ap.fill('#dT', 'Pagamentos\nCartões'); await ap.fill('#dP', 'Fernando'); await ap.click('#prox');
+  await ap.click('#pL'); await ap.waitForSelector('#pL ~ .chip'); await ap.click('#pC'); await btn(ap, 'ok'); await ap.waitForSelector('#pC ~ .chip');
+  await ap.click('#prox'); await ap.click('#sC'); await criarSenha(ap, SENHA2); await ap.click('#prox');
+  await ap.waitForSelector('#mapa2', { timeout: 30000 });
+  const paraTimes = await opfs(ap, async () => [await listar('LocalPronto/para-os-times'), await listar('LocalPronto/para-os-times/pagamentos')]);
+  ok(paraTimes[0].join() === 'cartoes,pagamentos' && ['quadro_pagamentos.html', 'financas_pagamentos.html', 'ferias.html', 'LEIA-ME.txt'].every(n => paraTimes[1].includes(n)), 'caminho normal do gestor também gera as chaves e para-os-times/<time>/');
+  ok(await ap.evaluate(() => document.querySelectorAll('.tk').length === 2 && !/gere a chave/i.test(document.getElementById('wz').textContent)), 'tela final mostra as chaves de cada time e não pede para gerar chave à mão');
+  const salvarP = async (arq, nome) => fs.writeFileSync(path.join(SAIDA, nome), await opfs(ap, async n => ler('LocalPronto', n), arq));
+  await salvarP('hub.html', 'pronto_hub.html'); await salvarP('financas_grupo.html', 'pronto_grupo.html'); await salvarP('ferias.html', 'pronto_ferias.html'); await salvarP('gestao_pessoal.html', 'pronto_central.html');
+  // hub: abre direto o arquivo lembrado, já com os times, as chaves e a pasta sincronizada
+  const hP = await novaP(SAIDA_URL + 'pronto_hub.html', {});
+  await senhaAbrir(hP, SENHA2); await hP.waitForSelector('#topo'); await hP.waitForTimeout(500);
+  ok(await hP.evaluate(() => __hub.db.times.every(t => t.chaves.length === 1) && raiz?.name === 'CompPronto'), 'hub abre sozinho o arquivo, com a chave de cada time e a pasta sincronizada ligada');
+  // Finanças do Grupo e Mapa de Férias: mesma coisa, sem escolher pasta
+  const gP = await novaP(SAIDA_URL + 'pronto_grupo.html', {});
+  await senhaAbrir(gP, SENHA2); await gP.waitForSelector('#topo'); await gP.waitForTimeout(500);
+  ok(await gP.evaluate(() => db.times.map(t => t.prefixo + ':' + t.chaves.length).join() === 'PAG:1,CAR:1' && raiz?.name === 'CompPronto'), 'Finanças do Grupo abre sozinho, com prefixos sugeridos, chaves de finanças e pasta ligada');
+  const fP = await novaP(SAIDA_URL + 'pronto_ferias.html', {});
+  await senhaAbrir(fP, SENHA2); await fP.waitForFunction(() => !!db, null, { timeout: 8000 }); await fP.waitForTimeout(500);
+  ok(await fP.evaluate(() => db.unidades.every(u => u.chaves.length === 1) && raiz?.name === 'CompPronto'), 'Mapa de Férias abre sozinho, com as chaves dos times e a pasta ligada');
+  // Central: "Continuar com" o arquivo do assistente, pasta de integração já conectada, chaves de tarefas e de finanças
+  const cP = await novaP(SAIDA_URL + 'pronto_central.html', {});
+  await cP.waitForSelector('#btnLast:not(.hidden)', { timeout: 5000 });
+  ok(/gestao-tecnologia\.json/.test(await cP.textContent('#btnLast')), 'Central oferece "Continuar com gestao-tecnologia.json" sem escolher arquivo');
+  await cP.fill('#lockPass', SENHA2); await cP.click('#btnLast'); await cP.waitForFunction(() => !document.querySelector('#app').classList.contains('hidden'), null, { timeout: 8000 });
+  ok(await cP.evaluate(async () => (await igLoadDir())?.name === 'CompPronto' && db.teams.map(t => t.prefix).join() === 'PAG,CAR' && db.teams.every(t => igActiveKey(t.id) && finKeyActive(t.id))), 'Central abre com a pasta de integração conectada, prefixos e as duas chaves de cada time');
+  // Central 15.8: botão em destaque para gerar a chave de integração dentro do time
+  await cP.evaluate(() => { db.teams.push({ id: 'tmN', name: 'Pix Novo', prefix: '', slug: '', createdAt: Date.now() }); teamSel = 'tmN'; tmView = 'overview'; go('team'); });
+  ok(await cP.evaluate(() => !!document.querySelector('#team .tmkey [data-act="tm-newkey"]') && !!document.querySelector('#team [data-act="tm-view"][data-v="integ"] .fdot')), 'time sem chave: aviso em destaque com "Gerar chave de integração" e ponto na aba Integração');
+  await cP.setViewportSize({ width: 1280, height: 640 }); await cP.screenshot({ path: path.join(SAIDA, 'central-time-sem-chave.png') });
+  await cP.click('#team .tmkey [data-act="tm-newkey"]'); await cP.waitForSelector('#cofreOk, #f4ok', { timeout: 5000 }).catch(() => {});
+  ok(await cP.evaluate(() => { const t = teamById('tmN'); return t.slug === 'pix-novo' && t.prefix === 'PIX' && /^GK1\.pix-novo-\d{4}\./.test(igActiveKey('tmN')?.key || '') && tmView === 'integ'; }), 'um clique gera a chave, define pasta e prefixo e mostra a aba Integração do time');
+  await cP.evaluate(() => document.querySelectorAll('dialog[open]').forEach(d => d.close()));
+  await cP.setViewportSize({ width: 1280, height: 800 }); await cP.screenshot({ path: path.join(SAIDA, 'central-integracao-time.png') });
+  await ap.setViewportSize({ width: 900, height: 900 }); await ap.screenshot({ path: path.join(SAIDA, 'inicio-pronto-gestor.png'), fullPage: true });
+  await ctxP.close();
 
   ok(erros.length === 0, 'sem erros de JavaScript nas páginas' + (erros.length ? ': ' + erros.join(' | ') : ''));
   await browser.close(); srv.close();

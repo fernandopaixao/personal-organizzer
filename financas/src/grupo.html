@@ -21,9 +21,11 @@
    compara com o orçamento do grupo e publica diretrizes grupo/financas/diretriz-<time>.json.
    Orçamento aprovado, itens do grupo, chaves e versões ficam no arquivo local cifrado.
    ===================================================================== */
-const TOOL = 'financas-grupo', TOOL_NOME = 'Finanças do Grupo', TOOL_VERSION = '1.4.1';
+const TOOL = 'financas-grupo', TOOL_NOME = 'Finanças do Grupo', TOOL_VERSION = '1.5.0';
 const LOCAL_SCHEMA = 'gestao-financas-local/1', PLANO_SCHEMA = 'gestao-financas-plano/1', DIRETRIZ_SCHEMA = 'gestao-financas-diretriz/1';
 const PRESET = /*FING-PRESET*/null/*FIM-FING-PRESET*/;
+// Onde o arquivo desta ferramenta ficou neste navegador (gravado pelo assistente ou na última abertura).
+const LEMBRAR = TOOL;
 const CATS_PADRAO = [
   ['pessoas', 'Pessoas', 'OPEX'], ['terceiros', 'Terceiros e consultoria', 'OPEX'], ['licencas', 'Licenças e software', 'OPEX'],
   ['nuvem', 'Nuvem e infraestrutura', 'OPEX'], ['viagens', 'Viagens e eventos', 'OPEX'], ['treinamento', 'Treinamento', 'OPEX'],
@@ -121,7 +123,7 @@ async function ligarPasta(h, silencioso = false) {
   raiz = h; await subpasta(raiz, ['grupo', 'financas'], true); await subpasta(raiz, ['times'], true);
   if (!await lerTexto(raiz, 'LEIA-ME.md')) { try { await gravarSeguro(raiz, 'LEIA-ME.md', LEIA_ME()); } catch {} }
   db.pastaComum = h.name; agendarSalvar();
-  if (!navigator.webdriver) kv.set('fin-grupo-raiz:' + db.grupo.slug, h);
+  lembrarPasta('fin-grupo-raiz:' + db.grupo.slug, h);
   clearInterval(pollT); pollT = setInterval(() => lerPasta(true), 60000);
   await lerPasta(silencioso);
   return true;
@@ -587,17 +589,19 @@ function vAjustes(el) {
 }
 
 /* ---------------------------- abertura e criação ---------------------------- */
-function telaInicial(msg = '') {
+async function telaInicial(msg = '') {
+  const ult = await arquivoLembrado(LEMBRAR);
   $('#app').innerHTML = `<div class="welcome"><div class="card">
     <div class="row"><div class="logo" style="margin:0">GRP</div><div><h2 style="margin:0">Finanças do Grupo</h2><div class="small muted">Consolidado dos planos financeiros dos times</div></div></div>
     ${msg ? `<div class="banner warn" style="margin-top:12px">${esc(msg)}</div>` : ''}
     ${avisoFS()}
+    ${botaoUltimo(ult)}
     <p class="lbl" style="margin-top:20px">É a primeira vez?</p>
     <button class="opt" id="iNovo"><b>Criar o arquivo do grupo</b><span>Pasta pessoal só sua (de preferência no seu OneDrive), senha guardada no cofre, depois times e chaves.</span></button>
     <p class="lbl" style="margin-top:16px">Já tenho o arquivo</p>
     <button class="opt" id="iAbrir"><b>Abrir a pasta local</b><span>Onde está <span class="code">financas-grupo-&lt;nome&gt;.json</span>.</span></button>
   </div></div>`;
-  $('#iNovo').onclick = criarDlg; $('#iAbrir').onclick = abrirPasta;
+  $('#iNovo').onclick = criarDlg; $('#iAbrir').onclick = abrirPasta; ligarUltimo(ult, abrirArquivo, telaInicial);
 }
 async function abrirPasta() {
   let h; try { h = await escolherPasta('fin-local'); } catch (e) { return; }
@@ -621,7 +625,8 @@ async function abrirArquivo(h, nome) {
 async function aposAbrir() {
   render();
   if (await lembreteTesteSenha(db.seg, ctx)) agendarSalvar();
-  if (!navigator.webdriver) { const h = await kv.get('fin-grupo-raiz:' + db.grupo.slug); if (h && await permissao(h, false)) await ligarPasta(h, true); }
+  lembrarArquivo(LEMBRAR, dirLocal, arquivo);
+  { const h = await pastaLembrada('fin-grupo-raiz:' + db.grupo.slug); if (h && await permissao(h, false)) await ligarPasta(h, true); }
 }
 async function criarDlg() {
   if (semFS()) return;
@@ -640,7 +645,7 @@ async function criarDlg() {
   };
 }
 async function escolherPastaLocal() {
-  await perguntar('Pasta local', `<p>Escolha uma pasta <b>deste computador</b> que <b>não</b> esteja no OneDrive.</p><div class="banner warn">Com o backup de pastas do OneDrive ligado, <b>Documentos</b> e <b>Área de Trabalho</b> também sincronizam. Prefira algo como <span class="code">C:\\Users\\voce\\GestaoLocal</span>.</div>`, [['ok', 'Escolher pasta', 'pri']]);
+  await perguntar('Pasta local', `<p>Escolha a sua <b>pasta pessoal</b>: só sua, de preferência no <b>seu OneDrive</b> (backup se trocar de computador), como <span class="code">OneDrive - Empresa\\GestaoPessoal</span>. Pode ser a mesma das outras ferramentas. Nunca a pasta compartilhada com os times.</p><div class="banner">O arquivo é cifrado com a sua senha: no OneDrive, ninguém consegue ler sem ela.</div>`, [['ok', 'Escolher pasta', 'pri']]);
   let h; try { h = await escolherPasta('fin-local'); } catch { return null; }
   if (!await permissao(h)) return null;
   const s = await suspeitaDeSincronizada(h);
@@ -660,7 +665,7 @@ async function criarArquivo({ nome, pessoa, ano, moeda, dir, senha, times = [] }
   toast('Arquivo do grupo criado e cifrado. Cadastre os times e gere as chaves.', 5000);
   return true;
 }
-telaInicial();
+(async () => { if (!await abrirLembradoSePuder(LEMBRAR, abrirArquivo) || (!db && !$('#app').children.length)) telaInicial(); })();
 </script>
 <!--EMB:finTimeEmb-->
 </body>

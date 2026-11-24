@@ -59,7 +59,7 @@
       O Quadro do Time mostra os post-its e grava quem já viu em times/<time>/postits/vistos/<pessoa>-<computador>.json.
    O arquivo pessoal do hub (times, chaves e seus post-its) é cifrado com a sua senha e fica numa pasta só sua (de preferência no seu OneDrive), nunca na compartilhada.
    ===================================================================== */
-const TOOL = 'hub', TOOL_NOME = 'Hub da solução', TOOL_VERSION = '1.3.1';
+const TOOL = 'hub', TOOL_NOME = 'Hub da solução', TOOL_VERSION = '1.4.0';
 try { window.name = 'gestao-hub'; } catch {}   // o botão "← Hub" das ferramentas volta para esta aba sem recarregar
 const LOCAL_SCHEMA = 'gestao-hub-local/1', POSTITS = 'gestao-postits/1', VISTOS = 'gestao-postits-vistos/1', PLANO = 'gestao-financas-plano/1';
 const CORES = [['amarelo', 'Amarelo'], ['rosa', 'Rosa'], ['verde', 'Verde'], ['azul', 'Azul'], ['lilas', 'Lilás']];
@@ -178,7 +178,7 @@ async function ligarPasta(h, silencioso = false) {
   }
   if (dirLocal && h.name === dirLocal.name && !v.tem && !silencioso) toast('Atenção: esta parece ser a pasta local. A pasta comum é a sincronizada pelo OneDrive.', 6000);
   raiz = h; db.pastaComum = h.name; agendarSalvar();
-  if (!navigator.webdriver) kv.set('hub-raiz', h);
+  lembrarPasta('hub-raiz', h);
   await lerTudo(); render();
   for (const t of db.times) if ((db.notas[t.slug] || []).length && !db.publicacao[t.slug]?.revision) agendarPublicar(t.slug, 500);
   return true;
@@ -558,7 +558,7 @@ function ajustes() {
 
 /* ---------------------------- abertura e criação ---------------------------- */
 async function telaInicial(msg = '') {
-  const ult = navigator.webdriver ? null : await kv.get('hub-local');
+  const ult = lembrarAtivo() ? await kv.get('hub-local') : null;
   $('#app').innerHTML = `<div class="welcome"><div class="card">
     <div class="row"><div class="logo" style="margin:0">HUB</div><div><h2 style="margin:0">${TOOL_NOME}</h2><div class="small muted">Abra as ferramentas da solução e deixe post-its para os times</div></div></div>
     ${msg ? `<div class="banner warn" style="margin-top:12px">${esc(msg)}</div>` : ''}
@@ -596,12 +596,12 @@ async function abrirArquivo(h, nome) {
   await aposAbrir();
 }
 async function aposAbrir() {
-  if (!navigator.webdriver) kv.set('hub-local', { dir: dirLocal, arquivo });
+  if (lembrarAtivo()) kv.set('hub-local', { dir: dirLocal, arquivo });
   await carregarChaves();
   ferramentas = await procurarFerramentas();
   render();
   if (await lembreteTesteSenha(db.seg, ctx)) agendarSalvar();
-  if (!navigator.webdriver) { const h = await kv.get('hub-raiz'); if (h && await permissao(h, false)) await ligarPasta(h, true); }
+  { const h = await pastaLembrada('hub-raiz'); if (h && await permissao(h, false)) await ligarPasta(h, true); }
   clearInterval(pollT); pollT = setInterval(atualizar, 30000);
 }
 document.addEventListener('visibilitychange', () => { if (!document.hidden && db) atualizar(); });
@@ -620,8 +620,7 @@ async function criarDlg() {
   };
 }
 async function escolherPastaLocal() {
-  await perguntar('Pasta local', `<p>Escolha a pasta <b>deste computador</b> onde estão os HTMLs das ferramentas. Ela não deve estar no OneDrive: o arquivo do hub guarda as chaves dos times.</p>
-    <div class="banner warn">Com o backup de pastas do OneDrive ligado, <b>Documentos</b> e <b>Área de Trabalho</b> também sincronizam. Prefira algo como <span class="code">C:\\Users\\voce\\GestaoLocal</span>.</div>`, [['ok', 'Escolher pasta', 'pri']]);
+  await perguntar('Pasta local', `<p>Escolha a sua <b>pasta pessoal</b>: só sua, de preferência no <b>seu OneDrive</b> (backup se trocar de computador), como <span class="code">OneDrive - Empresa\\GestaoPessoal</span>. A mesma das outras ferramentas, com os HTMLs. Nunca a pasta compartilhada com os times.</p><div class="banner">O arquivo é cifrado com a sua senha: no OneDrive, ninguém consegue ler sem ela.</div>`, [['ok', 'Escolher pasta', 'pri']]);
   let h; try { h = await escolherPasta('fin-local'); } catch { return null; }
   if (!await permissao(h)) return null;
   const s = await suspeitaDeSincronizada(h);
@@ -642,7 +641,10 @@ async function criarArquivo({ nome, pessoa }) {
   return true;
 }
 window.__hub = { get db() { return db; }, get recebidos() { return recebidos; }, importarDoGrupo, painel, novoDb, lerTime, publicar, atualizar, procurarFerramentas, get ferramentas() { return ferramentas; }, ligarPasta, colarChave, abrirArquivo };
-telaInicial();
+// Aberto pelo assistente ou de novo neste computador: abre direto o último hub quando a pasta ainda está liberada.
+(async () => { const u = lembrarAtivo() ? await kv.get('hub-local') : null; let ok = false;
+  try { ok = !!(u?.dir && await permissao(u.dir, false) && await lerTexto(u.dir, u.arquivo)); } catch {}
+  if (ok) await abrirArquivo(u.dir, u.arquivo); if (!db && !$('#app').children.length) telaInicial(); })();
 </script>
 </body>
 </html>

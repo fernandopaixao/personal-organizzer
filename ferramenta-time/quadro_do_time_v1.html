@@ -561,7 +561,7 @@ pre.json{background:#f6f7fb;border-radius:10px;padding:12px;font-size:11.5px;max
      gestao-status/1, gestao-metricas/1 dentro de gestao-envelope/1 (AES-256-GCM).
    - Só métricas de time, calculadas a partir da movimentação dos cards.
    ========================================================================= */
-const TOOL = 'quadro_do_time_v1.html', TOOL_VERSION = '2.2.0';
+const TOOL = 'quadro_do_time_v1.html', TOOL_VERSION = '2.3.0';
 /* Pré-configuração gravada pela Central de Gestão (Pessoas › Times › HTML do time).
    No arquivo original fica null; a Central troca o trecho entre os marcadores por um
    objeto quadro-preset/1: { team: { name, slug, prefix, contact }, people: [{ name, role }], key? }.
@@ -1128,6 +1128,8 @@ async function desserializar(texto, pedirSenha) {
   throw new Error('Senha incorreta');
 }
 function pedirSenhaDlg(errou) {
+  // Aberto pelo hub ou pela Central: usa uma vez a senha da sessão (ADR-0029); se não abrir, pergunta.
+  if (!errou) { const s = window.gestaoSessao?.usar(); if (s) return Promise.resolve(s); }
   return new Promise(ok => {
     modal(`<div class="mh"><h2>Senha do quadro</h2></div><div class="mb"><p class="muted small">${errou ? '<span class="latec">Senha incorreta. </span>' : ''}Este arquivo de quadro está protegido por senha.</p><input type="password" class="sin" id="pw" style="width:100%" autocomplete="current-password"></div>
       <div class="mf"><button class="btn" data-x="no">Cancelar</button><button class="btn pri" data-x="ok">Abrir</button></div>`);

@@ -1,6 +1,6 @@
 # Passo a passo · como lidar com a solução
 
-*24/11/2026 · Central v15.7, Quadro do Time 2.2, Hub 1.3.1, Finanças do Grupo 1.4.1 e do Time 1.3.1, Mapa de Férias 1.1.1, assistente 2.2.1*
+*24/11/2026 · Central v15.8, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.2, assistente 2.3*
 
 Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é independente. Antes de começar: use **Edge ou Chrome** no computador, abrindo o arquivo com dois cliques (não pela pré-visualização do Outlook, Teams ou OneDrive, nem de dentro do .zip), e tenha à mão um **cofre de senhas** (o gerenciador de senhas da empresa).
 
@@ -32,8 +32,9 @@ Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é ind
 6. **Dados:** nome, prefixo de código, ano fiscal e moeda. Com chave, o identificador já vem dela e fica travado. O gestor lista os times que lidera.
 7. Em **Pastas**, escolha a pasta pessoal e a pasta compartilhada. Se a ferramenta avisar que a pasta pessoal parece ser a compartilhada, escolha outra.
 8. Em **Senha**, crie a senha, **guarde no cofre** e marque "Já guardei no cofre".
-9. Em **Pronto**, a pasta pessoal passa a ter os HTMLs, os arquivos cifrados (já com as chaves coladas), o `hub.html` e o `onde-fica-cada-coisa.html`. A tela explica os **dois tipos de arquivo**: o pessoal, cifrado com a sua senha e numa pasta só sua, e os comuns, cifrados com a chave de cada time na pasta compartilhada. Siga os **próximos passos** do seu perfil.
-10. Clique **Abrir o hub**: ele abre já com a senha da sessão. A partir de agora o hub é a sua tela inicial; no dia a dia, abra o `hub.html` da pasta pessoal (dica: crie um atalho).
+9. Em **Pronto**, a pasta pessoal passa a ter os HTMLs, os arquivos cifrados (já com as chaves), o `hub.html` e o `onde-fica-cada-coisa.html`. A tela explica os **dois tipos de arquivo**: o pessoal, cifrado com a sua senha e numa pasta só sua, e os comuns, cifrados com a chave de cada time na pasta compartilhada. Siga os **próximos passos** do seu perfil.
+   Se você lidera vários times, o assistente já gerou a **chave de cada time** (tarefas e finanças) e a pasta `para-os-times/<time>/`: copie cada chave para o cofre com os botões da tela e mande cada pasta ao responsável por mensagem direta ou e-mail.
+10. Clique **Abrir o hub**: ele abre já com a senha da sessão. Cada ferramenta aberta pelo hub abre sozinha o seu arquivo, com a pasta sincronizada ligada: não precisa escolher pasta nem colar chave neste computador. Em outro computador, cada ferramenta pede a pasta pessoal uma vez. A partir de agora o hub é a sua tela inicial; no dia a dia, abra o `hub.html` da pasta pessoal (dica: crie um atalho).
 
 **Atalho: Estou com sorte.** Na primeira tela do assistente, quem lidera times pode clicar **Estou com sorte**:
 1. Preencha o nome do grupo, o seu nome, os times (um por linha, com o prefixo se quiser), o ano e a moeda.
@@ -42,14 +43,15 @@ Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é ind
 4. Na tela final, copie a chave de cada time para o cofre, siga o checklist e envie a cada responsável a pasta `para-os-times/<time>/` por mensagem direta ou e-mail (nunca pela pasta compartilhada). Depois clique **Abrir o hub**.
 5. O time abre o `quadro_<time>.html`, o `financas_<time>.html` ou o `ferias.html`, cria a própria senha e guarda a chave quando a ferramenta pedir.
 
-**Gestor: equipar cada time com o assistente.** Depois de gerar as chaves dos times (seção 2), mande a cada time o `inicio.html` e, por mensagem direta, a chave e o nome da pasta sincronizada. O responsável abre o assistente, escolhe "Sim, lidero 1 time", cola a chave e sai com o Quadro e/ou o Finanças do Time prontos. É o caminho recomendado; gerar o HTML do time pela Central (seção 2) continua valendo.
+**Gestor: equipar cada time com o assistente.** Se preferir que o time rode o próprio assistente, depois de gerar as chaves dos times (seção 1 ou 2), mande a cada time o `inicio.html` e, por mensagem direta, a chave e o nome da pasta sincronizada. O responsável abre o assistente, escolhe "Sim, lidero 1 time", cola a chave e sai com o Quadro e/ou o Finanças do Time prontos. É o caminho recomendado; gerar o HTML do time pela Central (seção 2) continua valendo.
 
 ## 2. Cadastrar um time e entregar a ferramenta
 
 **Tarefas (Quadro do Time)**
-1. Na Central, **Times › + Time**: nome, prefixo (2 a 5 letras, ex.: `PAG`) e pasta do time.
-2. Em **Integração › Pasta e chaves**, clique **Gerar chave** para o time e **guarde no cofre**.
-3. Em **Times**, abra o time e clique **HTML do time** (a tela mostra o aviso de cofre). Prefira enviar a chave separada do HTML.
+Times criados pelo assistente já têm prefixo, pasta e chave: pule para o passo 3.
+1. Na Central, **Times › + Time**: o nome basta (prefixo e pasta podem ficar em branco).
+2. Abra o time: o aviso em destaque mostra **Gerar chave de integração**. Um clique gera a chave e, se faltar, define a pasta e o prefixo (dá para mudar em **Editar time**). **Guarde no cofre**.
+3. Na aba **Integração** do time, clique **HTML do time (com a chave)** (a tela mostra o aviso de cofre). Prefira enviar a chave separada do HTML.
 4. Envie o HTML ao responsável e, **à parte, por mensagem direta no Teams ou por e-mail**, o texto da chave (`GK1.…`). Nunca coloque a chave na pasta compartilhada.
 5. No hub, **Importar da Central** para poder mandar post-its a esse time.
 
