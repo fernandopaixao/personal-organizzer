@@ -1,6 +1,6 @@
 # ADR-0028 · Finanças dos times na Central, só leitura
 
-**Status:** aceita · **Data:** 24/11/2026 (Central 15.5, revisão da decisão D6) · **Origem:** proposta "Integrar finanças no hub e na Central", aprovada pelo Fernando com as recomendações I1 a I4
+**Status:** aceita · **Data:** 24/11/2026 (Central 15.5 e 15.6, revisão da decisão D6) · **Origem:** proposta "Integrar finanças no hub e na Central", aprovada pelo Fernando com as recomendações I1 a I4
 
 ## Contexto
 A decisão D6 deixava finanças fora da Central: o gestor abria o Finanças do Grupo para ver dinheiro e a Central para ver o resto. O Fernando pediu "tudo integrado no hub/Central". O Hub 1.2 já mostra o previsto dos times. Faltava a Central cruzar o dinheiro com os times, a reunião de status e, depois, as iniciativas.
@@ -19,7 +19,8 @@ A decisão D6 deixava finanças fora da Central: o gestor abria o Finanças do G
 - Onde aparece:
   - card **Finanças dos times** na Hoje (previsto contra o teto ou o orçado, times acima do teto, planos sem publicar há mais de 35 dias);
   - linha de finanças no card do time (Times e Iniciativas);
-  - bloco **Finanças** na reunião de status, só quando há o que tratar.
+  - bloco **Finanças** na reunião de status, só quando há o que tratar;
+  - **15.6:** custo por iniciativa na lista de Iniciativas e na aba **Finanças** do painel. A conta soma, em todos os times, as linhas marcadas com o código da iniciativa ou de uma feature dela; códigos antigos seguem os apelidos da conciliação. A Conciliação lista os códigos das finanças que não existem na Central.
 - Sem a chave de finanças, nada disso aparece (I3).
 
 ## Consequências
@@ -27,6 +28,5 @@ A decisão D6 deixava finanças fora da Central: o gestor abria o Finanças do G
 - **Contra:** a Central passa a guardar mais uma chave por time, e o retrato fica tão atual quanto a última leitura da pasta.
 
 ## Ao evoluir
-- Etapa 2: custo por iniciativa, somando todos os times (I4), a partir de `fin[time].ini`.
 - Etapa 3: uma senha por sessão para as janelas abertas pelo hub ou pela Central (I2), e o hub da liderança.
 - Se um dia a Central precisar escrever em finanças, isso é uma decisão nova que substitui esta.

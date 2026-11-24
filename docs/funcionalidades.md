@@ -1,6 +1,6 @@
 # Funcionalidades, usos e objetivos
 
-*24/11/2026 · Central v15.5, Quadro do Time 2.2, Hub 1.2, Finanças do Grupo 1.3 e do Time 1.2, assistente 2.1*
+*24/11/2026 · Central v15.6, Quadro do Time 2.2, Hub 1.2, Finanças do Grupo 1.3 e do Time 1.2, assistente 2.1*
 
 Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. Para as regras técnicas por trás, veja as [decisões de arquitetura](adr/README.md). Para o caminho de quem usa, veja a [jornada do usuário](jornada-do-usuario.md) e o [passo a passo](passo-a-passo.md).
 
@@ -95,7 +95,7 @@ A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados
 
 ---
 
-## 5. Central de Gestão (v15.5)
+## 5. Central de Gestão (v15.6)
 
 **Objetivo:** concentrar o trabalho do gestor: o que ele faz, o que delegou, com quem conversa, em quais fóruns decide e como anda o portfólio.
 
@@ -127,6 +127,7 @@ Navegação em 8 páginas (teclas 1 a 8) e o botão **Importar e agentes** no to
 ### 5.5 Iniciativas (5)
 - **Vistas:** Lista (feito × prazo, fases, próxima feature, painel com abas), Semana (features e backlog da semana), Horizonte, Linha do tempo (fases sobrepostas) e Dependências.
 - **Uso:** cadastrar iniciativas e features com código (`PAG-042`, `PAG-042.F2`), agrupar features em fases, registrar a atualização de uma linha (diário de bordo, num formulário no lugar que mostra a última atualização e só habilita **Registrar atualização** com texto), ver o **downstream** dos times abaixo de cada feature.
+- **Finanças por iniciativa (15.6, só leitura):** com as chaves de finanças dos times, a lista mostra o previsto do ano ao lado do código. O painel da iniciativa ganha a aba **Finanças** (orçado, previsto, realizado, folga e uma barra por time). A conta soma, em todos os times, as linhas do plano marcadas com o código da iniciativa ou de uma feature dela ([ADR-0028](adr/0028-financas-na-central-so-leitura.md)).
 - **Objetivo:** ver o portfólio e o que está atrasando, com o dado do time chegando sozinho.
 
 ### 5.6 Fóruns (6)
@@ -140,7 +141,7 @@ Navegação em 8 páginas (teclas 1 a 8) e o botão **Importar e agentes** no to
 - **Objetivo:** acompanhar cada time e entregar a ferramenta pronta.
 
 ### 5.8 Integração (8)
-- **Uso:** pasta e chaves (gerar, copiar, revogar; **chave de finanças** por time, colada ou importada com **Chaves do Finanças do Grupo**), arquivos recebidos (com prévia), **Conciliação** (unir épicos, trazer para a Central, ligar itens a features) e **Compartilhar** (tela que mostra o que vai para cada time).
+- **Uso:** pasta e chaves (gerar, copiar, revogar; **chave de finanças** por time, colada ou importada com **Chaves do Finanças do Grupo**), arquivos recebidos (com prévia), **Conciliação** (unir épicos, trazer para a Central, ligar itens a features, códigos das finanças dos times sem iniciativa na Central) e **Compartilhar** (tela que mostra o que vai para cada time).
 - **Objetivo:** manter a Central e os times falando a mesma língua, sem sobrescrever nada.
 
 ### 5.9 Importar e agentes

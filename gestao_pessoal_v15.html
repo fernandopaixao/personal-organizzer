@@ -844,7 +844,7 @@ textarea.paste:focus{border-color:var(--bv)}
 <div class="lock" id="lock">
   <div class="lockcard">
     <div class="logo" style="margin:0">CG</div>
-    <h1>Central de Gestão <span class="appver" title="Versão desta Central">v15.5</span></h1>
+    <h1>Central de Gestão <span class="appver" title="Versão desta Central">v15.6</span></h1>
     <div class="muted small">Seus dados ficam em um arquivo JSON criptografado (AES-GCM 256, chave derivada da senha), separado deste HTML. Este arquivo não guarda nenhum dado.</div>
     <div class="field"><label for="lockPass">Senha</label><input type="password" id="lockPass" autocomplete="off" placeholder="Mínimo de 8 caracteres"></div>
     <div class="stack2">
@@ -858,7 +858,7 @@ textarea.paste:focus{border-color:var(--bv)}
   </div>
 </div>
 <div class="hidden" id="app">
-  <nav class="rail"><div class="logo">CG</div><div id="nav" style="display:contents"></div><div class="railver" title="Versão desta Central">v15.5</div></nav>
+  <nav class="rail"><div class="logo">CG</div><div id="nav" style="display:contents"></div><div class="railver" title="Versão desta Central">v15.6</div></nav>
   <main class="main"><div class="wrap">
     <div class="top">
       <h1 id="pageTitle"></h1>
@@ -1066,7 +1066,7 @@ const horizon=d=>{const n=dayDiff(today(),d);if(n<0)return'atrasada';if(n===0)re
 const KINDS={geral:'Geral',forte:'Ponto forte',desenv:'Desenvolvimento'};
 /* ============ Estado e migração (dados desacoplados, versionados e aditivos) ============ */
 const ME='me';
-const DB_VERSION=15,APP_VERSION='15.5'; /* versão exibida na página (rail e tela de senha); DB_VERSION é a do arquivo de dados */
+const DB_VERSION=15,APP_VERSION='15.6'; /* versão exibida na página (rail e tela de senha); DB_VERSION é a do arquivo de dados */
 const emptyDb=()=>({version:DB_VERSION,settings:{selfName:'Eu',hideFeedback:false,staffForumId:''},people:[],teams:[],initiatives:[],tasks:[],notes:[],cycles:[],staffs:[],weeklyReports:[],dateLog:[],forums:[],agendaItems:[],agreements:[],meetings:[],ooSessions:[]});
 let db=emptyDb();
 let password='',handle=null,dirty=false,saveTimer=null,pendingMigration=false;
@@ -1472,7 +1472,7 @@ function pulseRow(i){
   const ts=tasksOfInit(i.id),eow=addD(weekStart(T),6),week=ts.filter(t=>!t.done&&okDate(t.end)&&t.end<=eow),blk=ts.filter(isBlocked).length,nm=nextMs(i),r=nm&&nm.end?rel(nm.end):null;
   const u=lastUpd(i),a=updAge(i),behind=tp!=null&&pr+15<tp,ow=i.ownerId?first(nameOf(i.ownerId)):i.ownerLabel||'';
   return`<div class="pl-row">
-    <div class="pl-n" data-act="open-init" data-id="${i.id}" data-tip="init:${i.id}"><div class="tt">${hd(h)}<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(i.name)}</span></div><div class="pl-sub">${esc([i.ref||'',teamName(i.teamId),ow,i.bucket!=='now'?bucketName(i.bucket):''].filter(Boolean).join(' · ')||'—')}${igInitBadge(i)}</div></div>
+    <div class="pl-n" data-act="open-init" data-id="${i.id}" data-tip="init:${i.id}"><div class="tt">${hd(h)}<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(i.name)}</span></div><div class="pl-sub">${esc([i.ref||'',teamName(i.teamId),ow,i.bucket!=='now'?bucketName(i.bucket):''].filter(Boolean).join(' · ')||'—')}${finIniChip(i)}${igInitBadge(i)}</div></div>
     <div class="pl-tr pl-hide">${i.phases.length?phaseTrack(i,true):'<span class="faint small">sem fases</span>'}</div>
     <div class="pv pl-hide"><div class="ts-bar"><i style="width:${pr}%"></i>${tp!=null?`<b style="left:${tp}%" title="Hoje: ${Math.round(tp)}% do prazo"></b>`:''}</div><span class="${behind?'late':''}"><b>${pr}%</b> feito${tp!=null?` · ${Math.round(tp)}% do prazo`:''}${okDate(i.end)?` · até ${esc(fmtShort(i.end))}`:' · sem data'}</span></div>
     <div class="pl-hide" style="min-width:0">${nm?`<div class="cm" style="color:var(--ink)"><span class="dm"></span><span style="overflow:hidden;text-overflow:ellipsis">${esc(cut(nm.title,30))}</span></div><div class="tm"><span class="due ${r?r.cls:''}">${r?esc(r.text):'sem data'}</span>${week.length?`<span class="chip">${week.length} nesta semana</span>`:''}${blk?`<span class="chip late">${blk} bloqueada${blk>1?'s':''}</span>`:''}</div>`:`<span class="faint small">sem feature aberta</span>${week.length?`<div class="tm"><span class="chip">${week.length} nesta semana</span></div>`:''}`}</div>
@@ -3272,6 +3272,25 @@ function finTeam(tid,ano=finAno()){const s=db.integ.fin?.[tid];if(!s)return null
   const ref=s.cap[ano]||y.b,dias=s.gen?Math.max(0,dayDiff(s.gen.slice(0,10),today())):null;return{s,ano,y,ref,cap:s.cap[ano]||0,over:ref>0&&y.f>ref,dias,velho:dias!=null&&dias>35}}
 function finLine(tid){const x=finTeam(tid);if(!x)return'';if(!x.y)return`<span class="cm">finanças: sem plano de ${esc(x.ano)}</span>`;
   return`<span class="cm" style="${x.over?'color:var(--late)':''}" title="${esc(x.ano)} · realizado ${esc(finFmt(x.y.a,x.s.cur))} · plano revisão ${x.s.rev}${x.s.version?' · '+esc(x.s.version):''}">${ic('chart','sm')}previsto ${esc(finFmt(x.y.f,x.s.cur))} de ${esc(finFmt(x.ref,x.s.cur))}${x.cap?' (teto)':' orçado'}${x.velho?` · publicado há ${x.dias} dias`:''}</span>`}
+/* v15.6: finanças por iniciativa (ADR-0028). Soma, em todos os times (I4), as linhas do plano marcadas com o código
+   da iniciativa ou de uma feature dela (PAG-042, PAG-042.F2); códigos antigos seguem os apelidos da conciliação. */
+const finCode=c=>{const b=String(c||'').trim().toUpperCase().replace(/\.[FP]\d+$/,'');return igCanon(b)||b};
+function finIni(i,ano=finAno()){if(!i?.ref)return null;const ref=igCanon(i.ref),rows=[];
+  for(const t of db.teams){const s=db.integ.fin?.[t.id];if(!s)continue;const o={b:0,f:0,a:0};let hit=false;
+    for(const[c,ys]of Object.entries(s.ini||{}))if(ys[ano]&&finCode(c)===ref){o.b+=ys[ano].b;o.f+=ys[ano].f;o.a+=ys[ano].a;hit=true}
+    if(hit)rows.push(Object.assign({t,cur:s.cur},o))}
+  if(!rows.length)return null;const sum=k=>rows.reduce((n,r)=>n+r[k],0),b=sum('b'),f=sum('f');
+  return{ano,rows,b,f,a:sum('a'),cur:rows[0].cur,over:b>0&&f>b}}
+// Códigos usados nas finanças de um time que não existem na Central.
+function finOrfaos(t){const s=db.integ.fin?.[t.id];if(!s)return[];const refs=new Set(db.initiatives.filter(i=>i.ref).map(i=>igCanon(i.ref)));
+  return Object.keys(s.ini||{}).filter(c=>!refs.has(finCode(c))).sort()}
+function finIniChip(i){const x=finIni(i);return x?` · <span class="${x.over?'late':''}" title="Finanças de ${esc(x.ano)}: previsto ${esc(finFmt(x.f,x.cur))}, orçado ${esc(finFmt(x.b,x.cur))}, realizado ${esc(finFmt(x.a,x.cur))} · ${x.rows.length} time(s)">${ic('chart','sm')}${esc(finFmt(x.f,x.cur))}</span>`:''}
+function finIniTab(i,x){const pc=v=>x.b?Math.round(v/x.b*100):null,mx=Math.max(1,...x.rows.map(r=>Math.max(r.b,r.f,r.a)));
+  const kpi=(k,v,s,cls='')=>`<div class="drk ${cls}"><div class="k">${k}</div><div class="v">${v}</div>${s?`<div class="s">${s}</div>`:''}</div>`;
+  return`<div class="drkpis">${kpi('Orçado '+esc(x.ano),esc(finFmt(x.b,x.cur)),`${x.rows.length} time${x.rows.length>1?'s':''}`)}${kpi('Previsto',esc(finFmt(x.f,x.cur)),pc(x.f)!=null?pc(x.f)+'% do orçado':'sem orçado',x.over?'late':'')}${kpi('Realizado',esc(finFmt(x.a,x.cur)),pc(x.a)!=null?pc(x.a)+'% do orçado':'')}${kpi('Folga',esc(finFmt(x.b-x.f,x.cur)),x.over?'previsto acima do orçado':'orçado menos previsto',x.over?'late':'')}</div>
+    <div class="dr-s"><div class="lbl">Por time</div>${x.rows.sort((a,b)=>b.f-a.f).map(r=>`<div style="margin:10px 0"><div style="display:flex;gap:8px;align-items:baseline"><b class="small">${esc(r.t.name)}</b><span class="grow"></span><span class="muted small ${r.b&&r.f>r.b?'late':''}">previsto ${esc(finFmt(r.f,r.cur))} · orçado ${esc(finFmt(r.b,r.cur))} · realizado ${esc(finFmt(r.a,r.cur))}</span></div>
+      <div class="ts-bar" style="margin-top:6px" title="Barra: previsto; marca: orçado"><i style="width:${Math.round(r.f/mx*100)}%;${r.b&&r.f>r.b?'background:var(--late)':''}"></i>${r.b?`<b style="left:${Math.round(r.b/mx*100)}%"></b>`:''}</div></div>`).join('')}
+      <div class="muted small" style="margin-top:10px">Soma das linhas do plano de cada time marcadas com <span class="ref">${esc(igCanon(i.ref))}</span> ou com o código de uma feature dela, lidas do que o time publicou. Para mudar valores, use o Finanças do Time; orçamento e tetos ficam no Finanças do Grupo.</div></div>`}
 // Importa as chaves de finanças dos times do arquivo do Finanças do Grupo (só leitura, com a senha dele).
 function finAskPass(nome){return new Promise(res=>{const d=document.createElement('dialog');d.innerHTML=`<form class="modal" method="dialog" style="max-width:420px"><h2>Senha do Finanças do Grupo</h2><div class="muted small" style="margin:-6px 0 12px">Para ler as chaves de finanças de <span class="igkey">${esc(nome)}</span>. A Central só lê: nada é gravado nesse arquivo.</div><input type="password" id="finPw" autocomplete="off" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:8px 10px"><div class="macts"><button type="button" class="btn" value="">Cancelar</button><button class="btn pri" value="ok">Ler chaves</button></div></form>`;
   document.body.appendChild(d);d.querySelector('button[type=button]').onclick=()=>d.close('');d.onclose=()=>{const v=d.returnValue==='ok'?d.querySelector('#finPw').value:'';d.remove();res(v)};d.showModal();setTimeout(()=>d.querySelector('#finPw').focus(),0)})}
@@ -3558,8 +3577,9 @@ function igPaneConc(){const ts=sortedTeams().filter(t=>t.slug);if(!ts.length)ret
       <div class="acts"><button class="btn sm pri" data-act="ig-flink" data-v="${esc(y.localId)}">Ligar</button><button class="btn sm" data-act="ig-fnew" data-v="${esc(y.localId)}" data-id="${i.id}">Criar feature</button><button class="btn sm" data-act="ig-ignore" data-k="item" data-v="${esc(y.localId)}">Ignorar</button></div></div>`}).join('');
   const links=db.integ.links.filter(l=>l.teamId===t.id),ign=db.integ.ignored.filter(g=>g.teamId===t.id);
   const two=db.initiatives.filter(i=>i.teamId===t.id||!i.teamId);
+  const orf=finOrfaos(t);
   return`<div class="bar"><select class="sel" id="igCTeam">${ts.map(x=>`<option value="${x.id}" ${x.id===t.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select><span class="muted small">${s?`Backlog recebido ${esc(igFmtTs(s.at))} · as métricas do time sempre consideram o backlog inteiro`:'Este time ainda não publicou o backlog.'}</span><span class="grow"></span><button class="btn sm" data-act="copy-prompt" data-id="conc" data-ctx="${esc(t.name)}">${ic('copy','sm')} Prompt para agente</button></div>
-  <div class="igg"><div class="card"><div class="lbl">Iniciativas do time sem vínculo<span class="n">${igLonely(t).length}</span></div>${lonely||empty('Nada a conciliar.')}</div>
+  ${orf.length?`<div class="card" style="margin-bottom:14px"><div class="lbl">Códigos nas finanças do time sem iniciativa na Central<span class="n">${orf.length}</span></div><div class="muted small" style="margin-bottom:8px">O plano financeiro do time marca linhas com estes códigos, mas a Central não tem iniciativa com eles. O custo dessas linhas não entra em nenhuma iniciativa. Corrija o código no Finanças do Time ou una as iniciativas aqui.</div><div class="tm">${orf.map(c=>`<span class="ref">${esc(c)}</span>`).join(' ')}</div></div>`:''}<div class="igg"><div class="card"><div class="lbl">Iniciativas do time sem vínculo<span class="n">${igLonely(t).length}</span></div>${lonely||empty('Nada a conciliar.')}</div>
     <div class="card"><div class="lbl">Itens do time sem feature<span class="n">${items.length}</span></div>${itemRows||empty('Todos os itens das iniciativas vinculadas apontam para uma feature, ou foram ignorados.')}</div>
     <div class="card"><div class="lbl">Unir duas iniciativas da Central</div><div class="muted small" style="margin-bottom:8px">Use quando a mesma iniciativa existe duas vezes (por exemplo, uma criada por você e outra trazida do time). Features, tarefas, fases, atualizações e vínculos passam para a principal; o código da outra continua aceito como apelido.</div>
       <div class="bar" style="margin:0"><select class="sel" id="igMA"><option value="">Principal…</option>${two.map(i=>`<option value="${i.id}">${esc(i.ref||'sem código')} · ${esc(cut(i.name,46))}</option>`).join('')}</select><select class="sel" id="igMB"><option value="">Unir com…</option>${two.map(i=>`<option value="${i.id}">${esc(i.ref||'sem código')} · ${esc(cut(i.name,46))}</option>`).join('')}</select><button class="btn sm pri" data-act="ig-merge">Unir</button></div></div>
@@ -3634,7 +3654,7 @@ function igHomeCard(){const ts=db.teams.filter(t=>t.slug);if(!ts.length)return''
     ${noKey?`<div class="li" data-go="integ"><span class="fdot"></span><div class="tt">${noKey} time${noKey>1?'s':''} sem chave de integração</div></div>`:''}</div>`}
 /* ============ v14: painel da iniciativa (visão geral, features por fase, time, tarefas, ajustes) ============ */
 let drTab='geral',drFor='';
-const DR_TABS=[['geral','Visão geral'],['feat','Features'],['time','Do time'],['tasks','Tarefas'],['cfg','Ajustes']];
+const DR_TABS=[['geral','Visão geral'],['feat','Features'],['time','Do time'],['fin','Finanças'],['tasks','Tarefas'],['cfg','Ajustes']];
 function drFeatMeta(i,t){const d=t.dependsOn&&db.tasks.find(x=>x.id===t.dependsOn),its=igItemsOfFeature(t),fs=igFeatStatus(t),dn=its.filter(x=>x.y.status==='done').length,out=[];
   if(d){const blk=!d.done&&!t.done;out.push(`<button class="chip ${blk?'drblk':''}" data-act="edit-task" data-id="${d.id}" title="${blk?'Bloqueada: a feature de que depende ainda não terminou':'Depende de'}">${blk?'⛔':'↳'} ${esc(d.ref||'')} ${esc(cut(d.title,28))}${blk&&okDate(d.end)?' · '+esc(fmtShort(d.end)):''}</button>`)}
   const nx=db.tasks.filter(x=>x.type==='feature'&&x.dependsOn===t.id&&!x.done);if(nx.length)out.push(`<span class="chip" title="Features que dependem desta">→ ${nx.map(x=>esc(x.ref||cut(x.title,16))).join(', ')}</span>`);
@@ -3660,13 +3680,14 @@ function drInitHTML(i){
   const feats=ts.filter(t=>t.type==='feature'),fOpen=feats.filter(t=>!t.done),fDone=feats.filter(t=>t.done),tks=ts.filter(t=>t.type!=='feature'),tOpen=tks.filter(t=>!t.done),tDone=tks.filter(t=>t.done);
   const auto=i.autoProgress!==false&&ts.length>0,pBase=feats.length?feats:ts,cp=curPhase(i),cands=db.initiatives.filter(x=>x.id!==i.id&&!i.dependsOn.includes(x.id)&&!initCycle(i.id,x.id));
   const nxt=fOpen.filter(t=>okDate(t.end)).sort((a,b)=>a.end.localeCompare(b.end))[0],lateF=fOpen.filter(t=>okDate(t.end)&&t.end<T),blkF=fOpen.filter(t=>{const d=t.dependsOn&&db.tasks.find(x=>x.id===t.dependsOn);return d&&!d.done});
+  const fi=finIni(i);if(drTab==='fin'&&!fi)drTab='geral';
   const team=igTeamInits(i),tx=team[0]?.x,mets=drMetrics(i),unl=team.reduce((n,{t,x})=>n+igUnlinkedOf(t,x).length,0),last=lastUpd(i);
   const who=`<select data-q="who" title="Responsável"><option value="${ME}">Eu</option>${db.people.map(p=>`<option value="${p.id}" ${p.id===i.ownerId?'selected':''}>${esc(first(p.name))}</option>`).join('')}</select>`;
   const kpi=(k,v,s,cls='')=>`<div class="drk ${cls}"><div class="k">${k}</div><div class="v">${v}</div>${s?`<div class="s">${s}</div>`:''}</div>`;
   const left=okDate(i.end)?dayDiff(T,i.end):null;
   const head=`<div class="dr-h">${ring(pr,60,5)}<div style="flex:1;min-width:0"><h2>${i.ref?`<span class="ref lg">${esc(i.ref)}</span>`:''}${esc(i.name)}</h2><div class="muted small" style="margin-top:4px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">${hd(h)} ${h.label}${teamName(i.teamId)?' · '+esc(teamName(i.teamId)):''}${i.ownerId?` · ${av(i.ownerId,'xs')} ${esc(first(nameOf(i.ownerId)))}`:i.ownerLabel?' · '+esc(i.ownerLabel):''} · ${esc(bucketName(i.bucket))}${igInitBadge(i)}</div></div>
     <button class="ib" data-act="edit-init" data-id="${i.id}" title="Editar">${ic('edit')}</button><button class="ib danger" data-act="del-init" data-id="${i.id}" title="Excluir">${ic('trash')}</button><button class="ib" data-act="close-drawer" title="Fechar">${ic('x')}</button></div>
-    <div class="drtabs">${DR_TABS.map(([k,l])=>`<button class="${drTab===k?'on':''}" data-act="dr-tab" data-v="${k}">${l}${k==='feat'?` <span class="n">${fOpen.length}</span>`:k==='tasks'&&tOpen.length?` <span class="n">${tOpen.length}</span>`:k==='time'&&(team.length||mets.length)?` <span class="n ${unl?'hot':''}">${unl||team.length+mets.length}</span>`:''}</button>`).join('')}</div>`;
+    <div class="drtabs">${DR_TABS.filter(([k])=>k!=='fin'||fi).map(([k,l])=>`<button class="${drTab===k?'on':''}" data-act="dr-tab" data-v="${k}">${l}${k==='feat'?` <span class="n">${fOpen.length}</span>`:k==='tasks'&&tOpen.length?` <span class="n">${tOpen.length}</span>`:k==='time'&&(team.length||mets.length)?` <span class="n ${unl?'hot':''}">${unl||team.length+mets.length}</span>`:''}</button>`).join('')}</div>`;
   const updBox=`<div style="margin-bottom:8px">${updForm(i)}</div>`;
   const addFeat=`<div class="qadd wrap" data-dq="f:${i.id}"><input type="text" data-q="title" placeholder="+ Nova feature…">${who}<input type="date" data-q="end" value="${phaseEndDefault(i,cp)}">${i.phases.length?`<select data-q="phase"><option value="">Sem fase</option>${i.phases.map(p=>`<option value="${p.id}" ${cp&&cp.id===p.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select>`:''}<button class="btn sm" data-act="dr-add" data-id="f:${i.id}">Adicionar</button></div>`;
   let body='';
@@ -3688,6 +3709,7 @@ function drInitHTML(i){
           ${o.map(t=>taskRow(t,{noIni:true,dateInput:true})+drFeatMeta(i,t)+igFeatDs(t)).join('')||(fs.length?'':`<div class="empty" style="padding:6px 0">Nenhuma feature nesta fase.</div>`)}
           ${d.length?`<details class="drdone"><summary class="muted small">Concluídas · ${d.length}</summary>${d.sort((a,b)=>(b.doneAt||'').localeCompare(a.doneAt||'')).map(t=>taskRow(t,{noIni:true})+igFeatDs(t)).join('')}</details>`:''}</div>`}).join('')||empty('Nenhuma feature ainda.')}
       ${addFeat}`}
+  else if(drTab==='fin'){body=finIniTab(i,fi)}
   else if(drTab==='time'){
     body=`${igInitTeamBlock(i)||`<div class="dr-s">${empty(i.ref?'Nenhum time publicou status desta iniciativa ainda. O vínculo é pelo código '+esc(i.ref)+' ou pela conciliação.':'Defina o prefixo do time para a iniciativa ganhar código e poder ser compartilhada.')}</div>`}
       ${igUnlinkedItemsBlock(i)}

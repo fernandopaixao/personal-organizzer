@@ -529,6 +529,20 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   ok(await c.evaluate(() => document.querySelectorAll('#home .inss .ins').length === 5 && /Finanças dos times/.test(document.querySelector('#home .inss').textContent) && /acima do teto/.test(document.querySelector('#home .inss').textContent)), 'Hoje ganha o card de finanças e avisa time acima do teto');
   await c.evaluate(() => go('teams')); ok(/previsto R\$/.test(await c.textContent('body')), 'card do time mostra a linha de finanças');
   await c.screenshot({ path: path.join(SAIDA, 'central-financas.png') });
+  console.log('17. Central 15.6: finanças por iniciativa');
+  ok(finC && finC.ini['PAG-042'] && finC.ini['PAG-042']['2026'].b > 0, 'retrato soma as linhas do time pelo código da iniciativa (PAG-042)');
+  await c.evaluate(() => { IG.tab = 'conc'; IG.team = db.teams.find(t => t.slug === 'pagamentos').id; go('integ'); });
+  ok(/sem iniciativa na Central/.test(await c.textContent('#integ')) && /PAG-042/.test(await c.textContent('#integ')), 'conciliação avisa código das finanças sem iniciativa na Central');
+  await c.evaluate(() => { const i = initById('i1'); i.ref = 'PAG-042'; i.teamId = db.teams.find(t => t.slug === 'pagamentos').id; i.bucket = 'now'; changed(); });
+  const fiC = await c.evaluate(() => finIni(initById('i1'), '2026'));
+  ok(fiC && fiC.f === finC.ini['PAG-042']['2026'].f && fiC.b === finC.ini['PAG-042']['2026'].b && fiC.rows.length === 1, 'custo da iniciativa soma o que o time planejou para ela');
+  ok(await c.evaluate(() => { const s = db.integ.fin[db.teams.find(t => t.slug === 'pagamentos').id]; s.ini['PAG-042.F2'] = { 2026: { b: 100, f: 200, a: 0 } }; const x = finIni(initById('i1'), '2026'); delete s.ini['PAG-042.F2']; return x.f === finIni(initById('i1'), '2026').f + 200; }), 'linha marcada com o código de uma feature (PAG-042.F2) entra na iniciativa');
+  ok(!/sem iniciativa na Central/.test(await c.textContent('#integ')), 'aviso some quando a iniciativa existe');
+  await c.evaluate(() => { go('pulse'); }); ok(await c.evaluate(() => /R\$/.test(document.querySelector('.pl-sub')?.textContent || '')), 'lista de iniciativas mostra o previsto da iniciativa');
+  await c.evaluate(() => { openMeet = null; openInitId = 'i1'; renderDrawer(); }); await c.waitForTimeout(200);
+  await c.click('#drawer [data-act="dr-tab"][data-v="fin"]');
+  ok(/Por time/.test(await c.textContent('#drawer')) && /Pagamentos/.test(await c.textContent('#drawer')), 'painel da iniciativa ganha a aba Finanças com o custo por time');
+  await c.screenshot({ path: path.join(SAIDA, 'central-financas-iniciativa.png') });
 
   ok(erros.length === 0, 'sem erros de JavaScript nas páginas' + (erros.length ? ': ' + erros.join(' | ') : ''));
   await browser.close(); srv.close();
