@@ -363,7 +363,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   await t2.evaluate(() => { view = 'futuro'; render(); }); await t2.screenshot({ path: path.join(SAIDA, 'time-futuro-anos.png'), fullPage: true });
   await g.evaluate(() => { agrupar = 'time'; });
 
-  console.log('11. Consolidação em níveis: gestor publica o consolidado para a liderança');
+  console.log('12. Consolidação em níveis: gestor publica o consolidado para a liderança');
   const ch = await nova('/financas/financas_grupo.html', { 'fin-local': 'LocalChefe', 'fin-comum': 'Gestao-Compartilhado' });
   await ch.click('#iNovo'); await ch.fill('#cN', 'Diretoria Digital'); await ch.fill('#cP', 'Marina'); await ch.fill('#cA', '2026'); await ch.click('#cOk');
   await btn(ch, 'ok'); await criarSenha(ch); await ch.waitForSelector('#tNovo');

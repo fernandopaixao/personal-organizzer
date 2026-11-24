@@ -340,4 +340,4 @@ Pedido: um gestor de vários times encaminha o consolidado para a liderança, qu
 
 **Arquivo local:** `db.acima = { chaves, publicacao, diretriz }` no gestor, e `db.times[].tipo = 'time' | 'grupo'` na liderança. Arquivos 1.2 abrem com `tipo: 'time'` e sem nível acima. O onboarding pode gravar `db.acima.chaves` com `origem: 'onboarding'`.
 
-Teste: seção 11 de `financas/testes/teste-e2e.js`.
+Teste: seção 12 de `financas/testes/teste-e2e.js`.
