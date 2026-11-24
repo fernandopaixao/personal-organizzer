@@ -62,6 +62,7 @@ A solução é um pequeno ecossistema de **ferramentas HTML de arquivo único**,
 7. **Dado individual local, pedaço comum sincronizado.** Cada ferramenta guarda o detalhe numa pasta local fora do OneDrive; na pasta sincronizada vai só o que o outro lado precisa, de preferência agregado (desde 23/11/2026).
 8. **Um escritor por arquivo.** Cada arquivo comum tem um único dono (pessoa + computador), é um retrato completo com revisão sempre maior, e cópias de conflito do OneDrive são detectadas e resolvidas.
 9. **HTMLs desacoplados.** Nenhuma ferramenta lê o arquivo de dados de outra; elas só se encontram pela pasta comum.
+10. **Mesma identidade no claro e no escuro.** Um seletor comum (Claro, Escuro, Automático) em todas as ferramentas; a escolha fica só no computador e o escuro é aplicado por uma camada única, `financas/src/tema.js`, injetada no build (desde 24/11/2026).
 
 Cada princípio tem uma decisão registrada em [`docs/adr/`](adr/README.md).
 

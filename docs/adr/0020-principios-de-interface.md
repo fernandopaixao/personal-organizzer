@@ -15,4 +15,5 @@
 ## Ao evoluir
 - Pedido do Fernando de 24/11/2026 reforça: telas minimalistas, mais gráficos do que texto, cores neutras (branco e azul), cards que ajudam a interpretar, menos navegações.
 - Aplicado nas Finanças 1.2: telas irmãs viram **abas no topo** (menu do Time de 7 para 4, do Grupo de 5 para 3); **cards de leitura** (número, medidor e uma frase que interpreta, card principal em azul cheio); gráficos no lugar de tabelas; só tons de azul nos gráficos, vermelho só para estouro.
+- **Modo escuro** (24/11/2026): mesma identidade em azul-noite, por uma camada comum ([ADR-0027](0027-tema-claro-escuro-compartilhado.md)). Use variáveis de cor em telas novas.
 - As peças ficam em `financas/src/nucleo.js` e `nucleo.css` (`cardLeitura`, `barrasH`, `curvaAcumulada`). Tela nova deve reaproveitá-las antes de criar componente próprio.
