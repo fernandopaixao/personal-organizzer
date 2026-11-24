@@ -234,7 +234,7 @@ Em 23/11/2026 o Fernando pediu para implementar sem responder às perguntas abai
 | **D3** | O Quadro do Time muda para "um arquivo por pessoa" (seção 6.2)? | Sim, é o que garante zero conflito com várias pessoas. Alternativa mais simples: manter o arquivo único só na pasta local de uma pessoa, mas aí o time perde o quadro compartilhado |
 | **D4** | O que o time publica para o grupo: agregado por mês × categoria × linha, ou também os lançamentos individuais? | Só o agregado. O detalhe fica local, como pede o paradigma |
 | **D5** | Categorias e centros de custo: o grupo define uma lista fechada ou os times podem criar novas? | Lista do grupo, com "Outras" aceita e destacada no consolidado (mesmo espírito do dicionário de métricas) |
-| **D6** | A Central mostra um resumo financeiro das iniciativas (só leitura)? | Não na v1, para manter os HTMLs desacoplados. Reavaliar depois do F3 |
+| **D6** | A Central mostra um resumo financeiro das iniciativas (só leitura)? | Não na v1, para manter os HTMLs desacoplados. **Revista em 24/11/2026:** a Central 15.5 lê o plano e o teto dos times, só para leitura ([ADR-0028](adr/0028-financas-na-central-so-leitura.md)) |
 
 ---
 

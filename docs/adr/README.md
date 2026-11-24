@@ -1,6 +1,6 @@
 # Decisões de arquitetura (ADRs)
 
-*24/11/2026 · estado: Central v15.4, Quadro do Time 2.2, Hub 1.2, Finanças do Grupo 1.3 e do Time 1.2, assistente 2.1*
+*24/11/2026 · estado: Central v15.5, Quadro do Time 2.2, Hub 1.2, Finanças do Grupo 1.3 e do Time 1.2, assistente 2.1*
 
 Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequências e o que observar ao evoluir. Elas existem para que uma funcionalidade nova comece pelas regras certas, sem precisar reler todos os planos.
 
@@ -35,6 +35,7 @@ Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequê
 | [0025](0025-consolidacao-em-niveis.md) | Consolidação em níveis | Gestor publica o consolidado para a liderança como uma unidade |
 | [0026](0026-ferias-em-niveis.md) | Férias em níveis | Mapa de Férias: chave do time no time, chave do grupo entre níveis, um arquivo por pessoa |
 | [0027](0027-tema-claro-escuro-compartilhado.md) | Tema claro/escuro | Uma camada `tema.js` injetada em todos os HTMLs; escolha salva só no computador |
+| [0028](0028-financas-na-central-so-leitura.md) | Finanças na Central | A Central lê o plano e o teto dos times com a chave de finanças; não escreve em finanças |
 
 ## Checklist para uma funcionalidade nova
 

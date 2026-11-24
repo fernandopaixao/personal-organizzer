@@ -1,6 +1,6 @@
 # Passo a passo · como lidar com a solução
 
-*24/11/2026 · Central v15.4, Quadro do Time 2.2, Hub 1.2, Finanças do Grupo 1.3 e do Time 1.2, assistente 2.1*
+*24/11/2026 · Central v15.5, Quadro do Time 2.2, Hub 1.2, Finanças do Grupo 1.3 e do Time 1.2, assistente 2.1*
 
 Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é independente. Antes de começar: use **Edge ou Chrome** e tenha à mão um **cofre de senhas** (o gerenciador de senhas da empresa).
 
@@ -146,6 +146,13 @@ Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é ind
 3. **Gestor:** clique **Publicar para a liderança**, confira o que sobe (totais por ano e unidades que entram ou ficam de fora) e confirme.
 4. **Liderança:** em **Painel › Planos recebidos**, aplique o consolidado do gestor; ele soma ano a ano como uma unidade.
 5. **Liderança:** defina o teto do gestor por ano e **Publicar diretriz**; o gestor vê o teto no card do nível acima.
+
+**Ver as finanças dos times na Central (15.5, só leitura)**
+1. Na Central, vá em **Integração › Pasta e chaves** e confira se a pasta compartilhada está conectada.
+2. Clique **Chaves do Finanças do Grupo**, escolha o arquivo `financas-grupo-<grupo>.json` e digite a senha dele. A Central só lê as chaves de finanças dos times; os times entram pela pasta (`pagamentos`, `cartoes`…). Para um time só, use **Chave de finanças** na linha do time e cole a chave `GK1.<time>-fin-…`.
+3. A Central lê o plano publicado por cada time e o teto da diretriz. Depois disso, **Atualizar da pasta** traz os planos novos.
+4. Leia o card **Finanças dos times** na Hoje e a linha de finanças no card de cada time. Na reunião de status, o bloco **Finanças** aparece quando o time passou do teto ou não publica o plano há mais de 35 dias.
+5. Para mudar orçamento, teto ou plano, continue no Finanças do Grupo ou no Finanças do Time: a Central não grava nada de finanças.
 
 ## 9. Atualizar para uma versão nova
 

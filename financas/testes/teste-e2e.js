@@ -513,6 +513,23 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   await gS.click('#iAbrir'); await senhaAbrir(gS, SENHA2); await gS.waitForSelector('#topo');
   ok(await gS.evaluate(() => db.times.every(t => t.chaves.length === 1 && /-fin-/.test(t.chaves[0].kid))), 'Finanças do Grupo abre com a chave de finanças de cada time');
 
+  console.log('16. Central 15.5: finanças dos times, só leitura');
+  await c.bringToFront(); await c.evaluate(() => { window.__M = { 'gestao-integracao': 'Gestao-Compartilhado' }; });
+  await c.evaluate(() => igPickDir()); await c.waitForTimeout(600);
+  ok(await c.evaluate(() => !Object.keys(db.integ.fin).length), 'sem chave de finanças, a Central não lê planos');
+  ok(await c.evaluate(() => { try { finAddKey(db.teams.find(t => t.slug === 'pagamentos'), 'GK1.pagamentos-2611.' + 'A'.repeat(43)); return false; } catch (e) { return /chave de tarefas/.test(e.message); } }), 'recusa chave de tarefas no lugar da de finanças');
+  await c.evaluate(() => { window.__abrir = { dir: 'LocalGestor', arq: 'financas-grupo-tecnologia.json' }; finImport(); });
+  await c.waitForSelector('#finPw'); await c.fill('#finPw', SENHA); await c.click('dialog:has(#finPw) .btn.pri'); await c.waitForTimeout(1500);
+  ok(await c.evaluate(() => db.integ.finKeys[db.teams.find(t => t.slug === 'pagamentos').id]?.length === 1 && !db.integ.finKeys[db.teams.find(t => t.slug === 'cartoes').id]), 'importa a chave de finanças do time do arquivo do Finanças do Grupo (só leitura)');
+  const finC = await c.evaluate(() => db.integ.fin[db.teams.find(t => t.slug === 'pagamentos').id]);
+  ok(finC && finC.years['2026'].f === plH.porAno['2026'].previsto && finC.years['2027'].b === plH.porAno['2027'].orcado, 'Central lê o plano publicado pelo time com os mesmos totais que o hub (2026 e 2027)');
+  ok(finC && finC.cap['2026'] === 100000000, 'Central lê o teto da diretriz do grupo');
+  ok(finC && typeof finC.ini === 'object' && !JSON.stringify(finC).includes('Squad'), 'retrato guarda totais e iniciativas, sem os nomes das linhas do time');
+  await c.evaluate(() => { db.integ.fin[db.teams.find(t => t.slug === 'pagamentos').id].years['2026'] = { b: 1, f: 200000000, a: 0 }; go('home'); });
+  ok(await c.evaluate(() => document.querySelectorAll('#home .inss .ins').length === 5 && /Finanças dos times/.test(document.querySelector('#home .inss').textContent) && /acima do teto/.test(document.querySelector('#home .inss').textContent)), 'Hoje ganha o card de finanças e avisa time acima do teto');
+  await c.evaluate(() => go('teams')); ok(/previsto R\$/.test(await c.textContent('body')), 'card do time mostra a linha de finanças');
+  await c.screenshot({ path: path.join(SAIDA, 'central-financas.png') });
+
   ok(erros.length === 0, 'sem erros de JavaScript nas páginas' + (erros.length ? ': ' + erros.join(' | ') : ''));
   await browser.close(); srv.close();
   console.log(falhas ? `\n${falhas} verificação(ões) falharam.` : '\nTodas as verificações passaram.');
