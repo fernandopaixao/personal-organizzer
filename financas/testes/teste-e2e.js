@@ -367,6 +367,21 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   await t2.evaluate(() => { view = 'plano'; render(); }); await t2.screenshot({ path: path.join(SAIDA, 'time-plano.png') });
   await a.screenshot({ path: path.join(SAIDA, 'inicio-pronto.png') });
 
+  console.log('11. Hub: chaves de finanças do grupo e visão dos times');
+  await h.bringToFront(); await h.evaluate(() => { window.__abrir = { dir: 'LocalGestor', arq: 'financas-grupo-tecnologia.json' }; });
+  await h.click('#aImpF'); await senhaAbrir(h, SENHA); await h.waitForSelector('#dlg .cofre');
+  ok(/chave\(s\) de finanças/.test(await h.textContent('#dlg')), 'hub importa as chaves de finanças do arquivo do Finanças do Grupo (só leitura)');
+  await btn(h, 'ok');
+  ok(await h.evaluate(() => __hub.db.times.find(t => t.slug === 'pagamentos').chavesFin.length === 1 && __hub.db.times.find(t => t.slug === 'pagamentos').chaves.length === 1), 'chave de finanças fica separada da chave de tarefas do time');
+  await h.evaluate(() => __hub.atualizar()); await h.waitForTimeout(300);
+  const plH = await h.evaluate(() => __hub.recebidos.pagamentos.plano);
+  const tAnos2 = await t2.evaluate(() => [2026, 2027].map(a => totais(mesesAno(a))));
+  ok(plH && plH.porAno['2026'].previsto === tAnos2[0].previsto && plH.porAno['2027'].orcado === tAnos2[1].orcado, 'hub lê o plano agregado publicado pelo time (2026 e 2027)');
+  ok(/Previsto dos times em \d{4}/.test(await h.textContent('.inss')) && /Times ativos na semana/.test(await h.textContent('.inss')), 'hub mostra cards de leitura da visão dos times');
+  ok(await h.evaluate(() => !!document.querySelector('.hb')) && /previsto/.test(await h.textContent('[data-time="pagamentos"] .finl')), 'hub mostra barras por time e a linha de finanças no card do time');
+  ok(!JSON.stringify(await opfs(h, async () => ler('LocalGestor2', 'hub-tecnologia.json'))).includes('pagamentos-fin'), 'chave de finanças só dentro do arquivo cifrado do hub');
+  await h.setViewportSize({ width: 1280, height: 900 }); await h.screenshot({ path: path.join(SAIDA, 'hub-visao.png'), fullPage: true });
+
   ok(erros.length === 0, 'sem erros de JavaScript nas páginas' + (erros.length ? ': ' + erros.join(' | ') : ''));
   await browser.close(); srv.close();
   console.log(falhas ? `\n${falhas} verificação(ões) falharam.` : '\nTodas as verificações passaram.');
