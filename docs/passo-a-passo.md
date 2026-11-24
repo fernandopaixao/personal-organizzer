@@ -1,6 +1,6 @@
 # Passo a passo · como lidar com a solução
 
-*24/11/2026 · Central v15.2, Quadro do Time 2.2, Hub 1.1, Finanças 1.0*
+*24/11/2026 · Central v15.2, Quadro do Time 2.2, Hub 1.1, Finanças 1.2*
 
 Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é independente. Antes de começar: use **Edge ou Chrome** e tenha à mão um **cofre de senhas** (o gerenciador de senhas da empresa).
 
@@ -42,7 +42,7 @@ Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é ind
 5. No hub, **Importar times e chaves da Central** para poder mandar post-its a esse time.
 
 **Finanças (Finanças do Time)**
-1. No Finanças do Grupo, **Times**: cadastre o time, defina **teto e diretriz** e clique **Gerar chave** (chave de finanças, diferente da de tarefas).
+1. No Finanças do Grupo, **Times**: cadastre o time, defina o **teto de cada ano** e a diretriz, e clique **Gerar chave** (chave de finanças, diferente da de tarefas).
 2. **Publicar diretriz** para que o time veja tetos e categorias.
 3. **Gerar HTML** de finanças do time e envie ao responsável financeiro, com a chave à parte.
 
@@ -106,22 +106,26 @@ Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é ind
 
 ## 8. Finanças: do lançamento ao consolidado
 
-> A interface de finanças está sendo otimizada em outra frente. Os passos abaixo valem para a versão 1.0 atual; os nomes de telas podem mudar, o fluxo de dados não.
-
 **No time (Finanças do Time)**
-1. **Plano:** crie as linhas (categoria, centro de custo, OPEX/CAPEX, iniciativa opcional) e o orçado por mês.
-2. **Contratos:** cadastre os compromissos recorrentes; eles geram o previsto dos meses seguintes.
+1. **Plano › Plano mês a mês:** crie as linhas (categoria, centro de custo, OPEX/CAPEX, iniciativa opcional) e o orçado por mês. O "orçado mensal" de uma linha pode se repetir nos anos seguintes do plano.
+2. **Plano › Contratos:** cadastre os compromissos recorrentes; eles geram o previsto dos meses seguintes.
 3. **Lançamentos:** registre cada gasto numa linha do plano.
-4. **Resumo:** acompanhe orçado, previsto, realizado, saldo e o que pede atenção.
-5. **Futuro:** simule um cenário "e se" e use **Aplicar ao previsto** se for o caso.
+4. **Painel › Hoje:** leia os cards (folga ou excesso contra o orçado, ritmo do realizado, mês atual, teto), a curva do ano e "Onde vai o dinheiro".
+5. **Painel › Futuro e cenários:** simule um cenário "e se" e use **Aplicar ao previsto** se for o caso.
 6. Fim do mês: **Plano › Fechar mês**.
-7. **Grupo › Ver o que vai** e **Publicar plano**. Só o agregado por mês e linha vai para a pasta.
+7. **Publicar para o grupo** (topo) ou **Ajustes › Grupo e pasta › Ver o que vai** e **Publicar plano**. Só o agregado por mês e linha vai para a pasta, com todos os anos do horizonte.
+
+**Planejar mais de um ano**
+1. No topo, **+ Adicionar ano…** e escolha começar vazio ou copiar o previsto/orçado do ano anterior com um reajuste em %.
+2. Troque o ano no seletor do topo para editar o mês a mês daquele ano, ou use **Plano › Todos os anos** para ver linhas × anos (clique num ano para abrir o mês a mês).
+3. Em **Painel › Futuro e cenários**, o card **Vários anos** mostra o total por ano e a variação contra o ano anterior.
+4. Na virada do ano, em **Ajustes › Time e segurança**, mude o **ano base** para o novo ano. Tirar um ano do horizonte não apaga os valores.
 
 **No grupo (Finanças do Grupo)**
-1. **Ler pasta:** revise os planos novos de cada time e clique **Aplicar** (ou **Aplicar todos**).
-2. Confira a **Saúde da soma** (time sem plano, plano desatualizado, categoria fora da lista, cópia de conflito).
-3. **Consolidado:** compare a soma dos times e dos itens do grupo com o orçamento aprovado; exporte CSV se precisar.
-4. **Versões:** ao aprovar um orçamento ou reforecast, **Fechar versão**; depois, **Comparar com hoje**.
+1. Em **Ajustes**, informe o **orçamento aprovado de cada ano**; em **Times**, o teto de cada time por ano, e **Publicar diretriz**.
+2. **Painel › Planos recebidos:** revise os planos novos de cada time e clique **Aplicar** (ou **Aplicar todos**). Confira a **Saúde da soma**.
+3. **Painel › Consolidado:** escolha o ano no topo e leia os cards e as barras por time; a tabela **Por ano** mostra o horizonte inteiro; exporte CSV se precisar.
+4. **Painel › Versões:** ao aprovar um orçamento ou reforecast, **Fechar versão**; depois, compare com hoje no ano em exibição.
 
 ## 9. Atualizar para uma versão nova
 
@@ -143,7 +147,7 @@ Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é ind
 1. **Gestor:** na Central, **Integração › Pasta e chaves**, clique **Vazou: trocar chave** no time afetado; a chave antiga deixa de abrir os arquivos na hora e uma nova é gerada (para finanças, o mesmo em Finanças do Grupo › Times › **Revogar chave**).
 2. Envie a nova chave ao responsável por mensagem direta.
 3. No hub, importe as chaves da Central de novo.
-4. **Time:** cole a nova chave em **··· › Central** (Quadro) ou na aba **Grupo** (Finanças do Time). A próxima publicação já sai com a chave nova.
+4. **Time:** cole a nova chave em **··· › Central** (Quadro) ou em **Ajustes › Grupo e pasta** (Finanças do Time). A próxima publicação já sai com a chave nova.
 
 Os outros times não são afetados.
 
