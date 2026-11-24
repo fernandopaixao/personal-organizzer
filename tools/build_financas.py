@@ -4,7 +4,7 @@
     python3 tools/build_financas.py
 
 - injeta o núcleo comum (financas/src/nucleo.css e nucleo.js) em cada HTML;
-- injeta o tema claro/escuro/automático (financas/src/tema.js) no <head> de cada HTML;
+- injeta o tema claro/escuro/automático (financas/src/tema.js) e a senha por sessão (financas/src/sessao.js) no <head> de cada HTML;
 - financas/financas_time.html   ← src/time.html
 - financas/financas_grupo.html  ← src/grupo.html (+ Finanças do Time embutido, para gerar o HTML de cada time)
 - hub.html                      ← src/hub.html (tela inicial do dia a dia, sem nada embutido)
@@ -52,7 +52,17 @@ def tema(html):
     tag = f'<style id="identidade">\n{identidade()}</style>\n<script id="tema">\n{js}</script>'
     html = re.sub(r'<style id="identidade">.*?</style>\n?', '', html, count=1, flags=re.S)
     if '<script id="tema">' in html:
-        return re.sub(r'<script id="tema">.*?</script>', lambda m: tag, html, count=1, flags=re.S)
+        return sessao(re.sub(r'<script id="tema">.*?</script>', lambda m: tag, html, count=1, flags=re.S))
+    i = html.index('</head>')
+    return sessao(html[:i] + tag + '\n' + html[i:])
+
+def sessao(html):
+    """Põe (ou troca) <script id="sessao"> com financas/src/sessao.js logo depois do tema: uma senha por sessão (ADR-0029)."""
+    js = (SRC / 'sessao.js').read_text(encoding='utf-8')
+    assert '</script' not in js.lower()
+    tag = f'<script id="sessao">\n{js}</script>'
+    if '<script id="sessao">' in html:
+        return re.sub(r'<script id="sessao">.*?</script>', lambda m: tag, html, count=1, flags=re.S)
     i = html.index('</head>')
     return html[:i] + tag + '\n' + html[i:]
 
@@ -92,6 +102,7 @@ def main():
     ini, _ = embutir(ini, 'centralEmb', c.read_bytes(), c.stem)
     ini, _ = embutir(ini, 'quadroEmb', q.read_bytes(), versao(q.read_text(encoding='utf-8')))
     ini, _ = embutir(ini, 'hubEmb', hub.encode('utf-8'), versao(hub))
+    ini, _ = embutir(ini, 'feriasEmb', fer.encode('utf-8'), versao(fer))
     (RAIZ / 'inicio.html').write_text(ini, encoding='utf-8')
     for p in [RAIZ / 'financas' / 'financas_time.html', RAIZ / 'financas' / 'financas_grupo.html', RAIZ / 'hub.html', RAIZ / 'ferias' / 'ferias.html', RAIZ / 'inicio.html']:
         print(f'{p.relative_to(RAIZ)}: {p.stat().st_size // 1024} KB')

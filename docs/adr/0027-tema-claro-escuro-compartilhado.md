@@ -14,7 +14,7 @@ Todas as ferramentas (hub, assistente, Central, Quadro do Time, Finanças do Gru
    - as cores fixas das folhas de estilo, dos estilos inline e dos atributos `fill`/`stroke` do SVG são **convertidas no lugar, por papel**: fundo claro vira superfície azul-noite, texto escuro vira texto claro, borda clara vira borda escura, tons suaves (azul, vermelho, âmbar, verde) viram o mesmo tom escuro; cores cheias (botões, barras, destaques) ficam;
    - texto em `var(--bv)` passa a usar a variante clara `--bv-t`, legível sobre o fundo escuro, sem mudar o azul dos botões;
    - um `MutationObserver` converte o que a tela desenhar depois; voltar para o claro restaura os valores originais.
-5. **Paleta escura** no mesmo estilo do claro: fundo `#0e121c`, cards `#161b29`, bordas `#262d40`, texto `#e6e9f2`, azul BV `#5066ec` (texto `#8d9cf9`), vermelho `#ec7d74`, verde `#5cc292`. *Atualizada pela [ADR-0028](0028-identidade-visual-comum.md): fundo `#0a1122`, cards `#101a30`, azul `#2f5fd6` (texto `#8fb0ff`), carmim `#ff8aa1`, verde-azulado `#4fd1ae`.*
+5. **Paleta escura** no mesmo estilo do claro: fundo `#0e121c`, cards `#161b29`, bordas `#262d40`, texto `#e6e9f2`, azul BV `#5066ec` (texto `#8d9cf9`), vermelho `#ec7d74`, verde `#5cc292`. *Atualizada pela [ADR-0032](0032-identidade-visual-comum.md): fundo `#0a1122`, cards `#101a30`, azul `#2f5fd6` (texto `#8fb0ff`), carmim `#ff8aa1`, verde-azulado `#4fd1ae`.*
 
 ## Consequências
 - O zip continua autossuficiente: o tema vai dentro de cada HTML, inclusive nas cópias embutidas (HTML do time gerado pela Central, finanças do time geradas pelo grupo, tudo que o assistente gera).

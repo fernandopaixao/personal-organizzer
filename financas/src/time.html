@@ -20,9 +20,11 @@
    Dados individuais (lançamentos, notas, cenários) ficam no arquivo local cifrado.
    Só o plano agregado vai para a pasta sincronizada: times/<time>/financas/plano.json
    ===================================================================== */
-const TOOL = 'financas-time', TOOL_NOME = 'Finanças do Time', TOOL_VERSION = '1.3.0';
+const TOOL = 'financas-time', TOOL_NOME = 'Finanças do Time', TOOL_VERSION = '1.5.0';
 const LOCAL_SCHEMA = 'gestao-financas-local/1', PLANO_SCHEMA = 'gestao-financas-plano/1', DIRETRIZ_SCHEMA = 'gestao-financas-diretriz/1';
 const PRESET = /*FIN-PRESET*/null/*FIM-FIN-PRESET*/;
+// Onde o arquivo desta ferramenta ficou neste navegador (gravado pelo assistente ou na última abertura).
+const LEMBRAR = TOOL + ':' + (PRESET?.team?.slug || '');
 const CATS_PADRAO = [
   ['pessoas', 'Pessoas', 'OPEX'], ['terceiros', 'Terceiros e consultoria', 'OPEX'], ['licencas', 'Licenças e software', 'OPEX'],
   ['nuvem', 'Nuvem e infraestrutura', 'OPEX'], ['viagens', 'Viagens e eventos', 'OPEX'], ['treinamento', 'Treinamento', 'OPEX'],
@@ -149,7 +151,7 @@ async function ligarPasta(h, silencioso = false) {
   dirPlano = await subpasta(raiz, ['times', db.team.slug, 'financas'], true);
   dirDiretriz = await subpasta(raiz, ['grupo', 'financas'], false);
   db.pastaComum = h.name; agendarSalvar();
-  if (!navigator.webdriver) kv.set('fin-time-raiz:' + db.team.slug, h);
+  lembrarPasta('fin-time-raiz:' + db.team.slug, h);
   await lerPasta(); iniciarPolling();
   return true;
 }
@@ -713,20 +715,22 @@ function vAjustes(el) {
 }
 
 /* ---------------------------- abertura e criação ---------------------------- */
-function telaInicial(msg = '') {
+async function telaInicial(msg = '') {
+  const ult = await arquivoLembrado(LEMBRAR);
   $('#app').innerHTML = `<div class="welcome"><div class="card">
     <div class="row"><div class="logo" style="margin:0">FIN</div><div><h2 style="margin:0">Finanças do Time</h2><div class="small muted">Acompanhamento do dia a dia e planejamento do futuro</div></div></div>
     ${PRESET ? `<div class="banner" style="margin-top:16px">Pré-configurado pelo gestor para o time <b>${esc(PRESET.team?.nome)}</b>.${PRESET.chave ? ' A chave do time vem junto: você vai guardá-la no cofre no primeiro uso.' : ''}</div>` : ''}
     ${msg ? `<div class="banner warn" style="margin-top:12px">${esc(msg)}</div>` : ''}
+    ${avisoFS()}
+    ${botaoUltimo(ult)}
     <p class="lbl" style="margin-top:20px">É a primeira vez?</p>
     <button class="opt" id="iNovo"><b>Criar o arquivo do time</b><span>Passo a passo: pasta local, senha guardada no cofre e o primeiro plano.</span></button>
     <p class="lbl" style="margin-top:16px">Já tenho o arquivo</p>
     <button class="opt" id="iAbrir"><b>Abrir a pasta local</b><span>Escolha a pasta deste computador onde está o arquivo <span class="code">financas-&lt;time&gt;.json</span>.</span></button>
-    ${temFS() ? '' : '<div class="banner warn">Abra no Microsoft Edge ou no Google Chrome: esta ferramenta precisa ler e gravar arquivos.</div>'}
     <p class="small muted" style="margin-top:16px">Seus dados ficam num arquivo cifrado neste computador. Só o plano agregado vai para a pasta sincronizada pelo OneDrive.</p>
   </div></div>`;
   $('#iNovo').onclick = criarDlg;
-  $('#iAbrir').onclick = abrirPasta;
+  $('#iAbrir').onclick = abrirPasta; ligarUltimo(ult, abrirArquivo, telaInicial);
 }
 async function abrirPasta() {
   let h; try { h = await escolherPasta('fin-local'); } catch (e) { if (e.name !== 'AbortError') toast(e.message); return; }
@@ -741,7 +745,7 @@ async function abrirPasta() {
 async function abrirArquivo(h, nome) {
   const texto = await lerTexto(h, nome);
   for (let i = 0; i < 3; i++) {
-    const s = await pedirSenhaDlg('Senha das Finanças do Time', i > 0); if (s == null) return;
+    const s = await pedirSenhaDlg('Senha das Finanças do Time', i > 0, { sessao: true }); if (s == null) return;
     try { const r = await decifrarLocal(texto, s); db = normalizar(r.dados); ctx = r.ctx; dirLocal = h; arquivo = nome; break; }
     catch (e) { if (e.code !== 'SENHA') return telaInicial(e.message); }
   }
@@ -752,10 +756,11 @@ async function aposAbrir() {
   await carregarChaves();
   render();
   if (await lembreteTesteSenha(db.seg, ctx)) agendarSalvar();
-  if (!navigator.webdriver) { const h = await kv.get('fin-time-raiz:' + db.team.slug); if (h && await permissao(h, false)) await ligarPasta(h, true); }
+  lembrarArquivo(LEMBRAR, dirLocal, arquivo);
+  { const h = await pastaLembrada('fin-time-raiz:' + db.team.slug); if (h && await permissao(h, false)) await ligarPasta(h, true); }
 }
 async function criarDlg() {
-  if (!temFS()) return toast('Abra no Edge ou no Chrome.');
+  if (semFS()) return;
   const p = PRESET || {};
   const d = modal(`<div class="mh"><h2>Criar o arquivo do time</h2></div><div class="mb">
     <div class="steps"><i class="on"></i><i></i><i></i></div>
@@ -763,7 +768,7 @@ async function criarDlg() {
     <div class="f2"><label class="field"><span>Identificador (usado nas pastas)</span><input class="sin code" id="cS" value="${esc(p.team?.slug || '')}" ${p.team ? 'disabled' : ''}></label>
     <label class="field"><span>Ano fiscal</span><input class="sin" type="number" id="cA" value="${p.ano || new Date().getFullYear()}"></label></div>
     <div class="f2"><label class="field"><span>Seu nome</span><input class="sin" id="cP"></label><label class="field"><span>Moeda</span><select class="sel" id="cM"><option>BRL</option><option>USD</option><option>EUR</option></select></label></div>
-    <p class="small muted">Depois você escolhe a pasta local (fora do OneDrive) e cria a senha.</p></div>
+    <p class="small muted">Depois você escolhe a pasta local (só sua; de preferência no seu OneDrive) e cria a senha.</p></div>
     <div class="mf"><button class="btn" id="cNo">Cancelar</button><button class="btn pri" id="cOk">Escolher pasta local</button></div>`);
   $('#cN', d).oninput = () => { if (!p.team) $('#cS', d).value = slugify($('#cN', d).value); };
   if (p.moeda) $('#cM', d).value = p.moeda;
@@ -778,12 +783,11 @@ async function criarDlg() {
 }
 // Usado também pelo assistente (inicio.html) com a mesma lógica.
 async function escolherPastaLocal() {
-  await perguntar('Pasta local', `<p>Escolha uma pasta <b>deste computador</b> que <b>não</b> esteja no OneDrive. Ela guarda seus dados individuais cifrados.</p>
-    <div class="banner warn">Atenção: com o backup de pastas do OneDrive ligado, <b>Documentos</b> e <b>Área de Trabalho</b> também sincronizam. Prefira algo como <span class="code">C:\\Users\\voce\\GestaoLocal</span>.</div>`, [['ok', 'Escolher pasta', 'pri']]);
+  await perguntar('Pasta local', `<p>Escolha a sua <b>pasta pessoal</b>: só sua, de preferência no <b>seu OneDrive</b> (backup se trocar de computador), como <span class="code">OneDrive - Empresa\\GestaoPessoal</span>. Pode ser a mesma das outras ferramentas. Nunca a pasta compartilhada com os times.</p><div class="banner">O arquivo é cifrado com a sua senha: no OneDrive, ninguém consegue ler sem ela.</div>`, [['ok', 'Escolher pasta', 'pri']]);
   let h; try { h = await escolherPasta('fin-local'); } catch { return null; }
   if (!await permissao(h)) return null;
   const s = await suspeitaDeSincronizada(h);
-  if (s.length) { const r = await perguntar('Esta pasta parece sincronizada', `<div class="cofre">A pasta <b>${esc(h.name)}</b> ${esc(s.join(', '))}. Dados individuais devem ficar fora do OneDrive.</div>`, [['no', 'Escolher outra'], ['ok', 'Usar mesmo assim']]); if (r !== 'ok') return escolherPastaLocal(); }
+  if (s.length) { const r = await perguntar('Esta parece ser a pasta compartilhada', `<div class="cofre">A pasta <b>${esc(h.name)}</b> ${esc(s.join(', '))}. ${AVISO_PASTA_PESSOAL}</div>`, [['no', 'Escolher outra'], ['ok', 'Usar mesmo assim']]); if (r !== 'ok') return escolherPastaLocal(); }
   return h;
 }
 async function criarArquivo({ nome, slug, pessoa, ano, moeda }) {
@@ -806,7 +810,7 @@ async function criarArquivo({ nome, slug, pessoa, ano, moeda }) {
   toast('Arquivo criado e cifrado. Agora crie as linhas do plano.', 5000);
   return true;
 }
-telaInicial();
+(async () => { if (!await abrirLembradoSePuder(LEMBRAR, abrirArquivo) || (!db && !$('#app').children.length)) telaInicial(); })();
 </script>
 </body>
 </html>

@@ -1,8 +1,8 @@
 # Passo a passo · como lidar com a solução
 
-*24/11/2026 · Central v15.5, Quadro do Time 2.3, Hub 1.3, Finanças do Grupo 1.4 e do Time 1.3, Mapa de Férias 1.1, assistente 2.1*
+*24/11/2026 · Central v15.9, Quadro do Time 2.4, Hub 1.5, Finanças do Grupo 1.6 e do Time 1.5, Mapa de Férias 1.3, assistente 2.4*
 
-Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é independente. Antes de começar: use **Edge ou Chrome** e tenha à mão um **cofre de senhas** (o gerenciador de senhas da empresa).
+Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é independente. Antes de começar: use **Edge ou Chrome** no computador, abrindo o arquivo com dois cliques (não pela pré-visualização do Outlook, Teams ou OneDrive, nem de dentro do .zip), e tenha à mão um **cofre de senhas** (o gerenciador de senhas da empresa).
 
 **Sumário**
 1. [Montar a solução pela primeira vez](#1-montar-a-solução-pela-primeira-vez)
@@ -24,25 +24,34 @@ Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é ind
 ## 1. Montar a solução pela primeira vez
 
 0. Descompacte o **.zip da solução** (`gestao-solucao-AAAA-MM-DD.zip`) numa pasta qualquer; ele traz o `inicio.html`, as ferramentas, a documentação e um LEIA-ME.
-1. Crie uma **pasta local** fora do OneDrive, por exemplo `C:\Users\<você>\GestaoLocal`. Evite `Documentos` e `Área de Trabalho` se o backup de pastas do OneDrive estiver ligado.
+1. Crie uma **pasta pessoal**, só sua, de preferência dentro do **seu OneDrive** (por exemplo `OneDrive - Empresa\GestaoPessoal`). Ela é o seu backup se trocar de computador. Não use a pasta compartilhada com os times.
 2. Garanta que a **biblioteca do SharePoint** do grupo (`Gestao-Compartilhado`) está sincronizada no seu computador pelo OneDrive.
-3. Copie `inicio.html` para a pasta local e abra com dois cliques.
+3. Copie `inicio.html` para a pasta pessoal e abra com dois cliques.
 4. **Perfil:** responda **Você lidera times?** (2 ou mais, 1, ou não) e **O que você quer organizar?** (tarefas, finanças ou os dois).
 5. **Chaves:** se o seu líder mandou chaves (`GK1.…`), escolha **Sim, recebi**, cole uma por linha, clique **Conferir chaves** e informe o nome da pasta sincronizada que ele indicou. O assistente mostra o que cada chave é. Sem chave, escolha **Não, ainda não**: dá para colar depois dentro de cada ferramenta.
 6. **Dados:** nome, prefixo de código, ano fiscal e moeda. Com chave, o identificador já vem dela e fica travado. O gestor lista os times que lidera.
-7. Em **Pastas**, escolha a pasta local e a pasta sincronizada. Se a ferramenta avisar que a pasta local parece sincronizada, escolha outra.
+7. Em **Pastas**, escolha a pasta pessoal e a pasta compartilhada. Se a ferramenta avisar que a pasta pessoal parece ser a compartilhada, escolha outra.
 8. Em **Senha**, crie a senha, **guarde no cofre** e marque "Já guardei no cofre".
-9. Em **Pronto**, a pasta local passa a ter os HTMLs, os arquivos cifrados (já com as chaves coladas), o `hub.html` e o `onde-fica-cada-coisa.html`. Siga os **próximos passos** que a tela mostra para o seu perfil.
-10. Abra o `hub.html`. A partir de agora ele é a sua tela inicial.
+9. Em **Pronto**, a pasta pessoal passa a ter os HTMLs, os arquivos cifrados (já com as chaves), o `hub.html` e o `onde-fica-cada-coisa.html`. A tela explica os **dois tipos de arquivo**: o pessoal, cifrado com a sua senha e numa pasta só sua, e os comuns, cifrados com a chave de cada time na pasta compartilhada. Siga os **próximos passos** do seu perfil.
+   Se você lidera vários times, o assistente já gerou a **chave de cada time** (tarefas e finanças) e a pasta `para-os-times/<time>/`: copie cada chave para o cofre com os botões da tela e mande cada pasta ao responsável por mensagem direta ou e-mail.
+10. Clique **Abrir o hub**: ele abre já com a senha da sessão. Cada ferramenta aberta pelo hub abre sozinha o seu arquivo, com a pasta sincronizada ligada: não precisa escolher pasta nem colar chave neste computador. Em outro computador, cada ferramenta pede a pasta pessoal uma vez. A partir de agora o hub é a sua tela inicial; no dia a dia, abra o `hub.html` da pasta pessoal (dica: crie um atalho).
 
-**Gestor: equipar cada time com o assistente.** Depois de gerar as chaves dos times (seção 2), mande a cada time o `inicio.html` e, por mensagem direta, a chave e o nome da pasta sincronizada. O responsável abre o assistente, escolhe "Sim, lidero 1 time", cola a chave e sai com o Quadro e/ou o Finanças do Time prontos. É o caminho recomendado; gerar o HTML do time pela Central (seção 2) continua valendo.
+**Atalho: Estou com sorte.** Na primeira tela do assistente, quem lidera times pode clicar **Estou com sorte**:
+1. Preencha o nome do grupo, o seu nome, os times (um por linha, com o prefixo se quiser), o ano e a moeda.
+2. Escolha a pasta pessoal (só sua, de preferência no seu OneDrive), a pasta compartilhada (se já tiver) e crie a senha.
+3. Clique **Gerar tudo** e confirme o aviso de cofre das chaves.
+4. Na tela final, copie a chave de cada time para o cofre, siga o checklist e envie a cada responsável a pasta `para-os-times/<time>/` por mensagem direta ou e-mail (nunca pela pasta compartilhada). Depois clique **Abrir o hub**.
+5. O time abre o `quadro_<time>.html`, o `financas_<time>.html` ou o `ferias.html`, cria a própria senha e guarda a chave quando a ferramenta pedir.
+
+**Gestor: equipar cada time com o assistente.** Se preferir que o time rode o próprio assistente, depois de gerar as chaves dos times (seção 1 ou 2), mande a cada time o `inicio.html` e, por mensagem direta, a chave e o nome da pasta sincronizada. O responsável abre o assistente, escolhe "Sim, lidero 1 time", cola a chave e sai com o Quadro e/ou o Finanças do Time prontos. É o caminho recomendado; gerar o HTML do time pela Central (seção 2) continua valendo.
 
 ## 2. Cadastrar um time e entregar a ferramenta
 
 **Tarefas (Quadro do Time)**
-1. Na Central, **Times › + Time**: nome, prefixo (2 a 5 letras, ex.: `PAG`) e pasta do time.
-2. Em **Integração › Pasta e chaves**, clique **Gerar chave** para o time e **guarde no cofre**.
-3. Em **Times**, abra o time e clique **HTML do time** (a tela mostra o aviso de cofre). Prefira enviar a chave separada do HTML.
+Times criados pelo assistente já têm prefixo, pasta e chave: pule para o passo 3.
+1. Na Central, **Times › + Time**: o nome basta (prefixo e pasta podem ficar em branco).
+2. Abra o time: o aviso em destaque mostra **Gerar chave de integração**. Um clique gera a chave e, se faltar, define a pasta e o prefixo (dá para mudar em **Editar time**). **Guarde no cofre**.
+3. Na aba **Integração** do time, clique **HTML do time (com a chave)** (a tela mostra o aviso de cofre). Prefira enviar a chave separada do HTML.
 4. Envie o HTML ao responsável e, **à parte, por mensagem direta no Teams ou por e-mail**, o texto da chave (`GK1.…`). Nunca coloque a chave na pasta compartilhada.
 5. No hub, **Importar da Central** para poder mandar post-its a esse time.
 
@@ -54,7 +63,7 @@ Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é ind
 
 ## 3. Primeiro uso do Quadro do Time (time)
 
-1. Salve o HTML recebido numa pasta local (fora do OneDrive) e abra no Edge ou Chrome.
+1. Salve o HTML recebido numa pasta só sua (de preferência no seu OneDrive, nunca na pasta compartilhada) e abra no Edge ou Chrome.
 2. Crie a **senha** do seu arquivo local e guarde no cofre.
 3. Em **··· › Central**, cole a chave do time e conecte a pasta sincronizada (`Gestao-Compartilhado`).
 4. Responda **Quem é você neste quadro?** (nome e este computador).
@@ -70,6 +79,8 @@ Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é ind
 4. Se o cartão **Dos times** mostrar arquivos novos, vá em **Integração**, revise a prévia e aplique.
 5. Registre e delegue em **Tarefas** (tecla 2). A barra rápida aceita texto livre.
 6. Para mandar um recado a um time, volte ao hub (**← Hub**), clique **Novo post-it**, escolha o(s) time(s) e, se quiser, a pessoa e o "mostrar até". Depois acompanhe o **Visto por…**.
+
+**Uma senha por dia.** Abra o hub com a senha do cofre e abra as outras ferramentas pelos links dele. O Finanças do Grupo, o Finanças do Time e o Mapa de Férias abrem sem pedir a senha de novo; a Central chega com a senha preenchida. A senha fica só na memória das janelas abertas e some ao fechar ([ADR-0029](adr/0029-uma-senha-por-sessao.md)).
 
 ## 5. Rituais: 1:1, fóruns e reunião de status
 
@@ -140,6 +151,20 @@ Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é ind
 4. **Liderança:** em **Painel › Planos recebidos**, aplique o consolidado do gestor; ele soma ano a ano como uma unidade.
 5. **Liderança:** defina o teto do gestor por ano e **Publicar diretriz**; o gestor vê o teto no card do nível acima.
 
+**Ver as finanças dos times na Central (15.5 e 15.6, só leitura)**
+1. Na Central, vá em **Integração › Pasta e chaves** e confira se a pasta compartilhada está conectada.
+2. Clique **Chaves do Finanças do Grupo**, escolha o arquivo `financas-grupo-<grupo>.json` e digite a senha dele. A Central só lê as chaves de finanças dos times; os times entram pela pasta (`pagamentos`, `cartoes`…). Para um time só, use **Chave de finanças** na linha do time e cole a chave `GK1.<time>-fin-…`.
+3. A Central lê o plano publicado por cada time e o teto da diretriz. Depois disso, **Atualizar da pasta** traz os planos novos.
+4. Leia o card **Finanças dos times** na Hoje e a linha de finanças no card de cada time. Na reunião de status, o bloco **Finanças** aparece quando o time passou do teto ou não publica o plano há mais de 35 dias.
+5. **Custo por iniciativa (15.6):** no Finanças do Time, marque cada linha do plano com o código da iniciativa (`PAG-042`) ou da feature (`PAG-042.F2`). Na Central, a lista de Iniciativas mostra o previsto do ano ao lado do código, e o painel da iniciativa ganha a aba **Finanças**: orçado, previsto, realizado e folga, com uma barra por time. A soma inclui todos os times que marcaram linhas com o código.
+6. Em **Integração › Conciliação**, o cartão **Códigos nas finanças do time sem iniciativa na Central** lista os códigos que não batem com nenhuma iniciativa. Corrija o código no Finanças do Time, ou crie ou una a iniciativa na Central.
+7. Para mudar orçamento, teto ou plano, continue no Finanças do Grupo ou no Finanças do Time: a Central não grava nada de finanças.
+
+**Liderança: ver os gestores no hub (Hub 1.3)**
+1. No hub da liderança, clique **Importar do Finanças do Grupo**, escolha o arquivo do Finanças do Grupo da liderança e digite a senha dele.
+2. Cada gestor cadastrado como **Grupo de outro gestor** entra como um card "gestor", com o consolidado que ele publicou (`grupos/<grupo>/financas/`).
+3. O painel do topo vira **Visão dos gestores**: previsto, realizado e barras por gestor.
+
 ## 9. Atualizar para uma versão nova
 
 1. Baixe o **.zip** novo e **substitua** os HTMLs antigos na pasta local (mesmo nome, se possível, para o hub encontrar).
@@ -149,8 +174,8 @@ Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é ind
 
 ## 10. Trocar de computador
 
-1. No computador antigo, copie a **pasta local inteira** (é o mais simples). Também dá para baixar uma cópia de cada arquivo: **Ajustes › Baixar cópia cifrada** nas Finanças e **Baixar cópia** nos Ajustes do Quadro.
-2. No novo, crie a pasta local fora do OneDrive e cole o conteúdo.
+1. Se a sua pasta pessoal está no seu OneDrive, ela já está no computador novo: entre no OneDrive e espere sincronizar. Senão, copie a **pasta pessoal inteira** do computador antigo (ou baixe uma cópia de cada arquivo: **Ajustes › Baixar cópia cifrada** nas Finanças e **Baixar cópia** nos Ajustes do Quadro).
+2. Feche as ferramentas no computador antigo: use um computador de cada vez, para o OneDrive não criar cópia de conflito.
 3. Sincronize a biblioteca `Gestao-Compartilhado` pelo OneDrive.
 4. Abra o `hub.html` e cada ferramenta com a **senha do cofre**; reconecte as pastas quando o navegador pedir.
 5. No Quadro e em Finanças do Time, informe o novo nome de computador. Você passa a gravar um arquivo novo (`<você>-<computador novo>.json`); o antigo continua sendo lido.
@@ -176,8 +201,11 @@ Os outros times não são afetados.
 | ← Hub abre uma aba nova | O hub não estava aberto | Normal; abra as ferramentas sempre a partir do hub |
 | Hub não acha as ferramentas | O hub não está na mesma pasta dos HTMLs | Mova o `hub.html` para a pasta local das ferramentas |
 | Não consigo gravar | Navegador sem File System Access API ou pasta sem permissão | Use Edge ou Chrome e autorize a pasta de novo |
+| Aviso vermelho "Daqui não dá para abrir pastas" e os botões não seguem | O arquivo foi aberto no Safari, no Firefox, no celular ou numa pré-visualização (Outlook, Teams, OneDrive, SharePoint, biblioteca de outro aplicativo) | Faça o que o aviso diz: baixe o arquivo para uma pasta só sua e abra com dois cliques, ou botão direito > **Abrir com** > Microsoft Edge ou Google Chrome. A última linha do aviso mostra o navegador e o endereço detectados |
+| Aviso para extrair o .zip | O HTML foi aberto de dentro do .zip ou de um anexo (pasta temporária) | Botão direito no .zip > **Extrair tudo**, leve a pasta para um lugar só seu e abra o HTML de lá |
 | Quero a tela escura (ou ela ficou escura sem eu pedir) | O tema está em Automático e segue o sistema | Clique no botão redondo no canto inferior direito e escolha **Claro**, **Escuro** ou **Automático**. Fica salvo só neste computador e vale para todas as ferramentas |
-| Aviso de que a pasta local parece sincronizada | A pasta está dentro do OneDrive | Escolha uma pasta fora do OneDrive |
+| Aviso de que a pasta parece ser a compartilhada | Você escolheu a pasta dos times como pasta pessoal | Escolha uma pasta só sua (de preferência no seu OneDrive) |
+| Uma ferramenta pediu a senha mesmo aberta pelo hub | A senha dessa ferramenta é diferente da do hub, ou passaram mais de 90 segundos do clique | Digite a senha do cofre; abra as ferramentas pelos links do hub |
 
 ---
 
@@ -186,7 +214,7 @@ Os outros times não são afetados.
 O **Mapa de Férias** (`ferias.html`) é apoio para enxergar e planejar ausências; o pedido oficial continua na ferramenta da empresa.
 
 **No time (cada pessoa, ou o responsável por todos)**
-1. Abra `ferias.html`, escolha **Sou de um time**, informe o nome e o identificador do time (o mesmo do Quadro, ex.: `pagamentos`) e o seu nome. Escolha a pasta local (fora do OneDrive) e crie a senha.
+1. Abra `ferias.html`, escolha **Sou de um time**, informe o nome e o identificador do time (o mesmo do Quadro, ex.: `pagamentos`) e o seu nome. Escolha a pasta local (só sua, de preferência no seu OneDrive) e crie a senha.
 2. **Ajustes:** ligue a pasta sincronizada e cole a **chave do time** (a mesma do Quadro).
 3. **Pessoas:** marque as suas férias pela barra rápida ("05/01 a 23/01 férias") ou por **+ Ausência**. Se for o responsável, cadastre também os colegas que não usam a ferramenta, com o mesmo nome que eles usariam.
 4. Pronto: a ferramenta publica sozinha a cada mudança. As notas ficam só no seu computador.

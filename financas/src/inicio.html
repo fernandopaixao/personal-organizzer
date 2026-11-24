@@ -12,7 +12,22 @@
 .combo{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .res{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--line)}.res:last-child{border:0}
 .res .ic{width:28px;height:28px;border-radius:8px;background:var(--bv-soft);color:var(--bv);display:grid;place-items:center;font-weight:700;font-size:11px;flex:none}
-@media (max-width:720px){.combo{grid-template-columns:1fr}}
+/* 2.1: como funciona, Estou com sorte e checklist */
+.ilus{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+.ilu{border:1px solid var(--line);border-radius:14px;padding:12px 14px 13px;font-size:12.5px;color:var(--muted);background:#fff}
+.ilu h4{margin:8px 0 3px;color:var(--ink);font-size:13.5px;letter-spacing:-.01em}.ilu p{margin:0}
+.ilu svg,.mapa-svg{width:100%;height:auto;display:block}
+.ilu .s1,.mapa-svg .s1{stroke:var(--bv);fill:none;stroke-width:1.6}.ilu .sl,.mapa-svg .sl{stroke:#c7ccda;fill:none;stroke-width:1.4}
+.dois .g2s{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;font-size:12.5px}@media(max-width:640px){.dois .g2s{grid-template-columns:1fr}}
+.ilu .f1,.mapa-svg .f1{fill:var(--bv-soft)}.ilu .f2,.mapa-svg .f2{fill:var(--bv)}.ilu .fw,.mapa-svg .fw{fill:#fff}
+.ilu .t,.mapa-svg .t{fill:var(--ink);font-size:11px;font-weight:600}.ilu .tm,.mapa-svg .tm{fill:var(--muted);font-size:10px}.ilu .tb{fill:var(--bv);font-size:15px;font-weight:700}.ilu .tx,.mapa-svg .tx{fill:#9aa1b4;font-size:10px;font-family:ui-monospace,Consolas,monospace}
+.sorte{margin:4px 0 6px;border:1px solid var(--bv-line);background:linear-gradient(160deg,#fff 0%,var(--bv-soft) 100%);border-radius:14px;padding:14px 16px;display:flex;gap:14px;align-items:center}
+.sorte .grow{font-size:12.5px;color:var(--muted)}.sorte b{display:block;color:var(--ink);font-size:14px;margin-bottom:2px}
+.ck{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px;cursor:pointer}.ck:last-child{border-bottom:0}
+.ck input{margin-top:3px;accent-color:var(--bv);width:16px;height:16px;flex:none}.ck small{display:block;color:var(--muted);font-size:11.5px;margin-top:1px}
+.ck.on>span>span{color:var(--faint);text-decoration:line-through}
+.tk{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:12.5px}.tk:last-child{border-bottom:0}
+@media (max-width:720px){.combo{grid-template-columns:1fr}.ilus{grid-template-columns:1fr}.sorte{flex-direction:column;align-items:flex-start}}
 </style>
 </head>
 <body>
@@ -27,16 +42,16 @@
    Pergunta o uso esperado, cria o primeiro arquivo (sempre cifrado), gera os HTMLs
    desacoplados de cada uso e o cartão "Onde fica cada coisa".
    ===================================================================== */
-const TOOL_NOME = 'Início da solução', TOOL_VERSION = '2.1.0';
+const TOOL_NOME = 'Início da solução', TOOL_VERSION = '2.4.0';
 $('#ver').textContent = TOOL_VERSION;
-const st = { passo: 0, papel: '', usos: [], dados: {}, dirLocal: null, raiz: null, senha: null, criados: [], temChave: null, chaves: [], kErr: '', pastaDoLider: '', cofreChaves: false };
+const st = { modo: '', sp: 0, sorteTimes: [], passo: 0, papel: '', usos: [], dados: {}, dirLocal: null, raiz: null, senha: null, criados: [], temChave: null, chaves: [], kErr: '', pastaDoLider: '', cofreChaves: false };
 // Perfil: quem lidera, se quer finanças e tarefas, e se o líder já mandou chaves e a pasta.
 const PAPEIS = [
   ['gestor', 'Sim, lidero 2 ou mais times', 'Você acompanha um grupo: consolida tarefas e finanças dos seus times e gera as chaves deles.'],
   ['responsavel', 'Sim, lidero 1 time', 'Você cuida do dia a dia de um time: quadro de tarefas e, se quiser, o plano financeiro.'],
   ['membro', 'Não, faço parte de um time', 'Você usa o quadro de tarefas do time.']
 ];
-const USOS = [['tarefas', 'Tarefas', 'Iniciativas, quadro, backlog e acompanhamento.'], ['financas', 'Finanças', 'Orçado, previsto e realizado; contratos; previsão de vários anos.']];
+const USOS = [['tarefas', 'Tarefas', 'Iniciativas, quadro, backlog e acompanhamento.'], ['financas', 'Finanças', 'Orçado, previsto e realizado; contratos; previsão de vários anos.'], ['ferias', 'Férias', 'Quem está fora e quando; dias com muita gente fora no time e no grupo.']];
 // O que cada combinação gera. Cada HTML é desacoplado e tem o próprio arquivo de dados.
 function plano() {
   const g = st.papel === 'gestor', out = [{ id: 'hb', nome: 'Hub da solução', desc: 'Tela inicial do dia a dia: abre as outras ferramentas, mostra os times e deixa post-its.', html: 'hub.html' }];
@@ -44,6 +59,7 @@ function plano() {
                                              : { id: 'ft', nome: 'Finanças do Time', desc: 'Dia a dia e futuro das finanças do time.', html: `financas_${st.dados.slug || '<time>'}.html` });
   if (st.usos.includes('tarefas')) out.push(g ? { id: 'ct', nome: 'Central de Gestão', desc: 'Tarefas consolidado: iniciativas, times, rituais e pessoas.', html: 'gestao_pessoal.html' }
                                             : { id: 'qt', nome: 'Quadro do Time', desc: 'Tarefas de um time: quadro, backlog, sprints e métricas.', html: `quadro_${st.dados.slug || '<time>'}.html` });
+  if (st.usos.includes('ferias')) out.push({ id: 'fe', nome: 'Mapa de Férias', desc: g ? 'Soma as férias dos seus times e mostra onde há mais e menos gente fora.' : 'Férias do time: cada pessoa marca as suas e o time vê os picos.', html: 'ferias.html' });
   return out;
 }
 // Chaves coladas: o kid diz o que cada uma é. "<time>-AAMM" é de tarefas; "<time>-fin-AAMM" é de finanças.
@@ -52,25 +68,54 @@ function classificarChave(texto) {
   const k = lerChaveTexto(texto), m = /^(.+?)(-fin)?-\d{4}(?:-\d+)?$/.exec(k.kid) || [null, k.kid, ''];
   const fin = !!m[2], slug = m[1], g = st.papel === 'gestor';
   let papel = fin ? (g ? 'acima' : 'fin') : 'tarefas', aviso = '';
-  if (g && !fin) aviso = 'Chave de tarefas de um time. Como você lidera vários times, as chaves deles são geradas por você na Central; esta será ignorada.';
+  if (g && !fin) aviso = 'Chave de tarefas de um time. Se for de um dos times que você vai listar, ela é reaproveitada; para os outros times o assistente gera chaves novas.';
   if (!g && fin && st.papel === 'membro') aviso = 'Chave de finanças: as finanças do time ficam com quem lidera o time. Será ignorada.';
   if (!g && fin && !st.usos.includes('financas')) aviso = 'Chave de finanças, mas você não marcou Finanças. Será ignorada.';
-  if (!g && !fin && !st.usos.includes('tarefas')) aviso = 'Chave de tarefas, mas você não marcou Tarefas. Será guardada só no hub, para post-its.';
+  if (!g && !fin && !st.usos.includes('tarefas') && !st.usos.includes('ferias')) aviso = 'Chave de tarefas, mas você não marcou Tarefas nem Férias. Será guardada só no hub, para post-its.';
   return { texto: texto.trim(), kid: k.kid, slug, tipo: fin ? 'fin' : 'tarefas', papel, aviso, ignorar: /ignorada/.test(aviso) };
 }
 const chavesUteis = () => st.chaves.filter(c => !c.ignorar);
 const slugAcima = () => chavesUteis().find(c => c.papel === 'acima')?.slug || '';
 const slugDasChaves = () => { const s = [...new Set(chavesUteis().filter(c => c.papel !== 'acima').map(c => c.slug))]; return s.length === 1 ? s[0] : ''; };
 const ROTULO = { tarefas: 'Tarefas do time', fin: 'Finanças do time', acima: 'Finanças do nível acima (liderança)' };
+// Como a solução funciona: quatro desenhos simples, sem dados.
+const ILU = [
+  { h: 'O HTML é a ferramenta; o JSON é o seu caderno', p: 'O HTML não guarda nada e pode ser trocado por uma versão nova. Seus dados ficam num arquivo .json separado, trancado com a sua senha.',
+    svg: `<svg viewBox="0 0 240 104" aria-hidden="true"><rect class="s1 f1" x="22" y="8" width="62" height="74" rx="7"/><text class="tb" x="53" y="51" text-anchor="middle">&lt;/&gt;</text><text class="tm" x="53" y="98" text-anchor="middle">ferramenta.html</text>
+      <path class="sl" d="M92 45H146"/><path class="sl" d="M140 40l6 5l-6 5"/><text class="tm" x="119" y="37" text-anchor="middle">abre e grava</text>
+      <rect class="s1" x="156" y="8" width="62" height="74" rx="7"/><path class="s1" d="M181 46v-6a6 6 0 0 1 12 0v6"/><rect class="f2" x="176" y="45" width="22" height="17" rx="3"/><text class="tm" x="187" y="98" text-anchor="middle">seus-dados.json</text></svg>` },
+  { h: 'A chave é um idioma que só vocês dois falam', p: 'O que vai para a pasta compartilhada é escrito nesse idioma. Quem tem a chave lê; para qualquer outra pessoa, é texto embaralhado. Cada time tem a sua chave, e a de finanças é outra.',
+    svg: `<svg viewBox="0 0 240 104" aria-hidden="true"><circle class="s1 f1" cx="28" cy="34" r="10"/><path class="s1" d="M12 66c2-12 8-17 16-17s14 5 16 17"/><text class="tm" x="28" y="84" text-anchor="middle">você</text>
+      <rect class="s1 fw" x="50" y="10" width="34" height="18" rx="9"/><text class="t" x="67" y="23" text-anchor="middle">Olá</text>
+      <rect class="sl fw" x="92" y="26" width="56" height="44" rx="6"/><text class="tx" x="120" y="44" text-anchor="middle">x7#qL9</text><text class="tx" x="120" y="58" text-anchor="middle">@k2!vR</text><text class="tm" x="120" y="84" text-anchor="middle">a pasta só vê isto</text>
+      <path class="sl" d="M62 48H88"/><path class="sl" d="M152 48H178"/><path class="sl" d="M172 43l6 5l-6 5"/>
+      <circle class="s1 f1" cx="212" cy="34" r="10"/><path class="s1" d="M196 66c2-12 8-17 16-17s14 5 16 17"/><text class="tm" x="212" y="84" text-anchor="middle">seu time</text>
+      <rect class="s1 fw" x="156" y="10" width="34" height="18" rx="9"/><text class="t" x="173" y="23" text-anchor="middle">Olá</text><text class="tm" x="120" y="100" text-anchor="middle">GK1.pagamentos-2611.…</text></svg>` },
+  { h: 'Quem lidera 1 time ou vários', p: 'Quem lidera 1 time cuida do quadro e das finanças do time e publica para o gestor. Quem lidera vários times gera as chaves deles, soma o que publicam e, se a liderança também usa a solução, publica o consolidado para ela.',
+    svg: `<svg viewBox="0 0 240 104" aria-hidden="true"><rect class="sl fw" x="84" y="4" width="72" height="20" rx="6"/><text class="tm" x="120" y="17" text-anchor="middle">liderança</text>
+      <path class="sl" d="M120 24V38"/><rect class="s1 f1" x="56" y="38" width="128" height="22" rx="6"/><text class="t" x="120" y="53" text-anchor="middle">gestor (vários times)</text>
+      <path class="sl" d="M120 60V68M40 68H200M40 68V76M120 68V76M200 68V76"/>
+      <rect class="s1" x="10" y="76" width="60" height="22" rx="6"/><text class="tm" x="40" y="91" text-anchor="middle">time A</text>
+      <rect class="s1" x="90" y="76" width="60" height="22" rx="6"/><text class="tm" x="120" y="91" text-anchor="middle">time B</text>
+      <rect class="s1" x="170" y="76" width="60" height="22" rx="6"/><text class="tm" x="200" y="91" text-anchor="middle">time C</text></svg>` },
+  { h: 'A troca de arquivos é pelo OneDrive', p: 'Uma pasta do SharePoint, sincronizada pelo OneDrive, aparece igual em todos os computadores. Cada pessoa grava só o próprio arquivo e lê o dos outros: ninguém sobrescreve ninguém. O seu arquivo pessoal fica em outra pasta, só sua.',
+    svg: `<svg viewBox="0 -8 240 112" aria-hidden="true"><rect class="s1" x="8" y="44" width="54" height="34" rx="4"/><path class="s1" d="M2 84H68"/><text class="tm" x="35" y="98" text-anchor="middle">ana-notebook</text>
+      <path class="s1 f1" d="M92 40a14 14 0 0 1 8-26a20 20 0 0 1 38-2a14 14 0 0 1 12 28z"/><text class="t" x="120" y="32" text-anchor="middle">pasta</text>
+      <rect class="sl fw" x="84" y="52" width="72" height="16" rx="4"/><text class="tx" x="120" y="63" text-anchor="middle">ana.json</text><rect class="sl fw" x="84" y="72" width="72" height="16" rx="4"/><text class="tx" x="120" y="83" text-anchor="middle">bruno.json</text>
+      <path class="sl" d="M62 56L82 48"/><path class="sl" d="M158 48L178 56"/>
+      <rect class="s1" x="178" y="44" width="54" height="34" rx="4"/><path class="s1" d="M172 84H238"/><text class="tm" x="205" y="98" text-anchor="middle">bruno-desktop</text></svg>` }
+];
+const comoFunciona = () => `<div class="ilus">${ILU.map(x => `<div class="ilu">${x.svg}<h4>${x.h}</h4><p>${x.p}</p></div>`).join('')}</div>`;
 const PASSOS = ['Boas-vindas', 'Perfil', 'Chaves', 'Dados', 'Pastas', 'Senha', 'Pronto'];
 function desenhar() {
   const p = st.passo, el = $('#wz');
   const topo = `<div class="steps">${PASSOS.map((_, i) => `<i class="${i <= p ? 'on' : ''}"></i>`).join('')}</div>`;
   const nav = (proxOk = true, proxTxt = 'Continuar') => `<div class="row" style="margin-top:18px">${p > 0 && p < 6 ? '<button class="btn" id="vol">Voltar</button>' : ''}<span class="grow"></span>${p < 6 ? `<button class="btn pri" id="prox" ${proxOk ? '' : 'disabled'}>${proxTxt}</button>` : ''}</div>`;
-  if (p === 0) el.innerHTML = `${topo}<h1>Vamos montar sua solução</h1><p class="muted">Três perguntas sobre o seu perfil e, se o seu líder já mandou, a chave e a pasta. Depois criamos as ferramentas certas, o primeiro arquivo já cifrado e o mapa de onde fica cada coisa.</p>
-    <div class="map" style="margin:16px 0"><div><h4>Fica no seu computador</h4>Seus dados individuais, num arquivo cifrado com a sua senha, numa pasta <b>fora</b> do OneDrive.</div><div><h4>Vai para a pasta sincronizada</h4>Só o pedaço comum (planos, catálogos, status), cifrado com a chave do time, numa pasta do SharePoint sincronizada pelo OneDrive.</div></div>
-    ${temFS() ? '' : '<div class="banner warn">Abra este arquivo no Microsoft Edge ou no Google Chrome.</div>'}
-    <button class="btn ghost" id="mapa">Ver todas as ferramentas da solução</button>${nav(temFS(), 'Começar')}`;
+  if (st.modo === 'sorte') return desenharSorte(el);
+  if (p === 0) el.innerHTML = `${topo}<h1>Vamos montar sua solução</h1><p class="muted">Primeiro, como ela funciona em quatro desenhos. Depois, três perguntas sobre o seu perfil e, se o seu líder já mandou, a chave e a pasta.</p>
+    ${comoFunciona()}
+    ${temFS() ? `<div class="sorte"><div class="grow"><b>Estou com sorte</b>Lidero times e quero tudo pronto de uma vez: Central, Finanças do Grupo, Mapa de Férias, hub e, para cada time, o Quadro, o Finanças do Time e o Mapa de Férias, já com as chaves e a pasta.</div><button class="btn pri" id="sorte">Estou com sorte</button></div>` : avisoFS()}
+    <button class="btn ghost" id="mapa">Ver todas as ferramentas da solução</button>${nav(true, 'Começar')}`;
   if (p === 1) el.innerHTML = `${topo}<h1>Seu perfil</h1>
     <p class="lbl">1 · Você lidera times?</p>
     ${PAPEIS.map(([k, n, d]) => `<button class="opt ${st.papel === k ? 'on' : ''}" data-p="${k}"><b>${n}</b><span>${d}</span></button>`).join('')}
@@ -106,8 +151,8 @@ function desenhar() {
     if ($('#dM')) $('#dM').value = d.moeda || 'BRL';
   }
   if (p === 4) el.innerHTML = `${topo}<h1>Onde guardar</h1>
-    <p class="lbl">1 · Pasta local (obrigatória)</p>
-    <p class="small muted" style="margin-top:0">Fica só neste computador, <b>fora do OneDrive</b>: recebe os HTMLs e o seu arquivo de dados cifrado. Com o backup de pastas do OneDrive ligado, <b>Documentos</b> e <b>Área de Trabalho</b> também sincronizam; prefira algo como <span class="code">C:\\Users\\voce\\GestaoLocal</span>.</p>
+    <p class="lbl">1 · Sua pasta pessoal (obrigatória)</p>
+    <p class="small muted" style="margin-top:0">Recebe os HTMLs e os seus arquivos de dados, cifrados com a sua senha. É <b>só sua</b>: de preferência dentro do <b>seu OneDrive</b>, como <span class="code">OneDrive - Empresa\\GestaoPessoal</span>, para ter backup se trocar de computador. Nunca use a pasta compartilhada com os times.</p>
     <div class="row"><button class="btn ${st.dirLocal ? '' : 'pri'}" id="pL">${st.dirLocal ? 'Trocar' : 'Escolher pasta local'}</button>${st.dirLocal ? `<span class="chip ok">${esc(st.dirLocal.name)}</span>` : ''}</div>
     <p class="lbl" style="margin-top:20px">2 · Pasta sincronizada pelo OneDrive ${chavesUteis().length ? '(recomendada agora)' : '(pode ser depois)'}</p>
     <p class="small muted" style="margin-top:0">${chavesUteis().length ? `A pasta que o seu líder compartilhou${st.pastaDoLider ? `: <b class="code">${esc(st.pastaDoLider)}</b>` : ` (normalmente <span class="code">${PASTA_COMUM}</span>)`}. Ela precisa estar sincronizada neste computador (botão "Sincronizar" ou "Adicionar atalho ao Meu OneDrive" no SharePoint).` : `A pasta comum da solução, <span class="code">${PASTA_COMUM}</span>: recomendamos uma biblioteca do SharePoint do grupo, sincronizada pelo OneDrive.`} O assistente cria só a estrutura de pastas e um LEIA-ME; nenhum dado vai para lá agora.</p>
@@ -117,24 +162,24 @@ function desenhar() {
     ${st.senha ? '<p class="okc">Senha criada e guardada no cofre.</p>' : ''}<button class="btn ${st.senha ? '' : 'pri'}" id="sC">${st.senha ? 'Criar outra senha' : 'Criar senha'}</button>${nav(!!st.senha, 'Criar arquivos')}`;
   if (p === 6) el.innerHTML = `${topo}<h1>Pronto</h1><p class="muted">Criado na pasta local <span class="code">${esc(st.dirLocal.name)}</span>:</p>
     ${st.criados.map(c => `<div class="res"><span class="ic">${c.tipo}</span><div class="grow"><b class="code">${esc(c.nome)}</b><br><span class="small muted">${esc(c.desc)}</span></div></div>`).join('')}
+    ${doisArquivos()}${blocoChaves()}
     <p class="lbl" style="margin-top:18px">Próximos passos</p>${proximos()}
-    <div class="row" style="margin-top:16px"><button class="btn pri" id="mapa2">Abrir "Onde fica cada coisa"</button><button class="btn" id="mapa">Ferramentas da solução</button></div>`;
+    <p class="lbl" style="margin-top:18px">Checklist para deixar tudo funcionando</p>${checklist(itensChecklist())}
+    <div class="row" style="margin-top:16px;flex-wrap:wrap">${botaoHub()}<button class="btn" id="mapa2">Abrir "Onde fica cada coisa"</button><button class="btn" id="mapa">Ferramentas da solução</button></div>`;
   ligar();
 }
 function proximos() {
   const g = st.papel === 'gestor', l = [], ch = chavesUteis(), tem = tipo => ch.some(c => c.papel === tipo);
-  l.push('Abra o hub.html (Edge ou Chrome) como tela inicial: ele mostra as ferramentas desta pasta e abre cada uma. Em cada ferramenta, escolha a pasta local e digite a senha.');
+  l.push(`Abra o hub (botão "Abrir o hub" abaixo, ou o hub.html da sua pasta, no Edge ou Chrome) como tela inicial. Neste computador, cada ferramenta já sabe onde está o seu arquivo${st.raiz ? ' e a pasta sincronizada' : ''} e abre com a senha da sessão: não precisa escolher pasta nem colar chave.`);
   if (g) {
-    if (st.usos.includes('tarefas')) l.push('Na Central, em Times, cadastre o prefixo e a pasta de cada time e gere a chave de tarefas de cada um (guarde no cofre).');
-    if (st.usos.includes('financas')) l.push('Em Finanças do Grupo › Times, gere a chave de finanças de cada time (guarde no cofre).');
-    l.push('Para cada time, mande o inicio.html (está no pacote da solução) e, por mensagem direta, a chave e o nome da pasta sincronizada. O assistente do time já sai configurado com a chave.');
-    l.push('No hub, use "Importar da Central" e "Importar do Finanças do Grupo" para ver os times e deixar post-its.');
+    l.push(`As chaves dos ${(st.dados.times || []).length} times já foram geradas e estão em todas as suas ferramentas${st.usos.includes('tarefas') ? ' (a Central já tem times, prefixos, chaves de tarefas e de finanças)' : ''}. Guarde-as no cofre com os botões "Copiar chave" acima.`);
+    l.push('Mande a cada time a pasta para-os-times/<time> por mensagem direta ou e-mail: os HTMLs já levam a chave, o prefixo e o nome da pasta sincronizada.');
     if (tem('acima')) l.push('A chave da sua liderança já está em Finanças do Grupo › Ajustes › Nível acima. Publique o consolidado quando ele estiver pronto.');
   } else {
     if (st.usos.includes('tarefas')) l.push(tem('tarefas') ? 'O Quadro do Time já tem a chave de tarefas: na primeira abertura, ligue a pasta sincronizada e diga quem é você.' : 'No Quadro do Time, cole a chave de tarefas do time (menu ··· › Central) quando o seu líder enviar.');
     if (st.usos.includes('financas')) l.push(tem('fin') ? 'O Finanças do Time já tem a chave de finanças: em Ajustes › Grupo e pasta, ligue a pasta sincronizada, crie as linhas do plano e publique.' : 'Em Finanças do Time › Ajustes › Grupo e pasta, cole a chave de finanças quando o seu líder enviar.');
   }
-  if (!st.raiz) l.push(`Quando tiver a pasta sincronizada (${st.pastaDoLider || PASTA_COMUM}), ligue-a dentro de cada ferramenta.`);
+  if (!st.raiz) l.push(`Quando tiver a pasta sincronizada (${st.pastaDoLider || PASTA_COMUM}), ligue-a dentro de cada ferramenta (ou rode este assistente de novo escolhendo a pasta).`);
   l.push('Guarde uma cópia deste assistente: ele gera de novo as ferramentas se você trocar de computador.');
   return l.map(x => `<div class="al"><span class="dot"></span><div>${esc(x)}</div></div>`).join('');
 }
@@ -143,7 +188,7 @@ function lerChavesDigitadas() {
   st.kErr = ''; const out = [];
   for (const l of linhas) { try { const c = classificarChave(l); if (!out.some(x => x.kid === c.kid)) out.push(c); } catch (e) { st.kErr = `"${l.slice(0, 18)}…": ${e.message}`; } }
   const slugs = new Set(out.filter(c => !c.ignorar && c.papel !== 'acima').map(c => c.slug));
-  if (!st.kErr && slugs.size > 1) st.kErr = `As chaves são de times diferentes (${[...slugs].join(', ')}). Cole só as do seu time.`;
+  if (!st.kErr && slugs.size > 1 && st.papel !== 'gestor') st.kErr = `As chaves são de times diferentes (${[...slugs].join(', ')}). Cole só as do seu time.`;
   st.chaves = out; st.pastaDoLider = ($('#kP')?.value || '').trim();
 }
 function ligar() {
@@ -151,19 +196,19 @@ function ligar() {
   on('vol', () => { st.passo--; desenhar(); });
   on('mapa', () => ondeEstou({ ferramenta: TOOL_NOME, versao: TOOL_VERSION, arquivo: '', pastaLocal: st.dirLocal?.name, pastaComum: st.raiz?.name, writer: '',
     local: ['Os HTMLs das ferramentas', 'Arquivos de dados cifrados com a sua senha', 'Cópias de segurança (backup/)'], comum: ['Planos, diretrizes, catálogos e status cifrados com a chave de cada time', 'LEIA-ME.md (sem dados)'] }));
-  on('mapa2', abrirCartao);
+  on('mapa2', abrirCartao); if ($('#abrirHub')) prepararHub(); ligarCopiar();
+  on('sorte', () => { st.modo = 'sorte'; st.sp = 0; desenhar(); });
+  ligarChecklist();
   $$('[data-p]').forEach(b => b.onclick = () => { st.papel = b.dataset.p; if (st.papel === 'membro') st.usos = ['tarefas']; st.chaves = st.chaves.map(c => classificarChave(c.texto)); desenhar(); });
   $$('[data-u]').forEach(b => b.onclick = () => { const k = b.dataset.u; st.usos = st.usos.includes(k) ? st.usos.filter(x => x !== k) : [...st.usos, k]; st.chaves = st.chaves.map(c => classificarChave(c.texto)); desenhar(); });
   $$('[data-k]').forEach(b => b.onclick = () => { st.temChave = b.dataset.k === 'sim'; if (!st.temChave) { st.chaves = []; st.kErr = ''; } desenhar(); });
   on('kLer', () => { lerChavesDigitadas(); desenhar(); });
   if ($('#kT')) $('#kT').onchange = () => { lerChavesDigitadas(); desenhar(); };
   on('pL', async () => { const h = await escolherPastaLocalAssist(); if (h) { st.dirLocal = h; desenhar(); } });
-  on('pC', async () => { let h; try { h = await escolherPasta('fin-comum'); } catch { return; } if (!await permissao(h)) return; const v = await validarPastaComum(h);
-    if (st.dirLocal && h.name === st.dirLocal.name && !v.tem) toast('Esta parece ser a mesma pasta local. Escolha a pasta sincronizada.');
-    if (!v.tem && !v.nomeOk && h.name !== st.pastaDoLider && await perguntar('Esta é a pasta sincronizada?', `<p><b class="code">${esc(h.name)}</b> não tem a estrutura da solução nem o nome <span class="code">${PASTA_COMUM}</span>. Usar mesmo assim?</p>`, [['no', 'Escolher outra'], ['ok', 'Usar', 'pri']]) !== 'ok') return;
-    st.raiz = h; desenhar(); });
+  on('pC', escolherComum);
   on('sC', async () => { const s = await criarSenhaDlg('Senha dos seus arquivos'); if (s) { st.senha = s; desenhar(); } });
   on('prox', async () => {
+    if (st.passo === 0 && semFS()) return;
     if (st.passo === 2 && st.temChave) {
       lerChavesDigitadas(); if (st.kErr || !st.chaves.length) return desenhar();
       if (chavesUteis().length && !st.cofreChaves) { if (!await avisoCofre('chave', '<p class="small">As chaves vão para dentro dos arquivos cifrados que o assistente cria agora.</p>')) return; st.cofreChaves = true; }
@@ -177,17 +222,23 @@ function lerDados() {
   const d = st.dados, g = st.papel === 'gestor', sk = slugDasChaves();
   d.nome = $('#dN').value.trim(); d.pessoa = $('#dP').value.trim();
   if ($('#dA')) { d.ano = +$('#dA').value; d.moeda = $('#dM').value; } else { d.ano ??= new Date().getFullYear(); d.moeda ??= 'BRL'; }
-  if (g) { d.timesTxt = $('#dT').value; d.slug = slugAcima() || slugify(d.nome); d.times = d.timesTxt.split('\n').map(x => x.trim()).filter(Boolean).map(x => { const m = /^(.*?)\s+([A-Za-z]{2,5})$/.exec(x); const nome = m ? m[1] : x; return { nome, slug: slugify(nome), prefixo: m ? m[2].toUpperCase() : '' }; }); }
-  else { d.slug = sk || slugify($('#dS').value || d.nome); d.prefixo = $('#dPx').value.trim().toUpperCase(); }
+  if (g) { d.timesTxt = $('#dT').value; d.slug = slugAcima() || slugify(d.nome); d.times = comPrefixos(lerTimes(d.timesTxt)); if (!d.times.length) { toast('Informe pelo menos um time.'); return false; } if (new Set(d.times.map(t => t.slug)).size !== d.times.length) { toast('Há dois times com o mesmo nome.'); return false; } }
+  else { d.slug = sk || slugify($('#dS').value || d.nome); d.prefixo = $('#dPx').value.trim().toUpperCase().replace(/[^A-Z]/g, '') || prefixoPadrao(d.nome, new Set()); }
   if (!d.nome || !d.pessoa || !d.slug) { toast('Preencha o nome e o seu nome.'); return false; }
   if (d.ano < 2000 || d.ano > 2100) { toast('Ano fiscal inválido.'); return false; }
   return true;
+}
+async function escolherComum() {
+  let h; try { h = await escolherPasta('fin-comum'); } catch { return; } if (!await permissao(h)) return; const v = await validarPastaComum(h);
+  if (st.dirLocal && h.name === st.dirLocal.name && !v.tem) toast('Esta parece ser a mesma pasta local. Escolha a pasta sincronizada.');
+  if (!v.tem && !v.nomeOk && h.name !== st.pastaDoLider && await perguntar('Esta é a pasta sincronizada?', `<p><b class="code">${esc(h.name)}</b> não tem a estrutura da solução nem o nome <span class="code">${PASTA_COMUM}</span>. Usar mesmo assim?</p>`, [['no', 'Escolher outra'], ['ok', 'Usar', 'pri']]) !== 'ok') return;
+  st.raiz = h; desenhar();
 }
 async function escolherPastaLocalAssist() {
   let h; try { h = await escolherPasta('fin-local'); } catch { return null; }
   if (!await permissao(h)) return null;
   const s = await suspeitaDeSincronizada(h);
-  if (s.length) { if (await perguntar('Esta pasta parece sincronizada', `<div class="cofre">A pasta <b>${esc(h.name)}</b> ${esc(s.join(', '))}. Dados individuais devem ficar fora do OneDrive.</div>`, [['no', 'Escolher outra'], ['ok', 'Usar mesmo assim']]) !== 'ok') return null; }
+  if (s.length) { if (await perguntar('Esta parece ser a pasta compartilhada', `<div class="cofre">A pasta <b>${esc(h.name)}</b> ${esc(s.join(', '))}. ${AVISO_PASTA_PESSOAL}</div>`, [['no', 'Escolher outra'], ['ok', 'Usar mesmo assim']]) !== 'ok') return null; }
   return h;
 }
 
@@ -200,6 +251,7 @@ async function criarTudo() {
     await gravarLocal(dir, nome, texto); st.criados.push({ nome, tipo, desc });
   };
   const seg = { cofreConfirmadoEm: agora };
+  if (g) gerarChavesTimes(d.times); // quem lidera vários times: o assistente gera as chaves de cada time (ou reaproveita as coladas)
   const ch = chavesUteis(), reg = c => ({ kid: c.kid, texto: c.texto, em: agora, origem: 'onboarding' });
   const chTar = ch.filter(c => c.papel === 'tarefas'), chFin = ch.filter(c => c.papel === 'fin'), chAcima = ch.filter(c => c.papel === 'acima');
   for (const x of plano()) {
@@ -212,7 +264,7 @@ async function criarTudo() {
     }
     if (x.id === 'fg') {
       const db = { schema: 'gestao-financas-local/1', version: 1, tool: 'financas-grupo', criadoEm: agora, grupo: { nome: d.nome, slug: d.slug }, ano: d.ano, moeda: d.moeda, pessoa: { nome: d.pessoa, slug: slugify(d.pessoa).split('-')[0] || 'gestor' },
-        orcamento: { total: 0 }, itens: [], times: d.times.map(t => ({ nome: t.nome, slug: t.slug, prefixo: t.prefixo, chaves: [], teto: { total: 0, caps: {} }, diretriz: {} })), retratos: {}, versoes: [], centros: [], seg, ...(chAcima.length ? { acima: { chaves: chAcima.map(reg) } } : {}) };
+        orcamento: { total: 0 }, itens: [], times: d.times.map(t => ({ nome: t.nome, slug: t.slug, prefixo: t.prefixo, chaves: chFin.filter(c => c.slug === t.slug).map(c => ({ kid: c.kid, texto: c.texto, em: agora })), teto: { total: 0, caps: {} }, diretriz: {} })), retratos: {}, versoes: [], centros: [], seg, ...(chAcima.length ? { acima: { chaves: chAcima.map(reg) } } : {}) };
       await salvarNovo('financas_grupo.html', await lerEmbutido('finGrupoEmb'), 'FG', 'Ferramenta Finanças do Grupo (abra com dois cliques).');
       await salvarNovo(`financas-grupo-${d.slug}.json`, await cifrarLocal(db, await novoCtx(st.senha, 'financas-grupo')), 'DB', 'Dados das Finanças do Grupo, cifrados com a sua senha.');
     }
@@ -226,7 +278,11 @@ async function criarTudo() {
     if (x.id === 'ct') {
       const html = await lerEmbutido('centralEmb');
       await salvarNovo('gestao_pessoal.html', html, 'CT', 'Central de Gestão (tarefas consolidado).');
-      await salvarNovo(`gestao-${d.slug}.json`, await cifrarCentral({}, st.senha), 'DB', 'Dados da Central, cifrados com a sua senha. Ao abrir, a Central cria a estrutura.');
+      // Times (com prefixo e pasta) e as chaves de tarefas já entram na Central; o resto ela cria ao abrir.
+      const teams = d.times.map((t, i) => ({ id: 'tm' + (i + 1), name: t.nome, prefix: t.prefixo || '', slug: t.slug, createdAt: Date.now() })), keys = {};
+      teams.forEach(t => { const k = chTar.filter(c => c.slug === t.slug).map(c => ({ key: c.texto, createdAt: agora.slice(0, 10) })); if (k.length) keys[t.id] = k; });
+      const finKeys = {}; teams.forEach(t => { const k = chFin.filter(c => c.slug === t.slug).map(c => ({ key: c.texto, createdAt: agora.slice(0, 10), origin: 'onboarding' })); if (k.length) finKeys[t.id] = k; });
+      await salvarNovo(`gestao-${d.slug}.json`, await cifrarCentral({ teams, settings: { selfName: d.pessoa }, integ: { keys, finKeys } }, st.senha), 'DB', 'Dados da Central (times, chaves de tarefas e de finanças), cifrados com a sua senha.');
     }
     if (x.id === 'qt') {
       const html = aplicarPreset(await lerEmbutido('quadroEmb'), 'QUADRO-PRESET', { schema: 'quadro-preset/1', generatedAt: isoComFuso(), team: { name: d.nome, slug: d.slug, ...(d.prefixo ? { prefix: d.prefixo } : {}) }, people: [{ name: d.pessoa }], ...(chTar[0] ? { key: chTar[0].texto } : {}) });
@@ -235,14 +291,29 @@ async function criarTudo() {
       await salvarNovo(`quadro-${d.slug}.json`, await cifrarQuadro({ schema: 'quadro-time/1', createdAt: isoComFuso(), upd: t, team: { name: d.nome, slug: d.slug, contact: '', upd: t }, people: [{ id: 'P1', name: d.pessoa, upd: t }] }, st.senha), 'DB', 'Dados do Quadro, cifrados com a sua senha.');
     }
   }
+  if (plano().some(x => x.id === 'fe')) {
+    // Mapa de Férias: no time, a chave do time publica as férias; no grupo, os times entram como unidades
+    // (lidos com a chave de tarefas de cada um) e a chave da liderança, se houver, publica o consolidado.
+    const eu = { id: 'p' + Math.random().toString(36).slice(2, 9), nome: d.pessoa, ativo: true };
+    const db = { schema: 'gestao-ferias-local/1', version: 1, tool: 'ferias', criadoEm: agora, nivel: g ? 'grupo' : 'time', unidade: { nome: d.nome, slug: d.slug }, pessoa: { nome: d.pessoa, slug: slugify(d.pessoa).split('-')[0] || 'eu' }, eu: eu.id,
+      pessoas: [eu], ausencias: [], feriados: [], config: { limite: 30, diasUteis: [1, 2, 3, 4, 5], nomesAcima: true },
+      chaves: (g ? chAcima : chTar.filter(c => c.slug === d.slug)).map(reg), unidades: g ? d.times.map(t => ({ nome: t.nome, slug: t.slug, tipo: 'time', chaves: chTar.filter(c => c.slug === t.slug).map(reg) })) : [],
+      retratos: {}, publicacao: { revision: 0 }, seg };
+    await salvarNovo('ferias.html', aplicarPreset(await lerEmbutido('feriasEmb'), 'FERIAS-PRESET', { unidade: { nome: d.nome, slug: d.slug } }), 'FE', 'Mapa de Férias, já configurado.');
+    await salvarNovo(`ferias-${d.slug}.json`, await cifrarLocal(db, await novoCtx(st.senha, 'ferias')), 'DB', 'Dados do Mapa de Férias, cifrados com a sua senha.');
+  }
   await salvarNovo('onde-fica-cada-coisa.html', cartao(), 'MAP', 'Cartão em claro (sem dados nem senhas) com o mapa dos seus arquivos.');
   if (st.raiz) {
     await subpasta(st.raiz, ['grupo', 'financas'], true);
     const slugs = g ? d.times.map(t => t.slug) : [d.slug];
     for (const s of slugs) await subpasta(st.raiz, ['times', s, 'financas'], true);
+    if (st.usos.includes('ferias')) { if (g) await subpasta(st.raiz, ['grupos', d.slug, 'ferias'], true); for (const s of slugs) await subpasta(st.raiz, ['times', s, 'ferias'], true); }
     if (!await lerTexto(st.raiz, 'LEIA-ME.md')) await gravarSeguro(st.raiz, 'LEIA-ME.md', `# ${PASTA_COMUM}\n\nPasta compartilhada da solução (sincronizada pelo OneDrive). Tudo aqui é cifrado com a chave de cada time; nunca coloque senhas ou chaves aqui.\n\n- grupo/: só as ferramentas do gestor escrevem.\n- times/<time>/: as ferramentas do time escrevem; o hub escreve só os post-its, em postits/<pessoa>-<computador>.json (um arquivo por autor).\n- Arquivos com nome de computador no final são cópias de conflito do OneDrive: as ferramentas resolvem sozinhas.\n`);
   }
-  st.senha = null; // não fica em memória depois de usada
+  if (g) await gerarPacotes();
+  await lembrarTudo();
+  window.gestaoSessao?.definir(st.senha); // só para o hub aberto pelo botão do fim (ADR-0029)
+  if (st.modo !== 'sorte') st.senha = null; // não fica em memória depois de usada
 }
 // Formato do arquivo da Central (gestao-cripto/2): AES-GCM sem AAD, PBKDF2 600k.
 async function cifrarCentral(obj, senha) {
@@ -262,7 +333,7 @@ function cartao() {
 <style>body{font-family:"DM Sans","Segoe UI",system-ui,sans-serif;max-width:760px;margin:40px auto;padding:0 20px;color:#121f3d;background:#f4f7fc;line-height:1.5}h1{font-size:22px}h2{font-size:15px;margin-top:28px}table{border-collapse:collapse;width:100%;font-size:14px}td{border-bottom:1px solid #e0e6f1;padding:8px 6px;vertical-align:top}code{font-size:13px}.box{border:1.5px solid #c2334f;background:#fdedf1;border-radius:12px;padding:12px 14px;color:#7a1d33}.g{display:grid;grid-template-columns:1fr 1fr;gap:12px}.g div{border:1px solid #e0e6f1;background:#fff;border-radius:12px;padding:10px 12px}</style></head><body>
 <h1>Onde fica cada coisa</h1><p>${esc(st.papel === 'gestor' ? 'Grupo' : 'Time')} <b>${esc(d.nome)}</b> · criado em ${esc(new Date().toLocaleDateString('pt-BR'))} pelo assistente Início da solução. Este cartão não tem dados nem senhas.</p>
 <div class="box"><b>A senha dos arquivos está no seu cofre de senhas.</b> Sem ela não há como abrir os dados. As chaves dos times também ficam no cofre e só são enviadas por mensagem direta ou e-mail.</div>
-<h2>Pasta local (${esc(st.dirLocal.name)}) · só neste computador, fora do OneDrive</h2><table>${linhas}<tr><td><code>backup/</code></td><td>As 5 últimas versões de cada arquivo de dados (cifradas).</td></tr></table>
+<h2>Pasta pessoal (${esc(st.dirLocal.name)}) · só sua, de preferência no seu OneDrive (backup)</h2><table>${linhas}<tr><td><code>backup/</code></td><td>As 5 últimas versões de cada arquivo de dados (cifradas).</td></tr></table>
 <h2>Pasta sincronizada (${esc(st.raiz?.name || PASTA_COMUM)}) · OneDrive / SharePoint</h2><table>
 <tr><td><code>grupo/financas/diretriz-&lt;time&gt;.json</code></td><td>Tetos e categorias do grupo para cada time. Só o gestor escreve.</td></tr>
 <tr><td><code>times/&lt;time&gt;/financas/plano.json</code></td><td>Plano financeiro agregado do time. Só o responsável do time escreve.</td></tr>
@@ -275,6 +346,201 @@ async function abrirCartao() {
   const t = await lerTexto(st.dirLocal, 'onde-fica-cada-coisa.html'); if (!t) return;
   const w = window.open(URL.createObjectURL(new Blob([t], { type: 'text/html' })), '_blank'); if (!w) toast('Abra o arquivo onde-fica-cada-coisa.html na pasta local.');
 }
+/* --------------------------- Estou com sorte --------------------------- */
+// Uma tela só: grupo, times, seu nome, pasta e senha. Gera as chaves de cada time (tarefas e finanças),
+// as ferramentas do gestor já com times e chaves e, em para-os-times/<time>/, o Quadro e o Finanças do Time
+// de cada time já configurados com a chave e a pasta.
+function desenharSorte(el) {
+  const d = st.dados;
+  if (st.sp === 0) {
+    const ok = !!(st.dirLocal && st.senha);
+    el.innerHTML = `<h1>Estou com sorte</h1><p class="muted">Preencha só o essencial. Geramos as chaves de cada time e todas as ferramentas de uma vez, já configuradas.</p>
+      <div class="f2"><label class="field"><span>Nome do grupo</span><input class="sin" id="sN" value="${esc(d.nome || '')}" placeholder="Ex.: Tecnologia de Pagamentos"></label><label class="field"><span>Seu nome</span><input class="sin" id="sP" value="${esc(d.pessoa || '')}"></label></div>
+      <label class="field"><span>Times que você lidera (um por linha: nome e, se quiser, prefixo de código)</span><textarea class="sin" id="sT" placeholder="Pagamentos PAG&#10;Cartões CAR">${esc(d.timesTxt || '')}</textarea></label>
+      <div class="f2"><label class="field"><span>Ano fiscal e moeda</span><div class="row"><input class="sin" type="number" id="sA" value="${d.ano || new Date().getFullYear()}" style="width:100px"><select class="sel" id="sM"><option>BRL</option><option>USD</option><option>EUR</option></select></div></label><span></span></div>
+      <p class="lbl">Sua pasta pessoal (só sua; de preferência no seu OneDrive, como backup)</p>
+      <div class="row"><button class="btn ${st.dirLocal ? '' : 'pri'}" id="sL">${st.dirLocal ? 'Trocar' : 'Escolher pasta'}</button>${st.dirLocal ? `<span class="chip ok">${esc(st.dirLocal.name)}</span>` : ''}</div>
+      <p class="lbl" style="margin-top:16px">Pasta sincronizada pelo OneDrive (pode ser depois)</p>
+      <div class="row"><button class="btn" id="sC">${st.raiz ? 'Trocar' : 'Escolher pasta sincronizada'}</button>${st.raiz ? `<span class="chip ok">${esc(st.raiz.name)}</span>` : `<span class="small faint">normalmente ${PASTA_COMUM}</span>`}</div>
+      <p class="lbl" style="margin-top:16px">Senha (uma só, para todos os seus arquivos)</p>
+      <div class="row"><button class="btn ${st.senha ? '' : 'pri'}" id="sS">${st.senha ? 'Criar outra senha' : 'Criar senha'}</button>${st.senha ? '<span class="chip ok">guardada no cofre</span>' : ''}</div>
+      <div class="row" style="margin-top:20px"><button class="btn" id="sVol">Voltar</button><span class="grow"></span><button class="btn pri" id="sGo" ${ok ? '' : 'disabled'}>Gerar tudo</button></div>`;
+    $('#sM').value = d.moeda || 'BRL';
+    const guardar = () => { d.nome = $('#sN').value.trim(); d.pessoa = $('#sP').value.trim(); d.timesTxt = $('#sT').value; d.ano = +$('#sA').value; d.moeda = $('#sM').value; };
+    $('#sVol').onclick = () => { guardar(); st.modo = ''; st.passo = 0; desenhar(); };
+    $('#sL').onclick = async () => { guardar(); const h = await escolherPastaLocalAssist(); if (h) { st.dirLocal = h; desenhar(); } };
+    $('#sC').onclick = async () => { guardar(); await escolherComum(); };
+    $('#sS').onclick = async () => { guardar(); const s = await criarSenhaDlg('Senha dos seus arquivos'); if (s) { st.senha = s; desenhar(); } };
+    $('#sGo').onclick = async () => {
+      guardar(); const b = $('#sGo');
+      if (!d.nome || !d.pessoa) return toast('Preencha o nome do grupo e o seu nome.');
+      const times = comPrefixos(lerTimes(d.timesTxt)); if (!times.length) return toast('Informe pelo menos um time.');
+      if (new Set(times.map(t => t.slug)).size !== times.length) return toast('Há dois times com o mesmo nome.');
+      if (!(d.ano >= 2000 && d.ano < 2100)) return toast('Ano fiscal inválido.');
+      if (!await avisoCofre('chave', `<p class="small">Vamos gerar ${times.length * 2} chaves (tarefas e finanças de cada time). Elas vão dentro dos seus arquivos cifrados e dos HTMLs de cada time; você vê e copia cada uma na próxima tela.</p>`)) return;
+      b.disabled = true; b.textContent = 'Gerando…';
+      try { await gerarSorte(times); } catch (e) { b.disabled = false; b.textContent = 'Gerar tudo'; return toast('Erro: ' + e.message, 8000); }
+      st.sp = 1; desenhar();
+    };
+    return;
+  }
+  const n = st.sorteTimes.length, htmls = st.criados.filter(c => /\.html$/.test(c.nome)).length, json = st.criados.filter(c => /\.json$/.test(c.nome)).length;
+  el.innerHTML = `<h1>Tudo pronto</h1><p class="muted">Grupo <b>${esc(d.nome)}</b>, ${n} ${n === 1 ? 'time' : 'times'}, na pasta <span class="code">${esc(st.dirLocal.name)}</span>.</p>
+    <div class="inss">${[
+      cardLeitura({ hi: true, k: 'Ferramentas geradas', v: String(htmls), s: `${htmls - n * 3} suas e ${n * 3} dos times` }),
+      cardLeitura({ k: 'Times prontos', v: String(n), pct: 1, s: 'Quadro, Finanças e Férias de cada um' }),
+      cardLeitura({ k: 'Chaves criadas', v: String(n * 2), s: 'tarefas e finanças, já dentro dos arquivos' }),
+      cardLeitura({ k: 'Arquivos cifrados', v: String(json), s: 'todos abrem com a sua senha' })].join('')}</div>
+    <div class="card" style="padding:14px 16px;margin:4px 0 16px">${mapaSorte()}</div>
+    ${doisArquivos()}
+    ${blocoChaves()}
+    <p class="lbl" style="margin-top:18px">Checklist para deixar tudo funcionando</p>${checklist(itensChecklist())}
+    <div class="row" style="margin-top:16px;flex-wrap:wrap">${botaoHub()}<button class="btn" id="mapa2">Abrir "Onde fica cada coisa"</button><button class="btn" id="mapa">Ferramentas da solução</button></div>`;
+  ligarCopiar();
+  $('#mapa2').onclick = abrirCartao;
+  $('#mapa').onclick = () => ondeEstou({ ferramenta: TOOL_NOME, versao: TOOL_VERSION, arquivo: '', pastaLocal: st.dirLocal?.name, pastaComum: st.raiz?.name, writer: '', local: ['Os HTMLs das ferramentas', 'Arquivos de dados cifrados com a sua senha', 'para-os-times/: as ferramentas de cada time'], comum: ['Planos, diretrizes, catálogos e status cifrados com a chave de cada time'] });
+  ligarChecklist(); prepararHub();
+}
+// Prefixo de código padrão (PAG, CAR…): a Central só gera a chave de um time com prefixo.
+function prefixoPadrao(nome, usados) {
+  const l = slugify(nome).replace(/[^a-z]/g, '').toUpperCase().padEnd(3, 'X');
+  for (let n = 3; n <= Math.min(5, l.length); n++) if (!usados.has(l.slice(0, n))) return l.slice(0, n);
+  for (const c of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') if (!usados.has(l.slice(0, 2) + c)) return l.slice(0, 2) + c;
+  return '';
+}
+function comPrefixos(times) { const usados = new Set(times.map(t => t.prefixo).filter(Boolean)); return times.map(t => { if (t.prefixo) return t; const p = prefixoPadrao(t.nome, usados); usados.add(p); return { ...t, prefixo: p }; }); }
+function lerTimes(txt) {
+  return String(txt || '').split('\n').map(x => x.trim()).filter(Boolean).map(x => { const m = /^(.*?)\s+([A-Za-z]{2,5})$/.exec(x); const nome = m ? m[1] : x; return { nome, slug: slugify(nome), prefixo: m ? m[2].toUpperCase() : '' }; }).filter(t => t.slug);
+}
+async function gerarSorte(times) {
+  const d = st.dados;
+  st.papel = 'gestor'; st.usos = ['tarefas', 'financas', 'ferias']; st.temChave = false; st.chaves = [];
+  d.slug = slugify(d.nome); d.times = times;
+  await criarTudo(); // gera as chaves, as ferramentas do gestor, para-os-times/ e lembra tudo neste navegador
+  st.senha = null;
+}
+// Chaves de cada time (tarefas e, com Finanças, finanças). Reaproveita a chave de tarefas que a pessoa colou para um dos times.
+function gerarChavesTimes(times) {
+  const agora = new Date(), ym = String(agora.getFullYear()).slice(2) + pad2(agora.getMonth() + 1), fin = st.usos.includes('financas');
+  const colada = (slug, tipo) => st.chaves.find(c => !c.ignorar && c.slug === slug && c.tipo === tipo && c.papel !== 'acima')?.texto;
+  st.sorteTimes = times.map(t => ({ ...t, kTar: colada(t.slug, 'tarefas') || gerarChaveTexto(`${t.slug}-${ym}`), kFin: fin ? gerarChaveTexto(`${t.slug}-fin-${ym}`) : '' }));
+  const reg = (texto, slug, tipo) => ({ texto, kid: lerChaveTexto(texto).kid, slug, tipo, papel: tipo, aviso: '', ignorar: false });
+  st.chaves = [...st.chaves.filter(c => c.papel === 'acima' && !c.ignorar), ...st.sorteTimes.flatMap(t => [reg(t.kTar, t.slug, 'tarefas'), ...(t.kFin ? [reg(t.kFin, t.slug, 'fin')] : [])])];
+}
+// para-os-times/<time>/: as ferramentas de cada time, já com a chave, a pasta e o nome de quem gerou.
+async function gerarPacotes() {
+  const d = st.dados, agora = new Date(), iso = agora.toISOString(), pasta = st.raiz?.name || PASTA_COMUM, u = st.usos;
+  const quadro = u.includes('tarefas') ? await lerEmbutido('quadroEmb') : '', fin = u.includes('financas') ? await lerEmbutido('finTimeEmb') : '', fer = u.includes('ferias') ? await lerEmbutido('feriasEmb') : '';
+  for (const t of st.sorteTimes) {
+    const dirT = await subpasta(st.dirLocal, ['para-os-times', t.slug], true), itens = [];
+    if (quadro) { await gravarLocal(dirT, `quadro_${t.slug}.html`, aplicarPreset(quadro, 'QUADRO-PRESET', { schema: 'quadro-preset/1', generatedAt: isoComFuso(), team: { name: t.nome, slug: t.slug, ...(t.prefixo ? { prefix: t.prefixo } : {}), contact: d.pessoa }, key: t.kTar }));
+      itens.push(`quadro_${t.slug}.html: quadro de tarefas do time`); st.criados.push({ nome: `para-os-times/${t.slug}/quadro_${t.slug}.html`, tipo: 'QT', desc: `Quadro do Time ${t.nome}, com a chave de tarefas.` }); }
+    if (fin) { await gravarLocal(dirT, `financas_${t.slug}.html`, aplicarPreset(fin, 'FIN-PRESET', { schema: 'financas-preset/1', team: { nome: t.nome, slug: t.slug, prefixo: t.prefixo }, ano: d.ano, anos: [d.ano], moeda: d.moeda, pasta, chave: t.kFin, contato: d.pessoa, geradoEm: iso }));
+      itens.push(`financas_${t.slug}.html: finanças do time (só para quem cuida do dinheiro do time)`); st.criados.push({ nome: `para-os-times/${t.slug}/financas_${t.slug}.html`, tipo: 'FT', desc: `Finanças do Time ${t.nome}, com a chave de finanças.` }); }
+    if (fer) { await gravarLocal(dirT, 'ferias.html', aplicarPreset(fer, 'FERIAS-PRESET', { unidade: { nome: t.nome, slug: t.slug }, chave: t.kTar }));
+      itens.push('ferias.html: Mapa de Férias (cada pessoa marca as suas; escolha "Sou de um time")'); st.criados.push({ nome: `para-os-times/${t.slug}/ferias.html`, tipo: 'FE', desc: `Mapa de Férias do time ${t.nome}, com a chave do time.` }); }
+    await gravarLocal(dirT, 'LEIA-ME.txt', `Ferramentas do time ${t.nome}, geradas por ${d.pessoa} em ${agora.toLocaleDateString('pt-BR')}.\r\n\r\n` +
+      `1. Copie esta pasta para uma pasta só sua (de preferência no seu OneDrive, como backup; nunca na pasta compartilhada) e abra os HTMLs no Edge ou no Chrome.\r\n` +
+      `2. ${itens.join('. ')}.\r\n` +
+      `3. Na primeira abertura, crie a sua senha e guarde no cofre de senhas. As chaves do time já estão dentro dos HTMLs: não precisa colar nada.\r\n` +
+      `4. Ligue a pasta sincronizada pelo OneDrive (${pasta}) quando a ferramenta pedir.\r\n\r\nNão coloque estes HTMLs na pasta compartilhada: eles levam a chave do time.\r\n`);
+  }
+}
+// Grava neste navegador onde ficou cada arquivo e a pasta sincronizada: cada ferramenta abre já configurada (ADR-0030).
+async function idbPut(nome, k, v) {
+  try { const db = await new Promise((ok, err) => { const r = indexedDB.open(nome, 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => ok(r.result); r.onerror = () => err(r.error); });
+    await new Promise((ok, err) => { const t = db.transaction('kv', 'readwrite'); t.objectStore('kv').put(v, k); t.oncomplete = ok; t.onerror = () => err(t.error); }); db.close(); } catch {}
+}
+async function lembrarTudo() {
+  if (!lembrarAtivo()) return;
+  const d = st.dados, dir = st.dirLocal, raiz = st.raiz, ids = plano().map(x => x.id), s = d.slug;
+  const arq = async n => { try { return await dir.getFileHandle(n); } catch { return null; } };
+  if (ids.includes('hb')) { await kv.set('hub-local', { dir, arquivo: `hub-${s}.json` }); if (raiz) await kv.set('hub-raiz', raiz); }
+  if (ids.includes('fg')) { await kv.set('local:financas-grupo', { dir, arquivo: `financas-grupo-${s}.json` }); if (raiz) await kv.set('fin-grupo-raiz:' + s, raiz); }
+  if (ids.includes('ft')) { await kv.set('local:financas-time:' + s, { dir, arquivo: `financas-${s}.json` }); if (raiz) await kv.set('fin-time-raiz:' + s, raiz); }
+  if (ids.includes('fe')) { await kv.set('local:ferias:' + s, { dir, arquivo: `ferias-${s}.json` }); if (raiz) await kv.set('ferias-raiz:' + s, raiz); }
+  if (ids.includes('ct')) { const h = await arq(`gestao-${s}.json`); if (h) await idbPut('gestao-local', 'handle', h); if (raiz) await idbPut('gestao-local', 'igDir', raiz); }
+  if (ids.includes('qt')) { const h = await arq(`quadro-${s}.json`); if (h) await idbPut('quadro-do-time', 'dataFile', h); if (raiz) await idbPut('quadro-do-time', 'root', raiz); }
+}
+// Lista das chaves de cada time, com os botões de copiar (Pronto e Estou com sorte).
+function blocoChaves() {
+  if (!st.sorteTimes.length) return '';
+  return `<p class="lbl" style="margin-top:18px">Chaves de cada time</p>
+    <p class="small muted" style="margin-top:0">Já estão dentro das suas ferramentas e dos HTMLs de <span class="code">para-os-times/&lt;time&gt;/</span>: ninguém precisa colar nada. Envie cada pasta ao responsável do time por mensagem direta ou e-mail, nunca pela pasta compartilhada, e guarde as chaves no cofre.</p>
+    <div>${st.sorteTimes.map((t, i) => `<div class="tk"><div><b>${esc(t.nome)}</b> <span class="small faint code">${esc(t.slug)}${t.prefixo ? ' · ' + esc(t.prefixo) : ''}</span></div><button class="btn sm" data-cp="${i}:tar">Copiar chave de tarefas</button>${t.kFin ? `<button class="btn sm" data-cp="${i}:fin">Copiar chave de finanças</button>` : '<span></span>'}</div>`).join('')}</div>`;
+}
+function ligarCopiar() { $$('[data-cp]').forEach(b => b.onclick = async () => { const [i, k] = b.dataset.cp.split(':'), t = st.sorteTimes[+i]; try { await navigator.clipboard.writeText(k === 'fin' ? t.kFin : t.kTar); toast('Chave copiada. Cole no cofre ou na mensagem direta.'); } catch { toast('Não consegui copiar.'); } }); }
+// Desenho do que foi gerado: a sua pasta (ferramentas do gestor e para-os-times) e a pasta sincronizada.
+function mapaSorte() {
+  const ts = st.sorteTimes, linha = 30, y0 = 54, sua = ['hub.html', 'gestao_pessoal.html', 'financas_grupo.html', 'ferias.html', 'onde-fica-cada-coisa.html'];
+  const yT = y0 + sua.length * linha + 30, H = Math.max(yT + ts.length * linha, y0 + (ts.length + 1) * linha) + 16;
+  const item = (x, y, w, txt, sub, forte) => `<rect class="${forte ? 's1 f1' : 'sl fw'}" x="${x}" y="${y}" width="${w}" height="24" rx="6"/><text class="t" x="${x + 10}" y="${y + 16}">${esc(txt)}</text>${sub ? `<text class="tm" x="${x + w - 8}" y="${y + 16}" text-anchor="end">${esc(sub)}</text>` : ''}`;
+  let g = `<text class="t" x="10" y="20" style="font-size:12.5px">Sua pasta · ${esc(st.dirLocal.name)}</text><text class="tm" x="10" y="36">só sua, no seu OneDrive (backup)</text>`;
+  g += sua.map((n, i) => item(10, y0 + i * linha, 300, n, ['tela inicial', 'tarefas', 'finanças', 'férias', 'mapa'][i], i < 4)).join('');
+  g += `<text class="t" x="10" y="${yT - 8}">para-os-times/ · enviar a cada time</text>`;
+  g += ts.map((t, i) => item(10, yT + i * linha, 300, `${t.slug}/`, 'quadro, finanças, férias + chave', false)).join('');
+  const xr = 380;
+  g += `<text class="t" x="${xr}" y="20" style="font-size:12.5px">Pasta sincronizada · ${esc(st.raiz?.name || PASTA_COMUM)}</text><text class="tm" x="${xr}" y="36">${st.raiz ? 'OneDrive, igual em todos os computadores' : 'ligue depois, dentro de cada ferramenta'}</text>`;
+  g += item(xr, y0, 290, 'grupo/financas/', 'diretrizes', false);
+  g += ts.map((t, i) => item(xr, y0 + (i + 1) * linha, 290, `times/${t.slug}/`, 'planos, status, férias, post-its', false)).join('');
+  g += `<path class="sl" d="M318 ${y0 + 12}H${xr - 8}" stroke-dasharray="4 4"/><path class="sl" d="M${xr - 14} ${y0 + 7}l6 5l-6 5"/><text class="tm" x="${(318 + xr) / 2}" y="${y0 - 2}" text-anchor="middle">publica e lê</text>`;
+  return `<svg class="mapa-svg" viewBox="0 0 680 ${H}" role="img" aria-label="O que foi gerado e onde fica">${g}</svg>`;
+}
+// Checklist do que falta para tudo funcionar. Marcações só neste navegador (conveniência).
+function itensChecklist() {
+  const g = st.papel === 'gestor', n = (st.dados.times || []).length, sorte = st.modo === 'sorte', pasta = st.raiz?.name || st.pastaDoLider || PASTA_COMUM, l = [];
+  l.push(['cofre', 'A senha está guardada no cofre de senhas', 'Sem ela não há como abrir os dados: não existe recuperação.']);
+  l.push(['local', `A pasta ${st.dirLocal?.name || 'pessoal'} é só minha (não é a pasta compartilhada)`, 'Ela guarda os seus arquivos pessoais, cifrados com a sua senha. A pasta compartilhada é outra.']);
+  l.push(['backup', `A pasta ${st.dirLocal?.name || 'pessoal'} está no meu OneDrive`, 'É o backup: se trocar de computador ou o disco falhar, os arquivos continuam lá. Abra as ferramentas num computador de cada vez.']);
+  l.push(['sync', `A pasta ${pasta} sincroniza neste computador`, 'No SharePoint, botão "Sincronizar" ou "Adicionar atalho ao Meu OneDrive". Ela precisa aparecer no Explorador de Arquivos.']);
+  l.push(['hub', `Abri o hub.html e ele mostra ${g ? `os ${n} times` : 'o meu time'}`, 'O hub é a tela inicial: as outras ferramentas abrem a partir dele.']);
+  if (g && st.usos.includes('tarefas') && !st.raiz) l.push(['central', 'Na Central, liguei a pasta sincronizada', 'Integração › Pasta e chaves.']);
+  if (g && st.usos.includes('financas')) l.push(['fg', 'No Finanças do Grupo, informei o orçamento do ano', 'Ajustes › orçamento aprovado; Times › teto de cada time.']);
+  if (g) { l.push(['chaves', 'As chaves dos times estão no cofre', 'Use os botões "Copiar chave" acima.']); l.push(['envio', 'Mandei a cada time a pasta para-os-times/<time>', 'Por mensagem direta ou e-mail, nunca pela pasta compartilhada.']); }
+  else l.push(['chave', chavesUteis().length ? 'Guardei a chave do time no cofre' : 'Pedi a chave do time ao meu líder', 'A chave chega por mensagem direta; cole na ferramenta quando ela pedir.']);
+  return l;
+}
+// Os dois tipos de arquivo e por que ficam em pastas separadas (ADR-0008 revista em 24/11/2026).
+function doisArquivos() {
+  const pess = st.dirLocal?.name || 'GestaoPessoal', comum = st.raiz?.name || st.pastaDoLider || PASTA_COMUM;
+  return `<div class="card dois" style="padding:14px 16px;margin:6px 0 14px"><p class="lbl" style="margin-top:0">Seus arquivos: dois tipos, duas pastas</p>
+    <svg class="mapa-svg" viewBox="0 0 520 120" style="width:100%;max-width:560px;display:block;margin:4px auto 10px" aria-hidden="true">
+      <rect class="s1" x="6" y="10" width="236" height="100" rx="10"/><text class="t" x="20" y="32">Pasta pessoal · ${esc(pess)}</text><text class="tm" x="20" y="48">só sua · no seu OneDrive = backup</text>
+      <rect class="sl fw" x="20" y="60" width="96" height="18" rx="4"/><text class="tx" x="68" y="72" text-anchor="middle">gestao-….json</text><rect class="sl fw" x="124" y="60" width="104" height="18" rx="4"/><text class="tx" x="176" y="72" text-anchor="middle">hub-….json</text>
+      <text class="tm" x="20" y="98">cifrado com a SUA SENHA</text>
+      <rect class="s1" x="278" y="10" width="236" height="100" rx="10"/><text class="t" x="292" y="32">Pasta compartilhada · ${esc(comum)}</text><text class="tm" x="292" y="48">todos os times sincronizam</text>
+      <rect class="sl fw" x="292" y="60" width="104" height="18" rx="4"/><text class="tx" x="344" y="72" text-anchor="middle">plano.json</text><rect class="sl fw" x="404" y="60" width="96" height="18" rx="4"/><text class="tx" x="452" y="72" text-anchor="middle">post-its</text>
+      <text class="tm" x="292" y="98">cifrado com a CHAVE DE CADA TIME</text></svg>
+    <div class="g2s"><div><b>Arquivo pessoal</b> (o <span class="code">.json</span> de cada ferramenta: hub, Central, Finanças, Férias). Guarda tudo o que é seu: as chaves dos times, notas, lançamentos, pessoas. Fica numa pasta <b>só sua</b>. Deixe essa pasta no <b>seu OneDrive</b>: se trocar de computador ou o disco falhar, o arquivo continua lá.</div>
+    <div><b>Arquivos comuns</b> (na pasta compartilhada). Levam só o que o outro lado precisa: status, plano agregado, post-its. Cada pessoa grava só o próprio arquivo e lê o dos outros.</div></div>
+    <p class="small" style="margin:10px 0 0"><b>Por que separadas?</b> Todo o grupo vê e sincroniza a pasta compartilhada. O seu arquivo pessoal tem as chaves de todos os times e as suas anotações, então fica onde só você mexe. Separar também evita que uma ferramenta confunda o seu arquivo com o de outra pessoa.</p>
+    <p class="small" style="margin:6px 0 0"><b>Ninguém lê sem a senha.</b> Os arquivos são cifrados (AES de 256 bits, com a chave derivada da senha em 600 mil rodadas). Quem copiar o arquivo, a TI ou a Microsoft só veem letras embaralhadas. Sem a senha nem você abre, por isso ela fica no cofre.</p>
+    <p class="small muted" style="margin:6px 0 0">Use um computador de cada vez: feche a ferramenta antes de abrir em outra máquina, para o OneDrive não criar cópia de conflito.</p></div>`;
+}
+// Botão do fim: abre o hub criado na pasta pessoal. Se o inicio.html está na mesma pasta, abre o próprio hub.html;
+// senão, abre uma cópia lida da pasta (os links para as outras ferramentas funcionam quando o hub.html é aberto da pasta).
+function botaoHub() { return `<a class="btn pri" id="abrirHub" href="hub.html" target="_blank" rel="opener">Abrir o hub ↗</a>`; }
+async function prepararHub() {
+  const a = $('#abrirHub'); if (!a || !st.dirLocal) return;
+  let mesma = false; try { await st.dirLocal.getFileHandle('inicio.html'); mesma = true; } catch {}
+  if (mesma && location.protocol === 'file:') return;
+  try { const txt = await lerTexto(st.dirLocal, 'hub.html'); if (!txt) return; a.href = URL.createObjectURL(new Blob([txt], { type: 'text/html' }));
+    a.insertAdjacentHTML('afterend', `<p class="small muted" style="flex-basis:100%;margin:6px 0 0">No dia a dia, abra o <span class="code">hub.html</span> direto da pasta <b>${esc(st.dirLocal.name)}</b> (dica: crie um atalho). Assim os links para as outras ferramentas funcionam.</p>`); } catch {}
+}
+const CK_KEY = 'inicio-checklist';
+function ckLer() { try { return JSON.parse(localStorage.getItem(CK_KEY) || '{}'); } catch { return {}; } }
+function checklist(itens) {
+  const f = ckLer(), feitos = itens.filter(([k]) => f[k]).length;
+  return `<div class="ins" style="margin-bottom:8px"><div class="k">Feito</div><div class="v" id="ckV">${feitos} <span class="faint" style="font-size:15px">de ${itens.length}</span></div><div class="m"><i id="ckM" style="width:${feitos / itens.length * 100}%"></i></div></div>
+    <div id="ckL">${itens.map(([k, t, h]) => `<label class="ck ${f[k] ? 'on' : ''}"><input type="checkbox" data-ck="${k}" ${f[k] ? 'checked' : ''}><span><span>${esc(t)}</span><small>${esc(h)}</small></span></label>`).join('')}</div>`;
+}
+function ligarChecklist() {
+  $$('[data-ck]').forEach(c => c.onchange = () => {
+    const f = ckLer(); f[c.dataset.ck] = c.checked; try { localStorage.setItem(CK_KEY, JSON.stringify(f)); } catch {}
+    c.closest('.ck').classList.toggle('on', c.checked);
+    const todos = $$('[data-ck]'), n = todos.filter(x => x.checked).length; $('#ckV').innerHTML = `${n} <span class="faint" style="font-size:15px">de ${todos.length}</span>`; $('#ckM').style.width = n / todos.length * 100 + '%';
+  });
+}
 desenhar();
 </script>
 <!--EMB:finTimeEmb-->
@@ -282,5 +548,6 @@ desenhar();
 <!--EMB:centralEmb-->
 <!--EMB:quadroEmb-->
 <!--EMB:hubEmb-->
+<!--EMB:feriasEmb-->
 </body>
 </html>

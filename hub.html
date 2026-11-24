@@ -35,6 +35,8 @@ a{color:var(--bv)}
 button.pill:hover{border-color:#c2cde2;color:var(--ink)}
 .banner{background:var(--bv-soft);border:1px solid var(--bv-line);color:var(--bv-deep);border-radius:12px;padding:9px 14px;margin:0 0 14px;font-size:12.5px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .banner.warn{background:var(--late-soft);border-color:#f6c9d3;color:#9c2440}
+.aviso-fs{margin-top:16px;line-height:1.5}.aviso-fs.pisca{animation:pisca-fs .9s ease 2}
+@keyframes pisca-fs{50%{box-shadow:0 0 0 4px #e8a29b;transform:scale(1.01)}}
 .btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px 12px;font-weight:550;font-size:12.5px;white-space:nowrap}
 .btn:hover{border-color:#c2cde2}.btn.pri{background:var(--bv);border-color:var(--bv);color:#fff}.btn.pri:hover{background:var(--bv-deep)}
 .btn.sm{padding:3px 9px;font-size:12px;border-radius:8px}.btn:disabled{opacity:.4;cursor:not-allowed}.btn.danger{color:var(--late)}
@@ -438,6 +440,45 @@ h1,h2{letter-spacing:-.015em}
   else montarBotao();
 })();
 </script>
+<script id="sessao">
+/* sessao 1.0 · uma senha por sessão (ADR-0029)
+   Quem abre (hub, Central) guarda só em memória a senha que abriu o próprio arquivo. Quando a pessoa clica num link
+   para outra ferramenta (target=_blank rel=opener), a janela nova pede a senha e o abridor responde uma vez, só nos
+   90 segundos seguintes ao clique e só para uma janela aberta por ele (e.source.opener === window).
+   A ferramenta aberta usa a senha só para abrir o próprio arquivo; se não servir, pede a senha como sempre.
+   Nada vai para disco, localStorage ou para a pasta. Injetado em todos os HTMLs pelo build, junto com o tema. */
+(() => {
+  if (window.gestaoSessao) return;
+  const SC = 'gestao-sessao/1', JANELA = 90e3;
+  let senha = null, cliqueEm = 0, recebida = null, usada = false;
+  document.addEventListener('click', e => {
+    const a = e.target && e.target.closest && e.target.closest('a[target="_blank"][rel~="opener"]');
+    if (a && senha) cliqueEm = Date.now();
+  }, true);
+  window.addEventListener('message', e => {
+    const m = e.data; if (!m || m.schema !== SC) return;
+    if (m.tipo === 'pedir') {
+      if (!senha || !cliqueEm || Date.now() - cliqueEm > JANELA) return;
+      let filha = false; try { filha = !!e.source && e.source.opener === window; } catch {}
+      if (!filha) return;
+      cliqueEm = 0;
+      try { e.source.postMessage({ schema: SC, tipo: 'senha', senha }, '*'); } catch {}
+    } else if (m.tipo === 'senha') {
+      if (!window.opener || e.source !== window.opener || recebida !== null || typeof m.senha !== 'string' || !m.senha) return;
+      recebida = m.senha.slice(0, 500);
+      window.dispatchEvent(new Event('gestao-sessao'));
+    }
+  });
+  if (window.opener) try { window.opener.postMessage({ schema: SC, tipo: 'pedir' }, '*'); } catch {}
+  window.gestaoSessao = {
+    definir(s) { senha = s ? String(s) : null; if (!s) cliqueEm = 0; },
+    get recebida() { return recebida; },
+    // Entrega a senha recebida uma única vez (para abrir o próprio arquivo).
+    usar() { if (recebida == null || usada) return null; usada = true; return recebida; },
+    get usada() { return usada; }
+  };
+})();
+</script>
 </head>
 <body>
 <div id="app"></div>
@@ -508,6 +549,26 @@ const kv = (() => {
   const tx = async (mode, fn) => { const db = await open(); return new Promise((ok, err) => { const t = db.transaction('kv', mode); const st = t.objectStore('kv'); const r = fn(st); t.oncomplete = () => ok(r?.result); t.onerror = () => err(t.error); }); };
   return { get: k => tx('readonly', s => s.get(k)).catch(() => undefined), set: (k, v) => tx('readwrite', s => s.put(v, k)).catch(() => {}), del: k => tx('readwrite', s => s.delete(k)).catch(() => {}) };
 })();
+
+/* ---------------------- arquivo e pastas lembrados (ADR-0030) ---------------------- */
+// O assistente grava, neste navegador, onde ficou o arquivo de cada ferramenta e a pasta sincronizada;
+// cada ferramenta lê e abre sozinha. Nos testes automatizados (webdriver) só vale com window.__lembrar.
+const lembrarAtivo = () => !navigator.webdriver || window.__lembrar === true;
+async function lembrarArquivo(chave, dir, arquivo) { if (lembrarAtivo() && dir && arquivo) await kv.set('local:' + chave, { dir, arquivo }); }
+async function arquivoLembrado(chave) { if (!lembrarAtivo()) return null; const u = await kv.get('local:' + chave); return u?.dir && u.arquivo ? u : null; }
+async function pastaLembrada(chave) { if (!lembrarAtivo()) return null; return (await kv.get(chave)) || null; }
+function lembrarPasta(chave, h) { if (lembrarAtivo() && h) kv.set(chave, h); }
+// Na primeira abertura: se o navegador ainda tem a permissão da pasta, abre o último arquivo sem perguntar nada.
+async function abrirLembradoSePuder(chave, abrir) {
+  const u = await arquivoLembrado(chave); if (!u) return false;
+  try { if (!await permissao(u.dir, false) || !await lerTexto(u.dir, u.arquivo)) return false; } catch { return false; }
+  await abrir(u.dir, u.arquivo); return true;
+}
+// Botão "Abrir <arquivo>" da tela inicial (um clique libera a pasta quando a permissão expirou).
+function botaoUltimo(u) {
+  return u ? `<button class="opt" id="iUlt" style="margin-top:18px"><b>Abrir ${esc(u.arquivo)}</b><span>Pasta pessoal <span class="code">${esc(u.dir.name)}</span>, usada por último neste computador.</span></button>` : '';
+}
+function ligarUltimo(u, abrir, tela) { const b = document.getElementById('iUlt'); if (b && u) b.onclick = async () => { if (!await permissao(u.dir)) return tela('Sem permissão na pasta.'); await abrir(u.dir, u.arquivo); }; }
 
 /* ---------------------- identidade do computador (dispositivo) ---------------------- */
 // Identificador aleatório e curto, guardado no navegador. Junto com a pessoa forma o "dono"
@@ -616,8 +677,56 @@ async function decifrarEnv(env, chaves) {
 }
 
 /* ------------------------- pastas e arquivos (File System Access) ------------------------- */
-const temFS = () => typeof window.showDirectoryPicker === 'function';
-async function escolherPasta(id) { return window.showDirectoryPicker({ id, mode: 'readwrite' }); }
+// Só Edge e Chrome no computador deixam uma página abrir pastas. Quando a função falta, a tela
+// diz por quê e o que fazer, e os botões respondem ao clique (ADR-0030).
+function emOutraPagina(w = window) { try { return w.self !== w.top; } catch { return true; } }
+function outraOrigem(w = window) { if (!emOutraPagina(w)) return false; try { void w.top.location.href; return false; } catch { return true; } }
+const temFS = () => typeof window.showDirectoryPicker === 'function' && !outraOrigem();
+function diagnosticoFS({ loc = location, nav = navigator, w = window, api = typeof window.showDirectoryPicker === 'function' } = {}) {
+  let href = loc.href; try { href = decodeURIComponent(loc.href); } catch {}
+  const ua = nav.userAgent || '', arquivo = loc.protocol === 'file:';
+  const zip = arquivo && /\.zip[\\/]|[\\/](Temp|Temporary Internet Files|INetCache|Content\.Outlook)[\\/]/i.test(href);
+  const textoZip = 'Este arquivo parece aberto de dentro do .zip ou de um anexo (uma pasta temporária). Clique com o botão direito no .zip, escolha "Extrair tudo", leve a pasta para um lugar só seu (de preferência no seu OneDrive) e abra o HTML de lá. Senão, o que você salvar pode sumir com a pasta temporária.';
+  const navegador = /Edg\//.test(ua) ? 'Microsoft Edge' : nav.brave ? 'Brave' : /Firefox\//.test(ua) ? 'Firefox' : /Electron\//.test(ua) ? 'um aplicativo' : /OPR\//.test(ua) ? 'Opera' : /Chrome\//.test(ua) ? 'Google Chrome' : /Safari\//.test(ua) ? 'Safari' : 'outro navegador';
+  const detalhe = `Navegador: ${navegador}${emOutraPagina(w) ? ', dentro de outra página' : ''}. Endereço: ${arquivo ? 'arquivo no computador' : (loc.host || loc.protocol)}.`;
+  if (api && !outraOrigem(w)) return { ok: true, motivo: zip ? 'zip' : '', texto: zip ? textoZip : '', detalhe };
+  const botao = 'Abra o arquivo direto, com dois cliques (ou botão direito > "Abrir com" > Microsoft Edge ou Google Chrome).';
+  const [motivo, texto] =
+    /Android|iPhone|iPad|Mobile/.test(ua) ? ['celular', 'No celular ou no tablet o navegador não deixa páginas abrirem pastas. Abra no computador, no Microsoft Edge ou no Google Chrome.']
+    : emOutraPagina(w) || /Electron\//.test(ua) ? ['pre-visualizacao', 'Esta página está aberta dentro de outra (uma pré-visualização do Outlook, do Teams, do OneDrive, do SharePoint ou de outro aplicativo), e ali não dá para abrir pastas. Baixe o arquivo para uma pasta só sua, ou abra a pasta no Explorador de Arquivos (no Mac, no Finder). ' + botao]
+    : !arquivo && !/^(localhost|127\.0\.0\.1)(:|$)/.test(loc.host) ? ['internet', `Você está vendo o arquivo por um site (${loc.host || loc.protocol}), não pelo arquivo no computador. Baixe-o para uma pasta só sua, ou abra pela pasta do OneDrive no computador. ` + botao]
+    : nav.brave ? ['brave', 'No Brave essa função vem desligada. Abra o arquivo no Microsoft Edge ou no Google Chrome (botão direito > "Abrir com").']
+    : /Firefox\//.test(ua) ? ['firefox', 'O Firefox não deixa páginas abrirem pastas. Clique com o botão direito no arquivo e escolha "Abrir com" > Microsoft Edge ou Google Chrome.']
+    : navegador === 'Safari' ? ['safari', 'O Safari não deixa páginas abrirem pastas. No Finder, clique com o botão direito no arquivo e escolha "Abrir com" > Google Chrome ou Microsoft Edge.']
+    : ['navegador', 'Este navegador não deixa páginas abrirem pastas. Abra o arquivo no Microsoft Edge ou no Google Chrome, no computador (botão direito > "Abrir com").'];
+  return { ok: false, motivo, texto: zip ? texto + ' ' + textoZip : texto, detalhe };
+}
+// Aviso para a tela inicial de cada ferramenta: vazio quando está tudo certo.
+function avisoFS(estilo = '') {
+  const d = diagnosticoFS();
+  if (d.ok && !d.texto) return '';
+  return `<div class="banner warn aviso-fs" id="avisoFS" style="${estilo}"><div>${d.ok ? '' : '<b>Daqui não dá para abrir pastas, por isso os botões abaixo não funcionam aqui.</b><br>'}${esc(d.texto)}<br><span class="small">${esc(d.detalhe)}</span></div></div>`;
+}
+// Chame no começo de cada botão que precisa de pastas: se faltar a função, mostra o aviso e devolve true.
+function semFS() {
+  if (temFS()) return false;
+  const b = document.getElementById('avisoFS');
+  if (b && !b.closest('dialog')) { b.scrollIntoView({ block: 'center', behavior: 'smooth' }); b.classList.remove('pisca'); void b.offsetWidth; b.classList.add('pisca'); }
+  else { const d = diagnosticoFS(); modal(`<div class="mh"><h2>Daqui não dá para abrir pastas</h2></div><div class="mb"><p>${esc(d.texto)}</p><p class="small muted">${esc(d.detalhe)}</p></div><div class="mf"><button class="btn pri" id="fsOk">Entendi</button></div>`); $('#fsOk', dlg()).onclick = fecharModal; }
+  return true;
+}
+// Quem chama trata AbortError como "cancelou". Quando o navegador recusa (função ausente ou página
+// dentro de outra), a explicação aparece aqui e o erro sobe como AbortError, sem aviso repetido.
+async function escolherPasta(id) {
+  if (semFS()) throw new DOMException('Sem acesso a pastas', 'AbortError');
+  try { return await window.showDirectoryPicker({ id, mode: 'readwrite' }); }
+  catch (e) {
+    if (e.name !== 'SecurityError') throw e;
+    const d = diagnosticoFS({ api: false });
+    modal(`<div class="mh"><h2>O navegador não deixou abrir a pasta</h2></div><div class="mb"><p>${esc(d.texto)}</p><p class="small muted">${esc(d.detalhe)}</p></div><div class="mf"><button class="btn pri" id="fsOk">Entendi</button></div>`); $('#fsOk', dlg()).onclick = fecharModal;
+    throw new DOMException('Sem acesso a pastas', 'AbortError');
+  }
+}
 async function permissao(h, pedir = true) {
   if (!h?.queryPermission) return true;
   const o = { mode: 'readwrite' };
@@ -805,9 +914,13 @@ function criarSenhaDlg(titulo = 'Crie a senha do arquivo') {
     aoFechar(d, () => { if (!fim) ok(null); });
   });
 }
-function pedirSenhaDlg(titulo, errou) {
+// { sessao: true } só ao abrir o próprio arquivo: usa uma vez a senha que o hub ou a Central passou (ADR-0029).
+function pedirSenhaDlg(titulo, errou, { sessao = false } = {}) {
+  const ss = window.gestaoSessao;
+  if (sessao && !errou) { const s = ss?.usar(); if (s) return Promise.resolve(s); }
+  const daSessao = sessao && errou && ss?.usada && !pedirSenhaDlg.avisou; if (daSessao) pedirSenhaDlg.avisou = true;
   return new Promise(ok => {
-    const d = modal(`<div class="mh"><h2>${esc(titulo)}</h2></div><div class="mb">${errou ? '<p class="latec small" style="margin-top:0">Senha incorreta.</p>' : ''}
+    const d = modal(`<div class="mh"><h2>${esc(titulo)}</h2></div><div class="mb">${daSessao ? '<p class="small muted" style="margin-top:0">A senha da sessão (do hub ou da Central) não abre este arquivo. Digite a senha dele.</p>' : errou ? '<p class="latec small" style="margin-top:0">Senha incorreta.</p>' : ''}
       <label class="field"><span>Senha</span><input class="sin" type="password" id="pw" autocomplete="current-password"></label>
       <p class="small muted">Esqueceu? A senha está no seu cofre de senhas. Sem ela não há como abrir o arquivo.</p></div>
       <div class="mf"><button class="btn" data-r="no">Cancelar</button><button class="btn pri" data-r="ok">Abrir</button></div>`);
@@ -887,13 +1000,15 @@ async function validarPastaComum(raiz) {
   return { tem, nomeOk };
 }
 // Checagens indiretas de que a pasta "local" não está sincronizada (o navegador não mostra o caminho).
+// Desde 24/11/2026 (ADR-0008 revista) a pasta pessoal pode e deve ficar no OneDrive da pessoa, como backup.
+// O que não pode é ser a pasta compartilhada com os times: só esses sinais contam.
 async function suspeitaDeSincronizada(dir) {
   const sinais = [];
   if ([PASTA_COMUM, PASTA_COMUM_ANTIGA].includes(dir.name)) sinais.push('tem o nome da pasta compartilhada');
-  if (/onedrive|sharepoint/i.test(dir.name)) sinais.push('o nome lembra OneDrive/SharePoint');
-  try { for await (const [n] of dir.entries()) { if (/^desktop\.ini$/i.test(n)) sinais.push('tem desktop.ini'); if (n === 'times' || n === 'grupo') sinais.push('tem a estrutura da pasta compartilhada'); } } catch {}
+  try { for await (const [n] of dir.entries()) { if (['times', 'grupo', 'grupos'].includes(n)) sinais.push('tem a estrutura da pasta compartilhada (times/, grupo/)'); } } catch {}
   return [...new Set(sinais)];
 }
+const AVISO_PASTA_PESSOAL = 'O seu arquivo pessoal deve ficar numa pasta só sua (de preferência no seu OneDrive, como backup), nunca na pasta compartilhada com os times.';
 
 /* ---- Finanças 1.2: peças visuais comuns (cards de leitura, barras horizontais, curva acumulada) ---- */
 // Card de leitura: rótulo, número, medidor (pct de 0 a 1+, marca opcional) e uma frase que interpreta.
@@ -939,9 +1054,9 @@ const pctTxt = (a, b) => b ? Math.round(a / b * 100) + '%' : '—';
       times/<time>/postits/<pessoa>-<computador>.json   (gestao-envelope/1, conteúdo gestao-postits/1)
       cifrado com a chave do time, um arquivo por autor (ninguém grava o arquivo de outra pessoa).
       O Quadro do Time mostra os post-its e grava quem já viu em times/<time>/postits/vistos/<pessoa>-<computador>.json.
-   O arquivo local do hub (times, chaves e seus post-its) é cifrado com a sua senha e fica fora do OneDrive.
+   O arquivo pessoal do hub (times, chaves e seus post-its) é cifrado com a sua senha e fica numa pasta só sua (de preferência no seu OneDrive), nunca na compartilhada.
    ===================================================================== */
-const TOOL = 'hub', TOOL_NOME = 'Hub da solução', TOOL_VERSION = '1.3.0';
+const TOOL = 'hub', TOOL_NOME = 'Hub da solução', TOOL_VERSION = '1.5.0';
 try { window.name = 'gestao-hub'; } catch {}   // o botão "← Hub" das ferramentas volta para esta aba sem recarregar
 const LOCAL_SCHEMA = 'gestao-hub-local/1', POSTITS = 'gestao-postits/1', VISTOS = 'gestao-postits-vistos/1', PLANO = 'gestao-financas-plano/1';
 const CORES = [['amarelo', 'Amarelo'], ['rosa', 'Rosa'], ['verde', 'Verde'], ['azul', 'Azul'], ['lilas', 'Lilás']];
@@ -965,7 +1080,7 @@ const slugPessoa = n => slugify(n).replace(/-/g, '').slice(0, 16) || 'eu';
 function normalizar(d) {
   if (d?.schema !== LOCAL_SCHEMA || d.tool !== TOOL) throw new Error('Este arquivo não é do Hub da solução.');
   d.times ??= []; d.notas ??= {}; d.publicacao ??= {}; d.seg ??= {}; d.pessoa ??= { nome: 'Eu', slug: 'eu' };
-  for (const t of d.times) { t.chaves ??= []; t.chavesFin ??= []; }
+  for (const t of d.times) { t.chaves ??= []; t.chavesFin ??= []; t.tipo = t.tipo === 'grupo' ? 'grupo' : 'time'; }
   return d;
 }
 const writer = () => `${db.pessoa.slug}~${dispositivo().id}`;
@@ -1060,7 +1175,7 @@ async function ligarPasta(h, silencioso = false) {
   }
   if (dirLocal && h.name === dirLocal.name && !v.tem && !silencioso) toast('Atenção: esta parece ser a pasta local. A pasta comum é a sincronizada pelo OneDrive.', 6000);
   raiz = h; db.pastaComum = h.name; agendarSalvar();
-  if (!navigator.webdriver) kv.set('hub-raiz', h);
+  lembrarPasta('hub-raiz', h);
   await lerTudo(); render();
   for (const t of db.times) if ((db.notas[t.slug] || []).length && !db.publicacao[t.slug]?.revision) agendarPublicar(t.slug, 500);
   return true;
@@ -1084,6 +1199,7 @@ const anoCorrente = () => { const a = String(new Date().getFullYear()); const pl
 function totaisAno(pl, ano = anoCorrente()) { return pl?.porAno?.[ano] || null; }
 async function lerTime(t) {
   const r = { notas: [], vistos: {}, atividade: {}, erros: [], copias: 0, plano: null, planoErro: '' };
+  if (t.tipo === 'grupo') return lerGestor(t, r);
   const dt = await subpasta(raiz, ['times', t.slug]);
   if (!dt) return r;
   r.atividade.quadro = await ultimaAlteracao(await subpasta(dt, ['quadro']));
@@ -1120,6 +1236,16 @@ async function lerTime(t) {
     const porLeitor = new Map();
     await ler(dv, VISTOS, (n, p) => { const w = p.source?.writer || n, ant = porLeitor.get(w); if (!ant || p.revision > ant.revision) porLeitor.set(w, p); });
     for (const [w, p] of porLeitor) for (const s of p.seen || []) (r.vistos[s.id] ||= []).push({ quem: clamp(p.source?.author?.name || w.split('~')[0], 40), em: s.at });
+  }
+  return r;
+}
+// Liderança (Hub 1.3): um gestor par é uma unidade "grupo" no Finanças do Grupo da liderança. O hub lê o consolidado
+// que ele publica para a liderança (grupos/<grupo>/financas/plano.json, ADR-0025) com a chave de finanças do grupo.
+async function lerGestor(t, r) {
+  const df = await subpasta(raiz, ['grupos', t.slug, 'financas']); if (!df) return r;
+  r.atividade.plano = await ultimaAlteracao(df, n => /^plano/.test(n));
+  if (temChaveFin(t)) {
+    try { const e = await lerEnvelopes(df, 'plano', mapaFinDoTime(t), { team: t.slug, content: PLANO }); if (e.melhor) r.plano = resumoPlano(e.melhor.payload); else if (e.invalidos.some(x => x.principal)) r.planoErro = 'o consolidado não abriu com a chave de finanças do grupo'; } catch {}
   }
   return r;
 }
@@ -1181,7 +1307,7 @@ function render() {
   const ferr = ferramentas.map(f => `<a class="tool" href="${encodeURI(f.arquivo)}" target="_blank" rel="opener" data-f="${esc(f.arquivo)}"><span class="ic ${f.cls}">${esc(f.ic)}</span>
     <span style="min-width:0;flex:1"><b>${esc(f.titulo)}${f.time?.nome ? ' · ' + esc(f.time.nome) : ''}</b><span class="small muted">${esc(f.desc)}</span><span class="code">${esc(f.arquivo)}</span></span><span class="go">Abrir ↗</span></a>`).join('');
   $('#app').innerHTML = `<div class="hub"><header class="top" id="topo"></header>
-    ${ph && /onedrive|sharepoint/i.test(ph.caminho) ? '<div class="banner warn">Este hub está numa pasta sincronizada pelo OneDrive. O arquivo de dados dele (com as chaves dos times) deve ficar numa pasta local, fora do OneDrive.</div>' : ''}
+    ${ph && [PASTA_COMUM, PASTA_COMUM_ANTIGA].includes(ph.nome) ? '<div class="banner warn">Este hub está na pasta compartilhada com os times. O arquivo de dados dele (com as chaves dos times) deve ficar numa pasta só sua (de preferência no seu OneDrive).</div>' : ''}
     ${!mesma ? `<div class="banner warn">Este hub.html não está na pasta local <b class="code">${esc(dirLocal.name)}</b>, então os links podem não abrir. Copie o hub.html para a mesma pasta das ferramentas.</div>` : ''}
     <p class="lbl">Ferramentas <button class="btn sm ghost" id="fAtu">Procurar de novo</button></p>
     ${ferr ? `<div class="tools">${ferr}</div>` : `<div class="card"><div class="empty">Nenhuma ferramenta encontrada na pasta local <b class="code">${esc(dirLocal?.name || '')}</b>. Coloque o hub.html na mesma pasta dos HTMLs (Central, Quadro, Finanças) ou gere as ferramentas pelo <b>Início da solução</b>.</div></div>`}
@@ -1204,21 +1330,31 @@ function painel() {
     const vistas = minhas.filter(({ t, n }) => (recebidos[t.slug]?.vistos?.[n.id] || []).length).length;
     cards.push(cardLeitura({ k: 'Seus post-its ativos', v: String(minhas.length), pct: vistas / minhas.length, s: vistas === minhas.length ? 'Todos já foram vistos' : `<b>${minhas.length - vistas}</b> ainda sem "Vi"` }));
   }
+  const lid = db.times.every(t => t.tipo === 'grupo'), U = lid ? ['dos gestores', 'gestor'] : ['dos times', 'time'];
   const comPlano = db.times.map(t => ({ t, pl: recebidos[t.slug]?.plano })).filter(x => totaisAno(x.pl, ano));
   let barras = '';
   if (comPlano.length) {
     const moeda = comPlano[0].pl.moeda, mesmos = comPlano.filter(x => x.pl.moeda === moeda);
     const tot = mesmos.reduce((a, { pl }) => { const x = totaisAno(pl, ano); a.o += x.orcado; a.p += x.previsto; a.r += x.realizado; return a; }, { o: 0, p: 0, r: 0 });
     const fm = v => fmtMoeda(v, moeda), folga = tot.o - tot.p, mesIdx = +ano === new Date().getFullYear() ? new Date().getMonth() + 1 : +ano < new Date().getFullYear() ? 12 : 0;
-    cards.unshift(cardLeitura({ hi: true, k: `Previsto dos times em ${ano}`, v: fm(tot.p), pct: tot.o ? tot.p / tot.o : null,
+    cards.unshift(cardLeitura({ hi: true, k: `Previsto ${U[0]} em ${ano}`, v: fm(tot.p), pct: tot.o ? tot.p / tot.o : null,
       s: tot.o ? (folga >= 0 ? `Folga de <b>${fm(folga)}</b> no orçado de ${fmtCurto(tot.o)}` : `<b>${fm(-folga)}</b> acima do orçado de ${fmtCurto(tot.o)}`) : 'Os times ainda não informaram o orçado' }));
     cards.splice(1, 0, cardLeitura({ k: `Realizado em ${ano}`, v: fm(tot.r), pct: tot.p ? tot.r / tot.p : null, marca: mesIdx / 12, s: `<b>${pctTxt(tot.r, tot.p)}</b> do previsto · ${mesmos.length} time(s) com plano` }));
-    barras = `<div class="card"><p class="lbl" style="margin-top:0">Previsto por time em ${ano} <span class="faint">· marca = orçado</span></p>${barrasH(mesmos.map(({ t, pl }) => { const x = totaisAno(pl, ano); return { nome: esc(t.nome), valor: x.previsto, ref: x.orcado, cor: x.orcado && x.previsto > x.orcado ? 'var(--late)' : '', titulo: `Orçado ${fm(x.orcado)} · previsto ${fm(x.previsto)} · realizado ${fm(x.realizado)}` }; }), v => fmtCurto(v))}
+    barras = `<div class="card"><p class="lbl" style="margin-top:0">Previsto por ${U[1]} em ${ano} <span class="faint">· marca = orçado</span></p>${barrasH(mesmos.map(({ t, pl }) => { const x = totaisAno(pl, ano); return { nome: esc(t.nome), valor: x.previsto, ref: x.orcado, cor: x.orcado && x.previsto > x.orcado ? 'var(--late)' : '', titulo: `Orçado ${fm(x.orcado)} · previsto ${fm(x.previsto)} · realizado ${fm(x.realizado)}` }; }), v => fmtCurto(v))}
       ${mesmos.length < comPlano.length ? `<p class="small muted">${comPlano.length - mesmos.length} time(s) em outra moeda ficaram fora da soma.</p>` : ''}</div>`;
   }
-  return `<p class="lbl">Visão dos times</p><div class="inss">${cards.join('')}</div>${barras}`;
+  return `<p class="lbl">${db.times.every(t => t.tipo === 'grupo') ? 'Visão dos gestores' : db.times.some(t => t.tipo === 'grupo') ? 'Visão dos times e gestores' : 'Visão dos times'}</p><div class="inss">${cards.join('')}</div>${barras}`;
+}
+function gestorHtml(t) {
+  const r = recebidos[t.slug] || { atividade: {} }, kf = (t.chavesFin || []).slice(-1)[0];
+  return `<div class="card team" data-time="${esc(t.slug)}"><div class="hd"><h3>${esc(t.nome)}</h3><span class="chip">gestor</span><span class="chip code">grupos/${esc(t.slug)}/</span>
+    ${kf ? `<span class="chip bv code" title="Chave de finanças do grupo">${esc(kf.kid)}</span>` : '<span class="chip late">sem chave de finanças</span>'}<span class="grow"></span></div>
+    ${raiz ? `<p class="act">Consolidado publicado para a liderança ${tempo(r.atividade?.plano)}</p>` : ''}
+    ${linhaFin(t, r)}
+    ${!r.plano && raiz && !r.planoErro ? '<p class="small muted">Este gestor ainda não publicou o consolidado para a liderança (Finanças do Grupo › Ajustes › Nível acima).</p>' : ''}</div>`;
 }
 function timeHtml(t) {
+  if (t.tipo === 'grupo') return gestorHtml(t);
   const r = recebidos[t.slug] || { notas: [], vistos: {}, atividade: {}, erros: [] }, k = chaveDoTime(t), pe = pubEstado[t.slug], pb = db.publicacao[t.slug];
   const qd = ferramentas.find(f => f.titulo === 'Quadro do Time' && f.time?.slug === t.slug), fn = ferramentas.find(f => f.titulo === 'Finanças do Time' && f.time?.slug === t.slug);
   const a = r.atividade || {};
@@ -1383,7 +1519,8 @@ async function importarDoGrupo() {
   for (const tg of obj.times) {
     const slug = tg.slug || ''; if (!slug) continue;
     let t = timePorSlug(slug);
-    if (!t) { t = { nome: clamp(tg.nome, 80), slug, prefixo: clamp(tg.prefixo || '', 5), chaves: [], chavesFin: [] }; db.times.push(t); nt++; }
+    if (!t) { t = { nome: clamp(tg.nome, 80), slug, prefixo: clamp(tg.prefixo || '', 5), chaves: [], chavesFin: [], tipo: 'time' }; db.times.push(t); nt++; }
+    if (tg.tipo === 'grupo') t.tipo = 'grupo';
     for (const c of (tg.chaves || []).filter(c => !c.revogada)) { try { const p = lerChaveTexto(c.texto); if (!t.chavesFin.some(x => x.kid === p.kid)) { t.chavesFin.push({ kid: p.kid, texto: c.texto, em: new Date().toISOString(), origem: 'grupo' }); nk++; } } catch {} }
   }
   obj = null;
@@ -1418,16 +1555,16 @@ function ajustes() {
 
 /* ---------------------------- abertura e criação ---------------------------- */
 async function telaInicial(msg = '') {
-  const ult = navigator.webdriver ? null : await kv.get('hub-local');
+  const ult = lembrarAtivo() ? await kv.get('hub-local') : null;
   $('#app').innerHTML = `<div class="welcome"><div class="card">
     <div class="row"><div class="logo" style="margin:0">HUB</div><div><h2 style="margin:0">${TOOL_NOME}</h2><div class="small muted">Abra as ferramentas da solução e deixe post-its para os times</div></div></div>
     ${msg ? `<div class="banner warn" style="margin-top:12px">${esc(msg)}</div>` : ''}
+    ${avisoFS()}
     ${ult ? `<button class="opt" id="iUlt" style="margin-top:18px"><b>Abrir ${esc(ult.arquivo)}</b><span>Pasta local <span class="code">${esc(ult.dir.name)}</span>, usada por último neste computador.</span></button>` : ''}
     <p class="lbl" style="margin-top:20px">Já tenho o hub</p>
-    <button class="opt" id="iAbrir"><b>Abrir a pasta local</b><span>A pasta deste computador (fora do OneDrive) com as ferramentas e o arquivo <span class="code">hub-&lt;nome&gt;.json</span>.</span></button>
+    <button class="opt" id="iAbrir"><b>Abrir a pasta local</b><span>A pasta deste computador (só sua; de preferência no seu OneDrive) com as ferramentas e o arquivo <span class="code">hub-&lt;nome&gt;.json</span>.</span></button>
     <p class="lbl" style="margin-top:16px">É a primeira vez?</p>
     <button class="opt" id="iNovo"><b>Criar o hub</b><span>Seu nome, a pasta local e a senha. Depois você liga a pasta sincronizada e cola as chaves dos times (ou importa da Central).</span></button>
-    ${temFS() ? '' : '<div class="banner warn">Abra no Microsoft Edge ou no Google Chrome: o hub precisa ler pastas.</div>'}
     <p class="small muted" style="margin-top:16px">O hub não guarda dados das outras ferramentas: só abre cada uma. Seus post-its vão cifrados com a chave de cada time para a pasta sincronizada pelo OneDrive.</p>
   </div></div>`;
   $('#iNovo').onclick = criarDlg;
@@ -1448,28 +1585,28 @@ async function abrirArquivo(h, nome) {
   const texto = await lerTexto(h, nome);
   if (!texto) return telaInicial('Arquivo não encontrado.');
   for (let i = 0; i < 3; i++) {
-    const s = await pedirSenhaDlg('Senha do hub', i > 0); if (s == null) return;
-    try { const r = await decifrarLocal(texto, s); db = normalizar(r.dados); ctx = r.ctx; dirLocal = h; arquivo = nome; break; }
+    const s = await pedirSenhaDlg('Senha do hub', i > 0, { sessao: true }); if (s == null) return;
+    try { const r = await decifrarLocal(texto, s); db = normalizar(r.dados); ctx = r.ctx; dirLocal = h; arquivo = nome; window.gestaoSessao?.definir(s); break; }
     catch (e) { if (e.code !== 'SENHA') return telaInicial(e.message); }
   }
   if (!db) return telaInicial('Senha incorreta três vezes.');
   await aposAbrir();
 }
 async function aposAbrir() {
-  if (!navigator.webdriver) kv.set('hub-local', { dir: dirLocal, arquivo });
+  if (lembrarAtivo()) kv.set('hub-local', { dir: dirLocal, arquivo });
   await carregarChaves();
   ferramentas = await procurarFerramentas();
   render();
   if (await lembreteTesteSenha(db.seg, ctx)) agendarSalvar();
-  if (!navigator.webdriver) { const h = await kv.get('hub-raiz'); if (h && await permissao(h, false)) await ligarPasta(h, true); }
+  { const h = await pastaLembrada('hub-raiz'); if (h && await permissao(h, false)) await ligarPasta(h, true); }
   clearInterval(pollT); pollT = setInterval(atualizar, 30000);
 }
 document.addEventListener('visibilitychange', () => { if (!document.hidden && db) atualizar(); });
 async function criarDlg() {
-  if (!temFS()) return toast('Abra no Edge ou no Chrome.');
+  if (semFS()) return;
   const d = modal(`<div class="mh"><h2>Criar o hub</h2></div><div class="mb">
     <div class="f2"><label class="field"><span>Seu nome (aparece nos post-its)</span><input class="sin" id="cP"></label><label class="field"><span>Nome no topo (grupo ou time)</span><input class="sin" id="cN" placeholder="Ex.: Tecnologia"></label></div>
-    <p class="small muted">Depois você escolhe a pasta local (fora do OneDrive, a mesma das ferramentas) e cria a senha.</p></div>
+    <p class="small muted">Depois você escolhe a pasta pessoal (só sua, de preferência no seu OneDrive; a mesma das ferramentas) e cria a senha.</p></div>
     <div class="mf"><button class="btn" id="cNo">Cancelar</button><button class="btn pri" id="cOk">Escolher pasta local</button></div>`);
   $('#cNo', d).onclick = fecharModal;
   $('#cOk', d).onclick = async () => {
@@ -1480,12 +1617,11 @@ async function criarDlg() {
   };
 }
 async function escolherPastaLocal() {
-  await perguntar('Pasta local', `<p>Escolha a pasta <b>deste computador</b> onde estão os HTMLs das ferramentas. Ela não deve estar no OneDrive: o arquivo do hub guarda as chaves dos times.</p>
-    <div class="banner warn">Com o backup de pastas do OneDrive ligado, <b>Documentos</b> e <b>Área de Trabalho</b> também sincronizam. Prefira algo como <span class="code">C:\\Users\\voce\\GestaoLocal</span>.</div>`, [['ok', 'Escolher pasta', 'pri']]);
+  await perguntar('Pasta local', `<p>Escolha a sua <b>pasta pessoal</b>: só sua, de preferência no <b>seu OneDrive</b> (backup se trocar de computador), como <span class="code">OneDrive - Empresa\\GestaoPessoal</span>. A mesma das outras ferramentas, com os HTMLs. Nunca a pasta compartilhada com os times.</p><div class="banner">O arquivo é cifrado com a sua senha: no OneDrive, ninguém consegue ler sem ela.</div>`, [['ok', 'Escolher pasta', 'pri']]);
   let h; try { h = await escolherPasta('fin-local'); } catch { return null; }
   if (!await permissao(h)) return null;
   const s = await suspeitaDeSincronizada(h);
-  if (s.length) { const r = await perguntar('Esta pasta parece sincronizada', `<div class="cofre">A pasta <b>${esc(h.name)}</b> ${esc(s.join(', '))}. Dados individuais devem ficar fora do OneDrive.</div>`, [['no', 'Escolher outra'], ['ok', 'Usar mesmo assim']]); if (r !== 'ok') return escolherPastaLocal(); }
+  if (s.length) { const r = await perguntar('Esta parece ser a pasta compartilhada', `<div class="cofre">A pasta <b>${esc(h.name)}</b> ${esc(s.join(', '))}. ${AVISO_PASTA_PESSOAL}</div>`, [['no', 'Escolher outra'], ['ok', 'Usar mesmo assim']]); if (r !== 'ok') return escolherPastaLocal(); }
   return h;
 }
 async function criarArquivo({ nome, pessoa }) {
@@ -1495,14 +1631,17 @@ async function criarArquivo({ nome, pessoa }) {
   const senha = await criarSenhaDlg('Senha do hub'); if (!senha) return false;
   db = novoDb({ nome: nome || pessoa, pessoa });
   db.seg.cofreConfirmadoEm = new Date().toISOString();
-  ctx = await novoCtx(senha, TOOL); dirLocal = h; arquivo = nomeArq;
+  ctx = await novoCtx(senha, TOOL); dirLocal = h; arquivo = nomeArq; window.gestaoSessao?.definir(senha);
   await gravarLocal(h, nomeArq, await cifrarLocal(db, ctx));
   await aposAbrir();
   toast('Hub criado e cifrado. Agora ligue a pasta sincronizada e cadastre os times.', 5000);
   return true;
 }
 window.__hub = { get db() { return db; }, get recebidos() { return recebidos; }, importarDoGrupo, painel, novoDb, lerTime, publicar, atualizar, procurarFerramentas, get ferramentas() { return ferramentas; }, ligarPasta, colarChave, abrirArquivo };
-telaInicial();
+// Aberto pelo assistente ou de novo neste computador: abre direto o último hub quando a pasta ainda está liberada.
+(async () => { const u = lembrarAtivo() ? await kv.get('hub-local') : null; let ok = false;
+  try { ok = !!(u?.dir && await permissao(u.dir, false) && await lerTexto(u.dir, u.arquivo)); } catch {}
+  if (ok) await abrirArquivo(u.dir, u.arquivo); if (!db && !$('#app').children.length) telaInicial(); })();
 </script>
 </body>
 </html>

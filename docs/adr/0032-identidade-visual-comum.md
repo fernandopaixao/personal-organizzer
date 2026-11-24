@@ -1,4 +1,4 @@
-# ADR-0028 · Identidade visual comum: azul e branco, trilho marinho, fontes embutidas
+# ADR-0032 · Identidade visual comum: azul e branco, trilho marinho, fontes embutidas
 
 **Status:** aceita · **Data:** 24/11/2026 · **Origem:** pedido do Fernando ("otimize visualmente: não canse, seja elegante, simples de operar"; depois "mais brilho no azul", "vermelho e amarelo que conversem com o azul", "outras fontes, ficou muito sério"); fonte em `financas/src/identidade.css` e `financas/src/fontes/`
 

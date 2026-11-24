@@ -64,6 +64,26 @@ const kv = (() => {
   return { get: k => tx('readonly', s => s.get(k)).catch(() => undefined), set: (k, v) => tx('readwrite', s => s.put(v, k)).catch(() => {}), del: k => tx('readwrite', s => s.delete(k)).catch(() => {}) };
 })();
 
+/* ---------------------- arquivo e pastas lembrados (ADR-0030) ---------------------- */
+// O assistente grava, neste navegador, onde ficou o arquivo de cada ferramenta e a pasta sincronizada;
+// cada ferramenta lê e abre sozinha. Nos testes automatizados (webdriver) só vale com window.__lembrar.
+const lembrarAtivo = () => !navigator.webdriver || window.__lembrar === true;
+async function lembrarArquivo(chave, dir, arquivo) { if (lembrarAtivo() && dir && arquivo) await kv.set('local:' + chave, { dir, arquivo }); }
+async function arquivoLembrado(chave) { if (!lembrarAtivo()) return null; const u = await kv.get('local:' + chave); return u?.dir && u.arquivo ? u : null; }
+async function pastaLembrada(chave) { if (!lembrarAtivo()) return null; return (await kv.get(chave)) || null; }
+function lembrarPasta(chave, h) { if (lembrarAtivo() && h) kv.set(chave, h); }
+// Na primeira abertura: se o navegador ainda tem a permissão da pasta, abre o último arquivo sem perguntar nada.
+async function abrirLembradoSePuder(chave, abrir) {
+  const u = await arquivoLembrado(chave); if (!u) return false;
+  try { if (!await permissao(u.dir, false) || !await lerTexto(u.dir, u.arquivo)) return false; } catch { return false; }
+  await abrir(u.dir, u.arquivo); return true;
+}
+// Botão "Abrir <arquivo>" da tela inicial (um clique libera a pasta quando a permissão expirou).
+function botaoUltimo(u) {
+  return u ? `<button class="opt" id="iUlt" style="margin-top:18px"><b>Abrir ${esc(u.arquivo)}</b><span>Pasta pessoal <span class="code">${esc(u.dir.name)}</span>, usada por último neste computador.</span></button>` : '';
+}
+function ligarUltimo(u, abrir, tela) { const b = document.getElementById('iUlt'); if (b && u) b.onclick = async () => { if (!await permissao(u.dir)) return tela('Sem permissão na pasta.'); await abrir(u.dir, u.arquivo); }; }
+
 /* ---------------------- identidade do computador (dispositivo) ---------------------- */
 // Identificador aleatório e curto, guardado no navegador. Junto com a pessoa forma o "dono"
 // de um arquivo comum: ana-k3f9. Nunca usa o nome real do computador.
@@ -171,8 +191,56 @@ async function decifrarEnv(env, chaves) {
 }
 
 /* ------------------------- pastas e arquivos (File System Access) ------------------------- */
-const temFS = () => typeof window.showDirectoryPicker === 'function';
-async function escolherPasta(id) { return window.showDirectoryPicker({ id, mode: 'readwrite' }); }
+// Só Edge e Chrome no computador deixam uma página abrir pastas. Quando a função falta, a tela
+// diz por quê e o que fazer, e os botões respondem ao clique (ADR-0030).
+function emOutraPagina(w = window) { try { return w.self !== w.top; } catch { return true; } }
+function outraOrigem(w = window) { if (!emOutraPagina(w)) return false; try { void w.top.location.href; return false; } catch { return true; } }
+const temFS = () => typeof window.showDirectoryPicker === 'function' && !outraOrigem();
+function diagnosticoFS({ loc = location, nav = navigator, w = window, api = typeof window.showDirectoryPicker === 'function' } = {}) {
+  let href = loc.href; try { href = decodeURIComponent(loc.href); } catch {}
+  const ua = nav.userAgent || '', arquivo = loc.protocol === 'file:';
+  const zip = arquivo && /\.zip[\\/]|[\\/](Temp|Temporary Internet Files|INetCache|Content\.Outlook)[\\/]/i.test(href);
+  const textoZip = 'Este arquivo parece aberto de dentro do .zip ou de um anexo (uma pasta temporária). Clique com o botão direito no .zip, escolha "Extrair tudo", leve a pasta para um lugar só seu (de preferência no seu OneDrive) e abra o HTML de lá. Senão, o que você salvar pode sumir com a pasta temporária.';
+  const navegador = /Edg\//.test(ua) ? 'Microsoft Edge' : nav.brave ? 'Brave' : /Firefox\//.test(ua) ? 'Firefox' : /Electron\//.test(ua) ? 'um aplicativo' : /OPR\//.test(ua) ? 'Opera' : /Chrome\//.test(ua) ? 'Google Chrome' : /Safari\//.test(ua) ? 'Safari' : 'outro navegador';
+  const detalhe = `Navegador: ${navegador}${emOutraPagina(w) ? ', dentro de outra página' : ''}. Endereço: ${arquivo ? 'arquivo no computador' : (loc.host || loc.protocol)}.`;
+  if (api && !outraOrigem(w)) return { ok: true, motivo: zip ? 'zip' : '', texto: zip ? textoZip : '', detalhe };
+  const botao = 'Abra o arquivo direto, com dois cliques (ou botão direito > "Abrir com" > Microsoft Edge ou Google Chrome).';
+  const [motivo, texto] =
+    /Android|iPhone|iPad|Mobile/.test(ua) ? ['celular', 'No celular ou no tablet o navegador não deixa páginas abrirem pastas. Abra no computador, no Microsoft Edge ou no Google Chrome.']
+    : emOutraPagina(w) || /Electron\//.test(ua) ? ['pre-visualizacao', 'Esta página está aberta dentro de outra (uma pré-visualização do Outlook, do Teams, do OneDrive, do SharePoint ou de outro aplicativo), e ali não dá para abrir pastas. Baixe o arquivo para uma pasta só sua, ou abra a pasta no Explorador de Arquivos (no Mac, no Finder). ' + botao]
+    : !arquivo && !/^(localhost|127\.0\.0\.1)(:|$)/.test(loc.host) ? ['internet', `Você está vendo o arquivo por um site (${loc.host || loc.protocol}), não pelo arquivo no computador. Baixe-o para uma pasta só sua, ou abra pela pasta do OneDrive no computador. ` + botao]
+    : nav.brave ? ['brave', 'No Brave essa função vem desligada. Abra o arquivo no Microsoft Edge ou no Google Chrome (botão direito > "Abrir com").']
+    : /Firefox\//.test(ua) ? ['firefox', 'O Firefox não deixa páginas abrirem pastas. Clique com o botão direito no arquivo e escolha "Abrir com" > Microsoft Edge ou Google Chrome.']
+    : navegador === 'Safari' ? ['safari', 'O Safari não deixa páginas abrirem pastas. No Finder, clique com o botão direito no arquivo e escolha "Abrir com" > Google Chrome ou Microsoft Edge.']
+    : ['navegador', 'Este navegador não deixa páginas abrirem pastas. Abra o arquivo no Microsoft Edge ou no Google Chrome, no computador (botão direito > "Abrir com").'];
+  return { ok: false, motivo, texto: zip ? texto + ' ' + textoZip : texto, detalhe };
+}
+// Aviso para a tela inicial de cada ferramenta: vazio quando está tudo certo.
+function avisoFS(estilo = '') {
+  const d = diagnosticoFS();
+  if (d.ok && !d.texto) return '';
+  return `<div class="banner warn aviso-fs" id="avisoFS" style="${estilo}"><div>${d.ok ? '' : '<b>Daqui não dá para abrir pastas, por isso os botões abaixo não funcionam aqui.</b><br>'}${esc(d.texto)}<br><span class="small">${esc(d.detalhe)}</span></div></div>`;
+}
+// Chame no começo de cada botão que precisa de pastas: se faltar a função, mostra o aviso e devolve true.
+function semFS() {
+  if (temFS()) return false;
+  const b = document.getElementById('avisoFS');
+  if (b && !b.closest('dialog')) { b.scrollIntoView({ block: 'center', behavior: 'smooth' }); b.classList.remove('pisca'); void b.offsetWidth; b.classList.add('pisca'); }
+  else { const d = diagnosticoFS(); modal(`<div class="mh"><h2>Daqui não dá para abrir pastas</h2></div><div class="mb"><p>${esc(d.texto)}</p><p class="small muted">${esc(d.detalhe)}</p></div><div class="mf"><button class="btn pri" id="fsOk">Entendi</button></div>`); $('#fsOk', dlg()).onclick = fecharModal; }
+  return true;
+}
+// Quem chama trata AbortError como "cancelou". Quando o navegador recusa (função ausente ou página
+// dentro de outra), a explicação aparece aqui e o erro sobe como AbortError, sem aviso repetido.
+async function escolherPasta(id) {
+  if (semFS()) throw new DOMException('Sem acesso a pastas', 'AbortError');
+  try { return await window.showDirectoryPicker({ id, mode: 'readwrite' }); }
+  catch (e) {
+    if (e.name !== 'SecurityError') throw e;
+    const d = diagnosticoFS({ api: false });
+    modal(`<div class="mh"><h2>O navegador não deixou abrir a pasta</h2></div><div class="mb"><p>${esc(d.texto)}</p><p class="small muted">${esc(d.detalhe)}</p></div><div class="mf"><button class="btn pri" id="fsOk">Entendi</button></div>`); $('#fsOk', dlg()).onclick = fecharModal;
+    throw new DOMException('Sem acesso a pastas', 'AbortError');
+  }
+}
 async function permissao(h, pedir = true) {
   if (!h?.queryPermission) return true;
   const o = { mode: 'readwrite' };
@@ -360,9 +428,13 @@ function criarSenhaDlg(titulo = 'Crie a senha do arquivo') {
     aoFechar(d, () => { if (!fim) ok(null); });
   });
 }
-function pedirSenhaDlg(titulo, errou) {
+// { sessao: true } só ao abrir o próprio arquivo: usa uma vez a senha que o hub ou a Central passou (ADR-0029).
+function pedirSenhaDlg(titulo, errou, { sessao = false } = {}) {
+  const ss = window.gestaoSessao;
+  if (sessao && !errou) { const s = ss?.usar(); if (s) return Promise.resolve(s); }
+  const daSessao = sessao && errou && ss?.usada && !pedirSenhaDlg.avisou; if (daSessao) pedirSenhaDlg.avisou = true;
   return new Promise(ok => {
-    const d = modal(`<div class="mh"><h2>${esc(titulo)}</h2></div><div class="mb">${errou ? '<p class="latec small" style="margin-top:0">Senha incorreta.</p>' : ''}
+    const d = modal(`<div class="mh"><h2>${esc(titulo)}</h2></div><div class="mb">${daSessao ? '<p class="small muted" style="margin-top:0">A senha da sessão (do hub ou da Central) não abre este arquivo. Digite a senha dele.</p>' : errou ? '<p class="latec small" style="margin-top:0">Senha incorreta.</p>' : ''}
       <label class="field"><span>Senha</span><input class="sin" type="password" id="pw" autocomplete="current-password"></label>
       <p class="small muted">Esqueceu? A senha está no seu cofre de senhas. Sem ela não há como abrir o arquivo.</p></div>
       <div class="mf"><button class="btn" data-r="no">Cancelar</button><button class="btn pri" data-r="ok">Abrir</button></div>`);
@@ -442,13 +514,15 @@ async function validarPastaComum(raiz) {
   return { tem, nomeOk };
 }
 // Checagens indiretas de que a pasta "local" não está sincronizada (o navegador não mostra o caminho).
+// Desde 24/11/2026 (ADR-0008 revista) a pasta pessoal pode e deve ficar no OneDrive da pessoa, como backup.
+// O que não pode é ser a pasta compartilhada com os times: só esses sinais contam.
 async function suspeitaDeSincronizada(dir) {
   const sinais = [];
   if ([PASTA_COMUM, PASTA_COMUM_ANTIGA].includes(dir.name)) sinais.push('tem o nome da pasta compartilhada');
-  if (/onedrive|sharepoint/i.test(dir.name)) sinais.push('o nome lembra OneDrive/SharePoint');
-  try { for await (const [n] of dir.entries()) { if (/^desktop\.ini$/i.test(n)) sinais.push('tem desktop.ini'); if (n === 'times' || n === 'grupo') sinais.push('tem a estrutura da pasta compartilhada'); } } catch {}
+  try { for await (const [n] of dir.entries()) { if (['times', 'grupo', 'grupos'].includes(n)) sinais.push('tem a estrutura da pasta compartilhada (times/, grupo/)'); } } catch {}
   return [...new Set(sinais)];
 }
+const AVISO_PASTA_PESSOAL = 'O seu arquivo pessoal deve ficar numa pasta só sua (de preferência no seu OneDrive, como backup), nunca na pasta compartilhada com os times.';
 
 /* ---- Finanças 1.2: peças visuais comuns (cards de leitura, barras horizontais, curva acumulada) ---- */
 // Card de leitura: rótulo, número, medidor (pct de 0 a 1+, marca opcional) e uma frase que interpreta.

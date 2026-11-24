@@ -59,6 +59,9 @@ jobs:
       - name: Teste do Mapa de Férias
         run: node financas/testes/teste-ferias.js
 
+      - name: Teste do aviso sem acesso a pastas
+        run: node financas/testes/teste-navegador.js
+
       - name: Montar o pacote .zip
         run: python3 tools/empacotar.py
 

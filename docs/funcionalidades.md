@@ -1,6 +1,6 @@
 # Funcionalidades, usos e objetivos
 
-*24/11/2026 · Central v15.5, Quadro do Time 2.3, Hub 1.3, Finanças do Grupo 1.4 e do Time 1.3, Mapa de Férias 1.1, assistente 2.1*
+*24/11/2026 · Central v15.9, Quadro do Time 2.4, Hub 1.5, Finanças do Grupo 1.6 e do Time 1.5, Mapa de Férias 1.3, assistente 2.4*
 
 Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. Para as regras técnicas por trás, veja as [decisões de arquitetura](adr/README.md). Para o caminho de quem usa, veja a [jornada do usuário](jornada-do-usuario.md) e o [passo a passo](passo-a-passo.md).
 
@@ -42,14 +42,16 @@ Todas têm, no topo, **Onde estou?** (qual ferramenta, qual arquivo, o que é lo
 
 **Objetivo:** fazer a primeira montagem sem a pessoa precisar entender a arquitetura.
 
+**Como funciona (2.1).** A primeira tela explica a solução em quatro desenhos: o HTML é a ferramenta e o JSON é o caderno cifrado; a chave de integração é um idioma que só você e o time falam; quem lidera 1 time publica para o gestor, e quem lidera vários soma os times e publica para a liderança; a troca é por uma pasta sincronizada pelo OneDrive, onde cada pessoa grava só o próprio arquivo.
+
 | Passo | O que acontece |
 |---|---|
 | Perfil | **Você lidera times?** "Sim, lidero 2 ou mais times" (gestor), "Sim, lidero 1 time" (responsável) ou "Não, faço parte de um time" (membro). Depois, **o que quer organizar**: tarefas, finanças ou os dois (membro só tarefas) |
 | Chaves | **Seu líder compartilhou chaves de integração?** Cole as chaves (`GK1.…`, uma por linha) e o nome da pasta sincronizada que o líder indicou. O assistente diz o que cada chave é: tarefas do time (`<time>-AAMM`), finanças do time (`<time>-fin-AAMM`) ou, para o gestor, finanças da liderança (`<grupo>-fin-AAMM`, o "nível acima"). Chave que não serve ao perfil é mostrada como ignorada |
 | Dados | Nome, identificador, prefixo, ano fiscal e moeda. O identificador do time (ou do grupo, para o gestor com chave da liderança) **vem da chave e fica travado**, para casar com os arquivos do líder |
-| Pastas | Pasta **local** (fora do OneDrive) e pasta **sincronizada**; aviso automático se a local parecer sincronizada |
+| Pastas | Pasta **pessoal** (só sua, de preferência no seu OneDrive, como backup) e pasta **compartilhada**; aviso automático se a pessoal parecer ser a compartilhada |
 | Senha | Criação da senha com aviso de cofre |
-| Pronto | Grava os HTMLs do perfil, o primeiro arquivo cifrado de cada um **já com as chaves coladas**, o hub e o cartão "Onde fica cada coisa", e mostra os **próximos passos do perfil** (o gestor recebe a lista do que mandar a cada time) |
+| Pronto | Grava os HTMLs do perfil, o primeiro arquivo cifrado de cada um **já com as chaves coladas**, o hub e o cartão "Onde fica cada coisa". Explica os **dois tipos de arquivo** (pessoal × comum, por que em pastas separadas, ninguém lê sem a senha), mostra os **próximos passos do perfil** e o botão **Abrir o hub** (2.2), que abre o hub criado já com a senha da sessão |
 
 | Papel × uso | HTMLs gerados |
 |---|---|
@@ -57,11 +59,27 @@ Todas têm, no topo, **Onde estou?** (qual ferramenta, qual arquivo, o que é lo
 | Gestor + tarefas | Central (que gera o Quadro de cada time) |
 | Responsável + finanças | Finanças do Time |
 | Responsável ou membro + tarefas | Quadro do Time |
-| Os dois | A soma das linhas, cada HTML separado |
+| Qualquer papel + férias | Mapa de Férias: no time, cada pessoa marca as suas; no gestor, os times entram como unidades |
+| Vários usos | A soma das linhas, cada HTML separado |
+
+**Quem lidera vários times (2.3):** o caminho normal faz o mesmo que o Estou com sorte nas chaves. O assistente gera a chave de tarefas e, com Finanças, a de finanças de cada time (reaproveita a de tarefas que você colou para um dos times), sugere o prefixo de quem não tem (`PAG`, `CAR`), grava tudo na Central, no Finanças do Grupo, no Mapa de Férias e no hub, e gera `para-os-times/<time>/`. A tela final mostra as chaves com os botões de copiar.
+
+**Tudo abre pronto (2.3, [ADR-0031](adr/0031-ferramentas-abrem-prontas.md)):** o assistente grava neste navegador onde ficou o arquivo de cada ferramenta e a pasta sincronizada. Ao abrir pelo hub, cada ferramenta abre sozinha o seu arquivo, com a senha da sessão e a pasta já ligada; a Central mostra **Continuar com gestao-….json** e já tem a pasta de integração. Ninguém escolhe pasta nem cola chave de novo neste computador.
 
 Onde as chaves coladas vão parar: no hub (tarefas e finanças de cada time), no Quadro (chave de tarefas), no Finanças do Time (chave de finanças) e no Finanças do Grupo (`acima`, a chave da liderança). Nenhuma chave vai para a pasta compartilhada.
 
-**Quando usar:** uma vez, ou ao trocar de computador. O gestor manda o mesmo `inicio.html` (está no .zip da solução) a cada time, com a chave por mensagem direta, e o time monta tudo sozinho.
+**Estou com sorte (2.1).** Para quem lidera times e quer tudo de uma vez. Uma tela só (grupo, times, seu nome, pasta, pasta sincronizada opcional e senha) e o assistente:
+
+| Gera | Onde | Com o quê |
+|---|---|---|
+| Chaves de tarefas e de finanças de cada time | Dentro dos arquivos cifrados e dos HTMLs dos times | Aviso de cofre antes; botões para copiar cada chave depois |
+| Hub, Central, Finanças do Grupo, Mapa de Férias e "Onde fica cada coisa" | Na pasta escolhida | Times, prefixos, pastas e chaves já cadastrados; uma senha para todos |
+| Quadro do Time, Finanças do Time, Mapa de Férias e LEIA-ME de cada time | `para-os-times/<time>/` | A chave do time e a pasta sincronizada já configuradas |
+| Estrutura da pasta sincronizada | `times/<time>/…`, `grupos/<grupo>/ferias/` | Só pastas vazias |
+
+A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados), um desenho do que ficou em cada pasta, as chaves por time e um **checklist** (senha no cofre, pasta pessoal só sua e no seu OneDrive, pasta compartilhada sincronizando, hub mostrando os times, pasta ligada na Central e no Finanças do Grupo, chaves no cofre, pastas enviadas aos times). O caminho normal também termina com o checklist do perfil. As marcações ficam só no navegador.
+
+**Quando usar:** uma vez, ou ao trocar de computador. O gestor manda a cada time a pasta `para-os-times/<time>/` (ou o mesmo `inicio.html`, com a chave por mensagem direta), e o time monta tudo sozinho.
 
 ---
 
@@ -78,17 +96,24 @@ Onde as chaves coladas vão parar: no hub (tarefas e finanças de cada time), no
 | **Visão dos times** | Cards de leitura (previsto dos times, realizado com marca do mês, times ativos na semana, post-its vistos) e barras do previsto por time com a marca do orçado | Ver dinheiro e atividade dos times sem abrir outra ferramenta |
 | **Finanças no card do time** | Previsto, realizado e orçado do ano do plano publicado pelo time | Saber se o time está dentro do plano |
 | **Times e chaves** | Cadastrar times e colar chaves (de tarefas e de finanças), ou **Importar da Central** e **Importar do Finanças do Grupo** (só leitura, com a senha de cada um) | Reaproveitar o que a Central e o Finanças do Grupo já têm, sem colar chave por chave |
+| **Hub da liderança (1.3)** | Importado do Finanças do Grupo da liderança, cada gestor par vira um card "gestor" com o consolidado que ele publica (`grupos/<grupo>/financas/`); o painel vira **Visão dos gestores** | A liderança vê cada gestor como uma linha, sem o detalhe dos times |
+| **Abrir sem redigitar a senha (1.3)** | As ferramentas abertas pelos links do hub recebem a senha da sessão ([ADR-0029](adr/0029-uma-senha-por-sessao.md)) | Uma senha por dia |
 
 ---
 
-## 5. Central de Gestão (v15.5)
+## 5. Central de Gestão (v15.9)
+
+**Identidade visual comum (15.9).** A Central, o Quadro (2.4) e as demais ferramentas passam a usar o mesmo visual azul e branco, com trilho marinho e fontes embutidas ([ADR-0032](adr/0032-identidade-visual-comum.md)). Nada muda no funcionamento.
+
+**Chave de integração dentro do time (15.8).** Na visão do time, a aba **Integração** mostra a chave em destaque: **Gerar chave de integração** (um clique; se faltar, a Central sugere a pasta e o prefixo), **HTML do time (com a chave)**, **Copiar chave**, **Mensagem para o time**, **Chave de finanças** e **Vazou: trocar chave**, mais o que chega do time (backlog, métricas, plano). Time sem chave mostra o aviso com o botão também na **Visão do time** e no card da página Times.
+
 
 **Objetivo:** concentrar o trabalho do gestor: o que ele faz, o que delegou, com quem conversa, em quais fóruns decide e como anda o portfólio.
 
 Navegação em 8 páginas (teclas 1 a 8) e o botão **Importar e agentes** no topo.
 
 ### 5.1 Hoje (1)
-- **Cards de leitura no topo:** o dia (feitas de quantas, atrasadas), delegadas no prazo, iniciativas em andamento em dia e rituais dos próximos 7 dias. Cada card abre a página dona do dado.
+- **Cards de leitura no topo:** o dia (feitas de quantas, atrasadas), delegadas no prazo, iniciativas em andamento em dia e rituais dos próximos 7 dias. Com a chave de finanças dos times (15.5), entra o card **Finanças dos times**: previsto do ano contra o teto ou o orçado, times acima do teto e planos sem publicar há mais de 35 dias. Cada card abre a página dona do dado.
 - **Uso:** abrir o dia. Tarefas do dia e atrasadas, 1:1 da semana, fóruns dos próximos 7 dias, iniciativas pedindo atenção e o cartão **Dos times** (arquivos novos, alertas, épicos sem vínculo, times sem chave).
 - **Objetivo:** responder "o que pede atenção agora" sem navegar.
 
@@ -113,6 +138,7 @@ Navegação em 8 páginas (teclas 1 a 8) e o botão **Importar e agentes** no to
 ### 5.5 Iniciativas (5)
 - **Vistas:** Lista (feito × prazo, fases, próxima feature, painel com abas), Semana (features e backlog da semana), Horizonte, Linha do tempo (fases sobrepostas) e Dependências.
 - **Uso:** cadastrar iniciativas e features com código (`PAG-042`, `PAG-042.F2`), agrupar features em fases, registrar a atualização de uma linha (diário de bordo, num formulário no lugar que mostra a última atualização e só habilita **Registrar atualização** com texto), ver o **downstream** dos times abaixo de cada feature.
+- **Finanças por iniciativa (15.6, só leitura):** com as chaves de finanças dos times, a lista mostra o previsto do ano ao lado do código. O painel da iniciativa ganha a aba **Finanças** (orçado, previsto, realizado, folga e uma barra por time). A conta soma, em todos os times, as linhas do plano marcadas com o código da iniciativa ou de uma feature dela ([ADR-0028](adr/0028-financas-na-central-so-leitura.md)).
 - **Objetivo:** ver o portfólio e o que está atrasando, com o dado do time chegando sozinho.
 
 ### 5.6 Fóruns (6)
@@ -122,10 +148,12 @@ Navegação em 8 páginas (teclas 1 a 8) e o botão **Importar e agentes** no to
 
 ### 5.7 Times (7)
 - **Uso:** cadastro dos times (prefixo e pasta), **Métricas dos times** (fluxo publicado por eles), visão de cada time (backlog, features, reunião de status guiada, folha para o Teams) e **HTML do time** (gera o Quadro já configurado, com aviso de cofre).
+- **Finanças (15.5, só leitura):** com a chave de finanças do time, o card do time mostra o previsto do ano contra o teto ou o orçado. A reunião de status ganha o bloco **Finanças** quando o time passou do teto ou não publica há mais de 35 dias ([ADR-0028](adr/0028-financas-na-central-so-leitura.md)).
 - **Objetivo:** acompanhar cada time e entregar a ferramenta pronta.
 
 ### 5.8 Integração (8)
-- **Uso:** pasta e chaves (gerar, copiar, revogar), arquivos recebidos (com prévia), **Conciliação** (unir épicos, trazer para a Central, ligar itens a features) e **Compartilhar** (tela que mostra o que vai para cada time).
+- **Uso:** pasta e chaves (gerar, copiar, revogar; **chave de finanças** por time, colada ou importada com **Chaves do Finanças do Grupo**), arquivos recebidos (com prévia), **Conciliação** (unir épicos, trazer para a Central, ligar itens a features, códigos das finanças dos times sem iniciativa na Central) e **Compartilhar** (tela que mostra o que vai para cada time).
+- **Abrir o Finanças do Grupo (15.7):** botão em Integração e na aba Finanças da iniciativa; a senha da sessão vai junto.
 - **Objetivo:** manter a Central e os times falando a mesma língua, sem sobrescrever nada.
 
 ### 5.9 Importar e agentes
@@ -220,8 +248,10 @@ O grupo enxerga os anos do próprio horizonte **mais os anos publicados pelos ti
 | **Backup cifrado rotativo** | Ferramentas com arquivo local | 5 últimas versões em `backup/` e lembrete semanal de exportar |
 | **Detecção de cópias de conflito** | Todas que leem a pasta comum | Não perder dado escondido em `arquivo (1).json` |
 | **Reconhecer arquivo errado** | Todas | Dizer qual HTML abre aquele arquivo |
+| **Uma senha por sessão** | Hub, Central e assistente passam a senha; Finanças, Férias e Central recebem | Abrir pelo hub ou pela Central sem redigitar a senha. Só em memória, uma vez, para a janela recém-aberta ([ADR-0029](adr/0029-uma-senha-por-sessao.md)) |
 | **Tema claro, escuro ou automático** | Todas | Botão redondo no canto inferior direito; Automático segue o sistema. A escolha fica só neste computador e vale para todas as ferramentas abertas ([ADR-0027](adr/0027-tema-claro-escuro-compartilhado.md)) |
-| **Identidade visual comum** | Todas | Mesmo visual em toda a solução, feito para ficar aberto o dia todo: fundo cinza-azulado (não branco puro), cards brancos, trilho lateral marinho, um único destaque azul por tela, vermelho só para atraso e âmbar só para "vence hoje". Fontes DM Sans (texto) e Plus Jakarta Sans (títulos e números), embutidas no HTML para funcionar sem rede ([ADR-0028](adr/0028-identidade-visual-comum.md)) |
+| **Aviso quando não dá para abrir pastas** | Hub, Finanças, Mapa de Férias e assistente | No Safari, no Firefox, no celular, numa pré-visualização (Outlook, Teams, OneDrive) ou aberto de dentro do .zip, o aviso no topo diz o motivo e o que fazer, e todo botão responde ao clique ([ADR-0030](adr/0030-aviso-quando-nao-da-para-abrir-pastas.md)) |
+| **Identidade visual comum** | Todas | Mesmo visual em toda a solução, feito para ficar aberto o dia todo: fundo cinza-azulado (não branco puro), cards brancos, trilho lateral marinho, um único destaque azul por tela, vermelho só para atraso e âmbar só para "vence hoje". Fontes DM Sans (texto) e Plus Jakarta Sans (títulos e números), embutidas no HTML para funcionar sem rede ([ADR-0032](adr/0032-identidade-visual-comum.md)) |
 | **Migração automática** | Central (e demais quando o formato muda) | Abrir arquivo antigo na versão nova, com backup |
 | **Pacote .zip** | `python3 tools/empacotar.py` (e a CI do repositório pessoal) | Levar a solução para a empresa num único arquivo: HTMLs lado a lado, contratos, documentação e LEIA-ME. Não passa pelo repositório da empresa |
 

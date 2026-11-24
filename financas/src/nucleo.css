@@ -28,6 +28,8 @@ a{color:var(--bv)}
 button.pill:hover{border-color:#c2cde2;color:var(--ink)}
 .banner{background:var(--bv-soft);border:1px solid var(--bv-line);color:var(--bv-deep);border-radius:12px;padding:9px 14px;margin:0 0 14px;font-size:12.5px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .banner.warn{background:var(--late-soft);border-color:#f6c9d3;color:#9c2440}
+.aviso-fs{margin-top:16px;line-height:1.5}.aviso-fs.pisca{animation:pisca-fs .9s ease 2}
+@keyframes pisca-fs{50%{box-shadow:0 0 0 4px #e8a29b;transform:scale(1.01)}}
 .btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px 12px;font-weight:550;font-size:12.5px;white-space:nowrap}
 .btn:hover{border-color:#c2cde2}.btn.pri{background:var(--bv);border-color:var(--bv);color:#fff}.btn.pri:hover{background:var(--bv-deep)}
 .btn.sm{padding:3px 9px;font-size:12px;border-radius:8px}.btn:disabled{opacity:.4;cursor:not-allowed}.btn.danger{color:var(--late)}
