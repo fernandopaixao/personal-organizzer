@@ -35,6 +35,8 @@ a{color:var(--bv)}
 button.pill:hover{border-color:#cfd3e0;color:var(--ink)}
 .banner{background:var(--bv-soft);border:1px solid var(--bv-line);color:var(--bv-deep);border-radius:12px;padding:9px 14px;margin:0 0 14px;font-size:12.5px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .banner.warn{background:var(--late-soft);border-color:#f0cfcc;color:#8a2f28}
+.aviso-fs{margin-top:16px;line-height:1.5}.aviso-fs.pisca{animation:pisca-fs .9s ease 2}
+@keyframes pisca-fs{50%{box-shadow:0 0 0 4px #e8a29b;transform:scale(1.01)}}
 .btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px 12px;font-weight:550;font-size:12.5px;white-space:nowrap}
 .btn:hover{border-color:#cfd3e0}.btn.pri{background:var(--bv);border-color:var(--bv);color:#fff}.btn.pri:hover{background:var(--bv-deep)}
 .btn.sm{padding:3px 9px;font-size:12px;border-radius:8px}.btn:disabled{opacity:.4;cursor:not-allowed}.btn.danger{color:var(--late)}
@@ -620,8 +622,56 @@ async function decifrarEnv(env, chaves) {
 }
 
 /* ------------------------- pastas e arquivos (File System Access) ------------------------- */
-const temFS = () => typeof window.showDirectoryPicker === 'function';
-async function escolherPasta(id) { return window.showDirectoryPicker({ id, mode: 'readwrite' }); }
+// Só Edge e Chrome no computador deixam uma página abrir pastas. Quando a função falta, a tela
+// diz por quê e o que fazer, e os botões respondem ao clique (ADR-0030).
+function emOutraPagina(w = window) { try { return w.self !== w.top; } catch { return true; } }
+function outraOrigem(w = window) { if (!emOutraPagina(w)) return false; try { void w.top.location.href; return false; } catch { return true; } }
+const temFS = () => typeof window.showDirectoryPicker === 'function' && !outraOrigem();
+function diagnosticoFS({ loc = location, nav = navigator, w = window, api = typeof window.showDirectoryPicker === 'function' } = {}) {
+  let href = loc.href; try { href = decodeURIComponent(loc.href); } catch {}
+  const ua = nav.userAgent || '', arquivo = loc.protocol === 'file:';
+  const zip = arquivo && /\.zip[\\/]|[\\/](Temp|Temporary Internet Files|INetCache|Content\.Outlook)[\\/]/i.test(href);
+  const textoZip = 'Este arquivo parece aberto de dentro do .zip ou de um anexo (uma pasta temporária). Clique com o botão direito no .zip, escolha "Extrair tudo", leve a pasta para um lugar só seu (de preferência no seu OneDrive) e abra o HTML de lá. Senão, o que você salvar pode sumir com a pasta temporária.';
+  const navegador = /Edg\//.test(ua) ? 'Microsoft Edge' : nav.brave ? 'Brave' : /Firefox\//.test(ua) ? 'Firefox' : /Electron\//.test(ua) ? 'um aplicativo' : /OPR\//.test(ua) ? 'Opera' : /Chrome\//.test(ua) ? 'Google Chrome' : /Safari\//.test(ua) ? 'Safari' : 'outro navegador';
+  const detalhe = `Navegador: ${navegador}${emOutraPagina(w) ? ', dentro de outra página' : ''}. Endereço: ${arquivo ? 'arquivo no computador' : (loc.host || loc.protocol)}.`;
+  if (api && !outraOrigem(w)) return { ok: true, motivo: zip ? 'zip' : '', texto: zip ? textoZip : '', detalhe };
+  const botao = 'Abra o arquivo direto, com dois cliques (ou botão direito > "Abrir com" > Microsoft Edge ou Google Chrome).';
+  const [motivo, texto] =
+    /Android|iPhone|iPad|Mobile/.test(ua) ? ['celular', 'No celular ou no tablet o navegador não deixa páginas abrirem pastas. Abra no computador, no Microsoft Edge ou no Google Chrome.']
+    : emOutraPagina(w) || /Electron\//.test(ua) ? ['pre-visualizacao', 'Esta página está aberta dentro de outra (uma pré-visualização do Outlook, do Teams, do OneDrive, do SharePoint ou de outro aplicativo), e ali não dá para abrir pastas. Baixe o arquivo para uma pasta só sua, ou abra a pasta no Explorador de Arquivos (no Mac, no Finder). ' + botao]
+    : !arquivo && !/^(localhost|127\.0\.0\.1)(:|$)/.test(loc.host) ? ['internet', `Você está vendo o arquivo por um site (${loc.host || loc.protocol}), não pelo arquivo no computador. Baixe-o para uma pasta só sua, ou abra pela pasta do OneDrive no computador. ` + botao]
+    : nav.brave ? ['brave', 'No Brave essa função vem desligada. Abra o arquivo no Microsoft Edge ou no Google Chrome (botão direito > "Abrir com").']
+    : /Firefox\//.test(ua) ? ['firefox', 'O Firefox não deixa páginas abrirem pastas. Clique com o botão direito no arquivo e escolha "Abrir com" > Microsoft Edge ou Google Chrome.']
+    : navegador === 'Safari' ? ['safari', 'O Safari não deixa páginas abrirem pastas. No Finder, clique com o botão direito no arquivo e escolha "Abrir com" > Google Chrome ou Microsoft Edge.']
+    : ['navegador', 'Este navegador não deixa páginas abrirem pastas. Abra o arquivo no Microsoft Edge ou no Google Chrome, no computador (botão direito > "Abrir com").'];
+  return { ok: false, motivo, texto: zip ? texto + ' ' + textoZip : texto, detalhe };
+}
+// Aviso para a tela inicial de cada ferramenta: vazio quando está tudo certo.
+function avisoFS(estilo = '') {
+  const d = diagnosticoFS();
+  if (d.ok && !d.texto) return '';
+  return `<div class="banner warn aviso-fs" id="avisoFS" style="${estilo}"><div>${d.ok ? '' : '<b>Daqui não dá para abrir pastas, por isso os botões abaixo não funcionam aqui.</b><br>'}${esc(d.texto)}<br><span class="small">${esc(d.detalhe)}</span></div></div>`;
+}
+// Chame no começo de cada botão que precisa de pastas: se faltar a função, mostra o aviso e devolve true.
+function semFS() {
+  if (temFS()) return false;
+  const b = document.getElementById('avisoFS');
+  if (b && !b.closest('dialog')) { b.scrollIntoView({ block: 'center', behavior: 'smooth' }); b.classList.remove('pisca'); void b.offsetWidth; b.classList.add('pisca'); }
+  else { const d = diagnosticoFS(); modal(`<div class="mh"><h2>Daqui não dá para abrir pastas</h2></div><div class="mb"><p>${esc(d.texto)}</p><p class="small muted">${esc(d.detalhe)}</p></div><div class="mf"><button class="btn pri" id="fsOk">Entendi</button></div>`); $('#fsOk', dlg()).onclick = fecharModal; }
+  return true;
+}
+// Quem chama trata AbortError como "cancelou". Quando o navegador recusa (função ausente ou página
+// dentro de outra), a explicação aparece aqui e o erro sobe como AbortError, sem aviso repetido.
+async function escolherPasta(id) {
+  if (semFS()) throw new DOMException('Sem acesso a pastas', 'AbortError');
+  try { return await window.showDirectoryPicker({ id, mode: 'readwrite' }); }
+  catch (e) {
+    if (e.name !== 'SecurityError') throw e;
+    const d = diagnosticoFS({ api: false });
+    modal(`<div class="mh"><h2>O navegador não deixou abrir a pasta</h2></div><div class="mb"><p>${esc(d.texto)}</p><p class="small muted">${esc(d.detalhe)}</p></div><div class="mf"><button class="btn pri" id="fsOk">Entendi</button></div>`); $('#fsOk', dlg()).onclick = fecharModal;
+    throw new DOMException('Sem acesso a pastas', 'AbortError');
+  }
+}
 async function permissao(h, pedir = true) {
   if (!h?.queryPermission) return true;
   const o = { mode: 'readwrite' };
@@ -951,7 +1001,7 @@ const pctTxt = (a, b) => b ? Math.round(a / b * 100) + '%' : '—';
       O Quadro do Time mostra os post-its e grava quem já viu em times/<time>/postits/vistos/<pessoa>-<computador>.json.
    O arquivo pessoal do hub (times, chaves e seus post-its) é cifrado com a sua senha e fica numa pasta só sua (de preferência no seu OneDrive), nunca na compartilhada.
    ===================================================================== */
-const TOOL = 'hub', TOOL_NOME = 'Hub da solução', TOOL_VERSION = '1.3.0';
+const TOOL = 'hub', TOOL_NOME = 'Hub da solução', TOOL_VERSION = '1.3.1';
 try { window.name = 'gestao-hub'; } catch {}   // o botão "← Hub" das ferramentas volta para esta aba sem recarregar
 const LOCAL_SCHEMA = 'gestao-hub-local/1', POSTITS = 'gestao-postits/1', VISTOS = 'gestao-postits-vistos/1', PLANO = 'gestao-financas-plano/1';
 const CORES = [['amarelo', 'Amarelo'], ['rosa', 'Rosa'], ['verde', 'Verde'], ['azul', 'Azul'], ['lilas', 'Lilás']];
@@ -1454,12 +1504,12 @@ async function telaInicial(msg = '') {
   $('#app').innerHTML = `<div class="welcome"><div class="card">
     <div class="row"><div class="logo" style="margin:0">HUB</div><div><h2 style="margin:0">${TOOL_NOME}</h2><div class="small muted">Abra as ferramentas da solução e deixe post-its para os times</div></div></div>
     ${msg ? `<div class="banner warn" style="margin-top:12px">${esc(msg)}</div>` : ''}
+    ${avisoFS()}
     ${ult ? `<button class="opt" id="iUlt" style="margin-top:18px"><b>Abrir ${esc(ult.arquivo)}</b><span>Pasta local <span class="code">${esc(ult.dir.name)}</span>, usada por último neste computador.</span></button>` : ''}
     <p class="lbl" style="margin-top:20px">Já tenho o hub</p>
     <button class="opt" id="iAbrir"><b>Abrir a pasta local</b><span>A pasta deste computador (só sua; de preferência no seu OneDrive) com as ferramentas e o arquivo <span class="code">hub-&lt;nome&gt;.json</span>.</span></button>
     <p class="lbl" style="margin-top:16px">É a primeira vez?</p>
     <button class="opt" id="iNovo"><b>Criar o hub</b><span>Seu nome, a pasta local e a senha. Depois você liga a pasta sincronizada e cola as chaves dos times (ou importa da Central).</span></button>
-    ${temFS() ? '' : '<div class="banner warn">Abra no Microsoft Edge ou no Google Chrome: o hub precisa ler pastas.</div>'}
     <p class="small muted" style="margin-top:16px">O hub não guarda dados das outras ferramentas: só abre cada uma. Seus post-its vão cifrados com a chave de cada time para a pasta sincronizada pelo OneDrive.</p>
   </div></div>`;
   $('#iNovo').onclick = criarDlg;
@@ -1498,7 +1548,7 @@ async function aposAbrir() {
 }
 document.addEventListener('visibilitychange', () => { if (!document.hidden && db) atualizar(); });
 async function criarDlg() {
-  if (!temFS()) return toast('Abra no Edge ou no Chrome.');
+  if (semFS()) return;
   const d = modal(`<div class="mh"><h2>Criar o hub</h2></div><div class="mb">
     <div class="f2"><label class="field"><span>Seu nome (aparece nos post-its)</span><input class="sin" id="cP"></label><label class="field"><span>Nome no topo (grupo ou time)</span><input class="sin" id="cN" placeholder="Ex.: Tecnologia"></label></div>
     <p class="small muted">Depois você escolhe a pasta pessoal (só sua, de preferência no seu OneDrive; a mesma das ferramentas) e cria a senha.</p></div>

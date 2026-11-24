@@ -37,6 +37,7 @@ Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequê
 | [0027](0027-tema-claro-escuro-compartilhado.md) | Tema claro/escuro | Uma camada `tema.js` injetada em todos os HTMLs; escolha salva só no computador |
 | [0028](0028-financas-na-central-so-leitura.md) | Finanças na Central | A Central lê o plano e o teto dos times com a chave de finanças; não escreve em finanças |
 | [0029](0029-uma-senha-por-sessao.md) | Uma senha por sessão | O hub e a Central passam a senha, só em memória, para a janela que acabaram de abrir |
+| [0030](0030-aviso-quando-nao-da-para-abrir-pastas.md) | Aviso quando não dá para abrir pastas | O aviso diz o motivo (Safari, pré-visualização, zip...) e o que fazer; todo botão responde ao clique |
 
 ## Checklist para uma funcionalidade nova
 
@@ -48,7 +49,7 @@ Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequê
 6. **Migração:** campo novo com padrão em `normalizeDb`; abrir um arquivo da versão anterior ([0011](0011-migracao-aditiva-versionada.md)).
 7. **Entrada externa:** escapar, validar, prévia antes de aplicar ([0013](0013-downstream-previa-e-conciliacao.md), [0015](0015-agentes-por-arquivo.md)).
 8. **Interface:** um destaque, gráfico antes de texto, criar em modal, ver em painel, sem página nova se uma existente é a dona do dado ([0020](0020-principios-de-interface.md)). Cores por variável (`var(--card)`, `var(--ink)`...) para o modo escuro funcionar ([0027](0027-tema-claro-escuro-compartilhado.md)).
-9. **Build e teste:** editar a fonte, rodar `python3 tools/injetar_seguranca.py` (Central/Quadro) ou `python3 tools/build_financas.py`, e `node financas/testes/teste-e2e.js` ([0017](0017-build-embutir-e-injetar.md)).
+9. **Build e teste:** editar a fonte, rodar `python3 tools/injetar_seguranca.py` (Central/Quadro) ou `python3 tools/build_financas.py`, e `node financas/testes/teste-e2e.js` (mais `teste-navegador.js` se mexeu em pastas, [0030](0030-aviso-quando-nao-da-para-abrir-pastas.md)) ([0017](0017-build-embutir-e-injetar.md)).
 10. **Documentar no mesmo PR** ([0022](0022-documentacao-no-mesmo-pr.md)): atualizar [funcionalidades](../funcionalidades.md), o [passo a passo](../passo-a-passo.md) e a [jornada](../jornada-do-usuario.md) quando o caminho do usuário muda; plano do recurso em `docs/`; ADR nova se a decisão vale para mais de uma ferramenta; versões no cabeçalho dos documentos. A CI recusa PR que muda ferramenta sem mudar documentação.
 
 ## Como escrever uma ADR nova
