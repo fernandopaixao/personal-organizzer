@@ -402,6 +402,26 @@ textarea.paste:focus{border-color:var(--bv)}
 .prev{margin-top:12px;max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:12px}
 .prev .it{display:grid;grid-template-columns:70px 90px 1fr;gap:8px;padding:6px 12px;border-bottom:1px solid var(--line);font-size:12.5px}.prev .it:last-child{border-bottom:0}
 .k-new{color:var(--bv);font-weight:650}.k-update{color:#6b7389;font-weight:650}.k-same,.k-skip{color:var(--faint)}
+/* v15.4: formulário no lugar (atualização de iniciativa e acordos), mesmo padrão dos diálogos */
+.fxi{border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-top:10px;background:#fff;display:grid;gap:8px}
+.fxi:focus-within{border-color:var(--bv-line);box-shadow:0 0 0 3px var(--bv-soft)}
+.fxi-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.fxi-top .fx-kb{margin-left:auto;font-size:11px;color:var(--faint)}
+.fxi-pills{display:flex;gap:6px;flex-wrap:wrap}.fxi-pills button{height:28px;padding:0 12px;border-radius:99px;border:1px solid var(--line);background:#fff;font-size:12px;color:var(--muted);font-weight:550}.fxi-pills button:hover{color:var(--ink)}.fxi-pills button.on{border-color:var(--bv);background:var(--bv-soft);color:var(--bv);font-weight:650}
+.fxi input.fxi-t{width:100%;border:0;outline:none;font-size:14px;padding:4px 0;background:transparent;color:var(--ink)}
+.fxi-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.fxi-row label{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--muted)}
+.fxi-row select,.fxi-row input[type=date]{border:1px solid var(--line);border-radius:9px;padding:4px 7px;font-size:12px;background:#fff;outline:none;max-width:170px}
+.fxi-row .grow{flex:1}.fxi .fx-err{margin:0}
+.fxi[data-kind=decision] [data-only=commitment]{display:none}
+.fxi-ctx{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fxi-ctx b{color:var(--ink);font-weight:600}
+.fxi button[data-pri]:disabled{opacity:.45;cursor:not-allowed}
+.ipv{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+.ipv button{border:1px solid var(--line);border-radius:12px;background:#fff;padding:8px 10px;text-align:left;display:grid;gap:2px;font:inherit;color:inherit;cursor:pointer}
+.ipv button b{font-family:var(--title);font-size:20px;font-weight:600;line-height:1.1}.ipv button span{font-size:11.5px;color:var(--muted)}
+.ipv button.on{border-color:var(--bv);background:var(--bv-soft)}.ipv button.k0{opacity:.55}
+.ipv button.new b{color:var(--bv)}.ipv button.skip b{color:var(--faint)}
+.prev .grp{padding:6px 12px;background:var(--bg,#f6f7fb);font-size:11.5px;font-weight:650;color:var(--muted);border-bottom:1px solid var(--line);position:sticky;top:0}
+.prev .it.w{background:#fffaf0}
+.ipe{margin-top:12px;border:1px solid #f1d2d2;background:#fdf5f5;border-radius:12px;padding:10px 12px;font-size:13px;color:var(--late)}.ipe div{color:var(--muted);font-size:12px;margin-top:4px}
 .warn{color:#9a6a1c;font-size:11.5px}.err{color:var(--late);font-size:13px;margin-top:10px}
 .pr-list{display:grid;gap:8px}.pr{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center}
 .pr b{font-weight:600}.pr span{font-size:12px;color:var(--muted)}.pr .btn{grid-row:1/span 2;grid-column:2}
@@ -581,7 +601,7 @@ textarea.paste:focus{border-color:var(--bv)}
 <div class="lock" id="lock">
   <div class="lockcard">
     <div class="logo" style="margin:0">CG</div>
-    <h1>Central de Gestão <span class="appver" title="Versão desta Central">v15.3</span></h1>
+    <h1>Central de Gestão <span class="appver" title="Versão desta Central">v15.4</span></h1>
     <div class="muted small">Seus dados ficam em um arquivo JSON criptografado (AES-GCM 256, chave derivada da senha), separado deste HTML. Este arquivo não guarda nenhum dado.</div>
     <div class="field"><label for="lockPass">Senha</label><input type="password" id="lockPass" autocomplete="off" placeholder="Mínimo de 8 caracteres"></div>
     <div class="stack2">
@@ -595,7 +615,7 @@ textarea.paste:focus{border-color:var(--bv)}
   </div>
 </div>
 <div class="hidden" id="app">
-  <nav class="rail"><div class="logo">CG</div><div id="nav" style="display:contents"></div><div class="railver" title="Versão desta Central">v15.3</div></nav>
+  <nav class="rail"><div class="logo">CG</div><div id="nav" style="display:contents"></div><div class="railver" title="Versão desta Central">v15.4</div></nav>
   <main class="main"><div class="wrap">
     <div class="top">
       <h1 id="pageTitle"></h1>
@@ -803,7 +823,7 @@ const horizon=d=>{const n=dayDiff(today(),d);if(n<0)return'atrasada';if(n===0)re
 const KINDS={geral:'Geral',forte:'Ponto forte',desenv:'Desenvolvimento'};
 /* ============ Estado e migração (dados desacoplados, versionados e aditivos) ============ */
 const ME='me';
-const DB_VERSION=15,APP_VERSION='15.3'; /* versão exibida na página (rail e tela de senha); DB_VERSION é a do arquivo de dados */
+const DB_VERSION=15,APP_VERSION='15.4'; /* versão exibida na página (rail e tela de senha); DB_VERSION é a do arquivo de dados */
 const emptyDb=()=>({version:DB_VERSION,settings:{selfName:'Eu',hideFeedback:false,staffForumId:''},people:[],teams:[],initiatives:[],tasks:[],notes:[],cycles:[],staffs:[],weeklyReports:[],dateLog:[],forums:[],agendaItems:[],agreements:[],meetings:[],ooSessions:[]});
 let db=emptyDb();
 let password='',handle=null,dirty=false,saveTimer=null,pendingMigration=false;
@@ -1208,7 +1228,7 @@ function pulseRow(i){
     <div class="pl-hide" style="min-width:0">${nm?`<div class="cm" style="color:var(--ink)"><span class="dm"></span><span style="overflow:hidden;text-overflow:ellipsis">${esc(cut(nm.title,30))}</span></div><div class="tm"><span class="due ${r?r.cls:''}">${r?esc(r.text):'sem data'}</span>${week.length?`<span class="chip">${week.length} nesta semana</span>`:''}${blk?`<span class="chip late">${blk} bloqueada${blk>1?'s':''}</span>`:''}</div>`:`<span class="faint small">sem feature aberta</span>${week.length?`<div class="tm"><span class="chip">${week.length} nesta semana</span></div>`:''}`}</div>
     <div class="pl-hide pl-up ${u?'':'none'}" data-act="pl-edit" data-id="${i.id}" style="cursor:pointer" title="Registrar atualização">${u?esc(u.text):'sem atualização registrada'}${u?`<small class="${a>STALE?'late':''}">${a===0?'hoje':a===1?'ontem':'há '+a+' d'}</small>`:''}</div>
     <div><button class="btn sm ${plEdit===i.id?'pri':''}" data-act="pl-edit" data-id="${i.id}">${ic('edit','sm')} Atualizar</button></div>
-    ${plEdit===i.id?`<div class="pl-in"><input type="text" data-upd="${i.id}" placeholder="O que mudou hoje em ${esc(cut(i.name,40))}? (Enter salva · Esc cancela)"><button class="btn sm pri" data-act="pl-save" data-id="${i.id}">Salvar</button></div>`:''}
+    ${plEdit===i.id?updForm(i,{cancel:true}):''}
   </div>`;
 }
 function renderPulse(){
@@ -1588,18 +1608,41 @@ function renderMeet(box){
     <div class="dr-s"><div class="lbl">Resumo</div><textarea class="sta" data-mt="${f.id}|${d}" placeholder="Contexto, principais pontos discutidos…">${esc(m?.summary||'')}</textarea></div>
     <div class="dr-s"><div class="lbl">Decisões<span class="n">${dec.length}</span></div>
       ${dec.map((g,k)=>`<div class="ag-row"><span class="kd">${k+1}</span><div class="tx" style="overflow-wrap:anywhere">${esc(g.text)}</div><span class="hv" style="opacity:1"><button class="ib danger" data-act="del-agr" data-id="${g.id}" title="Excluir">${ic('trash','sm')}</button></span></div>`).join('')}
-      <div class="qadd"><input type="text" id="mt-dec" placeholder="+ O que foi decidido"><button class="btn sm" data-act="mt-dec-add">Registrar</button></div></div>
+</div>
     <div class="dr-s"><div class="lbl">Compromissos<span class="n">${com.filter(agrDone).length}/${com.length}</span></div>
       ${com.map(g=>{const t=agrTask(g),dn=agrDone(g),r=g.due&&!dn?rel(g.due):null;return`<div class="ag-row"><button class="circle ${dn?'on':''}" data-act="toggle-agr" data-id="${g.id}" aria-label="Concluir">${ic('check')}</button><div style="min-width:0"><div class="tx" style="${dn?'text-decoration:line-through;color:var(--faint)':''}">${esc(g.text)}</div><div class="tm">${g.ownerId?`<span class="cm">${av(g.ownerId,'xs')}${esc(first(nameOf(g.ownerId)))}</span>`:''}${t?'<span class="cm">virou tarefa</span>':''}</div></div><span style="display:flex;gap:6px;align-items:center">${r?`<span class="due ${r.cls}">${esc(r.text)}</span>`:''}<button class="ib danger" data-act="del-agr" data-id="${g.id}" title="Excluir">${ic('trash','sm')}</button></span></div>`}).join('')}
-      <div class="qadd wrap"><input type="text" id="mt-com" placeholder="+ Quem faz o quê (vira tarefa)"><select id="mt-com-owner">${(ppl.length?ppl.filter(id=>id!==ME&&person(id)).map(person):db.people).map(p=>`<option value="${p.id}">${esc(first(p.name))}</option>`).join('')}<option value="${ME}">Eu</option>${ppl.length?db.people.filter(p=>!ppl.includes(p.id)).map(p=>`<option value="${p.id}">${esc(first(p.name))}</option>`).join(''):''}</select><input type="date" id="mt-com-due" value="${addD(d<T?T:d,7)}"><button class="btn sm" data-act="mt-com-add">Registrar</button></div></div>
+      ${agrForm('mt',`${(ppl.length?ppl.filter(id=>id!==ME&&person(id)).map(person):db.people).map(p=>`<option value="${p.id}">${esc(first(p.name))}</option>`).join('')}<option value="${ME}">Eu</option>${ppl.length?db.people.filter(p=>!ppl.includes(p.id)).map(p=>`<option value="${p.id}">${esc(first(p.name))}</option>`).join(''):''}`,addD(d<T?T:d,7))}</div>
     <div class="dr-s" style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn pri" data-act="share-meet" data-f="${f.id}" data-d="${d}">${ic('share','sm')} Compartilhar acordos</button>${f.teamId&&teamById(f.teamId)?`<button class="btn" data-act="open-team-meet" data-id="${f.teamId}">${ic('users','sm')} Conduzir como reunião de status</button>`:''}${open.length&&d<=T?`<button class="btn" data-act="meet-close" data-f="${f.id}" data-d="${d}" title="Marca todos os itens abertos como discutidos">${ic('check','sm')} Tudo discutido</button>`:''}</div></div>`;
 }
-function addAgreement(kind){
-  const f=forumById(openMeet?.f),d=openMeet?.d;if(!f)return;const el=$(kind==='decision'?'#mt-dec':'#mt-com'),text=(el?.value||'').trim();if(!text){toast(kind==='decision'?'Descreva a decisão.':'Descreva o compromisso.');return}
-  const g={id:uid(),forumId:f.id,date:d,kind,text,ownerId:'',due:'',taskId:'',createdAt:Date.now()};
-  if(kind==='commitment'){g.ownerId=$('#mt-com-owner').value||ME;g.due=okDate($('#mt-com-due').value)?$('#mt-com-due').value:'';
-    const t=mkTask({title:text,assigneeId:g.ownerId,end:g.due,forWhom:`${f.name} · ${fmtShort(d)}`});autoFollow(t);db.tasks.push(t);g.taskId=t.id}
-  db.agreements.push(g);changed();toast(kind==='decision'?'Decisão registrada':'Compromisso registrado e criado como tarefa');setTimeout(()=>$(kind==='decision'?'#mt-dec':'#mt-com')?.focus(),0);
+/* v15.4: formulários no lugar no padrão único (pílulas, validação no campo, verbo no botão, Enter registra) */
+const agrKindMem={};
+const AGR_L={commitment:['Compromisso','Quem faz o quê (vira tarefa)','Registrar compromisso','Descreva o compromisso para registrar.'],decision:['Decisão','O que foi decidido','Registrar decisão','Descreva a decisão para registrar.']};
+function agrForm(ctx,ownerOpts,due){
+  const k=agrKindMem[ctx]||'commitment',L=AGR_L[k];
+  return`<div class="fxi" data-agr="${esc(ctx)}" data-kind="${k}">
+    <div class="fxi-top"><div class="fxi-pills">${Object.keys(AGR_L).map(v=>`<button type="button" class="${v===k?'on':''}" data-act="agr-kind" data-v="${v}">${AGR_L[v][0]}</button>`).join('')}</div><span class="fx-kb">Enter registra</span></div>
+    <input type="text" class="fxi-t" data-agrt placeholder="${L[1]}" autocomplete="off">
+    <div class="fxi-row"><label data-only="commitment">${ic('user','sm')}<select data-agro title="Responsável">${ownerOpts}</select></label><label data-only="commitment">${ic('cal','sm')}<input type="date" data-agrd value="${due}" title="Prazo"></label><span class="grow"></span><button class="btn sm pri" data-pri data-act="agr-save" disabled>${L[2]}</button></div>
+    <div class="fx-err"></div></div>`;
+}
+function agrKind(box,k){if(!box||!AGR_L[k])return;agrKindMem[box.dataset.agr]=k;box.dataset.kind=k;box.querySelectorAll('[data-act=agr-kind]').forEach(b=>b.classList.toggle('on',b.dataset.v===k));
+  const L=AGR_L[k];box.querySelector('[data-agrt]').placeholder=L[1];box.querySelector('[data-pri]').textContent=L[2];fxiCheck(box);box.querySelector('[data-agrt]').focus()}
+function fxiCheck(box,tried){const t=box.querySelector('[data-agrt],[data-upd]'),ok=!!t.value.trim(),b=box.querySelector('[data-pri]'),e=box.querySelector('.fx-err');if(b)b.disabled=!ok;
+  if(e)e.textContent=ok||!tried?'':box.dataset.agr!=null?AGR_L[box.dataset.kind][3]:'Escreva o que mudou para registrar.';return ok}
+function agrSave(box){
+  if(!box||!fxiCheck(box,true))return;const ctx=box.dataset.agr,kind=box.dataset.kind==='decision'?'decision':'commitment',text=box.querySelector('[data-agrt]').value.trim(),owner=box.querySelector('[data-agro]')?.value||ME,due=box.querySelector('[data-agrd]')?.value||'';
+  let f,d,iid='';if(ctx==='mt'){f=forumById(openMeet?.f);d=openMeet?.d}else{const c=tmCtx();if(!c){const e=box.querySelector('.fx-err');if(e)e.textContent='Inicie a reunião para registrar acordos.';return}f=c.f;d=c.m.date;iid=ctx.slice(3)}
+  if(!f)return;const g={id:uid(),forumId:f.id,date:d,kind,text,ownerId:'',due:'',taskId:'',createdAt:Date.now()};if(iid)g.initiativeId=iid;
+  if(kind==='commitment'){g.ownerId=owner;g.due=okDate(due)?due:'';const t=mkTask({title:text,assigneeId:g.ownerId,end:g.due,initiativeId:iid,forWhom:`${f.name} · ${fmtShort(d)}`});autoFollow(t);db.tasks.push(t);g.taskId=t.id}
+  db.agreements.push(g);changed();toast(kind==='decision'?'Decisão registrada':'Compromisso registrado e criado como tarefa');setTimeout(()=>document.querySelector(`[data-agr="${ctx}"] [data-agrt]`)?.focus(),0);
+}
+function updForm(i,{cancel=false,lbl='Registrar atualização'}={}){
+  const u=lastUpd(i);
+  return`<div class="fxi" data-updf="${i.id}" style="grid-column:1/-1">
+    ${u?`<div class="fxi-ctx">Última, ${esc(fmtShort(u.date))}: <b>${esc(cut(u.text,90))}</b></div>`:''}
+    <input type="text" class="fxi-t" data-upd="${i.id}" placeholder="O que mudou em ${esc(cut(i.name,40))}?" autocomplete="off">
+    <div class="fxi-row"><span class="fx-kb muted small">Enter registra${cancel?' · Esc cancela':''}</span><span class="grow"></span>${cancel?`<button type="button" class="btn sm" data-act="pl-edit" data-id="${i.id}">Cancelar</button>`:''}<button class="btn sm pri" data-pri data-act="pl-save" data-id="${i.id}" disabled>${lbl}</button></div>
+    <div class="fx-err"></div></div>`;
 }
 /* ---- Acordos: folha elegante para compartilhar com o time ---- */
 function shareModel(){
@@ -1843,7 +1886,7 @@ function tmOpenStep(tid,f,m){
 }
 function tmAgrForm(tid,iid,d){
   const ppl=membersOf(tid),rest=db.people.filter(p=>!ppl.includes(p));
-  return`<div class="qadd wrap" data-tmagr="${iid}"><input type="text" data-tq="text" placeholder="+ Decisão ou compromisso (Enter registra)"><select data-tq="kind"><option value="commitment">Compromisso</option><option value="decision">Decisão</option></select><select data-tq="owner" title="Responsável">${ppl.concat(rest).map(p=>`<option value="${p.id}">${esc(first(p.name))}</option>`).join('')}<option value="${ME}" ${ppl.length?'':'selected'}>Eu</option></select><input type="date" data-tq="due" value="${addD(d,7)}" title="Prazo"><button class="btn sm" data-act="tm-agr-add" data-id="${iid}">Registrar</button></div>`;
+  return agrForm('tm:'+iid,`${ppl.concat(rest).map(p=>`<option value="${p.id}">${esc(first(p.name))}</option>`).join('')}<option value="${ME}" ${ppl.length?'':'selected'}>Eu</option>`,addD(d,7));
 }
 function tmAgrRows(list){return list.map(g=>{if(g.kind==='decision')return`<div class="ag-row"><span class="kd">Decisão</span><div class="tx" style="overflow-wrap:anywhere">${esc(g.text)}${g.initiativeId&&initById(g.initiativeId)?`<div class="tm"><span class="cm">${esc(cut(initById(g.initiativeId).name,40))}</span></div>`:''}</div><button class="ib danger" data-act="del-agr" data-id="${g.id}" title="Excluir">${ic('trash','sm')}</button></div>`;
   const dn=agrDone(g),r=g.due&&!dn?rel(g.due):null;return`<div class="ag-row"><button class="circle ${dn?'on':''}" data-act="toggle-agr" data-id="${g.id}" aria-label="Concluir">${ic('check')}</button><div style="min-width:0"><div class="tx" style="${dn?'text-decoration:line-through;color:var(--faint)':''}">${esc(g.text)}</div><div class="tm">${g.ownerId?`<span class="cm">${av(g.ownerId,'xs')}${esc(first(nameOf(g.ownerId)))}</span>`:''}${g.initiativeId&&initById(g.initiativeId)?`<span class="cm">${esc(cut(initById(g.initiativeId).name,30))}</span>`:''}<span class="cm">virou tarefa</span></div></div><span style="display:flex;gap:6px;align-items:center">${r?`<span class="due ${r.cls}">${esc(r.text)}</span>`:''}<button class="ib danger" data-act="del-agr" data-id="${g.id}" title="Excluir">${ic('trash','sm')}</button></span></div>`}).join('')}
@@ -1951,12 +1994,6 @@ function tmStart(){
 function tmCtx(){const f=teamForum(teamSel,false);if(!f)return null;const m=tmMeeting(f,today(),false);return m&&m.startedAt?{f,m,order:tmOrder(m,teamSel)}:null}
 function tmGo(delta,mark){const c=tmCtx();if(!c)return;const steps=['open',...c.order,'close'],cur=steps[tmStep];if(mark&&cur&&cur!=='open'&&cur!=='close'){const r=tmRev(c.m,cur);if(!r.done){r.done=true;if(!r.k)r.k=health(initById(cur)).k==='done'?'ok':health(initById(cur)).k;touch()}}
   tmStep=Math.max(0,Math.min(steps.length-1,tmStep+delta));renderTeam();window.scrollTo({top:0,behavior:'smooth'})}
-function tmAddAgr(box){
-  const c=tmCtx();if(!c||!box){toast('Inicie a reunião para registrar acordos.');return}const g_=k=>box.querySelector(`[data-tq=${k}]`)?.value||'',text=g_('text').trim();if(!text){toast('Descreva a decisão ou o compromisso.');return}
-  const kind=g_('kind')==='decision'?'decision':'commitment',iid=box.dataset.tmagr||'',g={id:uid(),forumId:c.f.id,date:c.m.date,kind,text,ownerId:'',due:'',taskId:'',initiativeId:iid,createdAt:Date.now()};
-  if(kind==='commitment'){g.ownerId=g_('owner')||ME;g.due=okDate(g_('due'))?g_('due'):'';const t=mkTask({title:text,assigneeId:g.ownerId,end:g.due,initiativeId:iid,forWhom:`${c.f.name} · ${fmtShort(c.m.date)}`});autoFollow(t);db.tasks.push(t);g.taskId=t.id}
-  db.agreements.push(g);changed();toast(kind==='decision'?'Decisão registrada':'Compromisso registrado e criado como tarefa');setTimeout(()=>document.querySelector(`[data-tmagr="${iid}"] [data-tq=text]`)?.focus(),0);
-}
 setInterval(()=>{const el=document.getElementById('tmClock');if(!el||page!=='team'||tmView!=='meet')return;const c=tmCtx();if(c&&!c.m.endedAt)el.textContent=`${tmDur(Date.now()-c.m.startedAt)} de ${c.f.duration} min`},20000);
 /* ============ Métricas (nominais ficam aqui, fora da staff) ============ */
 let mtTeam='',mtTab='times';
@@ -2636,6 +2673,7 @@ function fxValidate(f){if(!f||!f.matches('[data-val]'))return;const b=f.querySel
   if(b)b.disabled=!!msg;let m=f.querySelector('.fx-err');if(!m){m=document.createElement('div');m.className='fx-err';f.querySelector('.macts').before(m)}m.textContent=f.dataset.touched?msg:''}
 function fxOpen(sel,label,more){const f=$(sel);delete f.dataset.touched;const b=f.querySelector('[data-pri]');if(b)b.textContent=label;fxPills(f);const d=f.querySelector('.fx-more');if(d&&more!==undefined)d.open=!!more;fxValidate(f);setTimeout(()=>f.querySelector('.fx-title,.fx-note')?.focus(),30)}
 document.addEventListener('click',e=>{const b=e.target.closest('.fx-pills button');if(!b)return;const g=b.parentElement,s=document.getElementById(g.dataset.for);if(s){s.value=b.dataset.v;s.dispatchEvent(new Event('change',{bubbles:true}))}fxPills(g.parentElement)});
+document.addEventListener('input',e=>{const x=e.target.closest?.('.fxi');if(x)fxiCheck(x)});
 document.addEventListener('input',e=>{const f=e.target.closest?.('form[data-val]');if(f){f.dataset.touched=1;fxValidate(f)}});
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){const f=e.target.closest?.('dialog[open] form');if(f){e.preventDefault();const b=f.querySelector('[data-pri],#tSave,#iSave,button.pri:not([type=button])');if(b&&!b.disabled)f.requestSubmit()}}},true);
 /* ============ Importação em massa (gestao-import/2) ============ */
@@ -2790,15 +2828,21 @@ function runImport(parsed){
   }finally{db=real}
   return{draft,log,cal:calRes};
 }
-let impPlan=null;
+let impPlan=null,impFilter='';
 function analyzeImport(){
-  const txt=$('#impText').value,box=$('#impPrev'),go_=$('#impGo');impPlan=null;go_.disabled=true;if(!txt.trim()){box.innerHTML='';return}
+  const txt=$('#impText').value,box=$('#impPrev'),go_=$('#impGo');impPlan=null;go_.disabled=true;if(!txt.trim()){box.innerHTML='';go_.textContent='Importar';return}
   try{const parsed=parseImport(txt);parsed.calChoice=impCalChoice;const plan=runImport(parsed),c=k=>plan.log.filter(p=>p.kind===k).length;impPlan=plan;go_.disabled=!(c('new')+c('update'));
     const L={new:'Nova',update:'Atualiza',same:'Igual',skip:'Ignorada'};
     const calOpts=ch=>[['new','Criar fórum novo'],...db.forums.filter(f=>!f.archived).map(f=>['f:'+f.id,'Fórum: '+f.name]),...db.people.map(p=>['p:'+p.id,'1:1 com '+p.name]),['skip','Ignorar']].map(([v,l])=>`<option value="${esc(v)}" ${v===ch?'selected':''}>${esc(l)}</option>`).join('');
     const cal=(plan.cal||[]).length?`<div class="calbox"><div class="lbl" style="margin:0 0 6px">Reuniões recorrentes do calendário<span class="n">${plan.cal.length}</span></div><div class="muted small" style="margin-bottom:6px">Confira a associação sugerida de cada série: um fórum (ritual) existente, um 1:1 com uma pessoa, um fórum novo, ou ignorar.</div>${plan.cal.map(x=>`<div class="calr"><div><b>${esc(x.title)}</b> <span class="muted small">${esc(CAL_FREQ[x.freq]||'')}${x.start||x.time?' · '+esc(calWhen({anchor:x.start,time:x.time})):''}</span></div><select class="sel" data-calch="${x.idx}">${calOpts(x.ch)}</select></div>`).join('')}</div>`:'';
-    box.innerHTML=cal+`<div class="small" style="margin-top:14px"><b>${c('new')}</b> novos · <b>${c('update')}</b> atualizados · <b>${c('same')}</b> iguais · <b>${c('skip')}</b> ignorados</div><div class="prev">${plan.log.map(p=>`<div class="it"><span class="k-${p.kind}">${L[p.kind]}</span><span class="muted">${p.res}</span><span>${esc(p.label)}${p.note?` <span class="muted">· ${esc(p.note)}</span>`:''}${p.warn.map(w=>`<div class="warn">${esc(w)}</div>`).join('')}</span></div>`).join('')}</div>`}
-  catch(e){box.innerHTML=`<div class="err">${esc(e.message)}</div>`}
+    const nAct=c('new')+c('update'),fk=impFilter&&c(impFilter)?impFilter:'',rows=plan.log.filter(p=>!fk||p.kind===fk),grp={};rows.forEach(p=>(grp[p.res]||=[]).push(p));
+    const nW=plan.log.filter(p=>p.warn.length).length;
+    const chip=(k,l)=>`<button type="button" class="${k} ${fk===k?'on':''} ${c(k)?'':'k0'}" data-act="imp-filter" data-v="${k}"><b>${c(k)}</b><span>${l}</span></button>`;
+    go_.textContent=nAct?`Importar ${nAct} ${nAct===1?'item':'itens'}`:'Nada para importar';
+    box.innerHTML=cal+`<div class="ipv">${chip('new','novos')}${chip('update','atualizados')}${chip('same','iguais')}${chip('skip','ignorados')}</div>
+      ${nW?`<div class="warn" style="margin-top:8px">${nW} ${nW===1?'item tem aviso':'itens têm aviso'}: confira as linhas destacadas.</div>`:''}
+      <div class="prev">${Object.keys(grp).map(r=>`<div class="grp">${esc(r)} · ${grp[r].length}</div>`+grp[r].map(p=>`<div class="it ${p.warn.length?'w':''}"><span class="k-${p.kind}">${L[p.kind]}</span><span class="muted">${p.res}</span><span>${esc(p.label)}${p.note?` <span class="muted">· ${esc(p.note)}</span>`:''}${p.warn.map(w=>`<div class="warn">${esc(w)}</div>`).join('')}</span></div>`).join('')).join('')||'<div class="it"><span></span><span></span><span class="muted">Nada neste filtro.</span></div>'}</div>`}
+  catch(e){go_.textContent='Importar';box.innerHTML=`<div class="ipe">Não consegui ler o conteúdo: ${esc(e.message)}<div>Cole o JSON que o agente devolveu (pode vir em bloco de código), um arquivo gestao-metricas/1 ou um .ics do Outlook. "Baixar modelo" mostra o formato.</div></div>`}
 }
 function applyImport(){impCalChoice={};
   if(!impPlan)return;const snap=JSON.stringify(db),n=impPlan.log.filter(p=>p.kind==='new').length,u=impPlan.log.filter(p=>p.kind==='update').length;
@@ -2876,7 +2920,7 @@ const IMPORT_TEMPLATE=()=>JSON.stringify({schema:'gestao-import/3',source:'model
   agenda:[{forum:'Comitê de produto',text:'Priorização do backlog do 1º trimestre',owner:'Nome da pessoa',minutes:20}],
   staffTopics:[{text:'Alinhar prioridades entre People Analytics e HR Tech',team:'People Analytics'}]},null,2);
 function renderPrompts(){$('#promptList').innerHTML=PROMPTS.map(p=>`<div class="pr"><b>${esc(p.label)}</b><span>${esc(p.area)} · ${esc(p.desc)}${p.ph?` Troque ${esc(p.ph)} no texto.`:''}</span><button class="btn sm" data-act="copy-prompt" data-id="${p.id}">${ic('copy','sm')} Copiar</button></div>`).join('')}
-let impTimer;$('#impText').addEventListener('input',()=>{impCalChoice={};clearTimeout(impTimer);impTimer=setTimeout(analyzeImport,250)});
+let impTimer;$('#impText').addEventListener('input',()=>{impCalChoice={};impFilter='';clearTimeout(impTimer);impTimer=setTimeout(analyzeImport,250)});
 $('#impFile').onchange=async ev=>{const f=ev.target.files[0];if(f){impCalChoice={};$('#impText').value=await f.text();analyzeImport()}ev.target.value=''};
 /* ============ v14: integração com as ferramentas dos times (pasta SharePoint, arquivos cifrados) ============ */
 /* Contratos: gestao-catalogo/1 (Central → time), gestao-status/1 e gestao-metricas/1 (time → Central), todos em gestao-envelope/1 (AES-256-GCM). */
@@ -3308,7 +3352,7 @@ function drInitHTML(i){
   const head=`<div class="dr-h">${ring(pr,60,5)}<div style="flex:1;min-width:0"><h2>${i.ref?`<span class="ref lg">${esc(i.ref)}</span>`:''}${esc(i.name)}</h2><div class="muted small" style="margin-top:4px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">${hd(h)} ${h.label}${teamName(i.teamId)?' · '+esc(teamName(i.teamId)):''}${i.ownerId?` · ${av(i.ownerId,'xs')} ${esc(first(nameOf(i.ownerId)))}`:i.ownerLabel?' · '+esc(i.ownerLabel):''} · ${esc(bucketName(i.bucket))}${igInitBadge(i)}</div></div>
     <button class="ib" data-act="edit-init" data-id="${i.id}" title="Editar">${ic('edit')}</button><button class="ib danger" data-act="del-init" data-id="${i.id}" title="Excluir">${ic('trash')}</button><button class="ib" data-act="close-drawer" title="Fechar">${ic('x')}</button></div>
     <div class="drtabs">${DR_TABS.map(([k,l])=>`<button class="${drTab===k?'on':''}" data-act="dr-tab" data-v="${k}">${l}${k==='feat'?` <span class="n">${fOpen.length}</span>`:k==='tasks'&&tOpen.length?` <span class="n">${tOpen.length}</span>`:k==='time'&&(team.length||mets.length)?` <span class="n ${unl?'hot':''}">${unl||team.length+mets.length}</span>`:''}</button>`).join('')}</div>`;
-  const updBox=`<div class="pl-in" style="margin-bottom:6px"><input type="text" data-upd="${i.id}" placeholder="O que mudou? (Enter salva)"><button class="btn sm" data-act="pl-save" data-id="${i.id}">Registrar</button></div>`;
+  const updBox=`<div style="margin-bottom:8px">${updForm(i)}</div>`;
   const addFeat=`<div class="qadd wrap" data-dq="f:${i.id}"><input type="text" data-q="title" placeholder="+ Nova feature…">${who}<input type="date" data-q="end" value="${phaseEndDefault(i,cp)}">${i.phases.length?`<select data-q="phase"><option value="">Sem fase</option>${i.phases.map(p=>`<option value="${p.id}" ${cp&&cp.id===p.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select>`:''}<button class="btn sm" data-act="dr-add" data-id="f:${i.id}">Adicionar</button></div>`;
   let body='';
   if(drTab==='geral'){
@@ -3422,10 +3466,10 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Enter'&&e.target.id==='st-text'){e.preventDefault();document.querySelector('[data-act=add-topic]').click();return}
   if(e.key==='Enter'&&e.target.dataset?.q==='title'){e.preventDefault();const b=e.target.closest('[data-dq],[data-pq]');if(b?.dataset.dq)drawerAdd(b.dataset.dq);else pqAdd();return}
   if(e.key==='Enter'&&e.target.id==='fc-text'){e.preventDefault();fcAdd();return}
-  if(e.key==='Enter'&&['mt-ag','mt-dec','mt-com'].includes(e.target.id)){e.preventDefault();document.querySelector(`[data-act=${e.target.id}-add]`)?.click();return}
+  if(e.key==='Enter'&&e.target.dataset?.agrt!=null){e.preventDefault();agrSave(e.target.closest('[data-agr]'));return}
+  if(e.key==='Enter'&&e.target.id==='mt-ag'){e.preventDefault();document.querySelector(`[data-act=${e.target.id}-add]`)?.click();return}
   if(e.target.dataset?.upd){if(e.key==='Enter'){e.preventDefault();saveUpd(e.target.dataset.upd,e.target.value);return}if(e.key==='Escape'){e.stopPropagation();plEdit='';render();return}}
   if(e.key==='Enter'&&e.target.id==='tm-ag-text'){e.preventDefault();document.querySelector('[data-act=tm-ag-add]')?.click();return}
-  if(e.key==='Enter'&&e.target.dataset?.tq==='text'){e.preventDefault();tmAddAgr(e.target.closest('[data-tmagr]'));return}
   if((e.key==='ArrowRight'||e.key==='ArrowLeft')&&page==='team'&&tmView==='meet'&&!e.altKey&&!e.ctrlKey&&!e.metaKey&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)&&!document.querySelector('dialog[open]')&&!openInitId&&!openMeet&&tmCtx()){e.preventDefault();tmGo(e.key==='ArrowRight'?1:-1,e.key==='ArrowRight');return}
   if(e.key==='Escape'&&(openInitId||openMeet)&&!document.querySelector('dialog[open]')){openInitId=null;openMeet=null;renderDrawer();return}
   if(/^[0-9]$/.test(e.key)&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)&&!document.querySelector('dialog[open]')&&!$('#app').classList.contains('hidden')&&!(page==='team'&&tmView==='meet')){const p=NAV[+e.key-1];if(p){e.preventDefault();openInitId=null;go(p.k)}return}
@@ -3479,8 +3523,6 @@ document.addEventListener('click',async e=>{
     case 'toggle-agenda':{const a=db.agendaItems.find(x=>x.id===id);if(a){const snap=JSON.stringify(db);if(a.status==='open'){a.date=effDate(a);a.status='done';a.doneAt=today()}else{a.status='open';a.doneAt=''}changed();toast(a.status==='done'?'Pauta discutida':'Pauta reaberta',()=>restore(snap))}break}
     case 'del-agenda':withUndo('Pauta excluída',()=>{db.agendaItems=db.agendaItems.filter(x=>x.id!==id)});break;
     case 'mt-ag-add':{const t=$('#mt-ag');if(!openMeet)break;const a=addAgenda({forumId:openMeet.f,text:t?.value,date:openMeet.d,ownerId:$('#mt-ag-owner')?.value||ME});if(!a){toast('Descreva o assunto.');break}changed();setTimeout(()=>$('#mt-ag')?.focus(),0);break}
-    case 'mt-dec-add':addAgreement('decision');break;
-    case 'mt-com-add':addAgreement('commitment');break;
     case 'toggle-agr':{const g=db.agreements.find(x=>x.id===id);if(!g)break;const t=agrTask(g);if(t){t.done=!t.done;t.doneAt=t.done?today():''}else g.done=!g.done;changed();break}
     case 'del-agr':{const g=db.agreements.find(x=>x.id===id);if(!g)break;const t=agrTask(g),rmT=t&&!t.done&&confirm('Excluir também a tarefa criada por este compromisso?');withUndo('Acordo excluído',()=>{db.agreements=db.agreements.filter(x=>x.id!==id);if(rmT)db.tasks=db.tasks.filter(x=>x.id!==t.id)});break}
     case 'meet-close':{const f=b.dataset.f,d=b.dataset.d,snap=JSON.stringify(db),l=openAgenda(f,d);l.forEach(a=>{a.date=d;a.status='done';a.doneAt=today()});changed();toast(`${l.length} pauta(s) marcada(s) como discutida(s)`,()=>restore(snap));break}
@@ -3533,7 +3575,8 @@ document.addEventListener('click',async e=>{
     case 'tm-k':{const c=tmCtx();if(!c)break;tmRev(c.m,id).k=b.dataset.v;touch();renderTeam();break}
     case 'tm-ag':{const a=db.agendaItems.find(x=>x.id===id);if(!a)break;const snap=JSON.stringify(db);if(a.status==='open'){a.date=today();a.status='done';a.doneAt=today()}else{a.status='open';a.doneAt=''}changed();toast(a.status==='done'?'Pauta discutida':'Pauta reaberta',()=>restore(snap));break}
     case 'tm-ag-add':{const f=teamForum(teamSel,true),t=$('#tm-ag-text');const a=addAgenda({forumId:f.id,text:t?.value,ownerId:$('#tm-ag-owner')?.value||ME,teamId:teamSel});if(!a){toast('Descreva o assunto.');break}changed();setTimeout(()=>$('#tm-ag-text')?.focus(),0);break}
-    case 'tm-agr-add':tmAddAgr(b.closest('[data-tmagr]'));break;
+    case 'agr-kind':agrKind(b.closest('[data-agr]'),b.dataset.v);break;
+    case 'agr-save':agrSave(b.closest('[data-agr]'));break;
     case 'tm-end':{const c=tmCtx();if(c&&!c.m.endedAt){c.m.endedAt=Date.now();touch()}tmShDate=today();tmView='share';renderTeam();window.scrollTo({top:0});break}
     case 'tm-share-at':tmShDate=b.dataset.d;tmView='share';renderTeam();break;
     case 'tm-sh-copy':{const M=tmShareModel(teamSel);await copyRich(tmShareHTML(M),tmShareText(M));toast('Copiado com formatação: cole na conversa do time no Teams');break}
@@ -3576,9 +3619,10 @@ document.addEventListener('click',async e=>{
     case 'imp-guide':download('gestao-import-guia.md',AGENT_GUIDE(),'text/markdown');break;
     case 'imp-template':download('gestao-import-modelo.json',IMPORT_TEMPLATE(),'application/json');break;
     case 'imp-go':applyImport();break;
+    case 'imp-filter':impFilter=impFilter===b.dataset.v?'':b.dataset.v;analyzeImport();break;
   }
 });
-function saveUpd(iid,text){const i=initById(iid);if(!i)return;if(!String(text||'').trim()){toast('Escreva a atualização.');return}const snap=JSON.stringify(db);addUpdate(i,text);plEdit='';changed();toast('Atualização registrada',()=>restore(snap))}
+function saveUpd(iid,text){const i=initById(iid);if(!i)return;if(!String(text||'').trim()){const box=document.querySelector(`[data-updf="${iid}"]`);if(box)fxiCheck(box,true);else toast('Escreva a atualização.');return}const snap=JSON.stringify(db);addUpdate(i,text);plEdit='';changed();toast('Atualização registrada',()=>restore(snap))}
 function openMeeting(fid,d){openInitId=null;openMeet={f:fid,d};$('#drawer').scrollTop=0;renderDrawer()}
 /* Arrastar e soltar: quadro de demandas, horizonte/backlog e semana da staff */
 const DRAGSEL='.bcard,.ic-card,.bk-card,.wi';

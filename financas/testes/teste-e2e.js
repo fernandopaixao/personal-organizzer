@@ -220,6 +220,19 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   await c.fill('#lockPass', SENHA2); await c.click('#btnOpen'); await c.waitForTimeout(1500);
   ok(await c.evaluate(() => !document.querySelector('#app').classList.contains('hidden')), 'Central abre o arquivo cifrado criado pelo assistente');
   ok(await c.evaluate(() => document.querySelectorAll('#home .inss .ins').length === 4 && /Delegadas no prazo/.test(document.querySelector('#home .inss').textContent)), 'Hoje da Central abre com quatro cards de leitura');
+  // Formulários no lugar no padrão único (v15.4): acordo com pílulas, validação no campo e Enter; atualização de iniciativa; prévia da importação
+  await c.evaluate(() => { const f = mkForum({ name: 'Comitê', cadence: 'weekly', anchor: today(), participants: [] }); db.forums.push(f); db.initiatives.push({ id: 'i1', name: 'Migração', teamId: '', ownerId: '', bucket: 'now', start: today(), end: addD(today(), 30), progress: 0, autoProgress: true, phases: [], dependsOn: [], updates: [], createdAt: Date.now() }); changed(); go('forum'); openMeeting(f.id, today()); });
+  await c.click('[data-agr="mt"] [data-act=agr-kind][data-v=decision]'); await c.focus('[data-agr="mt"] [data-agrt]'); await c.keyboard.press('Enter');
+  ok(await c.evaluate(() => { const b = document.querySelector('[data-agr="mt"]'); return b.querySelector('[data-pri]').disabled && /decisão/.test(b.querySelector('.fx-err').textContent) && b.querySelector('[data-pri]').textContent === 'Registrar decisão'; }), 'acordo: pílula Decisão muda o verbo do botão e a validação aparece no campo');
+  await c.fill('[data-agr="mt"] [data-agrt]', 'Adotar fluxo novo'); await c.keyboard.press('Enter'); await c.waitForTimeout(150);
+  await c.click('[data-agr="mt"] [data-act=agr-kind][data-v=commitment]'); await c.fill('[data-agr="mt"] [data-agrt]', 'Enviar plano'); await c.keyboard.press('Enter'); await c.waitForTimeout(150);
+  ok(await c.evaluate(() => db.agreements.map(g => g.kind + (g.taskId ? '+tarefa' : '')).join(',') === 'decision,commitment+tarefa'), 'acordo: decisão e compromisso registrados com Enter, compromisso vira tarefa');
+  await c.evaluate(() => { openMeet = null; renderDrawer(); go('pulse'); }); await c.click('[data-act=pl-edit][data-id=i1]');
+  await c.fill('[data-upd=i1]', 'Homologação começou'); await c.keyboard.press('Enter'); await c.waitForTimeout(150);
+  ok(await c.evaluate(() => initById('i1').updates.length === 1), 'atualização de iniciativa no formulário no lugar');
+  await c.evaluate(() => { $('#importDialog').showModal(); $('#impText').value = JSON.stringify({ schema: 'gestao-import/3', tasks: [{ title: 'A' }], updates: [{ initiative: 'Não existe', text: 'y' }] }); analyzeImport(); });
+  ok(await c.evaluate(() => $('#impGo').textContent === 'Importar 1 item' && document.querySelectorAll('#impPrev .ipv button').length === 4), 'prévia da importação com contadores e verbo no botão');
+  await c.evaluate(() => { $('#importDialog').close(); go('home'); });
 
   ok(await c.evaluate(() => /Onde estou/.test(document.getElementById('ondeEstou')?.textContent || '')), 'Central mostra o botão "Onde estou?"');
   await c.click('#ondeEstou .f4btn:not(.f4hub)'); ok(/Central de Gestão/.test(await c.textContent('#f4dlg')) && /gestao-tecnologia\.json/.test(await c.textContent('#f4dlg')), '"Onde estou?" da Central mostra ferramenta e arquivo');
