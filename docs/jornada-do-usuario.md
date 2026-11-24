@@ -41,7 +41,7 @@ A solução tem quatro papéis. A mesma pessoa pode ter mais de um (o gestor cos
 | **10. Conciliar** | Une épicos do time a iniciativas, liga itens a features | Central (Integração) | Uniões podem ser desfeitas; códigos antigos viram apelidos | |
 | **11. Usar agentes** | Depois de reuniões, copia o prompt certo, roda no agente, importa o JSON | Central (Importar e agentes) | Prévia antes de aplicar; reimportar não duplica | |
 | **12. Recados** | Deixa post-its para um ou vários times e vê quem leu | Hub | Cifrados por time; um time não vê o post-it do outro | Atraso normal da sincronização |
-| **13. Finanças** | Lê os planos novos dos times, revisa a prévia, olha o consolidado contra o orçamento, publica diretrizes, fecha versões | Finanças do Grupo | Um time com problema nunca derruba a soma; "Saúde da soma" aponta o que falta | Interface em revisão (ver [funcionalidades](funcionalidades.md#7-finanças-como-está-hoje)) |
+| **13. Finanças** | Lê os planos novos dos times, revisa a prévia, olha o consolidado contra o orçamento, publica diretrizes, fecha versões | Finanças do Grupo (Painel) | Um time com problema nunca derruba a soma; "Saúde da soma" aponta o que falta; consolidado ano a ano | Informar orçamento e tetos de cada ano do horizonte |
 
 ## 3. Jornada do responsável pelo time
 
@@ -68,11 +68,11 @@ A solução tem quatro papéis. A mesma pessoa pode ter mais de um (o gestor cos
 | Etapa | O que faz | Ferramenta | Ponto de atenção |
 |---|---|---|---|
 | **1. Receber** | Recebe o HTML de finanças do time e a **chave de finanças** (diferente da chave de tarefas) | Teams / e-mail | Guardar no cofre |
-| **2. Primeiro uso** | Cria a senha local, escolhe a pasta local e a sincronizada, cadastra a chave na aba Grupo | Finanças do Time | Pasta local fora do OneDrive |
-| **3. Montar o plano** | Cria as linhas do plano (categoria, centro de custo, OPEX/CAPEX), orçado por mês, contratos recorrentes | Plano, Contratos | Categorias seguem a diretriz do grupo |
-| **4. Dia a dia** | Registra lançamentos, olha o Resumo e os alertas | Lançamentos, Resumo | Lançamentos ficam **só locais** |
-| **5. Planejar** | Ajusta o previsto, simula cenários "e se" e aplica o escolhido | Futuro | Cenários ficam locais até aplicar |
-| **6. Fechar o mês** | Confere realizado × previsto, fecha o mês e publica o plano | Plano, Grupo | Só o agregado vai para a pasta |
+| **2. Primeiro uso** | Cria a senha local, escolhe a pasta local e a sincronizada, cadastra a chave em Ajustes › Grupo e pasta | Finanças do Time | Pasta local fora do OneDrive |
+| **3. Montar o plano** | Cria as linhas do plano (categoria, centro de custo, OPEX/CAPEX), orçado por mês, contratos recorrentes; adiciona os anos seguintes ao horizonte | Plano | Categorias e tetos seguem a diretriz do grupo |
+| **4. Dia a dia** | Registra lançamentos e lê os cards e gráficos do Painel | Lançamentos, Painel › Hoje | Lançamentos ficam **só locais** |
+| **5. Planejar** | Ajusta o previsto, simula cenários "e se", compara os anos no card Vários anos | Painel › Futuro e cenários | Cenários ficam locais até aplicar |
+| **6. Fechar o mês** | Confere realizado × previsto, fecha o mês e publica o plano | Plano, Publicar para o grupo | Só o agregado vai para a pasta |
 
 ---
 
@@ -96,7 +96,7 @@ Esta revisão olhou a solução como um todo em 24/11/2026. Os pontos abaixo nã
 | # | Atrito | Onde | Oportunidade |
 |---|---|---|---|
 | 1 | **Muitas senhas e chaves** para o gestor: senha da Central, do hub, de Finanças do Grupo, mais duas chaves por time | Gestor | Manter separado por segurança, mas o hub já importa times e chaves da Central; avaliar o mesmo para Finanças do Grupo |
-| 2 | **Finanças com 7 telas** no time e 5 no grupo, com mais texto do que gráfico | Finanças | Em andamento em outra frente: telas minimalistas, gráficos, cards de interpretação, menos navegação e visão multianual |
+| 2 | ~~Finanças com 7 telas no time e 5 no grupo, com mais texto do que gráfico~~ | Finanças | **Resolvido na 1.2:** menu de 4 e 3 entradas, cards de leitura, curva acumulada e barras; planejamento multianual na 1.1. Próximo passo possível: levar as mesmas peças (`cardLeitura`, `barrasH`, `curvaAcumulada`) ao Hub e à Central |
 | 3 | **Três formulários da Central** ainda no padrão antigo (atualização de iniciativa, acordo e prévia de importação) | Central | Trazer para o padrão único da v15 |
 | 4 | **Primeiro uso do time** exige várias ações (senha, chave, pasta, "quem é você") | Quadro, Finanças do Time | Um passo a passo guiado de primeira abertura, como o do assistente |
 | 5 | **Hub depende de estar na mesma pasta** dos HTMLs | Hub | Já avisa; o assistente já grava tudo junto. Manter a orientação no cartão "Onde fica cada coisa" |

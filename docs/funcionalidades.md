@@ -1,6 +1,6 @@
 # Funcionalidades, usos e objetivos
 
-*24/11/2026 · Central v15.2, Quadro do Time 2.2, Hub 1.1, Finanças do Grupo e do Time 1.0, assistente `inicio.html`*
+*24/11/2026 · Central v15.2, Quadro do Time 2.2, Hub 1.1, Finanças do Grupo e do Time 1.2, assistente `inicio.html`*
 
 Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. Para as regras técnicas por trás, veja as [decisões de arquitetura](adr/README.md). Para o caminho de quem usa, veja a [jornada do usuário](jornada-do-usuario.md) e o [passo a passo](passo-a-passo.md).
 
@@ -151,39 +151,45 @@ Cada pessoa grava o **próprio arquivo** (`quadro/<pessoa>-<computador>.json`) e
 
 ---
 
-## 7. Finanças (como está hoje)
+## 7. Finanças (1.2: multianual e interface minimalista)
 
-> **Em revisão.** A interface de finanças está sendo otimizada em outra frente (telas mais minimalistas, mais gráficos, menos navegação, cards de interpretação e planejamento multianual). Esta seção descreve a **versão 1.0 atual** e será atualizada quando a nova interface entrar. As regras de dados (local × comum, agregados, chave de finanças) não devem mudar.
+As duas ferramentas de finanças planejam **vários anos**: o **ano base** é o ano em curso (meses fechados, realizado, alertas) e o **horizonte** é a lista de anos planejados. Um seletor de ano no topo troca o ano em exibição. As telas seguem o princípio de mais gráfico do que texto: **cards de leitura** (número, medidor e uma frase que interpreta, com o card principal em azul cheio), curva acumulada do ano e barras por categoria ou por time. Só tons de azul; vermelho apenas para o que passou do orçado ou do teto.
 
 ### 7.1 Finanças do Time (`financas_time.html`)
 
 **Objetivo:** apoiar o dia a dia e o futuro do dinheiro de um time, publicando para o grupo só o agregado.
 
-| Tela | Uso | Objetivo |
-|---|---|---|
-| **Resumo** | Orçado no ano, previsto no ano, realizado até o mês, saldo previsto; "Pedindo atenção"; por categoria; ano mês a mês | Ver a saúde do ano numa tela |
-| **Lançamentos** | Registrar gastos numa linha do plano (filtros por mês e linha); entrada rápida | Registrar o realizado |
-| **Plano** | Linhas do plano por mês (orçado, previsto, realizado); **Fechar mês** | Manter o plano e fechar o mês |
-| **Contratos** | Compromissos recorrentes (início, fim, valor), restante no ano; geram o previsto dos meses seguintes | Não esquecer gastos já contratados |
-| **Futuro** | Previsão rolante até o fim do ano; cenários "e se" com **Aplicar ao previsto** | Antecipar estouro ou folga |
-| **Grupo** | Ligar a pasta, ler a diretriz (tetos e categorias), cadastrar a chave de finanças, **Ver o que vai** e **Publicar plano** | Publicar o agregado com segurança |
-| **Ajustes** | Time e ano, seu nome e computador, categorias, trocar senha, baixar cópia cifrada, testar senha, meses fechados | Configurar |
+Menu com 4 entradas; as telas irmãs são abas no topo.
 
-Alertas: categoria acima do teto, mês sem lançamento, contrato vencendo em 60 dias, divergência entre previsto e realizado.
+| Menu › aba | Uso | Objetivo |
+|---|---|---|
+| **Painel › Hoje** | Cards de leitura (previsto × orçado com folga ou excesso, realizado × previsto com a marca de quanto do ano passou, mês atual, teto do grupo ou ano seguinte), curva do ano acumulada com a linha de "hoje", "Onde vai o dinheiro" (barras por categoria com marca do orçado e do teto) e "Pedindo atenção" | Ver a saúde do ano numa tela |
+| **Painel › Futuro e cenários** | Previsão rolante, cenários "e se" com **Aplicar ao previsto** e o card **Vários anos** (gráfico e tabela por ano, variação contra o ano anterior, total do horizonte) | Antecipar estouro ou folga, inclusive nos próximos anos |
+| **Lançamentos** | Registrar gastos numa linha do plano (filtros por mês e linha); entrada rápida | Registrar o realizado |
+| **Plano › Plano mês a mês** | Linhas do plano por mês (orçado, previsto, realizado), visão **Todos os anos** (linhas × anos) e **Fechar mês** | Manter o plano e fechar o mês |
+| **Plano › Contratos** | Compromissos recorrentes (início, fim, valor); geram o previsto dos meses seguintes e, por padrão, terminam no fim do último ano do horizonte | Não esquecer gastos já contratados |
+| **Ajustes › Grupo e pasta** | Ligar a pasta, ler a diretriz (tetos por ano e categorias), cadastrar a chave de finanças, **Ver o que vai** e **Publicar plano** | Publicar o agregado com segurança |
+| **Ajustes › Time e segurança** | Time, ano base e anos do horizonte, seu nome e computador, categorias, trocar senha, baixar cópia cifrada, testar senha, meses fechados | Configurar |
+
+No topo: seletor de ano, **+ Adicionar ano…** (vazio ou copiando o previsto/orçado do ano anterior com reajuste em %), indicador único "salvo e cifrado" + pasta, **Publicar para o grupo**, **← Hub** e **Onde estou?**.
+
+Alertas: categoria acima do teto do ano, mês sem lançamento, contrato vencendo em 60 dias, divergência entre previsto e realizado, ano futuro do horizonte ainda vazio.
 
 ### 7.2 Finanças do Grupo (`financas_grupo.html`)
 
-**Objetivo:** somar os planos dos times, comparar com o orçamento aprovado e orientar os times, sem nunca alterar o número de um time.
+**Objetivo:** somar os planos dos times ano a ano, comparar com o orçamento aprovado e orientar os times, sem nunca alterar o número de um time.
 
-| Tela | Uso | Objetivo |
+Menu com 3 entradas.
+
+| Menu › aba | Uso | Objetivo |
 |---|---|---|
-| **Consolidado** | Orçamento aprovado do grupo, orçado (times + grupo), previsto, realizado, saldo; cortes por mês, categoria, time, iniciativa e OPEX/CAPEX; exportar CSV | Visão do grupo |
-| **Ler pasta** | Planos novos dos times com prévia (Aplicar / Aplicar todos) e **Saúde da soma** (time sem plano, plano desatualizado, moeda diferente, categoria fora da lista, cópia de conflito) | Só entra no consolidado o que foi revisto |
-| **Times** | Por time: teto e diretriz, gerar/copiar/revogar a chave de finanças, publicar diretriz, gerar o **HTML de finanças do time** | Orientar e equipar os times |
-| **Versões** | Fechar uma versão (Orçamento original, Reforecast 1…) e comparar com hoje | Comparar o plano com o que foi aprovado |
-| **Ajustes** | Nome do grupo, ano fiscal, orçamento aprovado, versão pedida aos times, centros de custo, itens do grupo (reservas e rateios), categorias OPEX/CAPEX, trocar senha, baixar cópia cifrada | Configurar |
+| **Painel › Consolidado** | Cards de leitura e barras por time com marca do orçado e do teto, para o ano escolhido; tabelas por time, categoria, iniciativa, OPEX × CAPEX e **Por ano** (time × ano, orçamento aprovado e saldo de cada ano); **Exportar CSV** com todos os anos | Visão do grupo, ano a ano |
+| **Painel › Planos recebidos** | Planos novos dos times com prévia (Aplicar / **Aplicar todos**) e **Saúde da soma** (time sem plano, plano que não cobre o ano em exibição, plano desatualizado, moeda diferente, categoria fora da lista, cópia de conflito) | Só entra no consolidado o que foi revisto |
+| **Painel › Versões** | **Fechar versão** (Orçamento original, Reforecast 1…) com todos os anos e comparar com hoje no ano em exibição | Comparar o plano com o que foi aprovado |
+| **Times** | Por time: teto por ano e diretriz, gerar/copiar/revogar a chave de finanças, **Publicar diretriz**, **Gerar HTML** de finanças do time | Orientar e equipar os times |
+| **Ajustes** | Nome do grupo, ano base e horizonte, orçamento aprovado por ano, versão pedida aos times, centros de custo, itens do grupo (reservas e rateios), categorias OPEX/CAPEX, trocar senha, baixar cópia cifrada | Configurar |
 
----
+O grupo enxerga os anos do próprio horizonte **mais os anos publicados pelos times**. Um plano de outro ano não é mais descartado: soma no ano a que se refere. Arquivos e planos 1.0 abrem sem perguntar nada (o orçamento e os tetos antigos viram os do ano base).
 
 ## 8. Funcionalidades transversais
 
