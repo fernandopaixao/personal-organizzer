@@ -296,3 +296,26 @@ Pedido: "Permita planejamento financeiro multi anual", nas Finanças do Time e d
 - Antes, o grupo **descartava** da soma um plano de ano diferente do seu; agora todo plano na mesma moeda entra, cada ano no seu lugar.
 
 Teste: seção 10 de `financas/testes/teste-e2e.js` (adicionar 2027 com reajuste, publicar, grupo somar 2026 e 2027, teto por ano na diretriz, migração de arquivos 1.0).
+
+## 13. Interface das finanças (24/11/2026, Finanças 1.2.0)
+
+Pedido: telas minimalistas, com mais gráficos do que texto, em branco e azul com destaques discretos, menos navegação e cards que ajudem a interpretar.
+
+- **Menos navegação.** O Time passou de 7 para 4 entradas no menu e o Grupo de 5 para 3. As telas irmãs viraram abas no topo:
+  - Time: **Painel** (Hoje, Futuro e cenários), **Lançamentos**, **Plano** (Plano mês a mês, Contratos), **Ajustes** (Grupo e pasta, Time e segurança).
+  - Grupo: **Painel** (Consolidado, Planos recebidos, Versões), **Times**, **Ajustes**.
+- **Cards de leitura.** Cada card traz o número, um medidor e uma frase que interpreta:
+  - previsto contra o orçado, com a folga ou o excesso;
+  - realizado contra o previsto, com a marca de quanto do ano já passou;
+  - o mês atual;
+  - o teto do grupo, ou o ano seguinte do plano.
+  
+  O card principal fica em azul cheio.
+- **Gráficos no lugar de tabelas.**
+  - Curva do ano acumulada (orçado, previsto e realizado, com a linha de "hoje").
+  - "Onde vai o dinheiro": barras por categoria, com marca do orçado e do teto.
+  - No Grupo, barras por time com a marca do orçado e do teto.
+  
+  As tabelas detalhadas continuam no Grupo (Por time, categoria, iniciativa, OPEX × CAPEX, Por ano) e no Plano.
+- **Cores.** Só tons de azul nos gráficos (o realizado em azul escuro). O vermelho fica para o que passou do orçado ou do teto. A barra de status junta "salvo e cifrado" e a pasta num único indicador.
+- As peças visuais ficam em `nucleo.js` (`cardLeitura`, `barrasH`, `curvaAcumulada`) e `nucleo.css`, para reaproveitar no Hub e nas próximas telas.

@@ -21,7 +21,7 @@
    compara com o orçamento do grupo e publica diretrizes grupo/financas/diretriz-<time>.json.
    Orçamento aprovado, itens do grupo, chaves e versões ficam no arquivo local cifrado.
    ===================================================================== */
-const TOOL = 'financas-grupo', TOOL_NOME = 'Finanças do Grupo', TOOL_VERSION = '1.1.0';
+const TOOL = 'financas-grupo', TOOL_NOME = 'Finanças do Grupo', TOOL_VERSION = '1.2.0';
 const LOCAL_SCHEMA = 'gestao-financas-local/1', PLANO_SCHEMA = 'gestao-financas-plano/1', DIRETRIZ_SCHEMA = 'gestao-financas-diretriz/1';
 const PRESET = /*FING-PRESET*/null/*FIM-FING-PRESET*/;
 const CATS_PADRAO = [
@@ -238,10 +238,13 @@ const ICONES = {
   versoes: '<svg viewBox="0 0 24 24"><path d="M12 8v5l3 2"/><circle cx="12" cy="12" r="9"/></svg>',
   ajustes: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>'
 };
-const NAV = [['consolidado', 'Consolidado'], ['revisar', 'Ler pasta'], ['times', 'Times'], ['versoes', 'Versões'], ['ajustes', 'Ajustes']];
+// 1.2: três entradas no menu; Consolidado, Planos recebidos e Versões viram abas do Painel.
+const NAV = [['consolidado', 'Painel', ['consolidado', 'revisar', 'versoes'], 'consolidado'], ['times', 'Times', ['times'], 'times'], ['ajustes', 'Ajustes', ['ajustes'], 'ajustes']];
+const SUB = { consolidado: 'Consolidado', revisar: 'Planos recebidos', versoes: 'Versões' };
+const pai = v => NAV.find(n => n[2].includes(v)) || NAV[0];
 function render() {
   if (!db) return;
-  $('#app').innerHTML = `<nav class="rail"><div class="logo">GRP</div>${NAV.map(([k, n]) => `<button class="nv ${view === k ? 'on' : ''}" data-v="${k}">${ICONES[k]}${n}${k === 'revisar' && pendentes.length ? `<span class="b">${pendentes.length}</span>` : ''}</button>`).join('')}</nav>
+  $('#app').innerHTML = `<nav class="rail"><div class="logo">GRP</div>${NAV.map(([k, n, , ic]) => `<button class="nv ${pai(view)[0] === k ? 'on' : ''}" data-v="${k}">${ICONES[ic]}${n}${k === 'consolidado' && pendentes.length ? `<span class="b">${pendentes.length}</span>` : ''}</button>`).join('')}</nav>
     <main class="main"><header class="top" id="topo"></header><div id="pg"></div></main>`;
   $$('.nv').forEach(b => b.onclick = () => { view = b.dataset.v; render(); });
   renderTopo();
@@ -249,10 +252,12 @@ function render() {
 }
 function renderTopo() {
   const t = $('#topo'); if (!t) return;
-  t.innerHTML = `<div><h1>${esc(NAV.find(n => n[0] === view)[1])}</h1><div class="sub">${esc(db.grupo.nome)} · ${esc(db.moeda)}</div></div>${['consolidado', 'revisar', 'times', 'versoes'].includes(view) ? `<select class="sel" id="tAno" title="Ano em exibição">${anosG().map(a => `<option value="${a}" ${a === anoV() ? 'selected' : ''}>${a}${a === db.ano ? ' (base)' : ''}</option>`).join('')}</select>` : ''}<span class="grow"></span>
-    <span class="pill"><span class="led ${sujo || salvando ? 'wait' : ''}"></span>${sujo || salvando ? 'Salvando…' : 'Salvo e cifrado'}</span>
-    <button class="pill" id="tPasta"><span class="led ${raiz ? '' : 'wait'}"></span>${raiz ? 'Pasta ligada' : 'Ligar pasta'}</button>
-    ${raiz ? '<button class="btn" id="tLer">Ler pasta</button>' : ''}<button class="btn ghost" id="tHub" title="Voltar ao Hub da solução">← Hub</button><button class="btn ghost" id="tOnde">Onde estou?</button>`;
+  const kids = pai(view)[2];
+  t.innerHTML = `<div><h1>${esc(pai(view)[1])}</h1><div class="sub">${esc(db.grupo.nome)} · ${esc(db.moeda)}</div></div>${['consolidado', 'revisar', 'times', 'versoes'].includes(view) ? `<select class="sel" id="tAno" title="Ano em exibição">${anosG().map(a => `<option value="${a}" ${a === anoV() ? 'selected' : ''}>${a}${a === db.ano ? ' (base)' : ''}</option>`).join('')}</select>` : ''}<span class="grow"></span>
+    <button class="pill" id="tPasta" title="${raiz ? 'Pasta sincronizada ligada: clique para trocar' : 'Ligar a pasta sincronizada'}"><span class="led ${sujo || salvando || !raiz ? 'wait' : ''}"></span>${sujo || salvando ? 'Salvando…' : 'Salvo e cifrado'}${raiz ? '' : ' · ligar pasta'}</button>
+    ${raiz ? '<button class="btn" id="tLer">Ler pasta</button>' : ''}<button class="btn ghost" id="tHub" title="Voltar ao Hub da solução">← Hub</button><button class="btn ghost" id="tOnde">Onde estou?</button>
+    ${kids.length > 1 ? `<div class="subnav">${kids.map(k => `<button data-v="${k}" class="${view === k ? 'on' : ''}">${SUB[k]}${k === 'revisar' && pendentes.length ? ` <span class="tag">${pendentes.length}</span>` : ''}</button>`).join('')}</div>` : ''}`;
+  $$('.subnav [data-v]', t).forEach(b => b.onclick = () => { view = b.dataset.v; render(); });
   $('#tPasta').onclick = async () => { try { await ligarPasta(await escolherPasta('fin-comum')); } catch (e) { if (e.name !== 'AbortError') toast(e.message); } };
   if ($('#tLer')) $('#tLer').onclick = () => lerPasta();
   $('#tHub').onclick = voltarAoHub;
@@ -265,14 +270,27 @@ const kpi = (r, v, c = '') => `<div class="kpi ${c}"><span>${r}</span><b>${v}</b
 
 /* --- Consolidado --- */
 function vCons(el) {
-  const c = consolidado(), y = consolidado(ytd()), orc = orcAno(), a = anoV();
-  const semPlano = db.times.filter(t => !db.retratos[t.slug]);
+  const c = consolidado(), y = consolidado(ytd()), orc = orcAno(), a = anoV(), ms = mesesAno(), m = mesAtual();
+  const semPlano = db.times.filter(t => !db.retratos[t.slug]), somados = c.porTime.filter(x => x.ok && (x.tot.previsto || x.tot.orcado));
   const dims = { time: 'Por time', categoria: 'Por categoria', iniciativa: 'Por iniciativa', tipo: 'OPEX × CAPEX', anos: 'Por ano' };
+  const desv = c.porTime.filter(x => x.ok && x.tot.orcado).map(x => ({ ...x, d: x.tot.previsto - x.tot.orcado })).sort((p, q) => q.d - p.d)[0];
+  const idx = ms.indexOf(m), passado = idx < 0 ? (ms[0] < m ? ms.length - 1 : -1) : idx;
+  const serie = k => ms.map(x => consolidado([x]).total[k]);
   el.innerHTML = `${pendentes.length ? `<div class="banner">${pendentes.length} plano(s) novo(s) na pasta. <button class="btn sm pri" id="cRev">Revisar</button></div>` : ''}
-    ${semPlano.length && db.times.length ? `<div class="banner warn">Sem plano: ${semPlano.map(t => esc(t.nome)).join(', ')}.</div>` : ''}
-    <div class="kpis">${kpi(`Orçamento aprovado ${a}`, orc ? fm(orc) : '<span class="faint">definir</span>')}${kpi('Orçado (times + grupo)', fm(c.total.orcado), orc && c.total.orcado > orc ? 'alert' : '')}
-      ${kpi(`Previsto em ${a}`, fm(c.total.previsto), orc && c.total.previsto > orc ? 'alert' : '')}${kpi('Realizado até ' + nomeMes(mesAtual()), fm(y.total.realizado))}
-      ${kpi('Saldo previsto', orc ? fm(orc - c.total.previsto) : '—', orc && orc - c.total.previsto < 0 ? 'alert' : '')}</div>
+    <div class="inss">
+      ${cardLeitura({ hi: true, k: `Previsto em ${a}`, v: fm(c.total.previsto), pct: orc ? c.total.previsto / orc : null, s: orc ? (orc >= c.total.previsto ? `Saldo de <b>${fm(orc - c.total.previsto)}</b> no orçamento aprovado` : `<b>${fm(c.total.previsto - orc)}</b> acima do orçamento aprovado`) : `Orçamento aprovado de ${a}: <b>definir em Ajustes</b>` })}
+      ${cardLeitura({ k: `Orçamento aprovado ${a}`, v: orc ? fm(orc) : '<span class="faint">definir</span>', pct: orc ? c.total.orcado / orc : null, s: `Times + grupo orçaram <b>${fmtCurto(c.total.orcado)}</b>${orc ? ` (${pctTxt(c.total.orcado, orc)})` : ''}` })}
+      ${cardLeitura({ k: `Realizado até ${nomeMes(ytd().at(-1) || m)}`, v: fm(y.total.realizado), pct: c.total.previsto ? y.total.realizado / c.total.previsto : null, marca: ytd().length / 12, s: `<b>${pctTxt(y.total.realizado, c.total.previsto)}</b> do previsto · ${ytd().length} de 12 meses` })}
+      ${cardLeitura({ k: 'Times na soma', v: `${somados.length}<span class="faint" style="font-size:15px"> / ${db.times.length}</span>`, pct: db.times.length ? somados.length / db.times.length : null, s: semPlano.length ? `Sem plano: <b>${semPlano.map(t => esc(t.nome)).join(', ')}</b>` : desv && desv.d > 0 ? `Maior desvio: <b>${esc(desv.t.nome)}</b> +${fmtCurto(desv.d)}` : 'Todos dentro do orçado', tag: semPlano.length ? '<span class="tag late">faltam</span>' : '' })}
+    </div>
+    <div class="g21">
+      <div class="card"><p class="lbl">Curva do ano · acumulado</p>${curvaAcumulada(ms, [
+        ...(orc ? [{ nome: 'Orçamento aprovado', cor: 'var(--faint)', v: ms.map(() => orc / 12), tracejada: true, fina: true }] : [{ nome: 'Orçado', cor: 'var(--faint)', v: serie('orcado'), tracejada: true, fina: true }]),
+        { nome: 'Previsto', cor: 'var(--bv-mid)', v: serie('previsto'), area: true },
+        { nome: 'Realizado', cor: 'var(--bv-deep)', v: serie('realizado'), ate: passado }], fmtCurto, idx)}</div>
+      <div class="card"><p class="lbl">Times · previsto de ${a}</p>${barrasH([...c.porTime.filter(x => x.ok).map(({ t, tot }) => ({ nome: `<button class="bvc" data-tm="${t.slug}">${esc(t.nome)}</button>`, valor: tot.previsto, ref: tot.orcado, cap: tetoAno(t).total, rotulo: `${fmtCurto(tot.previsto)}${tetoAno(t).total && tot.previsto > tetoAno(t).total ? ' <span class="tag late">teto</span>' : ''}`, titulo: `${t.nome}: previsto ${fm(tot.previsto)} · orçado ${fm(tot.orcado)}${tetoAno(t).total ? ' · teto ' + fm(tetoAno(t).total) : ''}` })).sort((p, q) => q.valor - p.valor), ...(db.itens.length ? [{ nome: '<i>Itens do grupo</i>', valor: c.itens.previsto, ref: c.itens.orcado, cor: 'var(--bv-mid)' }] : [])], fm)}
+        <div class="legend" style="margin-top:12px"><span><i style="background:var(--bv)"></i>Previsto</span><span><i style="background:var(--ink);width:2px"></i>Orçado</span><span><i style="background:var(--late);width:2px"></i>Teto</span></div></div>
+    </div>
     <div class="card"><div class="row"><div class="sg">${Object.entries(dims).map(([k, n]) => `<button class="${agrupar === k ? 'on' : ''}" data-g="${k}">${n}</button>`).join('')}</div><span class="grow"></span><button class="btn sm" id="cCsv">Exportar CSV</button></div>
       <div style="margin-top:12px">${tabelaAgrupada(agrupar)}</div></div>
     <div class="card"><p class="lbl">Previsto por mês, empilhado por time</p>${graficoTimes()}</div>`;
@@ -321,9 +339,9 @@ function tabelaAnos() {
   return `<div class="scroll"><table class="t"><tr><th>Previsto por ano</th>${anos.map(a => `<th class="n">${a}${a === db.ano ? ' <span class="faint">base</span>' : ''}</th>`).join('')}</tr>${rows.join('')}</table></div><p class="small muted">Cada time entra com os anos que publicou. Passe o mouse sobre um valor para ver orçado e realizado.</p>`;
 }
 function graficoTimes() {
-  const ms = mesesAno(), cores = ['#223ad2', '#8e9de9', '#002bab', '#c9d0f5', '#5b6fe0', '#aab0bf', '#3a4a9a', '#dfe3fb'];
+  const ms = mesesAno(), cores = ['#223ad2', '#8e9de9', '#002bab', '#c3ccf5', '#5b6fe0', '#3a4a9a', '#a9b5ef', '#14257f'];
   const series = db.times.map((t, i) => ({ nome: t.nome, cor: cores[i % cores.length], v: ms.map(m => somavel(db.retratos[t.slug]?.payload) ? totaisPlano(db.retratos[t.slug].payload, [m]).previsto : 0) }));
-  if (db.itens.length) series.push({ nome: 'Itens do grupo', cor: '#6f7689', v: ms.map(m => totaisItens([m]).previsto) });
+  if (db.itens.length) series.push({ nome: 'Itens do grupo', cor: '#cfd3e0', v: ms.map(m => totaisItens([m]).previsto) });
   const tot = ms.map((_, i) => series.reduce((s, x) => s + x.v[i], 0)), max = Math.max(1, ...tot, orcAno() / 12);
   const W = 760, H = 210, bw = (W - 16) / 12, y = v => H - 24 - (v / max) * (H - 40);
   let svg = '';

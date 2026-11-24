@@ -87,7 +87,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   await t.fill('#qk', 'Fatura squad janeiro 48.500 #squad 15/01'); await t.press('#qk', 'Enter');
   ok(await t.inputValue('#lV') === '48.500' && await t.inputValue('#lDt') === '2026-01-15', 'barra rápida interpreta valor e data');
   await t.click('#lOk');
-  await t.click('[data-v="compromissos"]'); await t.click('#cNovo'); await t.fill('#kN', 'Datadog'); await t.fill('#kV', '13.000'); await t.selectOption('#kL', { label: 'Licenças de observabilidade' }); await t.fill('#kI', '2026-03'); await t.fill('#kF', '2026-12'); await t.click('#kOk');
+  await t.click('[data-v="plano"]'); await t.click('[data-v="compromissos"]'); await t.click('#cNovo'); await t.fill('#kN', 'Datadog'); await t.fill('#kV', '13.000'); await t.selectOption('#kL', { label: 'Licenças de observabilidade' }); await t.fill('#kI', '2026-03'); await t.fill('#kF', '2026-12'); await t.click('#kOk');
   const tot = await t.evaluate(() => totais());
   ok(tot.orcado === (50000 * 12 + 12000 * 12) * 100, 'orçado do ano = soma das linhas');
   ok(tot.previsto === (50000 * 12 + 12000 * 2 + 13000 * 10) * 100, 'previsto usa contratos nos meses cobertos');
@@ -102,7 +102,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   ok(!JSON.stringify(pl).includes('Fatura squad'), 'lançamentos individuais não vão no plano publicado');
 
   console.log('3. Grupo lê a pasta, prévia e soma');
-  await g.click('[data-v="revisar"]'); await g.click('#tLer'); await g.waitForTimeout(500);
+  await g.click('[data-v="consolidado"]'); await g.click('[data-v="revisar"]'); await g.click('#tLer'); await g.waitForTimeout(500);
   ok(await g.evaluate(() => pendentes.length) === 1, 'plano novo aparece na prévia');
   await g.click('[data-ap="pagamentos"]');
   const cons = await g.evaluate(() => consolidado().total);
