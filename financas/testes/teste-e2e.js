@@ -200,7 +200,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   console.log('7. Assistente: gestor, finanças + tarefas (Central)');
   const a2 = await nova('/inicio.html', { 'fin-local': 'LocalGestor2', 'fin-comum': 'Gestao-Compartilhado' });
   await a2.click('#prox'); await a2.click('[data-p="gestor"]'); await a2.click('[data-u="financas"]'); await a2.click('[data-u="tarefas"]'); await a2.click('#prox');
-  const kAcima = await a2.evaluate(() => gerarChaveTexto('diretoria-fin-2611'));
+  const kAcima = await a2.evaluate(() => gerarChaveTexto('tecnologia-fin-2611'));
   await a2.click('[data-k="sim"]'); await a2.fill('#kT', kAcima + '\n' + await a2.evaluate(() => gerarChaveTexto('pagamentos-2611'))); await a2.click('#kLer');
   ok(/nível acima/.test(await a2.textContent('#wz')) && /será ignorada/.test(await a2.textContent('#wz')), 'gestor: chave de finanças da liderança vira "nível acima"; chave de tarefas de time é ignorada');
   await a2.click('#prox'); await cofre(a2);
@@ -213,12 +213,13 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   const g2 = await nova('/financas/testes/saida/financas_grupo_gerado.html', { 'fin-local': 'LocalGestor2' });
   await g2.click('#iAbrir'); await senhaAbrir(g2, SENHA2); await g2.waitForSelector('#topo');
   ok(await g2.evaluate(() => db.times.map(t => t.slug + ':' + t.prefixo).join(',')) === 'pagamentos:PAG,cartoes:CAR', 'Finanças do Grupo abre com os times informados no assistente');
-  ok(await g2.evaluate(() => db.acima?.chaves?.[0]?.kid === 'diretoria-fin-2611' && db.acima.chaves[0].origem === 'onboarding'), 'Finanças do Grupo criado com a chave do nível acima (db.acima)');
+  ok(await g2.evaluate(() => db.acima?.chaves?.[0]?.kid === 'tecnologia-fin-2611' && db.acima.chaves[0].origem === 'onboarding'), 'Finanças do Grupo criado com a chave do nível acima (db.acima)');
   fs.writeFileSync(path.join(SAIDA, 'gestao_gerada.html'), await opfs(a2, async () => ler('LocalGestor2', 'gestao_pessoal.html')));
   const c = await nova('/financas/testes/saida/gestao_gerada.html', {});
   await c.evaluate(() => { window.__abrir = { dir: 'LocalGestor2', arq: 'gestao-tecnologia.json' }; });
   await c.fill('#lockPass', SENHA2); await c.click('#btnOpen'); await c.waitForTimeout(1500);
   ok(await c.evaluate(() => !document.querySelector('#app').classList.contains('hidden')), 'Central abre o arquivo cifrado criado pelo assistente');
+  ok(await c.evaluate(() => document.querySelectorAll('#home .inss .ins').length === 4 && /Delegadas no prazo/.test(document.querySelector('#home .inss').textContent)), 'Hoje da Central abre com quatro cards de leitura');
 
   ok(await c.evaluate(() => /Onde estou/.test(document.getElementById('ondeEstou')?.textContent || '')), 'Central mostra o botão "Onde estou?"');
   await c.click('#ondeEstou .f4btn:not(.f4hub)'); ok(/Central de Gestão/.test(await c.textContent('#f4dlg')) && /gestao-tecnologia\.json/.test(await c.textContent('#f4dlg')), '"Onde estou?" da Central mostra ferramenta e arquivo');
@@ -387,7 +388,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   await t2.evaluate(() => { view = 'plano'; render(); }); await t2.screenshot({ path: path.join(SAIDA, 'time-plano.png') });
   await a.screenshot({ path: path.join(SAIDA, 'inicio-pronto.png') });
 
-  console.log('11. Hub: chaves de finanças do grupo e visão dos times');
+  console.log('12. Hub: chaves de finanças do grupo e visão dos times');
   await h.bringToFront(); await h.evaluate(() => { window.__abrir = { dir: 'LocalGestor', arq: 'financas-grupo-tecnologia.json' }; });
   await h.click('#aImpF'); await senhaAbrir(h, SENHA); await h.waitForSelector('#dlg .cofre');
   ok(/chave\(s\) de finanças/.test(await h.textContent('#dlg')), 'hub importa as chaves de finanças do arquivo do Finanças do Grupo (só leitura)');

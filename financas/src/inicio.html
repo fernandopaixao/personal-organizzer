@@ -59,6 +59,7 @@ function classificarChave(texto) {
   return { texto: texto.trim(), kid: k.kid, slug, tipo: fin ? 'fin' : 'tarefas', papel, aviso, ignorar: /ignorada/.test(aviso) };
 }
 const chavesUteis = () => st.chaves.filter(c => !c.ignorar);
+const slugAcima = () => chavesUteis().find(c => c.papel === 'acima')?.slug || '';
 const slugDasChaves = () => { const s = [...new Set(chavesUteis().filter(c => c.papel !== 'acima').map(c => c.slug))]; return s.length === 1 ? s[0] : ''; };
 const ROTULO = { tarefas: 'Tarefas do time', fin: 'Finanças do time', acima: 'Finanças do nível acima (liderança)' };
 const PASSOS = ['Boas-vindas', 'Perfil', 'Chaves', 'Dados', 'Pastas', 'Senha', 'Pronto'];
@@ -85,14 +86,14 @@ function desenhar() {
     <button class="opt ${st.temChave === false ? 'on' : ''}" data-k="nao"><b>Não, ainda não</b><span>Dá para colar depois, dentro de cada ferramenta.</span></button></div>
     ${st.temChave ? `<label class="field" style="margin-top:10px"><span>Chaves (uma por linha, começam com GK1.)</span><textarea class="sin code" id="kT" rows="3" placeholder="GK1.pagamentos-2611.…&#10;GK1.pagamentos-fin-2611.…">${esc(st.chaves.map(c => c.texto).join('\n'))}</textarea></label>
       <div class="row"><button class="btn sm" id="kLer">Conferir chaves</button><span class="small latec" id="kErr">${esc(st.kErr || '')}</span></div>
-      ${st.chaves.map(c => `<div class="res"><span class="ic">${c.tipo === 'fin' ? 'FIN' : 'TAR'}</span><div><b>${esc(ROTULO[c.papel])}</b> · <span class="code">${esc(c.kid)}</span><br><span class="small ${c.aviso ? 'latec' : 'muted'}">${esc(c.aviso || (c.papel === 'acima' ? `Liderança do grupo "${c.slug}". Vai para Finanças do Grupo › Ajustes › Nível acima.` : `Time "${c.slug}". Vai pré-configurada na ferramenta do time e no hub.`))}</span></div></div>`).join('')}
+      ${st.chaves.map(c => `<div class="res"><span class="ic">${c.tipo === 'fin' ? 'FIN' : 'TAR'}</span><div><b>${esc(ROTULO[c.papel])}</b> · <span class="code">${esc(c.kid)}</span><br><span class="small ${c.aviso ? 'latec' : 'muted'}">${esc(c.aviso || (c.papel === 'acima' ? `Gerada pela sua liderança para o seu grupo "${c.slug}". Vai para Finanças do Grupo › Ajustes › Nível acima.` : `Time "${c.slug}". Vai pré-configurada na ferramenta do time e no hub.`))}</span></div></div>`).join('')}
       <label class="field" style="margin-top:10px"><span>Nome da pasta sincronizada que o líder indicou (opcional)</span><input class="sin" id="kP" value="${esc(st.pastaDoLider || '')}" placeholder="${PASTA_COMUM}"></label>` : ''}
     ${nav(st.temChave === false || (st.temChave === true && st.chaves.length > 0 && !st.kErr))}`;
   }
   if (p === 3) {
     const g = st.papel === 'gestor', d = st.dados, sk = slugDasChaves();
     el.innerHTML = `${topo}<h1>${g ? 'Sobre o grupo' : 'Sobre o time'}</h1>
-      ${g ? `<label class="field"><span>Nome do grupo</span><input class="sin" id="dN" value="${esc(d.nome || '')}" placeholder="Ex.: Tecnologia de Pagamentos"></label>
+      ${g ? `<label class="field"><span>Nome do grupo${slugAcima() ? ` · identificador <span class="code">${esc(slugAcima())}</span>, da chave da liderança` : ''}</span><input class="sin" id="dN" value="${esc(d.nome || '')}" placeholder="Ex.: Tecnologia de Pagamentos"></label>
         <label class="field"><span>Times que você lidera (um por linha: nome e, se quiser, prefixo de código)</span><textarea class="sin" id="dT" placeholder="Pagamentos PAG&#10;Cartões CAR">${esc(d.timesTxt || '')}</textarea></label>`
       : `<div class="f2"><label class="field"><span>Nome do time</span><input class="sin" id="dN" value="${esc(d.nome || '')}"></label><label class="field"><span>Identificador (pastas)${sk ? ' · veio da chave' : ''}</span><input class="sin code" id="dS" value="${esc(sk || d.slug || '')}" ${sk ? 'disabled' : ''}></label></div>
         <label class="field"><span>Prefixo de código (opcional, ex.: PAG)</span><input class="sin" id="dPx" value="${esc(d.prefixo || '')}" maxlength="5"></label>`}
@@ -100,6 +101,7 @@ function desenhar() {
       ${st.usos.includes('financas') ? `<label class="field"><span>Ano fiscal e moeda</span><div class="row"><input class="sin" type="number" id="dA" value="${d.ano || new Date().getFullYear()}" style="width:100px"><select class="sel" id="dM"><option>BRL</option><option>USD</option><option>EUR</option></select></div></label>` : '<span></span>'}</div>
       ${nav(true)}`;
     if (!g && !sk) $('#dN').oninput = () => { $('#dS').value = slugify($('#dN').value); };
+    if (g && slugAcima() && !d.nome) $('#dN').value = slugAcima().split('-').map(x => x[0].toUpperCase() + x.slice(1)).join(' ');
     if (!g && sk && !d.nome) $('#dN').value = sk.split('-').map(x => x[0].toUpperCase() + x.slice(1)).join(' ');
     if ($('#dM')) $('#dM').value = d.moeda || 'BRL';
   }
@@ -175,7 +177,7 @@ function lerDados() {
   const d = st.dados, g = st.papel === 'gestor', sk = slugDasChaves();
   d.nome = $('#dN').value.trim(); d.pessoa = $('#dP').value.trim();
   if ($('#dA')) { d.ano = +$('#dA').value; d.moeda = $('#dM').value; } else { d.ano ??= new Date().getFullYear(); d.moeda ??= 'BRL'; }
-  if (g) { d.timesTxt = $('#dT').value; d.slug = slugify(d.nome); d.times = d.timesTxt.split('\n').map(x => x.trim()).filter(Boolean).map(x => { const m = /^(.*?)\s+([A-Za-z]{2,5})$/.exec(x); const nome = m ? m[1] : x; return { nome, slug: slugify(nome), prefixo: m ? m[2].toUpperCase() : '' }; }); }
+  if (g) { d.timesTxt = $('#dT').value; d.slug = slugAcima() || slugify(d.nome); d.times = d.timesTxt.split('\n').map(x => x.trim()).filter(Boolean).map(x => { const m = /^(.*?)\s+([A-Za-z]{2,5})$/.exec(x); const nome = m ? m[1] : x; return { nome, slug: slugify(nome), prefixo: m ? m[2].toUpperCase() : '' }; }); }
   else { d.slug = sk || slugify($('#dS').value || d.nome); d.prefixo = $('#dPx').value.trim().toUpperCase(); }
   if (!d.nome || !d.pessoa || !d.slug) { toast('Preencha o nome e o seu nome.'); return false; }
   if (d.ano < 2000 || d.ano > 2100) { toast('Ano fiscal inválido.'); return false; }
