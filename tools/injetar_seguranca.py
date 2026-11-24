@@ -7,7 +7,8 @@ da senha e "Onde estou?") e os ganchos de cada ferramenta na Central e no Quadro
 - Central (gestao_pessoal_v*.html mais nova): <script id="f4seg"> + <script id="f4central"> (financas/src/central-f4.js)
 - Quadro (ferramenta-time/quadro_do_time_v1.html): <script id="f4seg"> + <script id="f4quadro"> (financas/src/quadro-f4.js)
   + <script id="f5postits"> (financas/src/quadro-postits.js: post-its recebidos do Hub)
-Também injeta no <head> das duas o tema claro/escuro/automático (<script id="tema">, financas/src/tema.js).
+Também injeta no <head> das duas o tema claro/escuro/automático (<script id="tema">, financas/src/tema.js)
+e o ícone da aba (<link id="favicon">, financas/src/icones/).
 Pode rodar quantas vezes quiser: os blocos são substituídos. Depois atualiza a cópia do Quadro embutida
 na Central (tools/embutir_quadro.py) e remonta finanças e assistente (tools/build_financas.py).
 """

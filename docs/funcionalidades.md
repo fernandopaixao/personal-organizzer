@@ -103,7 +103,7 @@ A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados
 
 ## 5. Central de Gestão (v15.9)
 
-**Identidade visual comum (15.9).** A Central, o Quadro (2.4) e as demais ferramentas passam a usar o mesmo visual azul e branco, com trilho marinho e fontes embutidas ([ADR-0032](adr/0032-identidade-visual-comum.md)). Nada muda no funcionamento.
+**Identidade visual comum (15.9).** A Central, o Quadro (2.4) e as demais ferramentas passam a usar o mesmo visual azul e branco, com trilho marinho e fontes embutidas ([ADR-0032](adr/0032-identidade-visual-comum.md)). Cada ferramenta ganhou também um ícone próprio na aba do navegador. Nada muda no funcionamento.
 
 **Chave de integração dentro do time (15.8).** Na visão do time, a aba **Integração** mostra a chave em destaque: **Gerar chave de integração** (um clique; se faltar, a Central sugere a pasta e o prefixo), **HTML do time (com a chave)**, **Copiar chave**, **Mensagem para o time**, **Chave de finanças** e **Vazou: trocar chave**, mais o que chega do time (backlog, métricas, plano). Time sem chave mostra o aviso com o botão também na **Visão do time** e no card da página Times.
 
@@ -251,7 +251,7 @@ O grupo enxerga os anos do próprio horizonte **mais os anos publicados pelos ti
 | **Uma senha por sessão** | Hub, Central e assistente passam a senha; Finanças, Férias e Central recebem | Abrir pelo hub ou pela Central sem redigitar a senha. Só em memória, uma vez, para a janela recém-aberta ([ADR-0029](adr/0029-uma-senha-por-sessao.md)) |
 | **Tema claro, escuro ou automático** | Todas | Botão redondo no canto inferior direito; Automático segue o sistema. A escolha fica só neste computador e vale para todas as ferramentas abertas ([ADR-0027](adr/0027-tema-claro-escuro-compartilhado.md)) |
 | **Aviso quando não dá para abrir pastas** | Hub, Finanças, Mapa de Férias e assistente | No Safari, no Firefox, no celular, numa pré-visualização (Outlook, Teams, OneDrive) ou aberto de dentro do .zip, o aviso no topo diz o motivo e o que fazer, e todo botão responde ao clique ([ADR-0030](adr/0030-aviso-quando-nao-da-para-abrir-pastas.md)) |
-| **Identidade visual comum** | Todas | Mesmo visual em toda a solução, feito para ficar aberto o dia todo: fundo cinza-azulado (não branco puro), cards brancos, trilho lateral marinho, um único destaque azul por tela, vermelho só para atraso e âmbar só para "vence hoje". Fontes DM Sans (texto) e Plus Jakarta Sans (títulos e números), embutidas no HTML para funcionar sem rede ([ADR-0032](adr/0032-identidade-visual-comum.md)) |
+| **Identidade visual comum** | Todas | Mesmo visual em toda a solução, feito para ficar aberto o dia todo: fundo cinza-azulado (não branco puro), cards brancos, trilho lateral marinho, um único destaque azul por tela, vermelho só para atraso e âmbar só para "vence hoje". Fontes DM Sans (texto) e Plus Jakarta Sans (títulos e números), embutidas no HTML para funcionar sem rede. Cada ferramenta tem um ícone próprio na aba do navegador, para achar a certa entre muitas abas ([ADR-0032](adr/0032-identidade-visual-comum.md)) |
 | **Migração automática** | Central (e demais quando o formato muda) | Abrir arquivo antigo na versão nova, com backup |
 | **Pacote .zip** | `python3 tools/empacotar.py` (e a CI do repositório pessoal) | Levar a solução para a empresa num único arquivo: HTMLs lado a lado, contratos, documentação e LEIA-ME. Não passa pelo repositório da empresa |
 

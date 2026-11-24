@@ -4,7 +4,8 @@
     python3 tools/build_financas.py
 
 - injeta o núcleo comum (financas/src/nucleo.css e nucleo.js) em cada HTML;
-- injeta o tema claro/escuro/automático (financas/src/tema.js) e a senha por sessão (financas/src/sessao.js) no <head> de cada HTML;
+- injeta o tema claro/escuro/automático (financas/src/tema.js), a senha por sessão (financas/src/sessao.js) e o ícone da aba
+  (financas/src/icones/, um por ferramenta) no <head> de cada HTML;
 - financas/financas_time.html   ← src/time.html
 - financas/financas_grupo.html  ← src/grupo.html (+ Finanças do Time embutido, para gerar o HTML de cada time)
 - hub.html                      ← src/hub.html (tela inicial do dia a dia, sem nada embutido)
@@ -52,9 +53,29 @@ def tema(html):
     tag = f'<style id="identidade">\n{identidade()}</style>\n<script id="tema">\n{js}</script>'
     html = re.sub(r'<style id="identidade">.*?</style>\n?', '', html, count=1, flags=re.S)
     if '<script id="tema">' in html:
-        return sessao(re.sub(r'<script id="tema">.*?</script>', lambda m: tag, html, count=1, flags=re.S))
+        return icone(sessao(re.sub(r'<script id="tema">.*?</script>', lambda m: tag, html, count=1, flags=re.S)))
     i = html.index('</head>')
-    return sessao(html[:i] + tag + '\n' + html[i:])
+    return icone(sessao(html[:i] + tag + '\n' + html[i:]))
+
+# Ícone da aba de cada ferramenta, escolhido pelo primeiro <title> do HTML (ADR-0032).
+ICONES = {'Central de Gestão': 'central', 'Quadro do Time': 'quadro', 'Hub da solução': 'hub',
+          'Início da solução': 'inicio', 'Finanças do Time': 'financas-time',
+          'Finanças do Grupo': 'financas-grupo', 'Mapa de Férias': 'ferias'}
+
+def icone(html):
+    """Põe (ou troca) <link rel="icon" id="favicon"> com o SVG de financas/src/icones/ como data URI:
+    funciona aberto do disco e dentro do .zip, sem rede. O HTML de cada time gerado a partir deste herda o ícone."""
+    from urllib.parse import quote
+    i = html.index('</head>')
+    t = re.search(r'<title>([^<]*)</title>', html[:i])
+    nome = next((v for k, v in ICONES.items() if t and t.group(1).strip().startswith(k)), None)
+    assert nome, f'sem ícone para o título {t.group(1) if t else None!r}: inclua em ICONES'
+    svg = (SRC / 'icones' / f'{nome}.svg').read_text(encoding='utf-8').strip()
+    href = 'data:image/svg+xml,' + quote(svg, safe=" =:/'")  # aspas duplas viram %22: o href fica entre aspas duplas
+    tag = f'<link rel="icon" id="favicon" type="image/svg+xml" href="{href}">'
+    html = re.sub(r'<link rel="icon" id="favicon"[^>]*>\n?', '', html, count=1)
+    i = html.index('</head>')
+    return html[:i] + tag + '\n' + html[i:]
 
 def sessao(html):
     """Põe (ou troca) <script id="sessao"> com financas/src/sessao.js logo depois do tema: uma senha por sessão (ADR-0029)."""
