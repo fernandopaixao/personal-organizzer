@@ -397,6 +397,8 @@ textarea.paste:focus{border-color:var(--bv)}
 .pr-list{display:grid;gap:8px}.pr{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center}
 .pr b{font-weight:600}.pr span{font-size:12px;color:var(--muted)}.pr .btn{grid-row:1/span 2;grid-column:2}
 /* Entrada e toast */
+.appver{font:600 12px var(--font,Inter);color:var(--bv);background:var(--bv-soft);border-radius:99px;padding:2px 8px;vertical-align:middle;letter-spacing:0}
+.railver{margin-top:auto;padding:10px 0 2px;font-size:10px;font-weight:650;color:var(--faint);letter-spacing:.02em}
 .lock{position:fixed;inset:0;display:grid;place-items:center;padding:20px;z-index:50;background:var(--bg)}
 .lockcard{background:#fff;border:1px solid var(--line);border-radius:22px;padding:34px;width:min(400px,100%);box-shadow:0 20px 60px rgba(20,30,70,.06)}
 .lockcard h1{margin:12px 0 6px;font-family:var(--title);font-size:21px;font-weight:600;letter-spacing:-.02em}
@@ -490,7 +492,7 @@ textarea.paste:focus{border-color:var(--bv)}
 @media(max-width:1500px){.g3{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)}.g3>:first-child{grid-row:span 2}}
 @media(max-width:1200px){.kpis.k5{grid-template-columns:repeat(2,minmax(0,1fr))}.oo{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}.oo .icol{grid-column:1/-1}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.board{grid-template-columns:repeat(2,minmax(0,1fr))}.hz{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:900px){
-  .rail{top:auto;right:0;width:auto;height:64px;flex-direction:row;justify-content:space-around;padding:4px 4px;border-right:0;border-top:1px solid var(--line)}.rail .logo{display:none}.rail{justify-content:flex-start;overflow-x:auto;gap:0}.nv{width:auto;min-width:56px;flex:1 0 56px;padding:6px 2px;font-size:9.5px}.nvg,.nvt{display:none}
+  .rail{top:auto;right:0;width:auto;height:64px;flex-direction:row;justify-content:space-around;padding:4px 4px;border-right:0;border-top:1px solid var(--line)}.rail .logo,.rail .railver{display:none}.rail{justify-content:flex-start;overflow-x:auto;gap:0}.nv{width:auto;min-width:56px;flex:1 0 56px;padding:6px 2px;font-size:9.5px}.nvg,.nvt{display:none}
   .main{margin-left:0;padding:0 16px 90px}.top{flex-wrap:wrap}.quick{flex:1 1 100%;order:3;max-width:none}
   .g2,.g2e,.g3,.oo,.hz,.form,.tf-grid,.tf-row{grid-template-columns:1fr}.g3>:first-child{grid-row:auto}.tf-side{border-left:0;border-top:1px solid var(--line);border-radius:0}
   .ld{grid-template-columns:auto 70px 1fr 24px}.ld .xp{grid-column:1/-1}
@@ -570,7 +572,7 @@ textarea.paste:focus{border-color:var(--bv)}
 <div class="lock" id="lock">
   <div class="lockcard">
     <div class="logo" style="margin:0">CG</div>
-    <h1>Central de Gestão</h1>
+    <h1>Central de Gestão <span class="appver" title="Versão desta Central">v15.2</span></h1>
     <div class="muted small">Seus dados ficam em um arquivo JSON criptografado (AES-GCM 256, chave derivada da senha), separado deste HTML. Este arquivo não guarda nenhum dado.</div>
     <div class="field"><label for="lockPass">Senha</label><input type="password" id="lockPass" autocomplete="off" placeholder="Mínimo de 8 caracteres"></div>
     <div class="stack2">
@@ -584,7 +586,7 @@ textarea.paste:focus{border-color:var(--bv)}
   </div>
 </div>
 <div class="hidden" id="app">
-  <nav class="rail"><div class="logo">CG</div><div id="nav" style="display:contents"></div></nav>
+  <nav class="rail"><div class="logo">CG</div><div id="nav" style="display:contents"></div><div class="railver" title="Versão desta Central">v15.2</div></nav>
   <main class="main"><div class="wrap">
     <div class="top">
       <h1 id="pageTitle"></h1>
@@ -792,7 +794,7 @@ const horizon=d=>{const n=dayDiff(today(),d);if(n<0)return'atrasada';if(n===0)re
 const KINDS={geral:'Geral',forte:'Ponto forte',desenv:'Desenvolvimento'};
 /* ============ Estado e migração (dados desacoplados, versionados e aditivos) ============ */
 const ME='me';
-const DB_VERSION=15;
+const DB_VERSION=15,APP_VERSION='15.2'; /* versão exibida na página (rail e tela de senha); DB_VERSION é a do arquivo de dados */
 const emptyDb=()=>({version:DB_VERSION,settings:{selfName:'Eu',hideFeedback:false,staffForumId:''},people:[],teams:[],initiatives:[],tasks:[],notes:[],cycles:[],staffs:[],weeklyReports:[],dateLog:[],forums:[],agendaItems:[],agreements:[],meetings:[],ooSessions:[]});
 let db=emptyDb();
 let password='',handle=null,dirty=false,saveTimer=null,pendingMigration=false;
@@ -3649,7 +3651,7 @@ initLock();
 <script id="f4central">
 /* ---------- Central · aviso de cofre, lembrete de teste da senha e "Onde estou?" ---------- */
 function f4infoCentral() {
-  return { ferramenta: 'Central de Gestão', versao: 'v' + DB_VERSION, arquivo: handle?.name || (db ? 'aberto sem vínculo (salvar baixa uma cópia)' : ''), pastaComum: (typeof IG !== 'undefined' && IG.dirName) || '',
+  return { ferramenta: 'Central de Gestão', versao: 'v' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : DB_VERSION), arquivo: handle?.name || (db ? 'aberto sem vínculo (salvar baixa uma cópia)' : ''), pastaComum: (typeof IG !== 'undefined' && IG.dirName) || '',
     local: ['Seu arquivo de dados (cifrado com a senha), numa pasta fora do OneDrive', 'As chaves dos times (dentro do arquivo cifrado)'],
     comum: ['central/catalogo-<time>.json: iniciativas e features de cada time', 'Leitura de times/<time>/status.json e metricas.json'] };
 }
