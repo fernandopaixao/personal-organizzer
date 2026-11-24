@@ -29,6 +29,7 @@ Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequê
 | [0019](0019-edge-e-chrome-file-system-access.md) | Edge/Chrome | File System Access API |
 | [0020](0020-principios-de-interface.md) | Princípios de interface | Um destaque azul, modal para criar, painel para ver |
 | [0021](0021-feedbacks-fora-da-integracao.md) | Feedbacks fora | Ferramenta de feedbacks sem integração |
+| [0026](0026-tema-claro-escuro-compartilhado.md) | Tema claro/escuro | Uma camada `tema.js` injetada em todos os HTMLs; escolha salva só no computador |
 
 ## Checklist para uma funcionalidade nova
 
@@ -39,7 +40,7 @@ Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequê
 5. **Contrato:** `schema` versionado, JSON Schema e exemplo ([0009](0009-contratos-json-versionados.md)).
 6. **Migração:** campo novo com padrão em `normalizeDb`; abrir um arquivo da versão anterior ([0011](0011-migracao-aditiva-versionada.md)).
 7. **Entrada externa:** escapar, validar, prévia antes de aplicar ([0013](0013-downstream-previa-e-conciliacao.md), [0015](0015-agentes-por-arquivo.md)).
-8. **Interface:** um destaque, gráfico antes de texto, criar em modal, ver em painel, sem página nova se uma existente é a dona do dado ([0020](0020-principios-de-interface.md)).
+8. **Interface:** um destaque, gráfico antes de texto, criar em modal, ver em painel, sem página nova se uma existente é a dona do dado ([0020](0020-principios-de-interface.md)). Cores por variável (`var(--card)`, `var(--ink)`...) para o modo escuro funcionar ([0026](0026-tema-claro-escuro-compartilhado.md)).
 9. **Build e teste:** editar a fonte, rodar `python3 tools/injetar_seguranca.py` (Central/Quadro) ou `python3 tools/build_financas.py`, e `node financas/testes/teste-e2e.js` ([0017](0017-build-embutir-e-injetar.md)).
 10. **Documentar:** plano do recurso em `docs/`, ADR nova se a decisão vale para mais de uma ferramenta, e atualizar [funcionalidades](../funcionalidades.md) e o [passo a passo](../passo-a-passo.md).
 

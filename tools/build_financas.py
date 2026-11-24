@@ -4,6 +4,7 @@
     python3 tools/build_financas.py
 
 - injeta o núcleo comum (financas/src/nucleo.css e nucleo.js) em cada HTML;
+- injeta o tema claro/escuro/automático (financas/src/tema.js) no <head> de cada HTML;
 - financas/financas_time.html   ← src/time.html
 - financas/financas_grupo.html  ← src/grupo.html (+ Finanças do Time embutido, para gerar o HTML de cada time)
 - hub.html                      ← src/hub.html (tela inicial do dia a dia, sem nada embutido)
@@ -31,11 +32,22 @@ def central():
     cs = sorted(RAIZ.glob('gestao_pessoal_v*.html'), key=lambda p: int(re.search(r'v(\d+)', p.name).group(1)))
     return cs[-1]
 
+def tema(html):
+    """Põe (ou troca) <script id="tema"> com financas/src/tema.js logo antes do primeiro </head>.
+    Fica no <head> para o tema escuro valer antes da primeira pintura, sem piscar em branco."""
+    js = (SRC / 'tema.js').read_text(encoding='utf-8')
+    assert '</script' not in js.lower()
+    tag = f'<script id="tema">\n{js}</script>'
+    if '<script id="tema">' in html:
+        return re.sub(r'<script id="tema">.*?</script>', lambda m: tag, html, count=1, flags=re.S)
+    i = html.index('</head>')
+    return html[:i] + tag + '\n' + html[i:]
+
 def nucleo(html):
     css = (SRC / 'nucleo.css').read_text(encoding='utf-8')
     js = (SRC / 'nucleo.js').read_text(encoding='utf-8')
     assert '/*NUCLEO-CSS*/' in html and '/*NUCLEO-JS*/' in html
-    return html.replace('/*NUCLEO-CSS*/', css, 1).replace('/*NUCLEO-JS*/', js, 1)
+    return tema(html.replace('/*NUCLEO-CSS*/', css, 1).replace('/*NUCLEO-JS*/', js, 1))
 
 def embutir(html, ident, conteudo: bytes, versao=''):
     b64 = base64.b64encode(gzip_estavel(conteudo)).decode('ascii')
