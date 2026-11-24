@@ -19,7 +19,7 @@ Todas as ferramentas (hub, assistente, Central, Quadro do Time, Finanças do Gru
 ## Consequências
 - O zip continua autossuficiente: o tema vai dentro de cada HTML, inclusive nas cópias embutidas (HTML do time gerado pela Central, finanças do time geradas pelo grupo, tudo que o assistente gera).
 - Os HTMLs-fonte não mudam; o diff fica nos HTMLs montados, num bloco no `<head>`.
-- O teste e2e verifica o seletor em todas as ferramentas, a troca e a restauração (§13), e roda inteiro no escuro com `TEMA=escuro node financas/testes/teste-e2e.js` (telas em `financas/testes/saida/escuro/`).
+- O teste e2e verifica o seletor em todas as ferramentas, a troca e a restauração (§14), e roda inteiro no escuro com `TEMA=escuro node financas/testes/teste-e2e.js` (telas em `financas/testes/saida/escuro/`).
 
 ## Ao evoluir
 - **Tela nova:** use as variáveis (`var(--card)`, `var(--line)`, `var(--ink)`...) em vez de cores fixas; a conversão automática cobre o resto, mas a variável é sempre mais previsível.

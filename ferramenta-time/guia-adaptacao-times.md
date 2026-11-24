@@ -65,6 +65,8 @@ Cada feature do catálogo pode trazer dois campos opcionais:
 
 ### 2.2 Primeiro uso (uma pessoa do time, uns 10 minutos)
 
+> **Jeito mais rápido (desde 24/11/2026): o assistente.** O gestor manda o `inicio.html` (está no pacote .zip da solução) e, por mensagem direta, a chave do time e o nome da pasta sincronizada. Cada pessoa abre o `inicio.html`, responde "Você lidera times?", marca Tarefas (e Finanças, se cuida do dinheiro do time), cola a chave em "Seu líder compartilhou chaves?" e escolhe a pasta local e a sincronizada. O assistente reconhece o time pela chave, cria o Quadro já configurado com ela, o arquivo cifrado com a senha da pessoa e o hub. Na primeira abertura do Quadro, só falta dizer quem é você. Os passos abaixo continuam valendo para quem recebe o HTML do time direto da Central.
+
 > **HTML já configurado pelo gestor.** Na Central (Pessoas › Times, visão do time ou Integração), o botão **HTML do time** gera uma cópia do Quadro (versão 1.1 ou mais nova) com o nome do time, o identificador (pasta), o prefixo dos códigos, as pessoas e o contato já preenchidos. Ao abrir, o aviso no topo confirma para qual time ele foi preparado, e "Criar quadro novo" vem preenchido, com o identificador travado. Se o gestor marcou "incluir a chave", ela é cadastrada sozinha na primeira abertura (só uma vez: se for removida, não volta). Nesse caso, guarde o HTML só com o time e nunca na pasta `Gestao-Integracao`. Sem a chave embutida, cole a que chegar por Teams ou e-mail (passo 3).
 
 1. **Criar quadro novo**: nome do time, o identificador (slug) combinado com o gestor (ex.: `pagamentos`) e, se quiser, as pessoas do time (uma por linha, com o papel depois de `;`). Escolha onde salvar o arquivo `quadro-<slug>.json`: **numa pasta do time** (por exemplo, a biblioteca do time no SharePoint, sincronizada), **nunca** dentro de `Gestao-Integracao`. Se quiser, proteja com senha (não há como recuperar).
@@ -164,9 +166,61 @@ O pacote 03 descreve **o que** implementar. O Quadro do Time é uma **implementa
 
 ---
 
-### 3.x Post-its do gestor (opcional)
+### 3.3 Post-its do gestor (recomendado)
 
-O Hub da solução deixa recados para o time em `times/<time>/postits/<pessoa>-<computador>.json`, cifrados com a mesma chave do time (`gestao-envelope/1`, conteúdo `gestao-postits/1`, schema em `financas/contrato/`). O Quadro 2.2 já mostra esses post-its no topo do quadro. Uma ferramenta própria pode fazer o mesmo: ler todos os `.json` dessa pasta, decifrar, ficar com a maior `revision` de cada `source.writer` e ignorar os que têm `expiresAt` no passado. Para avisar que viu, grave só o arquivo da pessoa em `postits/vistos/<pessoa>-<computador>.json` (`gestao-postits-vistos/1`).
+O Hub da solução do gestor deixa recados curtos para o time. O Quadro do Time já os mostra; uma ferramenta própria pode fazer o mesmo com a **mesma chave do time** e o mesmo envelope. Contratos: `gestao-postits/1` e `gestao-postits-vistos/1` (schemas em `financas/contrato/` e na pasta `contrato/` do pacote .zip).
+
+**Onde ficam**
+
+```
+times/<slug>/postits/<pessoa>-<computador>.json          ← um arquivo por autor (o hub de cada gestor)
+times/<slug>/postits/vistos/<pessoa>-<computador>.json   ← um arquivo por pessoa do time que leu (recibo "Vi")
+```
+
+O cabeçalho do envelope traz também `writer` em claro (`<pessoa>~<computador>`). Ele **não** entra no AAD; depois de decifrar, confira que é igual a `payload.source.writer`. Mais de um gestor pode deixar post-its para o mesmo time (cada um tem o próprio arquivo).
+
+**Ler (a cada 30 s, ao voltar para a aba e ao abrir o quadro)**
+
+```js
+async function lerPostits(root, slug, chaves /* Map kid -> CryptoKey */) {
+  const dir = await root.getDirectoryHandle('times').then(d => d.getDirectoryHandle(slug)).then(d => d.getDirectoryHandle('postits')).catch(() => null);
+  if (!dir) return [];
+  const porAutor = new Map(), hoje = new Date().toISOString().slice(0, 10);
+  for await (const [nome, h] of dir.entries()) {
+    if (h.kind !== 'file' || !nome.endsWith('.json') || nome.startsWith('.')) continue;
+    try {
+      const env = JSON.parse(await (await h.getFile()).text());
+      const p = await decifrar(env, chaves);                              // função da seção 7.2 do pacote 03
+      if (p.schema !== 'gestao-postits/1' || env.team !== slug || p.source?.team !== slug) continue;
+      if (env.writer && env.writer !== p.source.writer) continue;          // dono não confere: ignore
+      const w = p.source.writer, ant = porAutor.get(w);                    // cópias de conflito do OneDrive:
+      if (!ant || p.revision > ant.revision) porAutor.set(w, p);           // vale a maior revisão de cada autor
+    } catch { /* arquivo de outra chave ou incompleto: ignore, sem quebrar a tela */ }
+  }
+  return [...porAutor.values()].flatMap(p => (p.notes || []).map(n => ({ ...n, autor: p.source.author?.name || p.source.writer.split('~')[0] })))
+    .filter(n => !n.expiresAt || n.expiresAt >= hoje);                     // vencido não aparece
+}
+```
+
+Mostre o texto **sempre como texto** (nunca como HTML), com a cor (`amarelo`, `rosa`, `verde`, `azul`, `lilas`), o autor, o destinatário (`to`, ausente = o time todo) e um botão **Vi**.
+
+**Gravar o recibo "Vi"** (opcional, mas é o que faz o gestor ver "visto por …")
+
+```js
+async function publicarVistos(root, slug, chave /* { kid, key } */, eu /* { pessoa, computador, nome } */, vistos /* [{ id, at }] */) {
+  const dir = await root.getDirectoryHandle('times').then(d => d.getDirectoryHandle(slug)).then(d => d.getDirectoryHandle('postits', { create: true })).then(d => d.getDirectoryHandle('vistos', { create: true }));
+  const writer = `${eu.pessoa}~${eu.computador}`, nome = `${eu.pessoa}-${eu.computador}.json`;
+  const revision = (+localStorage.getItem('postits.vistos.rev') || 0) + 1;      // cresce sempre
+  const payload = { schema: 'gestao-postits-vistos/1', revision, generatedAt: agoraComFuso(), source: { team: slug, writer, author: { name: eu.nome } }, seen: vistos };
+  const env = { ...(await cifrar(payload, { key: chave.key, kid: chave.kid, team: slug })), writer };
+  const w = await (await dir.getFileHandle(nome, { create: true })).createWritable();
+  await w.write(JSON.stringify(env)); await w.close();
+  localStorage.setItem('postits.vistos.rev', String(revision));
+}
+```
+
+`<pessoa>` e `<computador>` são identificadores curtos só com letras minúsculas e números (ex.: `ana` e um código aleatório guardado no navegador). Cada pessoa grava **só o próprio arquivo**: nunca escreva no arquivo de outra pessoa nem no arquivo do gestor.
+
 
 ## 4. Como testar (vale para A e para B)
 

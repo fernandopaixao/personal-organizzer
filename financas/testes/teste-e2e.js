@@ -159,10 +159,19 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
 
   console.log('6. Assistente inicial: responsável por um time, finanças + tarefas');
   const a = await nova('/inicio.html', { 'fin-local': 'LocalInicio', 'fin-comum': 'Gestao-Compartilhado' });
-  await a.click('#prox'); await a.click('[data-p="responsavel"]'); await a.click('#prox');
+  await a.click('#prox'); await a.click('[data-p="responsavel"]');
   await a.click('[data-u="financas"]'); await a.click('[data-u="tarefas"]');
-  ok((await a.textContent('#wz')).includes('Finanças do Time') && (await a.textContent('#wz')).includes('Quadro do Time'), 'mostra os HTMLs que serão gerados');
-  await a.click('#prox'); await a.fill('#dN', 'Cartões'); await a.fill('#dPx', 'CAR'); await a.fill('#dP', 'Caio'); await a.click('#prox');
+  ok((await a.textContent('#wz')).includes('Finanças do Time') && (await a.textContent('#wz')).includes('Quadro do Time'), 'perfil: lidera 1 time, finanças e tarefas; mostra os HTMLs que serão gerados');
+  await a.click('#prox');
+  const [kTarCar, kFinCar] = await a.evaluate(() => [gerarChaveTexto('cartoes-2501'), gerarChaveTexto('cartoes-fin-2611')]);
+  await a.click('[data-k="sim"]'); await a.fill('#kT', 'GK1.quebrada'); await a.click('#kLer');
+  ok(/GK1\.quebrada/.test(await a.textContent('#kErr')) && await a.isDisabled('#prox'), 'onboarding recusa chave inválida');
+  await a.fill('#kT', kTarCar + '\n' + kFinCar); await a.fill('#kP', 'Gestao-Compartilhado'); await a.click('#kLer');
+  const kTxt = await a.textContent('#wz');
+  ok(/Tarefas do time/.test(kTxt) && /Finanças do time/.test(kTxt) && /cartoes-fin-2611/.test(kTxt), 'onboarding reconhece a chave de tarefas e a de finanças do time pelo kid');
+  await a.click('#prox'); await cofre(a);
+  ok(await a.isDisabled('#dS') && await a.inputValue('#dS') === 'cartoes', 'identificador do time vem da chave e fica travado');
+  await a.fill('#dN', 'Cartões'); await a.fill('#dPx', 'CAR'); await a.fill('#dP', 'Caio'); await a.click('#prox');
   await a.click('#pL'); await a.waitForSelector('#pL ~ .chip'); await a.click('#pC'); await a.click('#prox');
   await a.click('#sC'); await criarSenha(a); await a.click('#prox');
   await a.waitForSelector('#mapa2', { timeout: 30000 });
@@ -171,6 +180,12 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   ok((await opfs(a, async () => listar('Gestao-Compartilhado/times'))).includes('cartoes'), 'estrutura criada na pasta comum');
   const cart = await opfs(a, async () => ler('LocalInicio', 'onde-fica-cada-coisa.html'));
   ok(/cofre de senhas/.test(cart) && !cart.includes(SENHA), 'cartão "onde fica cada coisa" com aviso de cofre e sem senha');
+  const dec = async arq => a.evaluate(async ([t, s]) => (await decifrarLocal(t, s)).dados, [await opfs(a, async n => ler('LocalInicio', n), arq), SENHA]);
+  const ftDb = await dec('financas-cartoes.json'), hbDb = await dec('hub-cartoes.json');
+  ok(ftDb.chaves.length === 1 && ftDb.chaves[0].kid === 'cartoes-fin-2611', 'Finanças do Time criado já com a chave de finanças do time');
+  ok(hbDb.times[0].chaves[0]?.kid === 'cartoes-2501' && hbDb.times[0].chavesFin[0]?.kid === 'cartoes-fin-2611', 'hub criado com as duas chaves do time, separadas');
+  ok((await opfs(a, async () => ler('LocalInicio', 'quadro_cartoes.html'))).includes(kTarCar), 'Quadro do Time gerado com a chave de tarefas na pré-configuração');
+  ok(!(await opfs(a, async () => ler('LocalInicio', 'financas-cartoes.json'))).includes('cartoes-fin'), 'chave não aparece em claro no arquivo local');
   // O arquivo criado pelo assistente abre nas Finanças do Time gerado por ele
   fs.writeFileSync(path.join(SAIDA, 'financas_cartoes.html'), await opfs(a, async () => ler('LocalInicio', 'financas_cartoes.html')));
   const t3 = await nova(SAIDA_URL + 'financas_cartoes.html', { 'fin-local': 'LocalInicio' });
@@ -186,7 +201,11 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
 
   console.log('7. Assistente: gestor, finanças + tarefas (Central)');
   const a2 = await nova('/inicio.html', { 'fin-local': 'LocalGestor2', 'fin-comum': 'Gestao-Compartilhado' });
-  await a2.click('#prox'); await a2.click('[data-p="gestor"]'); await a2.click('#prox'); await a2.click('[data-u="financas"]'); await a2.click('[data-u="tarefas"]'); await a2.click('#prox');
+  await a2.click('#prox'); await a2.click('[data-p="gestor"]'); await a2.click('[data-u="financas"]'); await a2.click('[data-u="tarefas"]'); await a2.click('#prox');
+  const kAcima = await a2.evaluate(() => gerarChaveTexto('tecnologia-fin-2611'));
+  await a2.click('[data-k="sim"]'); await a2.fill('#kT', kAcima + '\n' + await a2.evaluate(() => gerarChaveTexto('pagamentos-2611'))); await a2.click('#kLer');
+  ok(/nível acima/.test(await a2.textContent('#wz')) && /será ignorada/.test(await a2.textContent('#wz')), 'gestor: chave de finanças da liderança vira "nível acima"; chave de tarefas de time é ignorada');
+  await a2.click('#prox'); await cofre(a2);
   await a2.fill('#dN', 'Tecnologia'); await a2.fill('#dT', 'Pagamentos PAG\nCartões CAR'); await a2.fill('#dP', 'Fernando'); await a2.click('#prox');
   await a2.click('#pL'); await a2.waitForSelector('#pL ~ .chip'); await a2.click('#prox'); await a2.click('#sC'); await criarSenha(a2, SENHA2); await a2.click('#prox');
   await a2.waitForSelector('#mapa2', { timeout: 30000 });
@@ -196,11 +215,26 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   const g2 = await nova(SAIDA_URL + 'financas_grupo_gerado.html', { 'fin-local': 'LocalGestor2' });
   await g2.click('#iAbrir'); await senhaAbrir(g2, SENHA2); await g2.waitForSelector('#topo');
   ok(await g2.evaluate(() => db.times.map(t => t.slug + ':' + t.prefixo).join(',')) === 'pagamentos:PAG,cartoes:CAR', 'Finanças do Grupo abre com os times informados no assistente');
+  ok(await g2.evaluate(() => db.acima?.chaves?.[0]?.kid === 'tecnologia-fin-2611' && db.acima.chaves[0].origem === 'onboarding'), 'Finanças do Grupo criado com a chave do nível acima (db.acima)');
   fs.writeFileSync(path.join(SAIDA, 'gestao_gerada.html'), await opfs(a2, async () => ler('LocalGestor2', 'gestao_pessoal.html')));
   const c = await nova(SAIDA_URL + 'gestao_gerada.html', {});
   await c.evaluate(() => { window.__abrir = { dir: 'LocalGestor2', arq: 'gestao-tecnologia.json' }; });
   await c.fill('#lockPass', SENHA2); await c.click('#btnOpen'); await c.waitForTimeout(1500);
   ok(await c.evaluate(() => !document.querySelector('#app').classList.contains('hidden')), 'Central abre o arquivo cifrado criado pelo assistente');
+  ok(await c.evaluate(() => document.querySelectorAll('#home .inss .ins').length === 4 && /Delegadas no prazo/.test(document.querySelector('#home .inss').textContent)), 'Hoje da Central abre com quatro cards de leitura');
+  // Formulários no lugar no padrão único (v15.4): acordo com pílulas, validação no campo e Enter; atualização de iniciativa; prévia da importação
+  await c.evaluate(() => { const f = mkForum({ name: 'Comitê', cadence: 'weekly', anchor: today(), participants: [] }); db.forums.push(f); db.initiatives.push({ id: 'i1', name: 'Migração', teamId: '', ownerId: '', bucket: 'now', start: today(), end: addD(today(), 30), progress: 0, autoProgress: true, phases: [], dependsOn: [], updates: [], createdAt: Date.now() }); changed(); go('forum'); openMeeting(f.id, today()); });
+  await c.click('[data-agr="mt"] [data-act=agr-kind][data-v=decision]'); await c.focus('[data-agr="mt"] [data-agrt]'); await c.keyboard.press('Enter');
+  ok(await c.evaluate(() => { const b = document.querySelector('[data-agr="mt"]'); return b.querySelector('[data-pri]').disabled && /decisão/.test(b.querySelector('.fx-err').textContent) && b.querySelector('[data-pri]').textContent === 'Registrar decisão'; }), 'acordo: pílula Decisão muda o verbo do botão e a validação aparece no campo');
+  await c.fill('[data-agr="mt"] [data-agrt]', 'Adotar fluxo novo'); await c.keyboard.press('Enter'); await c.waitForTimeout(150);
+  await c.click('[data-agr="mt"] [data-act=agr-kind][data-v=commitment]'); await c.fill('[data-agr="mt"] [data-agrt]', 'Enviar plano'); await c.keyboard.press('Enter'); await c.waitForTimeout(150);
+  ok(await c.evaluate(() => db.agreements.map(g => g.kind + (g.taskId ? '+tarefa' : '')).join(',') === 'decision,commitment+tarefa'), 'acordo: decisão e compromisso registrados com Enter, compromisso vira tarefa');
+  await c.evaluate(() => { openMeet = null; renderDrawer(); go('pulse'); }); await c.click('[data-act=pl-edit][data-id=i1]');
+  await c.fill('[data-upd=i1]', 'Homologação começou'); await c.keyboard.press('Enter'); await c.waitForTimeout(150);
+  ok(await c.evaluate(() => initById('i1').updates.length === 1), 'atualização de iniciativa no formulário no lugar');
+  await c.evaluate(() => { $('#importDialog').showModal(); $('#impText').value = JSON.stringify({ schema: 'gestao-import/3', tasks: [{ title: 'A' }], updates: [{ initiative: 'Não existe', text: 'y' }] }); analyzeImport(); });
+  ok(await c.evaluate(() => $('#impGo').textContent === 'Importar 1 item' && document.querySelectorAll('#impPrev .ipv button').length === 4), 'prévia da importação com contadores e verbo no botão');
+  await c.evaluate(() => { $('#importDialog').close(); go('home'); });
 
   ok(await c.evaluate(() => /Onde estou/.test(document.getElementById('ondeEstou')?.textContent || '')), 'Central mostra o botão "Onde estou?"');
   await c.click('#ondeEstou .f4btn:not(.f4hub)'); ok(/Central de Gestão/.test(await c.textContent('#f4dlg')) && /gestao-tecnologia\.json/.test(await c.textContent('#f4dlg')), '"Onde estou?" da Central mostra ferramenta e arquivo');
@@ -417,7 +451,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   await t2.evaluate(() => { view = 'plano'; render(); }); await t2.screenshot({ path: path.join(SAIDA, 'time-plano.png') });
   await a.screenshot({ path: path.join(SAIDA, 'inicio-pronto.png') });
 
-  console.log('11. Hub: chaves de finanças do grupo e visão dos times');
+  console.log('13. Hub: chaves de finanças do grupo e visão dos times');
   await h.bringToFront(); await h.evaluate(() => { window.__abrir = { dir: 'LocalGestor', arq: 'financas-grupo-tecnologia.json' }; });
   await h.click('#aImpF'); await senhaAbrir(h, SENHA); await h.waitForSelector('#dlg .cofre');
   ok(/chave\(s\) de finanças/.test(await h.textContent('#dlg')), 'hub importa as chaves de finanças do arquivo do Finanças do Grupo (só leitura)');
@@ -432,7 +466,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   ok(!JSON.stringify(await opfs(h, async () => ler('LocalGestor2', 'hub-tecnologia.json'))).includes('pagamentos-fin'), 'chave de finanças só dentro do arquivo cifrado do hub');
   await h.setViewportSize({ width: 1280, height: 900 }); await h.screenshot({ path: path.join(SAIDA, 'hub-visao.png'), fullPage: true });
 
-  console.log('13. Tema claro, escuro e automático');
+  console.log('14. Tema claro, escuro e automático');
   const fundo = p => p.evaluate(() => getComputedStyle(document.body).backgroundColor);
   const corCard = p => p.evaluate(() => { const e = document.querySelector('.card'); return e ? getComputedStyle(e).backgroundColor : ''; });
   const tPaginas = { hub: h, central: c, quadro: qc, grupo: g, time: t2, inicio: a };
