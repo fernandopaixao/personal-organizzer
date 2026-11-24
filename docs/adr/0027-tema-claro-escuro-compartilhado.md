@@ -1,4 +1,4 @@
-# ADR-0026 · Tema claro, escuro e automático numa camada compartilhada
+# ADR-0027 · Tema claro, escuro e automático numa camada compartilhada
 
 **Status:** aceita · **Data:** 24/11/2026 · **Origem:** pedido do Fernando ("Adiciona modo escuro na interface"); fonte em `financas/src/tema.js`
 

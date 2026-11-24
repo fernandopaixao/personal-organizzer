@@ -15,7 +15,7 @@ O mesmo código (cripto, sincronização, aviso de cofre, "Onde estou?") precisa
 | `python3 tools/build_financas.py` | Monta Finanças do Grupo, Finanças do Time, hub e assistente a partir de `financas/src/`, embutindo a Central mais nova e o Quadro |
 | `python3 tools/embutir_quadro.py` | Embute o Quadro na Central (botão "HTML do time") |
 | `python3 tools/injetar_seguranca.py` | Reinjeta os blocos `<script id="f4…">`/`f5postits` na Central e no Quadro, reembute o Quadro e roda o build |
-| `build_financas.py` e `injetar_seguranca.py` | Também injetam o tema claro/escuro (`financas/src/tema.js`) no `<head>` de cada HTML como `<script id="tema">` ([ADR-0026](0026-tema-claro-escuro-compartilhado.md)) |
+| `build_financas.py` e `injetar_seguranca.py` | Também injetam o tema claro/escuro (`financas/src/tema.js`) no `<head>` de cada HTML como `<script id="tema">` ([ADR-0027](0027-tema-claro-escuro-compartilhado.md)) |
 | `node financas/testes/teste-e2e.js` | Teste ponta a ponta (73 verificações) |
 
 ## Ao evoluir
