@@ -20,7 +20,7 @@
    Dados individuais (lançamentos, notas, cenários) ficam no arquivo local cifrado.
    Só o plano agregado vai para a pasta sincronizada: times/<time>/financas/plano.json
    ===================================================================== */
-const TOOL = 'financas-time', TOOL_NOME = 'Finanças do Time', TOOL_VERSION = '1.3.0';
+const TOOL = 'financas-time', TOOL_NOME = 'Finanças do Time', TOOL_VERSION = '1.3.1';
 const LOCAL_SCHEMA = 'gestao-financas-local/1', PLANO_SCHEMA = 'gestao-financas-plano/1', DIRETRIZ_SCHEMA = 'gestao-financas-diretriz/1';
 const PRESET = /*FIN-PRESET*/null/*FIM-FIN-PRESET*/;
 const CATS_PADRAO = [
@@ -718,11 +718,11 @@ function telaInicial(msg = '') {
     <div class="row"><div class="logo" style="margin:0">FIN</div><div><h2 style="margin:0">Finanças do Time</h2><div class="small muted">Acompanhamento do dia a dia e planejamento do futuro</div></div></div>
     ${PRESET ? `<div class="banner" style="margin-top:16px">Pré-configurado pelo gestor para o time <b>${esc(PRESET.team?.nome)}</b>.${PRESET.chave ? ' A chave do time vem junto: você vai guardá-la no cofre no primeiro uso.' : ''}</div>` : ''}
     ${msg ? `<div class="banner warn" style="margin-top:12px">${esc(msg)}</div>` : ''}
+    ${avisoFS()}
     <p class="lbl" style="margin-top:20px">É a primeira vez?</p>
     <button class="opt" id="iNovo"><b>Criar o arquivo do time</b><span>Passo a passo: pasta local, senha guardada no cofre e o primeiro plano.</span></button>
     <p class="lbl" style="margin-top:16px">Já tenho o arquivo</p>
     <button class="opt" id="iAbrir"><b>Abrir a pasta local</b><span>Escolha a pasta deste computador onde está o arquivo <span class="code">financas-&lt;time&gt;.json</span>.</span></button>
-    ${temFS() ? '' : '<div class="banner warn">Abra no Microsoft Edge ou no Google Chrome: esta ferramenta precisa ler e gravar arquivos.</div>'}
     <p class="small muted" style="margin-top:16px">Seus dados ficam num arquivo cifrado neste computador. Só o plano agregado vai para a pasta sincronizada pelo OneDrive.</p>
   </div></div>`;
   $('#iNovo').onclick = criarDlg;
@@ -755,7 +755,7 @@ async function aposAbrir() {
   if (!navigator.webdriver) { const h = await kv.get('fin-time-raiz:' + db.team.slug); if (h && await permissao(h, false)) await ligarPasta(h, true); }
 }
 async function criarDlg() {
-  if (!temFS()) return toast('Abra no Edge ou no Chrome.');
+  if (semFS()) return;
   const p = PRESET || {};
   const d = modal(`<div class="mh"><h2>Criar o arquivo do time</h2></div><div class="mb">
     <div class="steps"><i class="on"></i><i></i><i></i></div>

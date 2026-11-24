@@ -42,7 +42,7 @@
    Pergunta o uso esperado, cria o primeiro arquivo (sempre cifrado), gera os HTMLs
    desacoplados de cada uso e o cartão "Onde fica cada coisa".
    ===================================================================== */
-const TOOL_NOME = 'Início da solução', TOOL_VERSION = '2.2.0';
+const TOOL_NOME = 'Início da solução', TOOL_VERSION = '2.2.1';
 $('#ver').textContent = TOOL_VERSION;
 const st = { modo: '', sp: 0, sorteTimes: [], passo: 0, papel: '', usos: [], dados: {}, dirLocal: null, raiz: null, senha: null, criados: [], temChave: null, chaves: [], kErr: '', pastaDoLider: '', cofreChaves: false };
 // Perfil: quem lidera, se quer finanças e tarefas, e se o líder já mandou chaves e a pasta.
@@ -114,8 +114,8 @@ function desenhar() {
   if (st.modo === 'sorte') return desenharSorte(el);
   if (p === 0) el.innerHTML = `${topo}<h1>Vamos montar sua solução</h1><p class="muted">Primeiro, como ela funciona em quatro desenhos. Depois, três perguntas sobre o seu perfil e, se o seu líder já mandou, a chave e a pasta.</p>
     ${comoFunciona()}
-    ${temFS() ? `<div class="sorte"><div class="grow"><b>Estou com sorte</b>Lidero times e quero tudo pronto de uma vez: Central, Finanças do Grupo, Mapa de Férias, hub e, para cada time, o Quadro, o Finanças do Time e o Mapa de Férias, já com as chaves e a pasta.</div><button class="btn pri" id="sorte">Estou com sorte</button></div>` : '<div class="banner warn">Abra este arquivo no Microsoft Edge ou no Google Chrome.</div>'}
-    <button class="btn ghost" id="mapa">Ver todas as ferramentas da solução</button>${nav(temFS(), 'Começar')}`;
+    ${temFS() ? `<div class="sorte"><div class="grow"><b>Estou com sorte</b>Lidero times e quero tudo pronto de uma vez: Central, Finanças do Grupo, Mapa de Férias, hub e, para cada time, o Quadro, o Finanças do Time e o Mapa de Férias, já com as chaves e a pasta.</div><button class="btn pri" id="sorte">Estou com sorte</button></div>` : avisoFS()}
+    <button class="btn ghost" id="mapa">Ver todas as ferramentas da solução</button>${nav(true, 'Começar')}`;
   if (p === 1) el.innerHTML = `${topo}<h1>Seu perfil</h1>
     <p class="lbl">1 · Você lidera times?</p>
     ${PAPEIS.map(([k, n, d]) => `<button class="opt ${st.papel === k ? 'on' : ''}" data-p="${k}"><b>${n}</b><span>${d}</span></button>`).join('')}
@@ -210,6 +210,7 @@ function ligar() {
   on('pC', escolherComum);
   on('sC', async () => { const s = await criarSenhaDlg('Senha dos seus arquivos'); if (s) { st.senha = s; desenhar(); } });
   on('prox', async () => {
+    if (st.passo === 0 && semFS()) return;
     if (st.passo === 2 && st.temChave) {
       lerChavesDigitadas(); if (st.kErr || !st.chaves.length) return desenhar();
       if (chavesUteis().length && !st.cofreChaves) { if (!await avisoCofre('chave', '<p class="small">As chaves vão para dentro dos arquivos cifrados que o assistente cria agora.</p>')) return; st.cofreChaves = true; }

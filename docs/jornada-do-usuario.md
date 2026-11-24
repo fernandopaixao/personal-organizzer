@@ -104,6 +104,7 @@ Esta revisão olhou a solução como um todo em 24/11/2026. Os pontos abaixo nã
 | 5 | **Hub depende de estar na mesma pasta** dos HTMLs | Hub | Já avisa; o assistente já grava tudo junto. Manter a orientação no cartão "Onde fica cada coisa" |
 | 6 | ~~Times com ferramenta própria não veem post-its~~ | Caminho B | **Resolvido:** post-its no pacote para agentes dos times (`integracao-time/03`, seção 7.6) e no guia de adaptação (seção 3.3) |
 | 7 | **Documentação espalhada** entre repositório e pasta do projeto | Docs | Este conjunto (ADRs, funcionalidades, jornada, passo a passo) vira a porta de entrada; a visão geral aponta para ele |
+| 8 | ~~Hub com botões mudos fora do Edge/Chrome~~ | Hub, Finanças, Férias, assistente | **Resolvido no Hub 1.3.1:** o aviso no topo diz o motivo (Safari, pré-visualização, celular, zip) e o que fazer, e todo botão responde ([ADR-0030](adr/0030-aviso-quando-nao-da-para-abrir-pastas.md)) |
 
 ---
 

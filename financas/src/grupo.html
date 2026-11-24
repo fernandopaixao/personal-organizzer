@@ -21,7 +21,7 @@
    compara com o orçamento do grupo e publica diretrizes grupo/financas/diretriz-<time>.json.
    Orçamento aprovado, itens do grupo, chaves e versões ficam no arquivo local cifrado.
    ===================================================================== */
-const TOOL = 'financas-grupo', TOOL_NOME = 'Finanças do Grupo', TOOL_VERSION = '1.4.0';
+const TOOL = 'financas-grupo', TOOL_NOME = 'Finanças do Grupo', TOOL_VERSION = '1.4.1';
 const LOCAL_SCHEMA = 'gestao-financas-local/1', PLANO_SCHEMA = 'gestao-financas-plano/1', DIRETRIZ_SCHEMA = 'gestao-financas-diretriz/1';
 const PRESET = /*FING-PRESET*/null/*FIM-FING-PRESET*/;
 const CATS_PADRAO = [
@@ -591,11 +591,11 @@ function telaInicial(msg = '') {
   $('#app').innerHTML = `<div class="welcome"><div class="card">
     <div class="row"><div class="logo" style="margin:0">GRP</div><div><h2 style="margin:0">Finanças do Grupo</h2><div class="small muted">Consolidado dos planos financeiros dos times</div></div></div>
     ${msg ? `<div class="banner warn" style="margin-top:12px">${esc(msg)}</div>` : ''}
+    ${avisoFS()}
     <p class="lbl" style="margin-top:20px">É a primeira vez?</p>
     <button class="opt" id="iNovo"><b>Criar o arquivo do grupo</b><span>Pasta pessoal só sua (de preferência no seu OneDrive), senha guardada no cofre, depois times e chaves.</span></button>
     <p class="lbl" style="margin-top:16px">Já tenho o arquivo</p>
     <button class="opt" id="iAbrir"><b>Abrir a pasta local</b><span>Onde está <span class="code">financas-grupo-&lt;nome&gt;.json</span>.</span></button>
-    ${temFS() ? '' : '<div class="banner warn">Abra no Microsoft Edge ou no Google Chrome.</div>'}
   </div></div>`;
   $('#iNovo').onclick = criarDlg; $('#iAbrir').onclick = abrirPasta;
 }
@@ -624,6 +624,7 @@ async function aposAbrir() {
   if (!navigator.webdriver) { const h = await kv.get('fin-grupo-raiz:' + db.grupo.slug); if (h && await permissao(h, false)) await ligarPasta(h, true); }
 }
 async function criarDlg() {
+  if (semFS()) return;
   const p = PRESET || {};
   const d = modal(`<div class="mh"><h2>Criar o arquivo do grupo</h2></div><div class="mb">
     <label class="field"><span>Nome do grupo</span><input class="sin" id="cN" value="${esc(p.grupo?.nome || '')}"></label>

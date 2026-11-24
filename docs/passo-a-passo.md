@@ -1,8 +1,8 @@
 # Passo a passo · como lidar com a solução
 
-*24/11/2026 · Central v15.7, Quadro do Time 2.2, Hub 1.3, Finanças do Grupo 1.4 e do Time 1.3, Mapa de Férias 1.1, assistente 2.2*
+*24/11/2026 · Central v15.7, Quadro do Time 2.2, Hub 1.3.1, Finanças do Grupo 1.4.1 e do Time 1.3.1, Mapa de Férias 1.1.1, assistente 2.2.1*
 
-Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é independente. Antes de começar: use **Edge ou Chrome** e tenha à mão um **cofre de senhas** (o gerenciador de senhas da empresa).
+Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é independente. Antes de começar: use **Edge ou Chrome** no computador, abrindo o arquivo com dois cliques (não pela pré-visualização do Outlook, Teams ou OneDrive, nem de dentro do .zip), e tenha à mão um **cofre de senhas** (o gerenciador de senhas da empresa).
 
 **Sumário**
 1. [Montar a solução pela primeira vez](#1-montar-a-solução-pela-primeira-vez)
@@ -199,6 +199,8 @@ Os outros times não são afetados.
 | ← Hub abre uma aba nova | O hub não estava aberto | Normal; abra as ferramentas sempre a partir do hub |
 | Hub não acha as ferramentas | O hub não está na mesma pasta dos HTMLs | Mova o `hub.html` para a pasta local das ferramentas |
 | Não consigo gravar | Navegador sem File System Access API ou pasta sem permissão | Use Edge ou Chrome e autorize a pasta de novo |
+| Aviso vermelho "Daqui não dá para abrir pastas" e os botões não seguem | O arquivo foi aberto no Safari, no Firefox, no celular ou numa pré-visualização (Outlook, Teams, OneDrive, SharePoint, biblioteca de outro aplicativo) | Faça o que o aviso diz: baixe o arquivo para uma pasta só sua e abra com dois cliques, ou botão direito > **Abrir com** > Microsoft Edge ou Google Chrome. A última linha do aviso mostra o navegador e o endereço detectados |
+| Aviso para extrair o .zip | O HTML foi aberto de dentro do .zip ou de um anexo (pasta temporária) | Botão direito no .zip > **Extrair tudo**, leve a pasta para um lugar só seu e abra o HTML de lá |
 | Quero a tela escura (ou ela ficou escura sem eu pedir) | O tema está em Automático e segue o sistema | Clique no botão redondo no canto inferior direito e escolha **Claro**, **Escuro** ou **Automático**. Fica salvo só neste computador e vale para todas as ferramentas |
 | Aviso de que a pasta parece ser a compartilhada | Você escolheu a pasta dos times como pasta pessoal | Escolha uma pasta só sua (de preferência no seu OneDrive) |
 | Uma ferramenta pediu a senha mesmo aberta pelo hub | A senha dessa ferramenta é diferente da do hub, ou passaram mais de 90 segundos do clique | Digite a senha do cofre; abra as ferramentas pelos links do hub |

@@ -54,7 +54,7 @@ A solução é um pequeno ecossistema de **ferramentas HTML de arquivo único**,
 ## 2. Princípios que valem para todas as ferramentas
 
 1. **Um HTML, um arquivo de dados.** O HTML nunca guarda dados, então pode ser trocado por uma versão nova a qualquer momento. Os dados ficam num JSON separado.
-2. **Sem servidor.** Nada de API, banco externo ou endpoint. Leitura e gravação pela File System Access API do navegador (**Edge ou Chrome**). Sem a API, há um plano B de baixar e enviar arquivos.
+2. **Sem servidor.** Nada de API, banco externo ou endpoint. Leitura e gravação pela File System Access API do navegador (**Edge ou Chrome**). Sem a API, há um plano B de baixar e enviar arquivos. Onde a API falta (Safari, Firefox, celular, pré-visualização do Outlook/Teams/OneDrive) ou o arquivo foi aberto de dentro do .zip, cada ferramenta diz o motivo e o que fazer ([ADR-0030](adr/0030-aviso-quando-nao-da-para-abrir-pastas.md)).
 3. **Tudo cifrado.** O arquivo de dados da Central é cifrado com a senha do gestor (AES-GCM, PBKDF2 com 600 mil iterações). Os arquivos da pasta de integração são cifrados com chaves aleatórias por time (AES-256-GCM). As duas coisas são independentes.
 4. **Migração aditiva.** Cada versão nova abre o arquivo da anterior, migra sozinha e baixa um backup do original. Versões antigas ficam em `legacy/`.
 5. **Entrada de fora é só dado.** Nada que vem de um time ou de um agente vira HTML ou código. Textos são escapados, links só `https://`, tamanhos limitados.

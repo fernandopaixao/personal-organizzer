@@ -4,7 +4,7 @@ Ferramenta de gestão pessoal em um único arquivo HTML, sem servidor e sem inst
 
 - **Abrir:** dê dois cliques em `gestao_pessoal_v15.html` (Chrome ou Edge recomendados, para salvar direto no arquivo e usar a pasta de integração).
 - **Dados:** ficam num arquivo JSON separado, criptografado com AES-GCM 256 e senha. O HTML não guarda nenhum dado, então pode ser atualizado à vontade.
-- **Versão atual:** Central 15.7, Hub 1.3 e assistente 2.2. A Central lê as finanças dos times e o custo de cada iniciativa, só para leitura ([ADR-0028](docs/adr/0028-financas-na-central-so-leitura.md)); o hub e a Central passam a senha da sessão para as ferramentas que abrem ([ADR-0029](docs/adr/0029-uma-senha-por-sessao.md)); o arquivo pessoal fica numa pasta só sua, de preferência no seu OneDrive ([ADR-0008](docs/adr/0008-local-individual-comum-sincronizado.md)).
+- **Versão atual:** Central 15.7, Hub 1.3.1 e assistente 2.2.1. Se uma ferramenta disser "Daqui não dá para abrir pastas", ela foi aberta no Safari, no Firefox, no celular ou numa pré-visualização: o aviso diz o que fazer ([ADR-0030](docs/adr/0030-aviso-quando-nao-da-para-abrir-pastas.md)). A Central lê as finanças dos times e o custo de cada iniciativa, só para leitura ([ADR-0028](docs/adr/0028-financas-na-central-so-leitura.md)); o hub e a Central passam a senha da sessão para as ferramentas que abrem ([ADR-0029](docs/adr/0029-uma-senha-por-sessao.md)); o arquivo pessoal fica numa pasta só sua, de preferência no seu OneDrive ([ADR-0008](docs/adr/0008-local-individual-comum-sincronizado.md)).
 - **Atualizar de versão:** abra o arquivo de dados atual na versão nova. A migração é automática e um backup do arquivo anterior é baixado.
 
 ## Telas

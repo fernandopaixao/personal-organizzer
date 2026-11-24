@@ -59,7 +59,7 @@
      (a mesma chave GK1.<grupo>-fin-… das Finanças do Grupo serve). Funciona em quantos níveis forem precisos.
    Notas das ausências ficam só no arquivo local cifrado. Conteúdo comum: gestao-ferias/1.
    ===================================================================== */
-const TOOL = 'ferias', TOOL_NOME = 'Mapa de Férias', TOOL_VERSION = '1.1.0';
+const TOOL = 'ferias', TOOL_NOME = 'Mapa de Férias', TOOL_VERSION = '1.1.1';
 const LOCAL_SCHEMA = 'gestao-ferias-local/1', FERIAS_SCHEMA = 'gestao-ferias/1';
 const PRESET = /*FERIAS-PRESET*/null/*FIM-FERIAS-PRESET*/;
 const TIPOS = { ferias: 'Férias', folga: 'Folga ou day off', treinamento: 'Treinamento ou evento', outro: 'Outra ausência' };
@@ -716,12 +716,12 @@ function telaInicial(msg = '') {
     <div class="row"><div class="logo" style="margin:0">FÉR</div><div><h2 style="margin:0">Mapa de Férias</h2><div class="small muted">Enxergar e planejar as ausências do time e do grupo</div></div></div>
     ${PRESET?.unidade ? `<div class="banner" style="margin-top:16px">Pré-configurado para <b>${esc(PRESET.unidade.nome)}</b>.${PRESET.chave ? ' A chave do time vem junto: você vai guardá-la no cofre ao criar o arquivo.' : ''}</div>` : ''}
     ${msg ? `<div class="banner warn" style="margin-top:12px">${esc(msg)}</div>` : ''}
+    ${avisoFS()}
     <p class="lbl" style="margin-top:20px">É a primeira vez?</p>
     <button class="opt" id="iTime"><b>Sou de um time</b><span>Cadastro as minhas férias (e, se quiser, as do time). Elas somam com as dos colegas e chegam ao gestor.</span></button>
     <button class="opt" id="iGrupo"><b>Sou gestor ou liderança</b><span>Vejo os dias com mais e menos gente fora em todos os meus times e grupos, cadastro as minhas e as dos diretos e publico para a minha liderança.</span></button>
     <p class="lbl" style="margin-top:16px">Já tenho o arquivo</p>
     <button class="opt" id="iAbrir"><b>Abrir a pasta local</b><span>A pasta deste computador onde está o arquivo <span class="code">ferias-&lt;nome&gt;.json</span>.</span></button>
-    ${temFS() ? '' : '<div class="banner warn">Abra no Microsoft Edge ou no Google Chrome: esta ferramenta precisa ler e gravar arquivos.</div>'}
     <p class="small muted" style="margin-top:16px">Apoio para a visão do grupo: não substitui a ferramenta oficial de férias da empresa. Tudo fica cifrado; as notas nunca saem deste computador.</p>
   </div></div>`;
   $('#iTime').onclick = () => criarDlg('time');
@@ -755,7 +755,7 @@ async function aposAbrir() {
   if (!navigator.webdriver) { const h = await kv.get('ferias-raiz:' + db.unidade.slug); if (h && await permissao(h, false)) await ligarPasta(h, true); }
 }
 function criarDlg(nivel) {
-  if (!temFS()) return toast('Abra no Edge ou no Chrome.');
+  if (semFS()) return;
   const p = PRESET?.unidade || {};
   const d = modal(`<div class="mh"><h2>${nivel === 'grupo' ? 'Mapa de Férias do grupo' : 'Mapa de Férias do time'}</h2></div><div class="mb">
     <div class="steps"><i class="on"></i><i></i><i></i></div>

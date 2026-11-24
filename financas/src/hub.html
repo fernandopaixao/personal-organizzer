@@ -59,7 +59,7 @@
       O Quadro do Time mostra os post-its e grava quem já viu em times/<time>/postits/vistos/<pessoa>-<computador>.json.
    O arquivo pessoal do hub (times, chaves e seus post-its) é cifrado com a sua senha e fica numa pasta só sua (de preferência no seu OneDrive), nunca na compartilhada.
    ===================================================================== */
-const TOOL = 'hub', TOOL_NOME = 'Hub da solução', TOOL_VERSION = '1.3.0';
+const TOOL = 'hub', TOOL_NOME = 'Hub da solução', TOOL_VERSION = '1.3.1';
 try { window.name = 'gestao-hub'; } catch {}   // o botão "← Hub" das ferramentas volta para esta aba sem recarregar
 const LOCAL_SCHEMA = 'gestao-hub-local/1', POSTITS = 'gestao-postits/1', VISTOS = 'gestao-postits-vistos/1', PLANO = 'gestao-financas-plano/1';
 const CORES = [['amarelo', 'Amarelo'], ['rosa', 'Rosa'], ['verde', 'Verde'], ['azul', 'Azul'], ['lilas', 'Lilás']];
@@ -562,12 +562,12 @@ async function telaInicial(msg = '') {
   $('#app').innerHTML = `<div class="welcome"><div class="card">
     <div class="row"><div class="logo" style="margin:0">HUB</div><div><h2 style="margin:0">${TOOL_NOME}</h2><div class="small muted">Abra as ferramentas da solução e deixe post-its para os times</div></div></div>
     ${msg ? `<div class="banner warn" style="margin-top:12px">${esc(msg)}</div>` : ''}
+    ${avisoFS()}
     ${ult ? `<button class="opt" id="iUlt" style="margin-top:18px"><b>Abrir ${esc(ult.arquivo)}</b><span>Pasta local <span class="code">${esc(ult.dir.name)}</span>, usada por último neste computador.</span></button>` : ''}
     <p class="lbl" style="margin-top:20px">Já tenho o hub</p>
     <button class="opt" id="iAbrir"><b>Abrir a pasta local</b><span>A pasta deste computador (só sua; de preferência no seu OneDrive) com as ferramentas e o arquivo <span class="code">hub-&lt;nome&gt;.json</span>.</span></button>
     <p class="lbl" style="margin-top:16px">É a primeira vez?</p>
     <button class="opt" id="iNovo"><b>Criar o hub</b><span>Seu nome, a pasta local e a senha. Depois você liga a pasta sincronizada e cola as chaves dos times (ou importa da Central).</span></button>
-    ${temFS() ? '' : '<div class="banner warn">Abra no Microsoft Edge ou no Google Chrome: o hub precisa ler pastas.</div>'}
     <p class="small muted" style="margin-top:16px">O hub não guarda dados das outras ferramentas: só abre cada uma. Seus post-its vão cifrados com a chave de cada time para a pasta sincronizada pelo OneDrive.</p>
   </div></div>`;
   $('#iNovo').onclick = criarDlg;
@@ -606,7 +606,7 @@ async function aposAbrir() {
 }
 document.addEventListener('visibilitychange', () => { if (!document.hidden && db) atualizar(); });
 async function criarDlg() {
-  if (!temFS()) return toast('Abra no Edge ou no Chrome.');
+  if (semFS()) return;
   const d = modal(`<div class="mh"><h2>Criar o hub</h2></div><div class="mb">
     <div class="f2"><label class="field"><span>Seu nome (aparece nos post-its)</span><input class="sin" id="cP"></label><label class="field"><span>Nome no topo (grupo ou time)</span><input class="sin" id="cN" placeholder="Ex.: Tecnologia"></label></div>
     <p class="small muted">Depois você escolhe a pasta pessoal (só sua, de preferência no seu OneDrive; a mesma das ferramentas) e cria a senha.</p></div>
