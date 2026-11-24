@@ -464,6 +464,32 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   ok(!JSON.stringify(await opfs(h, async () => ler('LocalGestor2', 'hub-tecnologia.json'))).includes('pagamentos-fin'), 'chave de finanças só dentro do arquivo cifrado do hub');
   await h.setViewportSize({ width: 1280, height: 900 }); await h.screenshot({ path: path.join(SAIDA, 'hub-visao.png'), fullPage: true });
 
+  console.log('14. Assistente: como funciona, "Estou com sorte" e checklist');
+  const ls = await nova('/inicio.html', { 'fin-local': 'LocalSorte', 'fin-comum': 'CompSorte' });
+  ok(await ls.evaluate(() => document.querySelectorAll('.ilu svg').length === 4 && /idioma que só vocês dois falam/.test(document.body.textContent)), 'primeira tela explica a solução em quatro desenhos (HTML e JSON, chave como idioma, níveis, OneDrive)');
+  await ls.click('#sorte'); await ls.fill('#sN', 'Tecnologia'); await ls.fill('#sP', 'Fernando'); await ls.fill('#sT', 'Pagamentos PAG\nCartões CAR');
+  await ls.click('#sL'); await ls.waitForSelector('#sL + .chip'); await ls.click('#sC'); await ls.click('#dlg [data-r="ok"]').catch(() => {}); await ls.waitForSelector('#sC + .chip');
+  await ls.click('#sS'); await criarSenha(ls, SENHA2); await ls.waitForSelector('#sGo:not([disabled])');
+  await ls.click('#sGo'); await cofre(ls); await ls.waitForSelector('.mapa-svg', { timeout: 30000 });
+  const locS = await opfs(ls, async () => [await listar('LocalSorte'), await listar('LocalSorte/para-os-times'), await listar('LocalSorte/para-os-times/pagamentos')]);
+  ok(['hub.html', 'gestao_pessoal.html', 'financas_grupo.html', 'onde-fica-cada-coisa.html', 'hub-tecnologia.json', 'gestao-tecnologia.json', 'financas-grupo-tecnologia.json'].every(n => locS[0].includes(n)), 'Estou com sorte: ferramentas do gestor geradas na pasta');
+  ok(locS[1].join() === 'cartoes,pagamentos' && ['quadro_pagamentos.html', 'financas_pagamentos.html', 'LEIA-ME.txt'].every(n => locS[2].includes(n)), 'Estou com sorte: Quadro e Finanças de cada time em para-os-times/<time>/');
+  const qS = await opfs(ls, async () => ler('LocalSorte/para-os-times/pagamentos', 'quadro_pagamentos.html')), fS = await opfs(ls, async () => ler('LocalSorte/para-os-times/pagamentos', 'financas_pagamentos.html'));
+  ok(/"key":"GK1\.pagamentos-\d{4}\./.test(qS) && /"chave":"GK1\.pagamentos-fin-\d{4}\./.test(fS) && /"pasta":"CompSorte"/.test(fS), 'HTMLs dos times já levam a chave certa e a pasta sincronizada');
+  ok(await ls.evaluate(() => document.querySelectorAll('.tk').length === 2 && document.querySelectorAll('[data-ck]').length >= 8 && document.querySelectorAll('.inss .ins').length === 4), 'tela final com cards, desenho, chaves por time e checklist');
+  await ls.click('[data-ck="cofre"]'); ok(/1/.test(await ls.textContent('#ckV')), 'checklist marca item e conta o progresso');
+  ok((await opfs(ls, async () => listar('CompSorte/times'))).join() === 'cartoes,pagamentos', 'pasta sincronizada recebe a estrutura dos times');
+  await ls.setViewportSize({ width: 900, height: 900 }); await ls.screenshot({ path: path.join(SAIDA, 'inicio-sorte.png'), fullPage: true });
+  fs.writeFileSync(path.join(SAIDA, 'gestao_sorte.html'), await opfs(ls, async () => ler('LocalSorte', 'gestao_pessoal.html')));
+  const cS = await nova('/financas/testes/saida/gestao_sorte.html', {});
+  await cS.evaluate(() => { window.__abrir = { dir: 'LocalSorte', arq: 'gestao-tecnologia.json' }; });
+  await cS.fill('#lockPass', SENHA2); await cS.click('#btnOpen'); await cS.waitForTimeout(1500);
+  ok(await cS.evaluate(() => db.teams.map(t => t.prefix + ':' + t.slug).join() === 'PAG:pagamentos,CAR:cartoes' && db.teams.every(t => /^GK1\./.test(igActiveKey(t.id)?.key || '')) && db.settings.selfName === 'Fernando'), 'Central abre com os times, prefixos, pastas e chaves de tarefas');
+  fs.writeFileSync(path.join(SAIDA, 'grupo_sorte.html'), await opfs(ls, async () => ler('LocalSorte', 'financas_grupo.html')));
+  const gS = await nova('/financas/testes/saida/grupo_sorte.html', { 'fin-local': 'LocalSorte' });
+  await gS.click('#iAbrir'); await senhaAbrir(gS, SENHA2); await gS.waitForSelector('#topo');
+  ok(await gS.evaluate(() => db.times.every(t => t.chaves.length === 1 && /-fin-/.test(t.chaves[0].kid))), 'Finanças do Grupo abre com a chave de finanças de cada time');
+
   ok(erros.length === 0, 'sem erros de JavaScript nas páginas' + (erros.length ? ': ' + erros.join(' | ') : ''));
   await browser.close(); srv.close();
   console.log(falhas ? `\n${falhas} verificação(ões) falharam.` : '\nTodas as verificações passaram.');
