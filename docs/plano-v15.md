@@ -91,4 +91,4 @@ Pessoa, time, fórum, ciclo e anotação seguem o mesmo padrão: campos essencia
 
 ## Versão exibida (24/11/2026)
 
-A Central mostra a versão na barra lateral (rodapé) e na tela de senha: `APP_VERSION` no HTML (hoje **15.2**: 15.0 = v15 original, 15.1 = senha/cofre e "Onde estou?" do PR #10, 15.2 = lista lateral de fóruns). `DB_VERSION` continua sendo a versão do arquivo de dados (15). Ao mudar a Central, suba `APP_VERSION` nos dois lugares em que aparece no HTML (constante e textos `v15.x`).
+A Central mostra a versão na barra lateral (rodapé) e na tela de senha: `APP_VERSION` no HTML (hoje **15.2**: 15.0 = v15 original, 15.1 = senha/cofre e "Onde estou?" do PR #10, 15.2 = lista lateral de fóruns). `DB_VERSION` continua sendo a versão do arquivo de dados (15). Ao mudar a Central, suba a versão na constante `APP_VERSION` e nos dois textos `v15.x` (barra lateral e tela de senha).
