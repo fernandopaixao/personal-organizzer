@@ -100,6 +100,30 @@ dialog[open]{display:flex;flex-direction:column}dialog>.mb{flex:1;min-height:0}
 svg.ch{width:100%;height:auto;display:block}
 .legend{display:flex;gap:14px;font-size:11.5px;color:var(--muted);flex-wrap:wrap;margin-top:6px}.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
 @media (max-width:720px){.rail{position:fixed;top:auto;bottom:0;width:100%;height:62px;flex-direction:row;justify-content:space-around;padding:0;border-right:0;border-top:1px solid var(--line)}.logo{display:none}.main{margin-left:0;padding-bottom:90px}.f2,.map{grid-template-columns:1fr}}
+/* ---- Finanças 1.2: cards de leitura, medidores e gráficos (branco e azul, destaque discreto) ---- */
+.top .sg{background:transparent;padding:0;gap:4px}.top .sg button{padding:4px 11px;border:1px solid transparent}.top .sg button.on{background:#fff;border-color:var(--bv-line);box-shadow:none}
+.subnav{flex-basis:100%;display:flex;gap:4px;margin-top:-2px}
+.subnav button{padding:5px 12px;border-radius:99px;color:var(--muted);font-weight:550;font-size:12.5px;border:1px solid transparent}
+.subnav button:hover{color:var(--ink)}.subnav button.on{color:var(--bv);background:#fff;border-color:var(--bv-line)}
+.inss{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:16px}
+.ins{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px 13px;display:flex;flex-direction:column;gap:7px;min-width:0}
+.ins .k{font-size:11.5px;color:var(--muted);font-weight:550;display:flex;gap:6px;align-items:center}
+.ins .v{font-family:var(--title);font-size:22px;font-weight:600;letter-spacing:-.02em;line-height:1.15}
+.ins .s{font-size:12px;color:var(--muted)}.ins .s b{color:var(--ink);font-weight:600}
+.ins.hi{background:linear-gradient(160deg,var(--bv) 0%,var(--bv-deep) 100%);border-color:var(--bv);color:#fff}
+.ins.hi .k,.ins.hi .s{color:rgba(255,255,255,.78)}.ins.hi .s b{color:#fff}.ins.hi .m{background:rgba(255,255,255,.22)}.ins.hi .m i{background:#fff}.ins.hi .m em{background:#fff}
+.m{height:6px;border-radius:3px;background:var(--bv-soft);position:relative}
+.m i{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:var(--bv);max-width:100%}
+.m.over i{background:var(--bv-deep)}.m em{position:absolute;top:-3px;bottom:-3px;width:2px;border-radius:1px;background:var(--ink)}
+.tag{font-size:10.5px;font-weight:650;padding:1px 7px;border-radius:99px;background:var(--bv-soft);color:var(--bv)}.tag.late{background:var(--late-soft);color:var(--late)}
+.hb{display:grid;grid-template-columns:minmax(90px,30%) 1fr auto;gap:9px 12px;align-items:center;font-size:12.5px}
+.hb .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hb .val{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.hb .tr{height:10px;border-radius:5px;background:var(--bv-soft);position:relative}.hb .tr i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:var(--bv)}
+.hb .tr em{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink);border-radius:1px}.hb .tr em.cap{background:var(--late)}
+.g21{display:grid;gap:16px;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}@media (max-width:980px){.g21{grid-template-columns:1fr}}
+.card.flat{padding:14px 18px}
+.al.compact{padding:6px 0}
+svg.ch{max-height:280px}
 
 .hub{max-width:1180px;margin:0 auto;padding:0 clamp(16px,2.6vw,40px) 80px}
 .hub .top .logo{margin:0}
@@ -589,6 +613,40 @@ async function suspeitaDeSincronizada(dir) {
   try { for await (const [n] of dir.entries()) { if (/^desktop\.ini$/i.test(n)) sinais.push('tem desktop.ini'); if (n === 'times' || n === 'grupo') sinais.push('tem a estrutura da pasta compartilhada'); } } catch {}
   return [...new Set(sinais)];
 }
+
+/* ---- Finanças 1.2: peças visuais comuns (cards de leitura, barras horizontais, curva acumulada) ---- */
+// Card de leitura: rótulo, número, medidor (pct de 0 a 1+, marca opcional) e uma frase que interpreta.
+function cardLeitura({ k, v, pct = null, marca = null, s = '', tag = '', hi = false }) {
+  const p = pct == null ? '' : `<div class="m ${pct > 1 ? 'over' : ''}"><i style="width:${Math.max(0, Math.min(1, pct)) * 100}%"></i>${marca != null ? `<em style="left:${Math.max(0, Math.min(1, marca)) * 100}%"></em>` : ''}</div>`;
+  return `<div class="ins ${hi ? 'hi' : ''}"><div class="k">${k}${tag}</div><div class="v">${v}</div>${p}${s ? `<div class="s">${s}</div>` : ''}</div>`;
+}
+// Barras horizontais: [{ nome, valor, ref (marca preta), cap (marca de teto), rotulo, attrs }]
+function barrasH(itens, fmt) {
+  if (!itens.length) return '<div class="empty">Nada para mostrar ainda.</div>';
+  const max = Math.max(1, ...itens.map(x => Math.max(x.valor || 0, x.ref || 0, x.cap || 0)));
+  const pc = v => (v / max * 100).toFixed(2) + '%';
+  return `<div class="hb">${itens.map(x => `<div class="n" title="${esc(x.titulo || '')}">${x.nome}</div><div class="tr" title="${esc(x.titulo || '')}"><i style="width:${pc(x.valor || 0)}${x.cor ? ';background:' + x.cor : ''}"></i>${x.ref ? `<em style="left:${pc(x.ref)}"></em>` : ''}${x.cap ? `<em class="cap" style="left:${pc(x.cap)}"></em>` : ''}</div><div class="val">${x.rotulo ?? fmt(x.valor || 0)}</div>`).join('')}</div>`;
+}
+// Curva acumulada do ano: séries [{ nome, cor, v: [por mês], ate (índice do último mês com dado), tracejada, area }]
+function curvaAcumulada(ms, series, fmt, hojeIdx = -1) {
+  const acc = series.map(s => { let a = 0; return { ...s, c: s.v.map((x, i) => (s.ate != null && i > s.ate) ? null : (a += x || 0)) }; });
+  const max = Math.max(1, ...acc.flatMap(s => s.c.filter(x => x != null)));
+  const W = 760, H = 230, pl = 10, pr = 96, pt = 12, pb = 26, X = i => pl + i * (W - pl - pr) / Math.max(1, ms.length - 1), Y = v => H - pb - (v / max) * (H - pt - pb);
+  let svg = [0.25, 0.5, 0.75, 1].map(f => `<line x1="${pl}" x2="${W - pr}" y1="${Y(max * f)}" y2="${Y(max * f)}" stroke="var(--line)"/>`).join('');
+  if (hojeIdx >= 0 && hojeIdx < ms.length) svg += `<line x1="${X(hojeIdx)}" x2="${X(hojeIdx)}" y1="${pt}" y2="${H - pb}" stroke="var(--bv-line)" stroke-dasharray="3 3"/><text x="${X(hojeIdx)}" y="${pt + 8}" text-anchor="middle" font-size="10" fill="var(--faint)">hoje</text>`;
+  const ocupados = [];
+  for (const s of acc) {
+    const pts = s.c.map((v, i) => v == null ? null : [X(i), Y(v)]).filter(Boolean); if (!pts.length) continue;
+    const d = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+    if (s.area) svg += `<path d="${d} L${pts.at(-1)[0].toFixed(1)} ${H - pb} L${pts[0][0].toFixed(1)} ${H - pb} Z" fill="${s.cor}" opacity=".08"/>`;
+    svg += `<path d="${d}" fill="none" stroke="${s.cor}" stroke-width="${s.fina ? 1.5 : 2.4}" ${s.tracejada ? 'stroke-dasharray="5 4"' : ''} stroke-linejoin="round" stroke-linecap="round"/>`;
+    const u = pts.at(-1), ult = s.c.filter(x => x != null).at(-1); let ty = u[1] + 4; while (ocupados.some(o => Math.abs(o - ty) < 13)) ty += 13; ocupados.push(ty);
+    svg += `<circle cx="${u[0]}" cy="${u[1]}" r="3.2" fill="${s.cor}"/><text x="${u[0] + 8}" y="${ty}" font-size="11" fill="${s.cor}" font-weight="600">${esc(fmt(ult))}</text>`;
+  }
+  svg += ms.map((m, i) => `<text x="${X(i)}" y="${H - 8}" text-anchor="middle" font-size="10.5" fill="var(--muted)">${nomeMes(m)}</text>`).join('');
+  return `<svg class="ch" viewBox="0 0 ${W} ${H}" role="img" aria-label="Curva acumulada do ano">${svg}</svg><div class="legend">${series.map(s => `<span><i style="background:${s.cor};${s.tracejada ? 'height:2px' : ''}"></i>${esc(s.nome)}</span>`).join('')}</div>`;
+}
+const pctTxt = (a, b) => b ? Math.round(a / b * 100) + '%' : '—';
 
 </script>
 <script>

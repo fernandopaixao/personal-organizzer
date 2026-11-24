@@ -448,3 +448,37 @@ async function suspeitaDeSincronizada(dir) {
   try { for await (const [n] of dir.entries()) { if (/^desktop\.ini$/i.test(n)) sinais.push('tem desktop.ini'); if (n === 'times' || n === 'grupo') sinais.push('tem a estrutura da pasta compartilhada'); } } catch {}
   return [...new Set(sinais)];
 }
+
+/* ---- Finanças 1.2: peças visuais comuns (cards de leitura, barras horizontais, curva acumulada) ---- */
+// Card de leitura: rótulo, número, medidor (pct de 0 a 1+, marca opcional) e uma frase que interpreta.
+function cardLeitura({ k, v, pct = null, marca = null, s = '', tag = '', hi = false }) {
+  const p = pct == null ? '' : `<div class="m ${pct > 1 ? 'over' : ''}"><i style="width:${Math.max(0, Math.min(1, pct)) * 100}%"></i>${marca != null ? `<em style="left:${Math.max(0, Math.min(1, marca)) * 100}%"></em>` : ''}</div>`;
+  return `<div class="ins ${hi ? 'hi' : ''}"><div class="k">${k}${tag}</div><div class="v">${v}</div>${p}${s ? `<div class="s">${s}</div>` : ''}</div>`;
+}
+// Barras horizontais: [{ nome, valor, ref (marca preta), cap (marca de teto), rotulo, attrs }]
+function barrasH(itens, fmt) {
+  if (!itens.length) return '<div class="empty">Nada para mostrar ainda.</div>';
+  const max = Math.max(1, ...itens.map(x => Math.max(x.valor || 0, x.ref || 0, x.cap || 0)));
+  const pc = v => (v / max * 100).toFixed(2) + '%';
+  return `<div class="hb">${itens.map(x => `<div class="n" title="${esc(x.titulo || '')}">${x.nome}</div><div class="tr" title="${esc(x.titulo || '')}"><i style="width:${pc(x.valor || 0)}${x.cor ? ';background:' + x.cor : ''}"></i>${x.ref ? `<em style="left:${pc(x.ref)}"></em>` : ''}${x.cap ? `<em class="cap" style="left:${pc(x.cap)}"></em>` : ''}</div><div class="val">${x.rotulo ?? fmt(x.valor || 0)}</div>`).join('')}</div>`;
+}
+// Curva acumulada do ano: séries [{ nome, cor, v: [por mês], ate (índice do último mês com dado), tracejada, area }]
+function curvaAcumulada(ms, series, fmt, hojeIdx = -1) {
+  const acc = series.map(s => { let a = 0; return { ...s, c: s.v.map((x, i) => (s.ate != null && i > s.ate) ? null : (a += x || 0)) }; });
+  const max = Math.max(1, ...acc.flatMap(s => s.c.filter(x => x != null)));
+  const W = 760, H = 230, pl = 10, pr = 96, pt = 12, pb = 26, X = i => pl + i * (W - pl - pr) / Math.max(1, ms.length - 1), Y = v => H - pb - (v / max) * (H - pt - pb);
+  let svg = [0.25, 0.5, 0.75, 1].map(f => `<line x1="${pl}" x2="${W - pr}" y1="${Y(max * f)}" y2="${Y(max * f)}" stroke="var(--line)"/>`).join('');
+  if (hojeIdx >= 0 && hojeIdx < ms.length) svg += `<line x1="${X(hojeIdx)}" x2="${X(hojeIdx)}" y1="${pt}" y2="${H - pb}" stroke="var(--bv-line)" stroke-dasharray="3 3"/><text x="${X(hojeIdx)}" y="${pt + 8}" text-anchor="middle" font-size="10" fill="var(--faint)">hoje</text>`;
+  const ocupados = [];
+  for (const s of acc) {
+    const pts = s.c.map((v, i) => v == null ? null : [X(i), Y(v)]).filter(Boolean); if (!pts.length) continue;
+    const d = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+    if (s.area) svg += `<path d="${d} L${pts.at(-1)[0].toFixed(1)} ${H - pb} L${pts[0][0].toFixed(1)} ${H - pb} Z" fill="${s.cor}" opacity=".08"/>`;
+    svg += `<path d="${d}" fill="none" stroke="${s.cor}" stroke-width="${s.fina ? 1.5 : 2.4}" ${s.tracejada ? 'stroke-dasharray="5 4"' : ''} stroke-linejoin="round" stroke-linecap="round"/>`;
+    const u = pts.at(-1), ult = s.c.filter(x => x != null).at(-1); let ty = u[1] + 4; while (ocupados.some(o => Math.abs(o - ty) < 13)) ty += 13; ocupados.push(ty);
+    svg += `<circle cx="${u[0]}" cy="${u[1]}" r="3.2" fill="${s.cor}"/><text x="${u[0] + 8}" y="${ty}" font-size="11" fill="${s.cor}" font-weight="600">${esc(fmt(ult))}</text>`;
+  }
+  svg += ms.map((m, i) => `<text x="${X(i)}" y="${H - 8}" text-anchor="middle" font-size="10.5" fill="var(--muted)">${nomeMes(m)}</text>`).join('');
+  return `<svg class="ch" viewBox="0 0 ${W} ${H}" role="img" aria-label="Curva acumulada do ano">${svg}</svg><div class="legend">${series.map(s => `<span><i style="background:${s.cor};${s.tracejada ? 'height:2px' : ''}"></i>${esc(s.nome)}</span>`).join('')}</div>`;
+}
+const pctTxt = (a, b) => b ? Math.round(a / b * 100) + '%' : '—';
