@@ -4,7 +4,7 @@
 
 > **Para quem é:** cada time que acompanha iniciativas em nível de card e precisa enviar backlog e métricas para a Central de Gestão do gestor.
 > **O que este guia resolve:** escolher entre (A) **usar o Quadro do Time** (`quadro_do_time_v1.html`, pronto) ou (B) **adaptar a ferramenta HTML que o time já tem**, seguindo a mesma arquitetura.
-> **Referência formal:** `integracao-time/03-pacote-para-agentes-do-time.md`, os schemas em `integracao-time/contrato/` e os exemplos em `integracao-time/exemplos/`. Este guia não muda nenhum contrato; quando houver dúvida, o pacote 03 e os schemas valem.
+> **Referência formal:** a pasta [`contratos/`](../contratos/LEIA-ME.md) (schemas, criptografia com vetores de teste, exemplos cifrados e o validador `node contratos/validar.js`) e `integracao-time/03-pacote-para-agentes-do-time.md`. Este guia não muda nenhum contrato; quando houver dúvida, o pacote 03 e os schemas valem.
 
 ---
 
@@ -28,7 +28,7 @@ Gestao-Integracao/                         (pasta do SharePoint, sincronizada pe
 | Backlog | Publicado **automaticamente** a cada movimentação de card (espera de ~10 s para agrupar mudanças) |
 | Métricas | Publicadas **ao fechar a sprint, com confirmação** (e por um botão "Publicar métricas agora"), com o campo `sprint` |
 | Escopo das métricas | Só do **time**, calculadas a partir da movimentação de cards, sobre o **backlog inteiro** (com e sem vínculo, com e sem épico). **Nada por pessoa**: o formato individual existe reservado, mas está desligado |
-| Nomes de métricas | Use `standard` quando seguir a definição padrão (dicionário em `contrato/dicionario-metricas.json`). Métricas próprias são aceitas, desde que tragam `definition` |
+| Nomes de métricas | Use `standard` quando seguir a definição padrão (dicionário em `contratos/schemas/dicionario-metricas.json`). Métricas próprias são aceitas, desde que tragam `definition` |
 
 ### Novidade no catálogo: fase e dependências da feature
 Cada feature do catálogo pode trazer dois campos opcionais:
@@ -121,7 +121,7 @@ O pacote 03 descreve **o que** implementar. O Quadro do Time é uma **implementa
 
 | Necessidade | Função no Quadro do Time | Observação |
 |---|---|---|
-| Cifrar e decifrar o envelope | `lerChaveTexto`, `importarChave`, `aadDe`, `cifrar`, `decifrar` | Idênticas a `contrato/cripto-referencia.js` (só o `b64.enc` foi feito em blocos, para arquivos grandes) |
+| Cifrar e decifrar o envelope | `lerChaveTexto`, `importarChave`, `aadDe`, `cifrar`, `decifrar` | Idênticas a `contratos/referencia/cripto.js` (só o `b64.enc` foi feito em blocos, para arquivos grandes) |
 | Chaveiro no navegador | `colarChave`, `chaveiro`, `removerChave` | `CryptoKey` com `extractable: false` no IndexedDB; a mais recente cifra |
 | Pasta | `conectarPasta`, `obterPasta` | Permissão pedida só dentro de um clique |
 | Catálogo | `lerCatalogo`, `lerCatalogoEnvelope`, `applyCatalogLinks` | Guarda o catálogo **ainda cifrado** no IndexedDB para abrir sem a pasta; aplica `links[]` e `aliases[]`; recusa catálogo de outro time |
@@ -168,7 +168,7 @@ O pacote 03 descreve **o que** implementar. O Quadro do Time é uma **implementa
 
 ### 3.3 Post-its do gestor (recomendado)
 
-O Hub da solução do gestor deixa recados curtos para o time. O Quadro do Time já os mostra; uma ferramenta própria pode fazer o mesmo com a **mesma chave do time** e o mesmo envelope. Contratos: `gestao-postits/1` e `gestao-postits-vistos/1` (schemas em `financas/contrato/` e na pasta `contrato/` do pacote .zip).
+O Hub da solução do gestor deixa recados curtos para o time. O Quadro do Time já os mostra; uma ferramenta própria pode fazer o mesmo com a **mesma chave do time** e o mesmo envelope. Contratos: `gestao-postits/1` e `gestao-postits-vistos/1` (schemas em `contratos/schemas/`, no repositório e no pacote .zip).
 
 **Onde ficam**
 
@@ -224,14 +224,14 @@ async function publicarVistos(root, slug, chave /* { kid, key } */, eu /* { pess
 
 ## 4. Como testar (vale para A e para B)
 
-1. **Exemplos cifrados:** cadastre a chave **pública de exemplo** `GK1.pagamentos-2611.AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8` e decifre os três arquivos de `integracao-time/exemplos/cifrados/`. O resultado deve ser idêntico aos de `exemplos/conteudo/`. Com outra chave, a mensagem deve ser "Falha ao decifrar: chave errada ou arquivo alterado". Nunca use essa chave com dados reais.
-2. **Pasta de teste:** copie `exemplos/cifrados/central/` para uma pasta `Gestao-Integracao` de teste, conecte, confira que o catálogo mostra `PAG-042` com as features F1 a F3, a fase de cada uma e que F2 depende de F1 e F3 depende de F2.
+1. **Exemplos cifrados:** cadastre a chave **pública de exemplo** do time Pagamentos (`contratos/exemplos/CHAVES-DE-EXEMPLO.txt`, a de `pagamentos-2611`) e decifre `status.json`, `metricas.json` e `central/catalogo-pagamentos.json` de `contratos/exemplos/Gestao-Compartilhado/`. O resultado deve ser idêntico aos de `contratos/exemplos/conteudo/`. Com outra chave, a mensagem deve ser "Falha ao decifrar: chave errada ou arquivo alterado". Nunca use essa chave com dados reais.
+2. **Pasta de teste:** copie `contratos/exemplos/Gestao-Compartilhado/central/` para uma pasta `Gestao-Compartilhado` de teste, conecte, confira que o catálogo mostra `PAG-042` com as features F1 a F3, a fase de cada uma e que F2 depende de F1 e F3 depende de F2.
 3. **Publicar duas vezes** e conferir: `iv` diferente, `revision` maior, conteúdo nunca em claro na pasta.
-4. **Validar contra os schemas** (o envelope e o conteúdo decifrado):
+4. **Validar** com o validador da solução (sem instalar nada além do Node 20+):
    ```
-   npx ajv-cli validate --spec=draft2020 -c ajv-formats -s contrato/gestao-envelope-1.schema.json -d times/<slug>/status.json
-   npx ajv-cli validate --spec=draft2020 -c ajv-formats -s contrato/gestao-status-1.schema.json   -d status-decifrado.json
-   npx ajv-cli validate --spec=draft2020 -c ajv-formats -s contrato/gestao-metricas-1.schema.json -d metricas-decifrado.json
+   node contratos/validar.js vetores                                   # sua cripto bate com a referência
+   node contratos/validar.js conteudo status-decifrado.json --como times/<slug>/status.json
+   node contratos/validar.js pasta <pasta de teste> --chave GK1.<slug>-AAMM.…
    ```
    No Quadro do Time, **Central › Ver status.json / Ver metricas.json** mostra o conteúdo que vai cifrado e o resultado da validação mínima.
 5. **Checklist de aceite** da seção 8 do pacote 03.
@@ -245,7 +245,7 @@ O Quadro do Time v1 passou por estes testes: os três exemplos cifrados decifram
 
 ```
 Vamos ligar a nossa ferramenta HTML de acompanhamento à Central de Gestão do gestor.
-Anexos: "guia-adaptacao-times.md", "03-pacote-para-agentes-do-time.md", a pasta contrato/
+Anexos: "guia-adaptacao-times.md", "03-pacote-para-agentes-do-time.md", a pasta contratos/
 (schemas, dicionario-metricas.json, cripto-referencia.js), a pasta exemplos/ e
 quadro_do_time_v1.html (implementação de referência).
 

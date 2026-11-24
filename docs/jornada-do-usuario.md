@@ -2,7 +2,7 @@
 
 *24/11/2026 · como cada papel conhece, monta, usa e mantém a solução*
 
-A solução tem quatro papéis. A mesma pessoa pode ter mais de um (o gestor costuma ser também o dono das finanças do grupo; o líder do time costuma ser também o responsável financeiro).
+A solução tem quatro papéis. A mesma pessoa pode ter mais de um (o gestor costuma ser também o dono das finanças do grupo; o líder do time costuma ser também o responsável financeiro). Quem integra uma **outra solução** pelos contratos tem a jornada própria na [seção 9](#9-jornada-de-quem-integra-outra-solução).
 
 | Papel | Quem é | Ferramentas que usa | O que espera da solução |
 |---|---|---|---|
@@ -122,3 +122,19 @@ O Mapa de Férias é apoio para a visão do grupo; o pedido oficial de férias c
 | **5. Cadastrar as próprias** | Gestor | Marca as próprias férias e as dos diretos | Diretos | Notas ficam só locais |
 | **6. Subir para a liderança** | Gestor | Cola a chave do grupo (a mesma das Finanças), confere e publica o consolidado | Ajustes › Nível acima | Opção de trocar nomes por "Pessoa N" |
 | **7. Visão da liderança** | Liderança | Cadastra cada gestor como unidade e soma tudo, em quantos níveis existirem | Unidades, Mapa | A liderança precisa ler a mesma pasta compartilhada |
+
+---
+
+## 9. Jornada de quem integra outra solução
+
+Times e gestores pares que já têm ferramenta própria não precisam trocar: eles se acoplam pelos contratos (`contratos/`, [ADR-0032](adr/0032-pasta-de-contratos.md)).
+
+| Etapa | Quem | O que faz | Onde | Ponto de atenção |
+|---|---|---|---|---|
+| **1. Combinar** | Gestor (ou liderança) e o responsável da outra solução | Cadastra o time ou o gestor como unidade, combina slug e prefixo, envia as chaves por mensagem direta e a pasta `contratos/` | Central, Finanças do Grupo, Mapa de Férias | Chave nunca na pasta nem no código |
+| **2. Entender** | Quem integra | Lê o LEIA-ME e a receita do seu caso; acha o arquivo e a chave na tabela do layout | `contratos/LEIA-ME.md`, `01` e `05` | Só publica arquivos cujo dono é o seu papel |
+| **3. Implementar** | Quem integra | Usa a referência de criptografia ou confere a própria com os vetores; monta o conteúdo a partir do exemplo | `referencia/cripto.js`, `vetores/`, `exemplos/` | Retrato completo, revisão sempre maior, totais = soma dos meses |
+| **4. Validar** | Quem integra | Confere conteúdo e pasta com o validador | `node contratos/validar.js` | Avisos não reprovam; erros fazem o arquivo ser ignorado |
+| **5. Aparecer** | Gestor ou liderança | Vê o arquivo no hub, na Central, nas Finanças do Grupo ou no Mapa de Férias; aplica pela prévia | Ferramenta de quem lê | Moeda e categorias iguais às do grupo |
+| **6. Manter** | Ambos | Contrato novo ou versão `/2` vem com ADR, schema, exemplo e período de convivência | `contratos/LEIA-ME.md`, histórico | Leitor tolerante: campo desconhecido é ignorado |
+

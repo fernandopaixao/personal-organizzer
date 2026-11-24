@@ -1,0 +1,554 @@
+{
+  "schema": "gestao-financas-plano/1",
+  "revision": 6,
+  "generatedAt": "2026-11-21T09:30:00-03:00",
+  "hlc": "1763728200000.0",
+  "source": {
+    "team": "canais",
+    "tool": "financas-grupo",
+    "toolVersion": "1.5.0",
+    "level": "group",
+    "writer": "marina~p8x2c"
+  },
+  "team": {
+    "name": "Canais",
+    "slug": "canais"
+  },
+  "fiscalYear": 2026,
+  "fiscalYears": [
+    2026,
+    2027
+  ],
+  "currency": "BRL",
+  "planVersion": "Reforecast 1",
+  "closedMonths": [],
+  "categories": [
+    {
+      "id": "pessoas",
+      "name": "Pessoas",
+      "kind": "OPEX"
+    },
+    {
+      "id": "ferramentas",
+      "name": "Ferramentas e licenças",
+      "kind": "OPEX"
+    },
+    {
+      "id": "infra",
+      "name": "Infraestrutura",
+      "kind": "OPEX"
+    },
+    {
+      "id": "projetos",
+      "name": "Projetos (CAPEX)",
+      "kind": "CAPEX"
+    }
+  ],
+  "lines": [
+    {
+      "id": "pagamentos:pessoas:O",
+      "name": "Pagamentos · Pessoas",
+      "category": "pessoas",
+      "kind": "OPEX",
+      "months": {
+        "2026-01": {
+          "budget": 4800000,
+          "forecast": 4800000,
+          "actual": 4800000
+        },
+        "2026-02": {
+          "budget": 4800000,
+          "forecast": 4800000,
+          "actual": 4800000
+        },
+        "2026-03": {
+          "budget": 4800000,
+          "forecast": 4800000,
+          "actual": 4800000
+        },
+        "2026-04": {
+          "budget": 4800000,
+          "forecast": 4800000,
+          "actual": 4800000
+        },
+        "2026-05": {
+          "budget": 4800000,
+          "forecast": 4800000,
+          "actual": 4800000
+        },
+        "2026-06": {
+          "budget": 4800000,
+          "forecast": 4800000,
+          "actual": 4800000
+        },
+        "2026-07": {
+          "budget": 4800000,
+          "forecast": 5200000,
+          "actual": 5200000
+        },
+        "2026-08": {
+          "budget": 4800000,
+          "forecast": 5200000,
+          "actual": 5200000
+        },
+        "2026-09": {
+          "budget": 4800000,
+          "forecast": 5200000,
+          "actual": 5200000
+        },
+        "2026-10": {
+          "budget": 4800000,
+          "forecast": 5200000,
+          "actual": 5200000
+        },
+        "2026-11": {
+          "budget": 4800000,
+          "forecast": 5200000,
+          "actual": 0
+        },
+        "2026-12": {
+          "budget": 4800000,
+          "forecast": 5200000,
+          "actual": 0
+        },
+        "2027-01": {
+          "budget": 0,
+          "forecast": 5200000,
+          "actual": 0
+        },
+        "2027-02": {
+          "budget": 0,
+          "forecast": 5200000,
+          "actual": 0
+        },
+        "2027-03": {
+          "budget": 0,
+          "forecast": 5200000,
+          "actual": 0
+        },
+        "2027-04": {
+          "budget": 0,
+          "forecast": 5200000,
+          "actual": 0
+        },
+        "2027-05": {
+          "budget": 0,
+          "forecast": 5200000,
+          "actual": 0
+        },
+        "2027-06": {
+          "budget": 0,
+          "forecast": 5200000,
+          "actual": 0
+        }
+      }
+    },
+    {
+      "id": "pagamentos:ferramentas:O",
+      "name": "Pagamentos · Ferramentas e licenças",
+      "category": "ferramentas",
+      "kind": "OPEX",
+      "months": {
+        "2026-01": {
+          "budget": 350000,
+          "forecast": 350000,
+          "actual": 350000
+        },
+        "2026-02": {
+          "budget": 350000,
+          "forecast": 350000,
+          "actual": 350000
+        },
+        "2026-03": {
+          "budget": 350000,
+          "forecast": 350000,
+          "actual": 350000
+        },
+        "2026-04": {
+          "budget": 350000,
+          "forecast": 350000,
+          "actual": 350000
+        },
+        "2026-05": {
+          "budget": 350000,
+          "forecast": 350000,
+          "actual": 350000
+        },
+        "2026-06": {
+          "budget": 350000,
+          "forecast": 350000,
+          "actual": 350000
+        },
+        "2026-07": {
+          "budget": 350000,
+          "forecast": 350000,
+          "actual": 350000
+        },
+        "2026-08": {
+          "budget": 350000,
+          "forecast": 350000,
+          "actual": 350000
+        },
+        "2026-09": {
+          "budget": 350000,
+          "forecast": 350000,
+          "actual": 350000
+        },
+        "2026-10": {
+          "budget": 350000,
+          "forecast": 350000,
+          "actual": 350000
+        },
+        "2026-11": {
+          "budget": 350000,
+          "forecast": 350000,
+          "actual": 0
+        },
+        "2026-12": {
+          "budget": 350000,
+          "forecast": 350000,
+          "actual": 0
+        },
+        "2027-01": {
+          "budget": 0,
+          "forecast": 380000,
+          "actual": 0
+        },
+        "2027-02": {
+          "budget": 0,
+          "forecast": 380000,
+          "actual": 0
+        },
+        "2027-03": {
+          "budget": 0,
+          "forecast": 380000,
+          "actual": 0
+        },
+        "2027-04": {
+          "budget": 0,
+          "forecast": 380000,
+          "actual": 0
+        },
+        "2027-05": {
+          "budget": 0,
+          "forecast": 380000,
+          "actual": 0
+        },
+        "2027-06": {
+          "budget": 0,
+          "forecast": 380000,
+          "actual": 0
+        },
+        "2027-07": {
+          "budget": 0,
+          "forecast": 380000,
+          "actual": 0
+        },
+        "2027-08": {
+          "budget": 0,
+          "forecast": 380000,
+          "actual": 0
+        },
+        "2027-09": {
+          "budget": 0,
+          "forecast": 380000,
+          "actual": 0
+        },
+        "2027-10": {
+          "budget": 0,
+          "forecast": 380000,
+          "actual": 0
+        },
+        "2027-11": {
+          "budget": 0,
+          "forecast": 380000,
+          "actual": 0
+        },
+        "2027-12": {
+          "budget": 0,
+          "forecast": 380000,
+          "actual": 0
+        }
+      }
+    },
+    {
+      "id": "pagamentos:projetos:C",
+      "name": "Pagamentos · Projetos (CAPEX)",
+      "category": "projetos",
+      "kind": "CAPEX",
+      "months": {
+        "2026-07": {
+          "budget": 2000000,
+          "forecast": 2000000,
+          "actual": 2100000
+        },
+        "2026-08": {
+          "budget": 2000000,
+          "forecast": 2000000,
+          "actual": 2100000
+        },
+        "2026-09": {
+          "budget": 2000000,
+          "forecast": 2000000,
+          "actual": 2100000
+        },
+        "2026-10": {
+          "budget": 2000000,
+          "forecast": 2000000,
+          "actual": 2100000
+        },
+        "2026-11": {
+          "budget": 2000000,
+          "forecast": 2000000,
+          "actual": 0
+        },
+        "2026-12": {
+          "budget": 2000000,
+          "forecast": 3000000,
+          "actual": 0
+        }
+      }
+    },
+    {
+      "id": "cartoes:pessoas:O",
+      "name": "Cartões · Pessoas",
+      "category": "pessoas",
+      "kind": "OPEX",
+      "months": {
+        "2026-01": {
+          "budget": 3900000,
+          "forecast": 3900000,
+          "actual": 3850000
+        },
+        "2026-02": {
+          "budget": 3900000,
+          "forecast": 3900000,
+          "actual": 3850000
+        },
+        "2026-03": {
+          "budget": 3900000,
+          "forecast": 3900000,
+          "actual": 3850000
+        },
+        "2026-04": {
+          "budget": 3900000,
+          "forecast": 3900000,
+          "actual": 3850000
+        },
+        "2026-05": {
+          "budget": 3900000,
+          "forecast": 3900000,
+          "actual": 3850000
+        },
+        "2026-06": {
+          "budget": 3900000,
+          "forecast": 3900000,
+          "actual": 3850000
+        },
+        "2026-07": {
+          "budget": 3900000,
+          "forecast": 3900000,
+          "actual": 3850000
+        },
+        "2026-08": {
+          "budget": 3900000,
+          "forecast": 3900000,
+          "actual": 3850000
+        },
+        "2026-09": {
+          "budget": 3900000,
+          "forecast": 3900000,
+          "actual": 3850000
+        },
+        "2026-10": {
+          "budget": 3900000,
+          "forecast": 3900000,
+          "actual": 3850000
+        },
+        "2026-11": {
+          "budget": 3900000,
+          "forecast": 3900000,
+          "actual": 0
+        },
+        "2026-12": {
+          "budget": 3900000,
+          "forecast": 3900000,
+          "actual": 0
+        }
+      }
+    },
+    {
+      "id": "cartoes:infra:O",
+      "name": "Cartões · Infraestrutura",
+      "category": "infra",
+      "kind": "OPEX",
+      "months": {
+        "2026-01": {
+          "budget": 900000,
+          "forecast": 1000000,
+          "actual": 980000
+        },
+        "2026-02": {
+          "budget": 900000,
+          "forecast": 1000000,
+          "actual": 980000
+        },
+        "2026-03": {
+          "budget": 900000,
+          "forecast": 1000000,
+          "actual": 980000
+        },
+        "2026-04": {
+          "budget": 900000,
+          "forecast": 1000000,
+          "actual": 980000
+        },
+        "2026-05": {
+          "budget": 900000,
+          "forecast": 1000000,
+          "actual": 980000
+        },
+        "2026-06": {
+          "budget": 900000,
+          "forecast": 1000000,
+          "actual": 980000
+        },
+        "2026-07": {
+          "budget": 900000,
+          "forecast": 1000000,
+          "actual": 980000
+        },
+        "2026-08": {
+          "budget": 900000,
+          "forecast": 1000000,
+          "actual": 980000
+        },
+        "2026-09": {
+          "budget": 900000,
+          "forecast": 1000000,
+          "actual": 980000
+        },
+        "2026-10": {
+          "budget": 900000,
+          "forecast": 1000000,
+          "actual": 980000
+        },
+        "2026-11": {
+          "budget": 900000,
+          "forecast": 1000000,
+          "actual": 0
+        },
+        "2026-12": {
+          "budget": 900000,
+          "forecast": 1000000,
+          "actual": 0
+        }
+      }
+    },
+    {
+      "id": "grupo:ferramentas",
+      "name": "Itens do grupo · Ferramentas e licenças",
+      "category": "ferramentas",
+      "kind": "OPEX",
+      "months": {
+        "2026-01": {
+          "budget": 120000,
+          "forecast": 120000,
+          "actual": 0
+        },
+        "2026-02": {
+          "budget": 120000,
+          "forecast": 120000,
+          "actual": 0
+        },
+        "2026-03": {
+          "budget": 120000,
+          "forecast": 120000,
+          "actual": 0
+        },
+        "2026-04": {
+          "budget": 120000,
+          "forecast": 120000,
+          "actual": 0
+        },
+        "2026-05": {
+          "budget": 120000,
+          "forecast": 120000,
+          "actual": 0
+        },
+        "2026-06": {
+          "budget": 120000,
+          "forecast": 120000,
+          "actual": 0
+        },
+        "2026-07": {
+          "budget": 120000,
+          "forecast": 120000,
+          "actual": 0
+        },
+        "2026-08": {
+          "budget": 120000,
+          "forecast": 120000,
+          "actual": 0
+        },
+        "2026-09": {
+          "budget": 120000,
+          "forecast": 120000,
+          "actual": 0
+        },
+        "2026-10": {
+          "budget": 120000,
+          "forecast": 120000,
+          "actual": 0
+        },
+        "2026-11": {
+          "budget": 120000,
+          "forecast": 120000,
+          "actual": 0
+        },
+        "2026-12": {
+          "budget": 120000,
+          "forecast": 120000,
+          "actual": 0
+        }
+      }
+    }
+  ],
+  "commitments": [],
+  "units": [
+    {
+      "slug": "pagamentos",
+      "name": "Pagamentos",
+      "kind": "time",
+      "revision": 14,
+      "generatedAt": "2026-11-20T18:12:40-03:00",
+      "planVersion": "Reforecast 1"
+    },
+    {
+      "slug": "cartoes",
+      "name": "Cartões",
+      "kind": "time",
+      "revision": 9,
+      "generatedAt": "2026-11-19T15:02:11-03:00",
+      "planVersion": "Reforecast 1"
+    }
+  ],
+  "totals": {
+    "budget": 132840000,
+    "forecast": 137440000,
+    "actual": 109800000
+  },
+  "totalsByYear": {
+    "2026": {
+      "budget": 132840000,
+      "forecast": 137440000,
+      "actual": 109800000
+    },
+    "2027": {
+      "budget": 0,
+      "forecast": 35760000,
+      "actual": 0
+    }
+  },
+  "directiveRevision": 2
+}

@@ -17,5 +17,5 @@ Os arquivos da pasta comum são lidos por mais de uma pessoa (a Central e o time
 - **Contra:** a chave é compartilhada dentro do time e não há assinatura digital, então a Central sabe que o arquivo veio do time, não de qual pessoa. O campo `writer` é conferido contra o conteúdo decifrado, mas não é prova criptográfica.
 
 ## Ao evoluir
-- Use `contrato/cripto-referencia.js` ou o núcleo comum. Não invente formato de envelope novo.
+- Use [`contratos/referencia/cripto.js`](../../contratos/referencia/cripto.js) (confira com `node contratos/validar.js vetores`) ou o núcleo comum. Não invente formato de envelope novo.
 - Recurso novo que precise de público diferente do time inteiro ganha **chave própria** (precedente: [ADR-0006](0006-chave-de-financas-separada.md)).

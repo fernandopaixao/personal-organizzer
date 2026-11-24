@@ -4,7 +4,7 @@
     python3 tools/empacotar.py            → dist/gestao-solucao-AAAA-MM-DD.zip
 
 O pacote tem uma pasta só, com todos os HTMLs lado a lado (o hub abre as ferramentas por link
-relativo, então elas precisam estar na mesma pasta), os contratos e a documentação de uso.
+relativo, então elas precisam estar na mesma pasta), os contratos (contratos/) e a documentação de uso.
 Não leva dados: nenhum arquivo .json de dados é incluído. Rode antes o build
 (python3 tools/injetar_seguranca.py) para que as cópias embutidas estejam em dia.
 """
@@ -28,8 +28,14 @@ def main():
         'financas_time.html': RAIZ / 'financas' / 'financas_time.html',
         'ferias.html': RAIZ / 'ferias' / 'ferias.html',
     }
-    for f in sorted((RAIZ / 'financas' / 'contrato').iterdir()):
-        arquivos[f'contrato/{f.name}'] = f
+    # Pasta de contratos inteira (ADR-0032): especificação, schemas, referência de cripto, validador,
+    # vetores e exemplos com chaves públicas. Fica de fora só o teste do repositório (precisa do Playwright).
+    for f in sorted((RAIZ / 'contratos').rglob('*')):
+        rel = f.relative_to(RAIZ).as_posix()
+        if f.is_file() and not rel.startswith('contratos/testes/'):
+            arquivos[rel] = f
+    for f in sorted((RAIZ / 'docs' / 'adr').glob('*.md')):
+        arquivos[f'docs/adr/{f.name}'] = f
     for d in ['passo-a-passo.md', 'funcionalidades.md', 'jornada-do-usuario.md', 'visao-geral-da-solucao.md']:
         arquivos[f'docs/{d}'] = RAIZ / 'docs' / d
     arquivos['docs/guia-adaptacao-times.md'] = RAIZ / 'ferramenta-time' / 'guia-adaptacao-times.md'
@@ -46,6 +52,8 @@ def main():
 
 Este pacote não contém dados. Senhas e chaves ficam no seu cofre de senhas.
 Guia completo: docs/passo-a-passo.md
+Outra solução precisa gerar arquivos que a solução lê (até a visão da liderança)?
+Entregue a pasta contratos/ (comece por contratos/LEIA-ME.md).
 """
     saida = RAIZ / 'dist'; saida.mkdir(exist_ok=True)
     zipf = saida / f'{nome}.zip'

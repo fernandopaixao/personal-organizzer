@@ -1,0 +1,60 @@
+{
+  "schema": "gestao-financas-diretriz/1",
+  "revision": 2,
+  "generatedAt": "2026-11-01T08:00:00-03:00",
+  "hlc": "1762002000000.0",
+  "source": {
+    "group": "diretoria-digital",
+    "tool": "financas-grupo",
+    "toolVersion": "1.5.0",
+    "team": "canais",
+    "writer": "rafael~d4m7z"
+  },
+  "team": {
+    "name": "Canais",
+    "slug": "canais"
+  },
+  "fiscalYear": 2026,
+  "currency": "BRL",
+  "categories": [
+    {
+      "id": "pessoas",
+      "name": "Pessoas",
+      "kind": "OPEX"
+    },
+    {
+      "id": "ferramentas",
+      "name": "Ferramentas e licenças",
+      "kind": "OPEX"
+    },
+    {
+      "id": "infra",
+      "name": "Infraestrutura",
+      "kind": "OPEX"
+    },
+    {
+      "id": "projetos",
+      "name": "Projetos (CAPEX)",
+      "kind": "CAPEX"
+    }
+  ],
+  "costCenters": [],
+  "caps": {},
+  "capTotal": 160000000,
+  "fiscalYears": [
+    2026,
+    2027
+  ],
+  "byYear": {
+    "2026": {
+      "caps": {},
+      "capTotal": 160000000
+    },
+    "2027": {
+      "caps": {},
+      "capTotal": 150000000
+    }
+  },
+  "planVersion": "Reforecast 1",
+  "publishBy": "2026-11-30"
+}

@@ -257,7 +257,7 @@ Em 23/11/2026 o Fernando pediu para implementar sem responder às perguntas abai
 | F2 Finanças do Time | Feito | `financas/financas_time.html` (1.1.0, multianual: seção 12) |
 | F3 Finanças do Grupo | Feito | `financas/financas_grupo.html` (1.1.0, multianual: seção 12), com "HTML de finanças do time" |
 | F4 Central e Quadro | Feito sobre a Central v15 e o Quadro 2.0 (que vira 2.1.0): senha obrigatória no Quadro (quadros antigos sem senha pedem uma ao abrir), aviso de cofre ao criar senha, gerar/copiar chave e gerar "HTML do time" com chave, lembrete de teste da senha, botão "Onde estou?" nas duas, e Quadro com **um arquivo por pessoa e computador** em `times/<time>/quadro/<pessoa>-<computador>.json` (cifrado com a chave do time, unido item a item a cada 20 s) | `financas/src/seguranca.js`, `central-f4.js`, `quadro-f4.js`, injetados por `python3 tools/injetar_seguranca.py` |
-| F5 documentação e testes | Feito para F0 a F3 | `financas/testes/teste-e2e.js` (53 verificações), contratos em `financas/contrato/` |
+| F5 documentação e testes | Feito para F0 a F3 | `financas/testes/teste-e2e.js` (53 verificações), contratos em `contratos/` (antes `financas/contrato/`) |
 
 Como montar: `python3 tools/build_financas.py` (lê a Central mais nova e o Quadro, sem alterá-los, e gera os três HTMLs). Como testar: `node financas/testes/teste-e2e.js`.
 

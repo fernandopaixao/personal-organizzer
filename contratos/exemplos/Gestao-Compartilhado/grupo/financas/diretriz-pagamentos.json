@@ -1,0 +1,12 @@
+{
+  "schema": "gestao-envelope/1",
+  "content": "gestao-financas-diretriz/1",
+  "team": "pagamentos",
+  "kid": "pagamentos-fin-2611",
+  "revision": 3,
+  "generatedAt": "2026-11-03T10:00:00-03:00",
+  "alg": "A256GCM",
+  "iv": "dLvR/Wu1XJLoEWxS",
+  "ct": "Vkuolxu3Sj8h7guWbguXZomFdliZAChGeRwYVOmCeEv/alR7+F9WU2iPYZ0Uj9MXbHRJmgJ3km2Hn2KLl2Pqi1JC6nXGDh5QcPaKTSedseSlbJumhJ+lDRStCJpG0lvFO3ATMEpdQv42AH2qoKVQlziWGe75iGxOsDrjj3QT/qNfLIW8sB1j/VicmXYXFRySNlKMI60N90yoWAYONlJJwKjqKghmUKXy4/V+nIcfe1MkFjW6ydYtJkh37awA3p+/2cAY4GhmRn5r4xMp5b7KSaEUlWwiG3C5qymzqgRXWxAqf2wW/Y9tuhgYk01eLfeCcl6fSGYfyNYgAruR1mEa7Q5rrLtaVxrmakbl2zrbNvFCtARwWt+foRHbA5BlDu7mMIQpg2JNBcu11KyOdY7L9xgROuYtqCoBXmTW3vbf779fSkLCKrYHlraUDH6Qex4mOO01m+WCrOGSmkh2qVsUw2QfGOr504KmDmAkaTRdydrfW7ccgkiIf/Hr+BPKTImSfaAhIEzDow79PL22PGQ5nGBXwx7zdup93PXcY//Dd/iP8UsVDq/9REMzr5XAVa8stOCS8lJyVaECAyjyjqiiU6yDxpolHEMJfiF0cWh3EJ2s2BHpkHI5nzSExWuYqcKGYZRNXJpl+ECa2+BgJTJPulVl8Ro3M4UHUUvZmlg2J3eaOmWI6FMbdZv7GSoU3nrnZbcy0/Hdm878lUmS8cK3pi4+D2eM8/8zIVVQoaUKuifeCjTDf1tlzB9aK4YrkWoFNYARraCT5hpQv4Hblx4VwtjuDOpNkpqsPuDNVzN5EkHt2ZsAY6fexgpXGjgn/4HJ8bRPlnR5PMC6nbJAdWD+klyg/NmphxRScJR5kJWjTkoWMG2WFGxiMGnPigdz+gXR/glsEE1Mg2OspE2tUn1PlmWjf/y26rQVAe9mJQ4thjfWT6WoROUKeCkPV/ad3s7V4x6Tmo/FHtUBa5byRMcEJuinVC3yA0yXDqNYPL7nEeoymQ5Bge6iHKmqtcxqk6UtxSGwoPmIUFwJnan06VKAAAzmLCUs3bMI2DHMDgbTtDXUdoQ+BFMHX1yZ+7KB7Ivr/6zNrhpM4evtEKWQPH/7re893hb7g1K2eEIAyO+cq+brm1RbILks9pW8+4QzMxMmQ76FWMIi4ZfJGMgYa8hlVeo/LXPz7JlgkXzCP0NPvOJVIgxtb+3O6o/NjwzADUircIXLOGlzehM3o8anKkylinnipAqAs37M7Q3Nnl9TYIgo4prbB+NYsq8hrcrzZ1Xu5AD/MkMLTkH4hBxuOt4a2h9SREaYlClPrYiWrzHH0Mea6rztEAEvpPra7Fn9ehy3RM53yQpzdiS1s4f9IR/voyY5CEnnIbqClc7JWnacUyHvfFbPcOuJMyc=",
+  "writer": "marina~p8x2c"
+}

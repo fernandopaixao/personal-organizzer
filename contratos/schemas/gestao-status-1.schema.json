@@ -1,0 +1,271 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "gestao-status/1",
+  "title": "Status das iniciativas exportado por uma ferramenta de time",
+  "description": "Escrito somente pela ferramenta do time em times/<slug>/status.json, dentro de um envelope gestao-envelope/1. É sempre um retrato completo (snapshot), nunca um delta. Campos desconhecidos são ignorados pela Central.",
+  "type": "object",
+  "required": [
+    "schema",
+    "source",
+    "generatedAt",
+    "revision",
+    "initiatives"
+  ],
+  "properties": {
+    "schema": {
+      "const": "gestao-status/1"
+    },
+    "source": {
+      "$ref": "#/$defs/source"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "catalogRevision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "initiatives": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "type": "object",
+        "required": [
+          "localId",
+          "name",
+          "status"
+        ],
+        "properties": {
+          "ref": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[A-Z]{2,5}-[0-9]{3,}$"
+          },
+          "localId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "status": {
+            "enum": [
+              "ok",
+              "attn",
+              "late",
+              "done",
+              "paused"
+            ]
+          },
+          "progress": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "progressBasis": {
+            "enum": [
+              "cards",
+              "points",
+              "items",
+              "manual"
+            ]
+          },
+          "forecastEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "update": {
+            "type": "object",
+            "required": [
+              "date",
+              "text"
+            ],
+            "properties": {
+              "date": {
+                "type": "string",
+                "format": "date"
+              },
+              "text": {
+                "type": "string",
+                "maxLength": 500
+              },
+              "author": {
+                "type": "string"
+              }
+            }
+          },
+          "blockers": {
+            "type": "array",
+            "maxItems": 50,
+            "items": {
+              "type": "object",
+              "required": [
+                "localId",
+                "text"
+              ],
+              "properties": {
+                "localId": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string",
+                  "maxLength": 300
+                },
+                "since": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "owner": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "counts": {
+            "type": "object",
+            "description": "Contagens livres (ex.: cards_total, cards_done). Exibidas como texto.",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "link": {
+            "type": "string",
+            "pattern": "^https://"
+          },
+          "features": {
+            "type": "array",
+            "maxItems": 200,
+            "description": "Visão do time sobre cada feature da Central em que trabalha (downstream). Nunca altera a feature na Central.",
+            "items": {
+              "type": "object",
+              "required": [
+                "ref",
+                "status"
+              ],
+              "properties": {
+                "ref": {
+                  "type": "string",
+                  "pattern": "^[A-Z]{2,5}-[0-9]{3,}\\.F[0-9]+$"
+                },
+                "status": {
+                  "enum": [
+                    "ok",
+                    "attn",
+                    "late",
+                    "done",
+                    "paused"
+                  ]
+                },
+                "progress": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100
+                },
+                "forecastEnd": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "note": {
+                  "type": "string",
+                  "maxLength": 300
+                }
+              }
+            }
+          },
+          "items": {
+            "type": "array",
+            "maxItems": 500,
+            "description": "Itens do time (features locais, histórias, entregas) relevantes para o gestor. Vinculados a uma feature da Central por featureRef, quando houver.",
+            "items": {
+              "type": "object",
+              "required": [
+                "localId",
+                "title",
+                "status"
+              ],
+              "properties": {
+                "localId": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                "kind": {
+                  "type": "string",
+                  "maxLength": 30,
+                  "description": "tipo no vocabulário do time: feature, historia, entrega, spike…"
+                },
+                "status": {
+                  "enum": [
+                    "open",
+                    "done",
+                    "cancelled"
+                  ]
+                },
+                "featureRef": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[A-Z]{2,5}-[0-9]{3,}\\.F[0-9]+$"
+                },
+                "due": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "doneAt": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "owner": {
+                  "type": "string"
+                },
+                "link": {
+                  "type": "string",
+                  "pattern": "^https://"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "required": [
+        "team",
+        "tool"
+      ],
+      "properties": {
+        "team": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+        "teamName": {
+          "type": "string"
+        },
+        "tool": {
+          "type": "string"
+        },
+        "toolVersion": {
+          "type": "string"
+        },
+        "contact": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

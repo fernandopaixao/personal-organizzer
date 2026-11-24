@@ -1,0 +1,90 @@
+{
+  "schema": "gestao-ferias/1",
+  "revision": 3,
+  "generatedAt": "2026-11-21T09:40:00-03:00",
+  "hlc": "1763728800000.0",
+  "source": {
+    "team": "canais",
+    "tool": "ferias",
+    "toolVersion": "1.2.0",
+    "level": "group",
+    "writer": "marina~p8x2c"
+  },
+  "unit": {
+    "name": "Canais",
+    "slug": "canais",
+    "kind": "grupo"
+  },
+  "units": [
+    {
+      "slug": "canais",
+      "name": "Canais",
+      "kind": "grupo",
+      "parent": null
+    },
+    {
+      "slug": "pagamentos",
+      "name": "Pagamentos",
+      "kind": "time",
+      "parent": "canais"
+    }
+  ],
+  "people": [
+    {
+      "id": "marina-alves",
+      "name": "Pessoa 1",
+      "unit": "canais"
+    },
+    {
+      "id": "pagamentos.ana-souza",
+      "name": "Pessoa 2",
+      "unit": "pagamentos"
+    },
+    {
+      "id": "pagamentos.bruno-lima",
+      "name": "Pessoa 3",
+      "unit": "pagamentos"
+    }
+  ],
+  "absences": [
+    {
+      "person": "pagamentos.bruno-lima",
+      "start": "2026-12-08",
+      "end": "2026-12-08",
+      "kind": "folga"
+    },
+    {
+      "person": "pagamentos.ana-souza",
+      "start": "2026-12-21",
+      "end": "2027-01-08",
+      "kind": "ferias"
+    },
+    {
+      "person": "marina-alves",
+      "start": "2027-01-04",
+      "end": "2027-01-15",
+      "kind": "ferias"
+    },
+    {
+      "person": "pagamentos.bruno-lima",
+      "start": "2027-01-12",
+      "end": "2027-01-30",
+      "kind": "ferias"
+    }
+  ],
+  "holidays": [
+    {
+      "date": "2026-12-25",
+      "name": "Natal"
+    }
+  ],
+  "contributors": [
+    {
+      "slug": "pagamentos",
+      "name": "Pagamentos",
+      "kind": "time",
+      "files": 2,
+      "lastGeneratedAt": "2026-11-18T11:20:00-03:00"
+    }
+  ]
+}

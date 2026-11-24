@@ -1,6 +1,6 @@
 # Passo a passo · como lidar com a solução
 
-*24/11/2026 · Central v15.8, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.2, assistente 2.3*
+*24/11/2026 · Central v15.8, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.2, assistente 2.3, contratos 1.0*
 
 Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é independente. Antes de começar: use **Edge ou Chrome** no computador, abrindo o arquivo com dois cliques (não pela pré-visualização do Outlook, Teams ou OneDrive, nem de dentro do .zip), e tenha à mão um **cofre de senhas** (o gerenciador de senhas da empresa).
 
@@ -18,6 +18,7 @@ Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é ind
 11. [Uma chave vazou](#11-uma-chave-vazou)
 12. [Problemas comuns](#12-problemas-comuns)
 13. [Férias: do time à liderança](#13-férias-do-time-à-liderança)
+14. [Integrar outra solução pelos contratos](#14-integrar-outra-solução-pelos-contratos)
 
 ---
 
@@ -230,3 +231,22 @@ O **Mapa de Férias** (`ferias.html`) é apoio para enxergar e planejar ausênci
 1. Crie o arquivo como gestor, com o seu identificador.
 2. **Unidades › + Grupo de outro gestor**, com o identificador do grupo dele. Se você já gerou a chave dele nas Finanças do Grupo, cole a mesma; senão, **Gerar chave para o gestor** e envie por mensagem direta.
 3. O consolidado do gestor entra como uma unidade, com a unidade de origem de cada pessoa.
+
+---
+
+## 14. Integrar outra solução pelos contratos
+
+Quando um time ou um gestor par usa uma ferramenta própria e quer aparecer no seu hub ou na visão da liderança. Tudo está em `contratos/` (no repositório e no .zip).
+
+**Quem administra (você)**
+1. Cadastre o time (Central, Finanças do Grupo ou Mapa de Férias) ou, se você é a liderança, o gestor como unidade **grupo**. Combine o **identificador** (slug) e, para times, o **prefixo**.
+2. Gere as chaves que ele vai usar e envie por mensagem direta: tarefas (`GK1.<time>-AAMM`) e/ou finanças (`GK1.<time>-fin-AAMM`) para um time; a chave do grupo (`GK1.<grupo>-fin-AAMM`) para um gestor que vai publicar para a liderança.
+3. Envie a pasta `contratos/` e diga por onde começar: `contratos/LEIA-ME.md` e a receita certa em `contratos/05-como-integrar.md` (A: tarefas para a Central; B: finanças do time; C: gestor para a liderança; D: férias; E: post-its).
+
+**Quem integra (a outra solução)**
+1. Rode `node contratos/validar.js vetores` com a sua implementação de criptografia (ou use `contratos/referencia/cripto.js`).
+2. Monte o conteúdo seguindo o schema e o exemplo do arquivo; confira com `node contratos/validar.js conteudo <arquivo> --como <caminho na pasta>`.
+3. Publique seguindo as regras de escrita (um dono, revisão maior, gravação atômica) e confira a pasta real com `node contratos/validar.js pasta <pasta> --chave GK1.…`.
+
+**Conferir do seu lado:** o arquivo aparece na ferramenta que lê (hub, Central, Finanças do Grupo ou Mapa de Férias). Finanças e consolidados entram pela prévia, como os de qualquer time. Se não aparecer, a tabela "Quando algo não aparece" do guia diz a causa provável.
+

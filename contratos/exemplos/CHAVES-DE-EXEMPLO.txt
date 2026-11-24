@@ -1,0 +1,16 @@
+CHAVES DE EXEMPLO · PÚBLICAS · NUNCA USE EM DADOS REAIS
+
+Elas abrem os arquivos de exemplo em Gestao-Compartilhado/. Foram derivadas de um texto fixo
+(SHA-256 de "contratos-exemplo|<kid>") só para os exemplos serem reproduzíveis.
+Chaves reais são 32 bytes aleatórios gerados pela ferramenta que administra o nível.
+
+Chave de tarefas do time Pagamentos (status, métricas, catálogo, férias e post-its do time):
+GK1.pagamentos-2611.X8479WY2tntKmoO2vzXE7JAmX-d6tyUaEDP-CDLU_Ho
+
+Chave de finanças do time Pagamentos (plano do time e diretriz do gestor para o time):
+GK1.pagamentos-fin-2611.3YwTZ2i8m1IepzBD-94TjnjMakbDMAK_RCQzg_bSI_Q
+
+Chave que a liderança gerou para o grupo Canais (consolidado financeiro, diretriz da liderança e férias do grupo):
+GK1.canais-fin-2611.875BqfvXVD6amNqGU0K3inmlJIYQhtEvZBmwoNXQoeI
+
+Conferir: node contratos/validar.js exemplos

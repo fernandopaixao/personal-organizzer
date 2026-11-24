@@ -1,0 +1,161 @@
+{
+  "schema": "gestao-dicionario-metricas/1",
+  "updated": "2026-11-15",
+  "description": "Índice usado pela Central para casar métricas dos times (por standard, id ou nome). Métricas fora do índice são aceitas como não mapeadas.",
+  "metrics": [
+    {
+      "standard": "throughput",
+      "name": "Vazão",
+      "valueType": "count",
+      "unit": "cards",
+      "direction": "higher_is_better",
+      "grain": "week",
+      "viz": "bar",
+      "aliases": [
+        "vazao",
+        "entregas_semana",
+        "cards_concluidos_semana",
+        "throughput_semanal"
+      ]
+    },
+    {
+      "standard": "sprint_closed",
+      "name": "Cards fechados por sprint",
+      "valueType": "count",
+      "unit": "cards",
+      "direction": "higher_is_better",
+      "grain": "sprint",
+      "viz": "bar",
+      "aliases": [
+        "cards_fechados_sprint",
+        "fechados_sprint",
+        "concluidos_por_sprint",
+        "velocity_cards"
+      ]
+    },
+    {
+      "standard": "lead_time",
+      "name": "Lead time",
+      "valueType": "duration",
+      "unit": "dias",
+      "direction": "lower_is_better",
+      "grain": "week",
+      "viz": "line",
+      "aliases": [
+        "leadtime",
+        "tempo_de_entrega",
+        "lead"
+      ]
+    },
+    {
+      "standard": "cycle_time",
+      "name": "Cycle time",
+      "valueType": "duration",
+      "unit": "dias",
+      "direction": "lower_is_better",
+      "grain": "week",
+      "viz": "line",
+      "aliases": [
+        "cycletime",
+        "tempo_de_ciclo"
+      ]
+    },
+    {
+      "standard": "wip",
+      "name": "Trabalho em andamento",
+      "valueType": "count",
+      "unit": "cards",
+      "direction": "neutral",
+      "grain": "none",
+      "viz": "kpi",
+      "aliases": [
+        "wip_atual",
+        "em_andamento",
+        "trabalho_em_andamento"
+      ]
+    },
+    {
+      "standard": "wip_age",
+      "name": "Idade do WIP",
+      "valueType": "duration",
+      "unit": "dias",
+      "direction": "lower_is_better",
+      "grain": "none",
+      "viz": "kpi",
+      "aliases": [
+        "idade_wip",
+        "aging_wip",
+        "envelhecimento"
+      ]
+    },
+    {
+      "standard": "cfd",
+      "name": "Fluxo cumulativo",
+      "valueType": "count",
+      "unit": "cards",
+      "direction": "neutral",
+      "grain": "week",
+      "viz": "stacked_area",
+      "aliases": [
+        "fluxo_cumulativo",
+        "cumulative_flow"
+      ]
+    },
+    {
+      "standard": "blocked_pct",
+      "name": "% do tempo bloqueado",
+      "valueType": "percent",
+      "unit": "%",
+      "direction": "lower_is_better",
+      "grain": "week",
+      "viz": "line",
+      "aliases": [
+        "bloqueio_pct",
+        "tempo_bloqueado",
+        "pct_bloqueado"
+      ]
+    },
+    {
+      "standard": "predictability",
+      "name": "Compromisso cumprido",
+      "valueType": "percent",
+      "unit": "%",
+      "direction": "higher_is_better",
+      "grain": "sprint",
+      "viz": "bar",
+      "aliases": [
+        "compromisso_sprint",
+        "previsibilidade",
+        "sprint_commitment"
+      ]
+    },
+    {
+      "standard": "items_on_time",
+      "name": "Itens no prazo",
+      "valueType": "percent",
+      "unit": "%",
+      "direction": "higher_is_better",
+      "grain": "month",
+      "viz": "bar",
+      "aliases": [
+        "entregas_no_prazo",
+        "on_time",
+        "aderencia_prazo"
+      ]
+    },
+    {
+      "standard": "arrival_rate",
+      "name": "Demanda que chega",
+      "valueType": "count",
+      "unit": "cards",
+      "direction": "neutral",
+      "grain": "week",
+      "viz": "bar",
+      "aliases": [
+        "entrada",
+        "demanda",
+        "cards_criados_semana"
+      ]
+    }
+  ]
+}

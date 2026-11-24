@@ -1,0 +1,553 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "gestao-metricas/1",
+  "title": "Métricas autodescritivas exportadas por uma ferramenta de time",
+  "description": "Escrito somente pela ferramenta do time em times/<slug>/metricas.json, dentro de um envelope gestao-envelope/1. Cada métrica descreve a si mesma (nome, tipo, unidade, forma dos dados, visualização sugerida), para que a Central desenhe métricas que não conhece. Campos desconhecidos são ignorados. Na v1 só métricas do time derivadas da movimentação de cards; métricas individuais estão reservadas (não ativas).",
+  "type": "object",
+  "required": [
+    "schema",
+    "source",
+    "generatedAt",
+    "revision",
+    "metrics"
+  ],
+  "properties": {
+    "schema": {
+      "const": "gestao-metricas/1"
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "team",
+        "tool"
+      ],
+      "properties": {
+        "team": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+        "teamName": {
+          "type": "string"
+        },
+        "tool": {
+          "type": "string"
+        },
+        "toolVersion": {
+          "type": "string"
+        },
+        "contact": {
+          "type": "string"
+        }
+      }
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "groups": {
+      "type": "array",
+      "description": "Ordem e nome dos grupos usados em metrics[].group (opcional).",
+      "items": {
+        "type": "object",
+        "required": [
+          "key",
+          "label"
+        ],
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "metrics": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "$ref": "#/$defs/metric"
+      }
+    },
+    "sprint": {
+      "type": "object",
+      "description": "Sprint cujo fechamento gerou esta publicação (opcional).",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "start": {
+          "type": "string",
+          "format": "date"
+        },
+        "end": {
+          "type": "string",
+          "format": "date"
+        },
+        "closedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "metric": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "valueType",
+        "data"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]{1,60}$"
+        },
+        "standard": {
+          "type": "string",
+          "description": "id de uma métrica padrão do catálogo (throughput, lead_time...) quando esta métrica segue a definição padrão"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "definition": {
+          "type": "string",
+          "maxLength": 600,
+          "description": "Como é calculada, em texto."
+        },
+        "group": {
+          "type": "string"
+        },
+        "order": {
+          "type": "integer"
+        },
+        "highlight": {
+          "type": "boolean",
+          "description": "true = candidata a aparecer na Visão do time e na reunião de status"
+        },
+        "scope": {
+          "type": "object",
+          "required": [
+            "level"
+          ],
+          "properties": {
+            "level": {
+              "enum": [
+                "team",
+                "initiative",
+                "feature"
+              ]
+            },
+            "ref": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "ref da iniciativa (PAG-042) ou da feature (PAG-042.F2), conforme level",
+              "pattern": "^[A-Z]{2,5}-[0-9]{3,}(\\.F[0-9]+)?$"
+            },
+            "localId": {
+              "type": "string"
+            }
+          },
+          "description": "Na v1: 'team', 'initiative' ou 'feature'. O nível 'person' está RESERVADO para o contrato futuro gestao-metricas-pessoas/1 (ver $defs/reservedPersonScope) e não deve ser enviado neste arquivo."
+        },
+        "valueType": {
+          "enum": [
+            "count",
+            "number",
+            "percent",
+            "duration",
+            "currency",
+            "ratio"
+          ]
+        },
+        "unit": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "decimals": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4
+        },
+        "direction": {
+          "enum": [
+            "higher_is_better",
+            "lower_is_better",
+            "neutral"
+          ]
+        },
+        "grain": {
+          "enum": [
+            "day",
+            "week",
+            "month",
+            "sprint",
+            "quarter",
+            "none"
+          ]
+        },
+        "aggregation": {
+          "enum": [
+            "sum",
+            "mean",
+            "median",
+            "p85",
+            "p95",
+            "last",
+            "max",
+            "min"
+          ]
+        },
+        "target": {
+          "type": "object",
+          "required": [
+            "value"
+          ],
+          "properties": {
+            "value": {
+              "type": "number"
+            },
+            "op": {
+              "enum": [
+                "<=",
+                ">=",
+                "=",
+                "<",
+                ">"
+              ]
+            },
+            "label": {
+              "type": "string"
+            }
+          }
+        },
+        "thresholds": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "status",
+              "op",
+              "value"
+            ],
+            "properties": {
+              "status": {
+                "enum": [
+                  "ok",
+                  "attn",
+                  "late"
+                ]
+              },
+              "op": {
+                "enum": [
+                  "<=",
+                  ">=",
+                  "<",
+                  ">"
+                ]
+              },
+              "value": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "status": {
+          "enum": [
+            "ok",
+            "attn",
+            "late"
+          ]
+        },
+        "viz": {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "enum": [
+                "kpi",
+                "line",
+                "bar",
+                "stacked_bar",
+                "stacked_area",
+                "gauge",
+                "histogram",
+                "table"
+              ]
+            },
+            "showTarget": {
+              "type": "boolean"
+            },
+            "min": {
+              "type": "number"
+            },
+            "max": {
+              "type": "number"
+            }
+          }
+        },
+        "data": {
+          "type": "object",
+          "description": "Exatamente uma forma: value, series, categories ou bins.",
+          "properties": {
+            "value": {
+              "type": "number"
+            },
+            "asOf": {
+              "type": "string",
+              "format": "date"
+            },
+            "previous": {
+              "type": "number"
+            },
+            "series": {
+              "type": "array",
+              "maxItems": 12,
+              "items": {
+                "type": "object",
+                "required": [
+                  "key",
+                  "points"
+                ],
+                "properties": {
+                  "key": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "points": {
+                    "type": "array",
+                    "maxItems": 400,
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "t",
+                        "v"
+                      ],
+                      "properties": {
+                        "t": {
+                          "type": "string",
+                          "format": "date"
+                        },
+                        "v": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "n": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "categories": {
+              "type": "array",
+              "maxItems": 30,
+              "items": {
+                "type": "object",
+                "required": [
+                  "key",
+                  "v"
+                ],
+                "properties": {
+                  "key": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "v": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "bins": {
+              "type": "array",
+              "maxItems": 60,
+              "items": {
+                "type": "object",
+                "required": [
+                  "from",
+                  "to",
+                  "v"
+                ],
+                "properties": {
+                  "from": {
+                    "type": "number"
+                  },
+                  "to": {
+                    "type": "number"
+                  },
+                  "v": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          },
+          "oneOf": [
+            {
+              "required": [
+                "value"
+              ],
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "series"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "categories"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "bins"
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "required": [
+                "series"
+              ],
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "value"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "categories"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "bins"
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "required": [
+                "categories"
+              ],
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "value"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "series"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "bins"
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "required": [
+                "bins"
+              ],
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "value"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "series"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "categories"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    "reservedPersonScope": {
+      "$comment": "RESERVADO, NÃO ATIVO. Formato previsto para métricas individuais, que irão num arquivo separado (times/<slug>/metricas-pessoas.json, contrato gestao-metricas-pessoas/1, chave própria). Não é aceito em gestao-metricas/1 e a Central v1 ignora.",
+      "type": "object",
+      "required": [
+        "level",
+        "person"
+      ],
+      "properties": {
+        "level": {
+          "const": "person"
+        },
+        "person": {
+          "type": "object",
+          "required": [
+            "key"
+          ],
+          "properties": {
+            "key": {
+              "type": "string",
+              "description": "identificador estável e pseudônimo da pessoa na ferramenta do time"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[A-Z]{2,5}-[0-9]{3,}$"
+        }
+      }
+    }
+  }
+}

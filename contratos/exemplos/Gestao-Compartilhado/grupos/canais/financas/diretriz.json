@@ -1,0 +1,12 @@
+{
+  "schema": "gestao-envelope/1",
+  "content": "gestao-financas-diretriz/1",
+  "team": "canais",
+  "kid": "canais-fin-2611",
+  "revision": 2,
+  "generatedAt": "2026-11-01T08:00:00-03:00",
+  "alg": "A256GCM",
+  "iv": "mL9oMU7TtxuAI22H",
+  "ct": "vxX9a7bQEkF7T2HLGP5nNrZBhf4racunWpsaaOW0VAIL4iY0gCK5m8ayCrGRlSswn3Qak6q5urW86cf6XviVVo+3LgWAZ9zo8IRXEq8782x5qdjGkuUarX5fJJQp1byndruFKo27FtIBxwDoIfmt9Y+SPVN7goA3dnsSkODxHPQkAKXyGlWpoouI7CXaAt01jBRWmc02Z7YzFp+hk1CxxkF72i47OSDKTpxUB1jLJvrmW0IUxjXKNQsFwuG26F+bFkwvvoXamIO2PIBnW6xpMp09eUA/N38LNQPZNg7v/BXRB2jTHnG8nhK8w6OkArAk7VapjFJM5dTDFKfIh6SvZXRYtXLCAOk4Agsl3UDD4ArfbahBf+/WuZETBZZZFGWZALGHeRZfCmgu9snu5YeV79Xhm5V6KJThJ0xfPrnkmpUZhCPkxF7EciESllEPE5xbi6eJKjBHblcl1LkL140WTQ8CnhrG58s/jy/JdBxGxFeGTOpmUEiHD5iMFWJtf88Mtpu6dZxebXTyGTxLtBQibEyNa+GO2RP9fOqfhRMADg5WuM9hDqe7kyADciRG9UJVADW9EaV6sFoXr4+NPN+RG5i0ft+IV9HDIiNb5eEzWzpNWozJtoM/A+CzfRT0hoXJEI+9geG8hPOFBUV6PT0+Jdf5EA5i/8fFjRvzVEaEmqmg8Mb0aIgUSKofSK0fyBCDEEpfPUmNQK3abCJCm7OQTuYpF8wTGJNFSMKChAAYNiXW/iCsmBC4QunS0/b2NolGT1CyAH+Y6Ff1c/EmTr0BuLg9G/4/Rk5FpQxNrLZxpInHapUMZ6CF6BS96kejc8svUDPS+NfSQIxuL9LDwBk9JkVizyGOK1/L7iQK3+ZDmbBLwHuWdvH2RVGOnjlb1qS+21GDE1WePuFQYFsL+kCdwuycjEcSvFeU/Ysm6bZLEoVLNnnbPF1QOQ41MhqChfyBz1yAmWz8m9FFVzgvNU5rw4IoLPAhXFHZTrMUkIRNk4ssbY2KrXgsVwfrjdW5rL4rO4OvKDyI5clhdZVBiJJouBiJ66TXGi0ncR/jW2s=",
+  "writer": "rafael~d4m7z"
+}

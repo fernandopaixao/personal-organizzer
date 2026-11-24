@@ -1,0 +1,119 @@
+{
+  "schema": "gestao-status/1",
+  "source": {
+    "team": "pagamentos",
+    "teamName": "Pagamentos",
+    "tool": "kanban-pagamentos.html",
+    "toolVersion": "3.4.0",
+    "contact": "Ana Souza"
+  },
+  "generatedAt": "2026-11-14T17:40:00-03:00",
+  "revision": 231,
+  "catalogRevision": 18,
+  "initiatives": [
+    {
+      "ref": "PAG-042",
+      "localId": "EPIC-PIX-PARC",
+      "name": "Pix parcelado",
+      "status": "attn",
+      "progress": 58,
+      "progressBasis": "cards",
+      "forecastEnd": "2026-12-23",
+      "update": {
+        "date": "2026-11-14",
+        "text": "Integração com o motor de crédito concluída; homologação do parceiro atrasou 4 dias.",
+        "author": "Ana Souza"
+      },
+      "blockers": [
+        {
+          "localId": "CARD-311",
+          "text": "Aguardando credenciais de homologação do parceiro",
+          "since": "2026-11-10",
+          "owner": "Bruno Lima"
+        }
+      ],
+      "features": [
+        {
+          "ref": "PAG-042.F1",
+          "status": "done",
+          "progress": 100
+        },
+        {
+          "ref": "PAG-042.F2",
+          "status": "attn",
+          "progress": 60,
+          "forecastEnd": "2026-12-03",
+          "note": "Depende das credenciais de homologação do parceiro."
+        }
+      ],
+      "items": [
+        {
+          "localId": "CARD-280",
+          "title": "API de simulação de parcelas",
+          "kind": "feature",
+          "status": "done",
+          "featureRef": "PAG-042.F1",
+          "due": "2026-11-07",
+          "doneAt": "2026-11-06",
+          "owner": "Carla Dias"
+        },
+        {
+          "localId": "CARD-295",
+          "title": "Tela de contratação no app",
+          "kind": "historia",
+          "status": "open",
+          "featureRef": "PAG-042.F2",
+          "due": "2026-11-21",
+          "owner": "Diego Reis",
+          "link": "https://contoso.sharepoint.com/sites/pagamentos/kanban#CARD-295"
+        },
+        {
+          "localId": "CARD-301",
+          "title": "Aceite dos termos de contratação",
+          "kind": "historia",
+          "status": "done",
+          "featureRef": "PAG-042.F2",
+          "doneAt": "2026-11-12",
+          "owner": "Diego Reis"
+        },
+        {
+          "localId": "CARD-320",
+          "title": "Plano do piloto com 1% da base",
+          "kind": "entrega",
+          "status": "open",
+          "featureRef": "PAG-042.F3",
+          "due": "2026-11-28",
+          "owner": "Ana Souza"
+        },
+        {
+          "localId": "CARD-333",
+          "title": "Ajuste de logs do motor de crédito",
+          "kind": "historia",
+          "status": "open",
+          "featureRef": null
+        }
+      ],
+      "counts": {
+        "cards_total": 43,
+        "cards_done": 25,
+        "cards_blocked": 2
+      }
+    },
+    {
+      "ref": null,
+      "localId": "EPIC-OBS",
+      "name": "Observabilidade do checkout",
+      "status": "ok",
+      "progress": 20,
+      "progressBasis": "cards",
+      "update": {
+        "date": "2026-11-12",
+        "text": "Iniciativa interna do time; dashboards de erro em construção."
+      },
+      "counts": {
+        "cards_total": 10,
+        "cards_done": 2
+      }
+    }
+  ]
+}

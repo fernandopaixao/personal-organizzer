@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "gestao-envelope/1",
+  "title": "Envelope cifrado de todo arquivo de dados da pasta compartilhada",
+  "description": "Todo arquivo de dados na pasta compartilhada é este envelope. O conteúdo é o JSON do contrato indicado em 'content', cifrado com AES-256-GCM pela chave GK1 identificada por 'kid'. AAD = 'gestao-envelope/1|<content>|<team>|<kid>|<revision>|<generatedAt>' em UTF-8 (writer fica fora do AAD e é conferido contra payload.source.writer). Especificação: contratos/02-criptografia.md.",
+  "type": "object",
+  "required": ["schema", "content", "team", "kid", "revision", "generatedAt", "alg", "iv", "ct"],
+  "properties": {
+    "schema": { "const": "gestao-envelope/1" },
+    "content": {
+      "enum": ["gestao-catalogo/1", "gestao-status/1", "gestao-metricas/1", "gestao-financas-plano/1", "gestao-financas-diretriz/1", "gestao-ferias/1", "gestao-postits/1", "gestao-postits-vistos/1", "quadro-contrib/1"],
+      "description": "Igual a payload.schema. quadro-contrib/1 é interno do Quadro do Time: outras soluções não escrevem."
+    },
+    "team": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "description": "Slug do time ou do grupo dono da pasta; igual a payload.source.team." },
+    "kid": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "description": "Identificador da chave (não é segredo). Começa pelo slug do time ou grupo." },
+    "revision": { "type": "integer", "minimum": 1, "description": "Igual a payload.revision." },
+    "generatedAt": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?([+-]\\d{2}:\\d{2}|Z)$", "description": "Igual a payload.generatedAt (ISO 8601 com fuso)." },
+    "alg": { "const": "A256GCM" },
+    "writer": { "type": "string", "pattern": "^[a-z0-9]+~[a-z0-9]+$", "description": "Dono do arquivo (<pessoa>~<computador>), em claro. Obrigatório nos arquivos de dono único publicados pelo núcleo (plano, diretriz, férias, post-its, vistos); ausente em catálogo, status e métricas." },
+    "iv": { "type": "string", "pattern": "^[A-Za-z0-9+/]{16}$", "description": "12 bytes aleatórios em base64 padrão, novos a cada gravação." },
+    "ct": { "type": "string", "pattern": "^[A-Za-z0-9+/]+={0,2}$", "description": "Texto cifrado seguido da tag de 16 bytes, em base64 padrão." }
+  }
+}

@@ -38,7 +38,7 @@ A liderança cadastra o grupo do gestor como uma **unidade** e soma o consolidad
 | F10 | Não mexe no `inicio.html` nesta entrega | O onboarding por perfil está em outra thread; a sugestão é gerar o Mapa de Férias no perfil de gestor e de time |
 
 ## 4. Contrato
-`gestao-ferias/1` (`financas/contrato/gestao-ferias-1.schema.json`), dentro do envelope `gestao-envelope/1`: `unit`, `units` (árvore), `people` (id, nome, unidade de origem), `absences` (pessoa, início, fim inclusive, tipo), `holidays` e, no grupo, `contributors`.
+`gestao-ferias/1` (`contratos/schemas/gestao-ferias-1.schema.json`), dentro do envelope `gestao-envelope/1`: `unit`, `units` (árvore), `people` (id, nome, unidade de origem), `absences` (pessoa, início, fim inclusive, tipo), `holidays` e, no grupo, `contributors`.
 
 ## 5. Arquivo local
 `gestao-ferias-local/1`: `nivel` (time/grupo), `unidade`, `pessoa`, `eu`, `pessoas`, `ausencias` (com `nota`), `feriados`, `config` (`limite`, `diasUteis`, `nomesAcima`), `chaves` (do time ou do nível acima), `unidades` (com chaves), `retratos` (último lido de cada unidade, para abrir sem a pasta), `publicacao`, `seg`.
