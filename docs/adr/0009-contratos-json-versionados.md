@@ -9,6 +9,7 @@ Ferramentas diferentes (inclusive ferramentas próprias dos times, adaptadas pel
 - Todo conteúdo começa com `"schema": "gestao-<nome>/<n>"` e tem um JSON Schema 2020-12.
 - **Campos novos opcionais não mudam a versão**; quem lê ignora o que não conhece. Mudança incompatível cria `/<n+1>` e o leitor aceita as duas por um tempo (precedente: `gestao-import/2` e `/3`).
 - Valores monetários em **centavos inteiros**, moeda explícita; o grupo recusa somar moedas diferentes.
+- Precedente de evolução sem nova versão: o multianual (Finanças 1.1) acrescentou `fiscalYears` e `totalsByYear` ao plano e `byYear` à diretriz, mantendo `fiscalYear`, `totals`, `caps` e `capTotal` como os do ano base. Leitores 1.0 continuam funcionando.
 - Cada lado manda nos seus campos; divergência vira alerta, nunca sobrescrita silenciosa.
 
 | Contrato | Escritor | Pasta / arquivo |

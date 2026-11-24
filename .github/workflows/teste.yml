@@ -1,0 +1,48 @@
+# Roda só no repositório pessoal. Na empresa a solução chega como .zip (tools/empacotar.py), sem CI.
+name: Teste e pacote
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  teste:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Blocos injetados e cópias embutidas em dia
+        run: |
+          python3 tools/injetar_seguranca.py
+          if ! git diff --quiet; then
+            echo "::error::Os HTMLs montados não batem com financas/src/. Rode python3 tools/injetar_seguranca.py e faça commit."
+            git diff --stat
+            exit 1
+          fi
+
+      - name: Instalar Playwright e Chromium
+        run: |
+          npm install --no-save --no-package-lock playwright@1.48.2
+          npx playwright install --with-deps chromium
+
+      - name: Teste de ponta a ponta
+        run: node financas/testes/teste-e2e.js
+
+      - name: Montar o pacote .zip
+        run: python3 tools/empacotar.py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gestao-solucao
+          path: dist/*.zip
+          retention-days: 30

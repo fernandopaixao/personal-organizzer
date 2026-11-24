@@ -156,6 +156,8 @@ svg.ch{max-height:280px}
 .tchk{display:flex;flex-wrap:wrap;gap:6px}.tchk label{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);border-radius:99px;padding:3px 10px;font-size:12px;cursor:pointer}
 .kl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--line)}.kl:last-child{border:0}
 .sub2{font-size:12px;color:var(--muted)}
+.finl{display:grid;grid-template-columns:auto minmax(80px,180px) 1fr;gap:10px;align-items:center;margin:2px 0 8px}
+.finl .m{height:6px;border-radius:99px;background:var(--bv-soft);position:relative;overflow:hidden}.finl .m i{position:absolute;inset:0 auto 0 0;background:var(--bv);border-radius:99px}.finl .m.over i{background:var(--late)}
 @media (max-width:720px){.tools{grid-template-columns:1fr}.wall{grid-template-columns:1fr 1fr}}
 </style>
 </head>
@@ -660,13 +662,13 @@ const pctTxt = (a, b) => b ? Math.round(a / b * 100) + '%' : '—';
       O Quadro do Time mostra os post-its e grava quem já viu em times/<time>/postits/vistos/<pessoa>-<computador>.json.
    O arquivo local do hub (times, chaves e seus post-its) é cifrado com a sua senha e fica fora do OneDrive.
    ===================================================================== */
-const TOOL = 'hub', TOOL_NOME = 'Hub da solução', TOOL_VERSION = '1.1.0';
+const TOOL = 'hub', TOOL_NOME = 'Hub da solução', TOOL_VERSION = '1.2.0';
 try { window.name = 'gestao-hub'; } catch {}   // o botão "← Hub" das ferramentas volta para esta aba sem recarregar
-const LOCAL_SCHEMA = 'gestao-hub-local/1', POSTITS = 'gestao-postits/1', VISTOS = 'gestao-postits-vistos/1';
+const LOCAL_SCHEMA = 'gestao-hub-local/1', POSTITS = 'gestao-postits/1', VISTOS = 'gestao-postits-vistos/1', PLANO = 'gestao-financas-plano/1';
 const CORES = [['amarelo', 'Amarelo'], ['rosa', 'Rosa'], ['verde', 'Verde'], ['azul', 'Azul'], ['lilas', 'Lilás']];
 const MAX_TEXTO = 500;
 
-let db = null, ctx = null, dirLocal = null, arquivo = '', raiz = null, chaves = new Map();
+let db = null, ctx = null, dirLocal = null, arquivo = '', raiz = null, chaves = new Map(), chavesFin = new Map();
 let ferramentas = [], recebidos = {}, situacao = { lidoEm: null, erro: '' };
 let salvarT = null, salvando = false, sujo = false, pollT = null;
 const pubT = {}, pubEstado = {};
@@ -676,7 +678,7 @@ function novoDb({ nome, pessoa, times = [] }) {
   return {
     schema: LOCAL_SCHEMA, version: 1, tool: TOOL, criadoEm: new Date().toISOString(),
     nome: clamp(nome, 80), pessoa: { nome: clamp(pessoa, 80), slug: slugPessoa(pessoa) },
-    times: times.map(t => ({ nome: clamp(t.nome, 80), slug: t.slug, prefixo: clamp(t.prefixo || '', 5), chaves: [] })),
+    times: times.map(t => ({ nome: clamp(t.nome, 80), slug: t.slug, prefixo: clamp(t.prefixo || '', 5), chaves: [], chavesFin: [] })),
     notas: {}, publicacao: {}, pastaComum: '', seg: { cofreConfirmadoEm: null, ultimoTesteEm: null }
   };
 }
@@ -684,7 +686,7 @@ const slugPessoa = n => slugify(n).replace(/-/g, '').slice(0, 16) || 'eu';
 function normalizar(d) {
   if (d?.schema !== LOCAL_SCHEMA || d.tool !== TOOL) throw new Error('Este arquivo não é do Hub da solução.');
   d.times ??= []; d.notas ??= {}; d.publicacao ??= {}; d.seg ??= {}; d.pessoa ??= { nome: 'Eu', slug: 'eu' };
-  for (const t of d.times) t.chaves ??= [];
+  for (const t of d.times) { t.chaves ??= []; t.chavesFin ??= []; }
   return d;
 }
 const writer = () => `${db.pessoa.slug}~${dispositivo().id}`;
@@ -708,13 +710,19 @@ window.addEventListener('beforeunload', e => { if (db && (sujo || Object.keys(pu
 /* --------------------------------- chaves --------------------------------- */
 async function carregarChaves() {
   chaves = new Map();
+  chavesFin = new Map();
   for (const t of db.times) for (const c of t.chaves) { try { const k = lerChaveTexto(c.texto); chaves.set(k.kid, await importarChave(k.raw)); } catch {} }
+  for (const t of db.times) for (const c of (t.chavesFin ||= [])) { try { const k = lerChaveTexto(c.texto); chavesFin.set(k.kid, await importarChave(k.raw)); } catch {} }
 }
+// Chave de finanças (separada da de tarefas): só serve para ler o plano agregado que o time publica.
+const mapaFinDoTime = t => new Map((t.chavesFin ||= []).filter(c => !c.revogada && chavesFin.has(c.kid)).map(c => [c.kid, chavesFin.get(c.kid)]));
+const temChaveFin = t => mapaFinDoTime(t).size > 0;
 function chaveDoTime(t) { const c = t.chaves.filter(x => !x.revogada).at(-1); return c && chaves.has(c.kid) ? { kid: c.kid, key: chaves.get(c.kid) } : null; }
 const mapaDoTime = t => new Map(t.chaves.filter(c => chaves.has(c.kid)).map(c => [c.kid, chaves.get(c.kid)]));
-async function colarChave(t, texto, origem = 'colada') {
-  const k = lerChaveTexto(texto);
-  if (!t.chaves.some(c => c.kid === k.kid)) t.chaves.push({ kid: k.kid, texto: texto.trim(), em: new Date().toISOString(), origem });
+async function colarChave(t, texto, origem = 'colada', fin = false) {
+  const k = lerChaveTexto(texto), lista = fin ? t.chavesFin : t.chaves;
+  if (fin) lista.forEach(c => c.revogada = c.revogada || (c.kid !== k.kid));
+  if (!lista.some(c => c.kid === k.kid)) lista.push({ kid: k.kid, texto: texto.trim(), em: new Date().toISOString(), origem });
   await carregarChaves(); agendarSalvar();
   return k.kid;
 }
@@ -782,14 +790,30 @@ async function ultimaAlteracao(dir, filtro = () => true) {
   try { for await (const [n, h] of dir.entries()) if (h.kind === 'file' && !n.startsWith('.') && filtro(n)) { const f = await h.getFile(); m = Math.max(m, f.lastModified); } } catch {}
   return m;
 }
+// Só os totais agregados do plano publicado (o detalhe dos lançamentos nunca sai do time).
+function resumoPlano(p) {
+  const n = v => Number.isFinite(+v) ? Math.round(+v) : 0;
+  const porAno = {};
+  for (const [a, x] of Object.entries(p.totalsByYear || {})) if (/^\d{4}$/.test(a)) porAno[a] = { orcado: n(x?.budget), previsto: n(x?.forecast), realizado: n(x?.actual) };
+  if (!Object.keys(porAno).length && p.fiscalYear) porAno[p.fiscalYear] = { orcado: n(p.totals?.budget), previsto: n(p.totals?.forecast), realizado: n(p.totals?.actual) };
+  return { moeda: clamp(p.currency || 'BRL', 3), ano: +p.fiscalYear || null, porAno, fechados: (p.closedMonths || []).length, em: p.generatedAt || '' };
+}
+// Ano mostrado: o ano corrente, se algum time já planejou; senão o ano base mais recente publicado.
+const anoCorrente = () => { const a = String(new Date().getFullYear()); const pls = db?.times.map(t => recebidos[t.slug]?.plano).filter(Boolean) || [];
+  return !pls.length || pls.some(p => p.porAno[a]) ? a : String(Math.max(...pls.map(p => p.ano || 0))); };
+function totaisAno(pl, ano = anoCorrente()) { return pl?.porAno?.[ano] || null; }
 async function lerTime(t) {
-  const r = { notas: [], vistos: {}, atividade: {}, erros: [], copias: 0 };
+  const r = { notas: [], vistos: {}, atividade: {}, erros: [], copias: 0, plano: null, planoErro: '' };
   const dt = await subpasta(raiz, ['times', t.slug]);
   if (!dt) return r;
   r.atividade.quadro = await ultimaAlteracao(await subpasta(dt, ['quadro']));
   r.atividade.status = await ultimaAlteracao(dt, n => n === 'status.json');
   r.atividade.metricas = await ultimaAlteracao(dt, n => n === 'metricas.json');
-  r.atividade.plano = await ultimaAlteracao(await subpasta(dt, ['financas']), n => /^plano/.test(n));
+  const df = await subpasta(dt, ['financas']);
+  r.atividade.plano = await ultimaAlteracao(df, n => /^plano/.test(n));
+  if (df && temChaveFin(t)) {
+    try { const e = await lerEnvelopes(df, 'plano', mapaFinDoTime(t), { team: t.slug, content: PLANO }); if (e.melhor) r.plano = resumoPlano(e.melhor.payload); else if (e.invalidos.some(x => x.principal)) r.planoErro = 'o plano não abriu com a chave de finanças cadastrada'; } catch {}
+  }
   const dp = await subpasta(dt, ['postits']); if (!dp) return r;
   const mapa = mapaDoTime(t), meu = writer(), porAutor = new Map();
   const ler = async (dir, conteudo, fn) => {
@@ -881,11 +905,38 @@ function render() {
     ${!mesma ? `<div class="banner warn">Este hub.html não está na pasta local <b class="code">${esc(dirLocal.name)}</b>, então os links podem não abrir. Copie o hub.html para a mesma pasta das ferramentas.</div>` : ''}
     <p class="lbl">Ferramentas <button class="btn sm ghost" id="fAtu">Procurar de novo</button></p>
     ${ferr ? `<div class="tools">${ferr}</div>` : `<div class="card"><div class="empty">Nenhuma ferramenta encontrada na pasta local <b class="code">${esc(dirLocal?.name || '')}</b>. Coloque o hub.html na mesma pasta dos HTMLs (Central, Quadro, Finanças) ou gere as ferramentas pelo <b>Início da solução</b>.</div></div>`}
-    <p class="lbl">Times e post-its <button class="btn sm ghost" id="aTime">+ Time</button><button class="btn sm ghost" id="aImp">Importar times e chaves da Central</button></p>
+    ${painel()}
+    <p class="lbl">Times e post-its <button class="btn sm ghost" id="aTime">+ Time</button><button class="btn sm ghost" id="aImp">Importar da Central</button><button class="btn sm ghost" id="aImpF">Importar do Finanças do Grupo</button></p>
     ${!raiz ? `<div class="banner">Ligue a pasta sincronizada pelo OneDrive (<span class="code">${PASTA_COMUM}</span>) para publicar post-its e ver a atividade dos times. <button class="btn sm pri" id="bPasta">Ligar pasta</button></div>` : ''}
     ${db.times.length ? db.times.map(timeHtml).join('') : '<div class="card"><div class="empty">Nenhum time ainda. Use "+ Time" ou importe os times e as chaves da Central.</div></div>'}
     <p class="small muted" style="margin-top:20px">Hub ${TOOL_VERSION} · cada ferramenta continua separada, com o próprio arquivo. Os post-its vão cifrados com a chave de cada time, um arquivo por autor, e o Quadro do Time mostra os recebidos.</p></div>`;
   renderTopo(); ligar();
+}
+// Painel do topo: cards de leitura e barras, só com o que o hub já lê da pasta (atividade, post-its, planos agregados).
+function painel() {
+  if (!raiz || !db.times.length) return '';
+  const ano = anoCorrente(), semana = Date.now() - 7 * 864e5, cards = [];
+  const ativos = db.times.filter(t => { const a = recebidos[t.slug]?.atividade || {}; return Math.max(a.quadro || 0, a.status || 0, a.plano || 0) > semana; });
+  cards.push(cardLeitura({ k: 'Times ativos na semana', v: `${ativos.length} <span class="faint" style="font-size:15px">de ${db.times.length}</span>`, pct: ativos.length / db.times.length,
+    s: ativos.length === db.times.length ? 'Todos publicaram nos últimos 7 dias' : `Sem publicação: <b>${esc(db.times.filter(t => !ativos.includes(t)).map(t => t.nome).join(', '))}</b>` }));
+  const minhas = db.times.flatMap(t => notasDe(t.slug).filter(n => !expirada(n)).map(n => ({ t, n })));
+  if (minhas.length) {
+    const vistas = minhas.filter(({ t, n }) => (recebidos[t.slug]?.vistos?.[n.id] || []).length).length;
+    cards.push(cardLeitura({ k: 'Seus post-its ativos', v: String(minhas.length), pct: vistas / minhas.length, s: vistas === minhas.length ? 'Todos já foram vistos' : `<b>${minhas.length - vistas}</b> ainda sem "Vi"` }));
+  }
+  const comPlano = db.times.map(t => ({ t, pl: recebidos[t.slug]?.plano })).filter(x => totaisAno(x.pl, ano));
+  let barras = '';
+  if (comPlano.length) {
+    const moeda = comPlano[0].pl.moeda, mesmos = comPlano.filter(x => x.pl.moeda === moeda);
+    const tot = mesmos.reduce((a, { pl }) => { const x = totaisAno(pl, ano); a.o += x.orcado; a.p += x.previsto; a.r += x.realizado; return a; }, { o: 0, p: 0, r: 0 });
+    const fm = v => fmtMoeda(v, moeda), folga = tot.o - tot.p, mesIdx = +ano === new Date().getFullYear() ? new Date().getMonth() + 1 : +ano < new Date().getFullYear() ? 12 : 0;
+    cards.unshift(cardLeitura({ hi: true, k: `Previsto dos times em ${ano}`, v: fm(tot.p), pct: tot.o ? tot.p / tot.o : null,
+      s: tot.o ? (folga >= 0 ? `Folga de <b>${fm(folga)}</b> no orçado de ${fmtCurto(tot.o)}` : `<b>${fm(-folga)}</b> acima do orçado de ${fmtCurto(tot.o)}`) : 'Os times ainda não informaram o orçado' }));
+    cards.splice(1, 0, cardLeitura({ k: `Realizado em ${ano}`, v: fm(tot.r), pct: tot.p ? tot.r / tot.p : null, marca: mesIdx / 12, s: `<b>${pctTxt(tot.r, tot.p)}</b> do previsto · ${mesmos.length} time(s) com plano` }));
+    barras = `<div class="card"><p class="lbl" style="margin-top:0">Previsto por time em ${ano} <span class="faint">· marca = orçado</span></p>${barrasH(mesmos.map(({ t, pl }) => { const x = totaisAno(pl, ano); return { nome: esc(t.nome), valor: x.previsto, ref: x.orcado, cor: x.orcado && x.previsto > x.orcado ? 'var(--late)' : '', titulo: `Orçado ${fm(x.orcado)} · previsto ${fm(x.previsto)} · realizado ${fm(x.realizado)}` }; }), v => fmtCurto(v))}
+      ${mesmos.length < comPlano.length ? `<p class="small muted">${comPlano.length - mesmos.length} time(s) em outra moeda ficaram fora da soma.</p>` : ''}</div>`;
+  }
+  return `<p class="lbl">Visão dos times</p><div class="inss">${cards.join('')}</div>${barras}`;
 }
 function timeHtml(t) {
   const r = recebidos[t.slug] || { notas: [], vistos: {}, atividade: {}, erros: [] }, k = chaveDoTime(t), pe = pubEstado[t.slug], pb = db.publicacao[t.slug];
@@ -904,16 +955,26 @@ function timeHtml(t) {
     ${k ? `<span class="chip bv code" title="Chave do time (tarefas)">${esc(k.kid)}</span>` : ''}${estado}<span class="grow"></span>
     ${qd ? `<a class="btn sm" href="${encodeURI(qd.arquivo)}" target="_blank" rel="opener">Quadro ↗</a>` : ''}${fn ? `<a class="btn sm" href="${encodeURI(fn.arquivo)}" target="_blank" rel="opener">Finanças ↗</a>` : ''}</div>
     ${raiz ? `<p class="act">Quadro atualizado ${tempo(a.quadro)} · status para a Central ${tempo(a.status)} · métricas ${tempo(a.metricas)} · plano financeiro ${tempo(a.plano)}</p>` : ''}
+    ${linhaFin(t, r)}
     ${!k ? `<div class="banner warn">Para deixar post-its, cole a chave de tarefas do time (a mesma do Quadro) em <b>Ajustes</b>, ou importe da Central. <button class="btn sm" data-ch="${esc(t.slug)}">Colar chave</button></div>` : ''}
     ${r.erros?.length ? `<div class="banner warn" title="${esc(r.erros.join('\n'))}">${r.erros.length} arquivo(s) de post-it não abriram com a chave cadastrada (chave antiga ou arquivo incompleto).</div>` : ''}
     ${r.copias ? '<div class="banner">Há cópia de conflito do OneDrive do seu arquivo; ela é resolvida na próxima publicação.</div>' : ''}
     <div class="wall"><button class="pi novo" data-novo="${esc(t.slug)}" ${k ? '' : 'disabled'}>+ Post-it</button>${minhas.map(n => pi(n, true)).join('')}${r.notas.map(n => pi(n, false)).join('')}</div></div>`;
+}
+function linhaFin(t, r) {
+  if (!raiz) return '';
+  if (r.planoErro) return `<div class="banner warn">Finanças: ${esc(r.planoErro)}.</div>`;
+  const x = totaisAno(r.plano); if (!x) return '';
+  const fm = v => fmtMoeda(v, r.plano.moeda), pct = x.orcado ? x.previsto / x.orcado : null;
+  return `<div class="finl"><span class="small muted">Finanças ${anoCorrente()}</span><div class="m ${pct > 1 ? 'over' : ''}"><i style="width:${Math.min(1, pct || 0) * 100}%"></i></div>
+    <span class="small"><b>${fm(x.previsto)}</b> previsto${x.orcado ? ` de ${fmtCurto(x.orcado)} orçado` : ''} · ${fm(x.realizado)} realizado</span></div>`;
 }
 function ligar() {
   const on = (id, f) => { const e = $('#' + id); if (e) e.onclick = f; };
   on('fAtu', async () => { ferramentas = await procurarFerramentas(); render(); });
   on('aTime', () => editarTime());
   on('aImp', importarDaCentral);
+  on('aImpF', importarDoGrupo);
   on('bPasta', async () => { let h; try { h = await escolherPasta('fin-comum'); } catch { return; } await ligarPasta(h); });
   $$('[data-novo]').forEach(b => b.onclick = () => editarNota(b.dataset.novo));
   $$('[data-ed]').forEach(b => b.onclick = () => { const [s, id] = b.dataset.ed.split('|'); editarNota(s, notasDe(s).find(n => n.id === id)); });
@@ -973,16 +1034,17 @@ function editarTime(t = null) {
     if (!nome || !slug) return toast('Preencha nome e identificador.');
     if (!t && timePorSlug(slug)) return toast('Já existe um time com esse identificador.');
     if (t) Object.assign(t, { nome: clamp(nome, 80), prefixo: clamp(prefixo, 5) });
-    else db.times.push({ nome: clamp(nome, 80), slug, prefixo: clamp(prefixo, 5), chaves: [] });
+    else db.times.push({ nome: clamp(nome, 80), slug, prefixo: clamp(prefixo, 5), chaves: [], chavesFin: [] });
     fecharModal(); agendarSalvar(); render();
   };
 }
 // A chave é conferida antes do diálogo fechar (d._validar), para mostrar o erro no lugar.
-async function pedirChave(t) {
+async function pedirChave(t, tipo = 'tarefas') {
+  const fin = tipo === 'fin';
   if (!t) return;
   let texto = '';
-  const pr = perguntar(`Chave do time ${t.nome}`, `<p class="small muted" style="margin-top:0">Cole a chave de <b>tarefas</b> do time (a mesma que o Quadro usa, gerada na Central). Ela fica só dentro do arquivo cifrado do hub, neste computador.</p>
-    <input class="sin code" id="kT" style="width:100%" placeholder="GK1.${esc(t.slug)}-AAMM.…" autocomplete="off"><p class="small latec" id="kM"></p>`, [['no', 'Cancelar'], ['ok', 'Cadastrar', 'pri']]);
+  const pr = perguntar(`Chave ${fin ? 'de finanças ' : ''}do time ${t.nome}`, `<p class="small muted" style="margin-top:0">${fin ? 'Cole a chave de <b>finanças</b> do time (gerada no Finanças do Grupo). Ela só serve para o hub ler o plano agregado que o time publica.' : 'Cole a chave de <b>tarefas</b> do time (a mesma que o Quadro usa, gerada na Central).'} Ela fica só dentro do arquivo cifrado do hub, neste computador.</p>
+    <input class="sin code" id="kT" style="width:100%" placeholder="GK1.${esc(t.slug)}${fin ? '-fin' : ''}-AAMM.…" autocomplete="off"><p class="small latec" id="kM"></p>`, [['no', 'Cancelar'], ['ok', 'Cadastrar', 'pri']]);
   const d = dlg();
   d._validar = () => {
     texto = $('#kT', d).value.trim();
@@ -992,7 +1054,7 @@ async function pedirChave(t) {
   const r = await pr; d._validar = null; d._aviso = false;
   if (r !== 'ok') return;
   if (!await avisoCofre('chave', '<p class="small">A chave também fica dentro do arquivo do hub, cifrado com a sua senha.</p>')) return;
-  const kid = await colarChave(t, texto); toast(`Chave ${kid} cadastrada.`);
+  const kid = await colarChave(t, texto, 'colada', fin); toast(`Chave ${kid} cadastrada.`);
   if ((db.notas[t.slug] || []).length) agendarPublicar(t.slug, 300);
   await atualizar(); render();
 }
@@ -1015,13 +1077,39 @@ async function importarDaCentral() {
   for (const tc of obj.teams || []) {
     const slug = tc.slug || ''; if (!slug) { sem.push(tc.name); continue; }
     let t = timePorSlug(slug);
-    if (!t) { t = { nome: clamp(tc.name, 80), slug, prefixo: clamp(tc.prefix || '', 5), chaves: [] }; db.times.push(t); nt++; }
+    if (!t) { t = { nome: clamp(tc.name, 80), slug, prefixo: clamp(tc.prefix || '', 5), chaves: [], chavesFin: [] }; db.times.push(t); nt++; }
     for (const k of (obj.integ?.keys?.[tc.id] || []).filter(k => !k.revokedAt)) { try { const p = lerChaveTexto(k.key); if (!t.chaves.some(c => c.kid === p.kid)) { t.chaves.push({ kid: p.kid, texto: k.key, em: new Date().toISOString(), origem: 'central' }); nk++; } } catch {} }
   }
   obj = null;
   await carregarChaves(); agendarSalvar(); await atualizar(); render();
   await perguntar('Importado da Central', `<p>${nt} time(s) novo(s) e ${nk} chave(s) trazidos da Central.${sem.length ? ` Times sem pasta definida na Central ficaram de fora: ${esc(sem.join(', '))}.` : ''}</p>
     <div class="cofre">As chaves dos times agora também ficam dentro do arquivo do hub, cifrado com a <b>sua senha</b>. Ela deve estar no cofre de senhas.</div>`);
+}
+
+// Lê o arquivo local do Finanças do Grupo (gestao-local-cifrado/1) com a senha dele e traz os times e as
+// chaves de finanças ativas. Só lê: o arquivo do grupo não é alterado. Cada gestor importa o próprio grupo.
+async function importarDoGrupo() {
+  let fh; try { [fh] = await window.showOpenFilePicker({ id: 'hub-grupo', types: [{ description: 'Dados do Finanças do Grupo', accept: { 'application/json': ['.json'] } }] }); } catch { return; }
+  const texto = await (await fh.getFile()).text();
+  try { lerCabecalhoLocal(texto); } catch (e) { return toast(e.message); }
+  let obj = null;
+  for (let i = 0; i < 3 && !obj; i++) {
+    const s = await pedirSenhaDlg('Senha do Finanças do Grupo', i > 0); if (s == null) return;
+    try { obj = (await decifrarLocal(texto, s)).dados; } catch (e) { if (e.code !== 'SENHA') return toast(e.message); }
+  }
+  if (!obj) return toast('Senha incorreta.');
+  if (obj.tool !== 'financas-grupo' || !Array.isArray(obj.times)) return toast('Este arquivo não é do Finanças do Grupo.');
+  let nt = 0, nk = 0;
+  for (const tg of obj.times) {
+    const slug = tg.slug || ''; if (!slug) continue;
+    let t = timePorSlug(slug);
+    if (!t) { t = { nome: clamp(tg.nome, 80), slug, prefixo: clamp(tg.prefixo || '', 5), chaves: [], chavesFin: [] }; db.times.push(t); nt++; }
+    for (const c of (tg.chaves || []).filter(c => !c.revogada)) { try { const p = lerChaveTexto(c.texto); if (!t.chavesFin.some(x => x.kid === p.kid)) { t.chavesFin.push({ kid: p.kid, texto: c.texto, em: new Date().toISOString(), origem: 'grupo' }); nk++; } } catch {} }
+  }
+  obj = null;
+  await carregarChaves(); agendarSalvar(); await atualizar(); render();
+  await perguntar('Importado do Finanças do Grupo', `<p>${nt} time(s) novo(s) e ${nk} chave(s) de finanças trazidos. O hub passa a mostrar o plano agregado que cada time publica (orçado, previsto e realizado do ano).</p>
+    <div class="cofre">As chaves de finanças agora também ficam dentro do arquivo do hub, cifrado com a <b>sua senha</b>. Ela deve estar no cofre de senhas.</div>`);
 }
 
 /* --------------------------------- ajustes --------------------------------- */
@@ -1031,7 +1119,8 @@ function ajustes() {
     <p class="small muted" style="margin-top:-4px">Você neste computador: <span class="code">${esc(writer())}</span>. Seus post-its vão em <span class="code">times/&lt;time&gt;/postits/${esc(baseArq())}.json</span>.</p>
     <p class="lbl" style="margin-top:14px">Times e chaves</p>
     ${db.times.map(t => { const k = chaveDoTime(t); return `<div class="kl"><b>${esc(t.nome)}</b><span class="chip code">${esc(t.slug)}</span>${k ? `<span class="chip ok code">${esc(k.kid)}</span>` : '<span class="chip late">sem chave</span>'}<span class="grow"></span>
-      <button class="btn sm" data-ak="${esc(t.slug)}">${k ? 'Trocar chave' : 'Colar chave'}</button>${k ? `<button class="btn sm ghost" data-ar="${esc(t.slug)}">Remover chave</button>` : ''}<button class="btn sm ghost" data-ae="${esc(t.slug)}">Editar</button></div>`; }).join('') || '<div class="empty">Nenhum time.</div>'}
+      ${temChaveFin(t) ? '<span class="chip ok" title="Chave de finanças cadastrada">finanças</span>' : ''}
+      <button class="btn sm" data-ak="${esc(t.slug)}">${k ? 'Trocar chave' : 'Colar chave'}</button><button class="btn sm ghost" data-af="${esc(t.slug)}">${temChaveFin(t) ? 'Trocar chave de finanças' : 'Colar chave de finanças'}</button>${k ? `<button class="btn sm ghost" data-ar="${esc(t.slug)}">Remover chave</button>` : ''}<button class="btn sm ghost" data-ae="${esc(t.slug)}">Editar</button></div>`; }).join('') || '<div class="empty">Nenhum time.</div>'}
     <p class="lbl" style="margin-top:14px">Senha do arquivo</p>
     <div class="row"><button class="btn sm" id="aSenha">Trocar senha</button><button class="btn sm" id="aTeste">Testar minha senha</button><button class="btn sm" id="aBk">Baixar cópia cifrada</button></div></div>
     <div class="mf"><button class="btn pri" id="aOk">Fechar</button></div>`, 'wide');
@@ -1039,6 +1128,7 @@ function ajustes() {
   $('#aP', d).onchange = e => { const n = e.target.value.trim(); if (n) { db.pessoa.nome = clamp(n, 80); agendarSalvar(); for (const t of db.times) if ((db.notas[t.slug] || []).length) agendarPublicar(t.slug); } };
   $('#aOk', d).onclick = () => { fecharModal(); render(); };
   $$('[data-ak]', d).forEach(b => b.onclick = () => { fecharModal(); pedirChave(timePorSlug(b.dataset.ak)); });
+  $$('[data-af]', d).forEach(b => b.onclick = () => { fecharModal(); pedirChave(timePorSlug(b.dataset.af), 'fin'); });
   $$('[data-ae]', d).forEach(b => b.onclick = () => { fecharModal(); editarTime(timePorSlug(b.dataset.ae)); });
   $$('[data-ar]', d).forEach(b => b.onclick = async () => { const t = timePorSlug(b.dataset.ar); t.chaves.forEach(c => c.revogada = true); await carregarChaves(); agendarSalvar(); fecharModal(); render(); });
   $('#aSenha', d).onclick = async () => { const s = await criarSenhaDlg('Nova senha do hub'); if (!s) return; ctx = await novoCtx(s, TOOL); db.seg = { cofreConfirmadoEm: new Date().toISOString(), ultimoTesteEm: null }; await salvar(); toast('Senha trocada. Use a nova a partir de agora.'); };
@@ -1131,7 +1221,7 @@ async function criarArquivo({ nome, pessoa }) {
   toast('Hub criado e cifrado. Agora ligue a pasta sincronizada e cadastre os times.', 5000);
   return true;
 }
-window.__hub = { get db() { return db; }, novoDb, lerTime, publicar, atualizar, procurarFerramentas, get ferramentas() { return ferramentas; }, ligarPasta, colarChave, abrirArquivo };
+window.__hub = { get db() { return db; }, get recebidos() { return recebidos; }, importarDoGrupo, painel, novoDb, lerTime, publicar, atualizar, procurarFerramentas, get ferramentas() { return ferramentas; }, ligarPasta, colarChave, abrirArquivo };
 telaInicial();
 </script>
 </body>

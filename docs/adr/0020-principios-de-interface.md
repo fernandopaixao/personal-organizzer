@@ -13,4 +13,6 @@
 8. **Menos navegação:** juntar telas que mostram o mesmo dado (a v15 reorganizou a Central em 8 páginas sem telas duplicadas).
 
 ## Ao evoluir
-- Pedido do Fernando de 24/11/2026 reforça: telas minimalistas, mais gráficos do que texto, cores neutras (branco e azul), cards que ajudam a interpretar, menos navegações. A interface de finanças está sendo revista nessa linha em outra frente.
+- Pedido do Fernando de 24/11/2026 reforça: telas minimalistas, mais gráficos do que texto, cores neutras (branco e azul), cards que ajudam a interpretar, menos navegações.
+- Aplicado nas Finanças 1.2: telas irmãs viram **abas no topo** (menu do Time de 7 para 4, do Grupo de 5 para 3); **cards de leitura** (número, medidor e uma frase que interpreta, card principal em azul cheio); gráficos no lugar de tabelas; só tons de azul nos gráficos, vermelho só para estouro.
+- As peças ficam em `financas/src/nucleo.js` e `nucleo.css` (`cardLeitura`, `barrasH`, `curvaAcumulada`). Tela nova deve reaproveitá-las antes de criar componente próprio.
