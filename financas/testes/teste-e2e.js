@@ -363,6 +363,54 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   await t2.evaluate(() => { view = 'futuro'; render(); }); await t2.screenshot({ path: path.join(SAIDA, 'time-futuro-anos.png'), fullPage: true });
   await g.evaluate(() => { agrupar = 'time'; });
 
+  console.log('12. Consolidação em níveis: gestor publica o consolidado para a liderança');
+  const ch = await nova('/financas/financas_grupo.html', { 'fin-local': 'LocalChefe', 'fin-comum': 'Gestao-Compartilhado' });
+  await ch.click('#iNovo'); await ch.fill('#cN', 'Diretoria Digital'); await ch.fill('#cP', 'Marina'); await ch.fill('#cA', '2026'); await ch.click('#cOk');
+  await btn(ch, 'ok'); await criarSenha(ch); await ch.waitForSelector('#tNovo');
+  await ch.click('#tNovoG'); await ch.fill('#mN', 'Tecnologia (Fernando)'); await ch.fill('#mS', 'tecnologia'); await ch.fill('#mT', '2.000.000'); await ch.click('#mOk');
+  ok(await ch.evaluate(() => timePorSlug('tecnologia').tipo === 'grupo' && pastaUnidade(timePorSlug('tecnologia')).join('/') === 'grupos/tecnologia/financas'), 'liderança cadastra o grupo do gestor como unidade do tipo grupo');
+  ok(!(await ch.textContent('#pg')).includes('HTML de finanças do time'), 'unidade do tipo grupo não oferece "HTML de finanças do time"');
+  await ch.click('[data-gk="tecnologia"]'); await ch.waitForSelector('#cofreOk'); const chaveGrp = await ch.inputValue('#dlg input.code'); await cofre(ch);
+  ok(/^GK1\.tecnologia-fin-\d{4}\.[A-Za-z0-9_-]{43}$/.test(chaveGrp), 'chave entre grupos no formato GK1.<grupo>-fin-AAMM');
+  await ch.click('#tPasta'); await ch.waitForTimeout(300);
+  await ch.evaluate(() => { tetoEditavel(timePorSlug('tecnologia'), 2027).total = 150000000; db.anos = [2026, 2027]; });
+  await ch.click('[data-pd="tecnologia"]'); await ch.waitForTimeout(400);
+  ok((await opfs(ch, async () => listar('Gestao-Compartilhado/grupos/tecnologia/financas'))).includes('diretriz.json'), 'diretriz da liderança em grupos/tecnologia/financas/diretriz.json');
+  // Gestor: chave errada é recusada; a certa é cadastrada com aviso de cofre
+  await g.bringToFront(); await g.click('[data-v="ajustes"]');
+  ok(await g.evaluate(async () => { try { await cadastrarChaveAcima('GK1.outro-fin-2611.' + 'A'.repeat(43)); return false; } catch (e) { return /não do grupo/.test(e.message); } }), 'chave de outro grupo é recusada');
+  await g.fill('#gAc', chaveGrp); await g.click('#gAcOk'); await cofre(g); await g.waitForTimeout(500);
+  ok(await g.evaluate(() => db.acima.chaves.length === 1 && db.acima.diretriz?.revision === 1), 'gestor cadastra a chave da liderança e lê a diretriz dela');
+  ok(await g.evaluate(() => tetoAcima(2026) === 200000000 && tetoAcima(2027) === 150000000), 'teto da liderança por ano chega ao gestor');
+  ok(await g.evaluate(() => acimaPendente()), 'painel avisa que o consolidado ainda não subiu');
+  await g.click('#gAcPub'); await g.waitForSelector('#dlg [data-r="ok"]');
+  ok(/Entram: Pagamentos/.test(await g.textContent('#dlg')) && /2027/.test(await g.textContent('#dlg')), 'confirmação mostra o que sobe, por ano e por unidade');
+  await btn(g, 'ok'); await g.waitForTimeout(600);
+  const envAc = JSON.parse(await opfs(g, async () => ler('Gestao-Compartilhado/grupos/tecnologia/financas', 'plano.json')));
+  ok(envAc.schema === 'gestao-envelope/1' && envAc.content === 'gestao-financas-plano/1' && envAc.team === 'tecnologia' && !JSON.stringify(envAc).includes('Squad'), 'consolidado publicado cifrado em grupos/tecnologia/financas/plano.json');
+  const plAc = await g.evaluate(() => montarConsolidado({ revision: 0, generatedAt: '', hlc: '' }));
+  ok(plAc.source.level === 'group' && plAc.units.map(u => u.slug).join() === 'pagamentos' && plAc.lines.every(l => /^pagamentos:|^grupo:/.test(l.id)) && !plAc.lines.some(l => /Squad|Licenças de observabilidade/.test(l.name)), 'uma linha por unidade e categoria, sem os nomes das linhas dos times');
+  ok(await g.evaluate(() => !acimaPendente()), 'depois de publicar, o aviso some');
+  // Liderança lê, revisa e soma o gestor como uma unidade
+  await ch.bringToFront(); await ch.click('[data-v="consolidado"]'); await ch.click('#tLer'); await ch.waitForTimeout(500);
+  ok(await ch.evaluate(() => pendentes.length === 1 && pendentes[0].t.slug === 'tecnologia'), 'consolidado do gestor aparece em Planos recebidos da liderança');
+  await ch.evaluate(() => aplicar()); await ch.waitForTimeout(100);
+  const gTot = await g.evaluate(() => [2026, 2027].map(a => { const t = consolidado(mesesAno(a)).total; return [t.orcado, t.previsto, t.realizado].join('/'); }));
+  const chTot = await ch.evaluate(() => [2026, 2027].map(a => { const t = consolidado(mesesAno(a)).total; return [t.orcado, t.previsto, t.realizado].join('/'); }));
+  ok(gTot.join() === chTot.join(), 'liderança soma exatamente o consolidado do gestor, ano a ano: ' + chTot.join(' | '));
+  ok(await ch.evaluate(() => anosG().join(',')) === '2026,2027', 'liderança enxerga os anos que subiram');
+  await ch.evaluate(() => { anoVista = 2027; agrupar = 'categoria'; render(); });
+  ok(/Terceiros/.test(await ch.textContent('#pg')), 'liderança vê o consolidado por categoria');
+  // Mudança embaixo: o aviso volta para o gestor
+  await g.evaluate(() => { db.itens.push({ id: 'I-x', nome: 'Reserva', cat: 'outras', orcado: { '2026-12': 1000000 } }); });
+  ok(await g.evaluate(() => acimaPendente()), 'mudança no consolidado reabre o aviso de publicar para a liderança');
+  await g.evaluate(() => { db.itens = db.itens.filter(i => i.id !== 'I-x'); view = 'consolidado'; anoVista = null; render(); });
+  await g.click('[data-v="times"]');
+  ok(/Teto da liderança/.test(await g.textContent('#pg')), 'aba Times mostra o teto da liderança para repartir entre os times');
+  ok(await g.evaluate(() => { const d = structuredClone(db); delete d.acima; for (const t of d.times) delete t.tipo; const n = normalizar(d); return n.acima.chaves.length === 0 && n.times.every(t => t.tipo === 'time'); }), 'arquivo do grupo 1.2 abre com tipo "time" e sem nível acima');
+  ok(await g.evaluate(() => { const d = structuredClone(db); d.acima = { chaves: [{ kid: 'tecnologia-fin-2611', texto: 'x', em: '', origem: 'onboarding' }] }; const n = normalizar(d); return n.acima.chaves[0].origem === 'onboarding' && !!n.acima.publicacao; }), 'aceita db.acima vindo do onboarding');
+  await ch.evaluate(() => { anoVista = null; agrupar = 'time'; view = 'consolidado'; render(); }); await ch.setViewportSize({ width: 1280, height: 860 }); await ch.screenshot({ path: path.join(SAIDA, 'lideranca-painel.png') });
+
   for (const [p, n] of [[g, 'grupo-consolidado'], [t2, 'time-resumo']]) { await p.setViewportSize({ width: 1280, height: 860 }); await p.evaluate(() => { view = typeof vCons === 'function' ? 'consolidado' : 'resumo'; render(); }); await p.screenshot({ path: path.join(SAIDA, n + '.png') }); }
   await t2.evaluate(() => { view = 'plano'; render(); }); await t2.screenshot({ path: path.join(SAIDA, 'time-plano.png') });
   await a.screenshot({ path: path.join(SAIDA, 'inicio-pronto.png') });
