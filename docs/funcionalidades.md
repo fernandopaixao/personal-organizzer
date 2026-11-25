@@ -1,6 +1,6 @@
 # Funcionalidades, usos e objetivos
 
-*24/11/2026 · Central v15.9, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.3, assistente 2.4, contratos 1.0*
+*25/11/2026 · Central v15.9, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.3, assistente 2.5, contratos 1.0*
 
 Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. Para as regras técnicas por trás, veja as [decisões de arquitetura](adr/README.md). Para o caminho de quem usa, veja a [jornada do usuário](jornada-do-usuario.md) e o [passo a passo](passo-a-passo.md).
 
@@ -79,7 +79,9 @@ Onde as chaves coladas vão parar: no hub (tarefas e finanças de cada time), no
 | Quadro do Time, Finanças do Time, Mapa de Férias e LEIA-ME de cada time | `para-os-times/<time>/` | A chave do time e a pasta sincronizada já configuradas |
 | Estrutura da pasta sincronizada | `times/<time>/…`, `grupos/<grupo>/ferias/` | Só pastas vazias |
 
-A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados), um desenho do que ficou em cada pasta, as chaves por time e um **checklist** (senha no cofre, pasta pessoal só sua e no seu OneDrive, pasta compartilhada sincronizando, hub mostrando os times, pasta ligada na Central e no Finanças do Grupo, chaves no cofre, pastas enviadas aos times). O caminho normal também termina com o checklist do perfil. As marcações ficam só no navegador.
+A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados), um desenho do que ficou em cada pasta, as chaves por time e um **checklist** (senha no cofre, pasta pessoal só sua e no seu OneDrive, pasta compartilhada sincronizando, pasta compartilhada marcada como **"Sempre manter neste dispositivo"**, hub mostrando os times, pasta ligada na Central e no Finanças do Grupo, chaves no cofre, pastas enviadas aos times). O caminho normal também termina com o checklist do perfil. As marcações ficam só no navegador.
+
+**Sempre manter neste dispositivo (2.5).** Com os "Arquivos sob demanda" do OneDrive, a pasta compartilhada pode ficar só na nuvem, e o navegador não lê os arquivos que os outros publicam. O assistente orienta marcar a pasta como **"Sempre manter neste dispositivo"** (botão direito na pasta, no Explorador de Arquivos do Windows ou no Finder do Mac) em quatro lugares: no desenho de como funciona, na etapa Pastas (e na tela do Estou com sorte), no checklist final e nos LEIA-ME que ele grava na pasta compartilhada e em `para-os-times/<time>/`. O item da pasta pessoal sugere o mesmo ([ADR-0004](adr/0004-troca-por-arquivos-na-pasta-sincronizada.md)).
 
 **Quando usar:** uma vez, ou ao trocar de computador. O gestor manda a cada time a pasta `para-os-times/<time>/` (ou o mesmo `inicio.html`, com a chave por mensagem direta), e o time monta tudo sozinho.
 
