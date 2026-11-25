@@ -1,6 +1,6 @@
 # Funcionalidades, usos e objetivos
 
-*24/11/2026 · Central v15.9, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.3, assistente 2.4, contratos 1.0*
+*25/11/2026 · Central v15.9, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.3, assistente 2.4, contratos 1.0 · visual experimental em `experimental/`*
 
 Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. Para as regras técnicas por trás, veja as [decisões de arquitetura](adr/README.md). Para o caminho de quem usa, veja a [jornada do usuário](jornada-do-usuario.md) e o [passo a passo](passo-a-passo.md).
 
@@ -34,6 +34,7 @@ Dar a um gestor de vários times, e aos próprios times, **um lugar organizado p
 | **Mapa de Férias** | `ferias.html` | Cada pessoa do time | Marcar as próprias férias e ver as do time; sobem sozinhas para a página Férias da Central do gestor ([ADR-0033](adr/0033-ferias-dentro-da-central.md)) |
 | **Cartão "Onde fica cada coisa"** | `onde-fica-cada-coisa.html` | Todos | Mapa em claro (sem dados) de arquivos e pastas |
 | **Contratos de integração** | pasta `contratos/` | Quem constrói outra solução (time, gestor par, agente) | Gravar arquivos que o hub, a Central, as Finanças e o Mapa de Férias leem e conciliam, até a visão da liderança ([seção 10](#10-contratos-para-outras-soluções)) |
+| **Visual experimental** | pasta `experimental/` do pacote | Quem quiser experimentar | As mesmas ferramentas, com os mesmos dados, no visual novo ([seção 11](#11-visual-experimental-pasta-experimental)) |
 
 Todas têm, no topo, **Onde estou?** (qual ferramenta, qual arquivo, o que é local e o que é compartilhado) e **← Hub**.
 
@@ -259,7 +260,7 @@ O grupo enxerga os anos do próprio horizonte **mais os anos publicados pelos ti
 | **Tema claro, escuro ou automático** | Todas | Botão redondo no canto inferior direito; Automático segue o sistema. A escolha fica só neste computador e vale para todas as ferramentas abertas ([ADR-0027](adr/0027-tema-claro-escuro-compartilhado.md)) |
 | **Aviso quando não dá para abrir pastas** | Hub, Finanças, Mapa de Férias e assistente | No Safari, no Firefox, no celular, numa pré-visualização (Outlook, Teams, OneDrive) ou aberto de dentro do .zip, o aviso no topo diz o motivo e o que fazer, e todo botão responde ao clique ([ADR-0030](adr/0030-aviso-quando-nao-da-para-abrir-pastas.md)) |
 | **Migração automática** | Central (e demais quando o formato muda) | Abrir arquivo antigo na versão nova, com backup |
-| **Pacote .zip** | `python3 tools/empacotar.py` (e a CI do repositório pessoal) | Levar a solução para a empresa num único arquivo: HTMLs lado a lado, contratos, documentação e LEIA-ME. Não passa pelo repositório da empresa |
+| **Pacote .zip** | `python3 tools/empacotar.py` (e a CI do repositório pessoal) | Levar a solução para a empresa num único arquivo: HTMLs lado a lado, contratos, documentação, LEIA-ME e a pasta `experimental/` com o visual novo. Não passa pelo repositório da empresa |
 
 ---
 
@@ -297,4 +298,26 @@ Times e gestores que usam **ferramentas próprias** (sistema do time, planilha c
 | **Validador** (`validar.js`) | Confere uma pasta inteira, um arquivo ou um conteúdo em claro; cifra, decifra e roda os vetores. Só Node 20+, sem instalar nada | Saber se está certo antes de publicar |
 
 Os exemplos são lidos, no teste da CI, pelas funções de leitura reais do hub, das Finanças do Grupo, do Mapa de Férias e do Quadro do Time. A pasta vai inteira no pacote .zip.
+
+---
+
+## 11. Visual experimental (pasta `experimental/`)
+
+O pacote traz, numa pasta `experimental/`, **as mesmas sete ferramentas com um visual novo**, para experimentar sem trocar o que os times já usam ([ADR-0034](adr/0034-visual-experimental.md)).
+
+| O que muda | Como fica |
+|---|---|
+| **Cores** | Azul de destaque `#1e4fc8`, fundo cinza-azulado (`#f4f7fc`, nunca branco puro), sinais da mesma família: carmim só para atraso, âmbar só para atenção, verde-azulado para "no prazo"; escuro em azul-noite |
+| **Trilho lateral** | Marinho (`#0b2155`), com o item ativo em branco sobre azul: a âncora da marca |
+| **Fontes** | DM Sans no texto e Plus Jakarta Sans nos títulos e números, embutidas no HTML (sem rede) |
+| **Ícone da aba** | Um por ferramenta (Central, Quadro, Hub, assistente, Finanças do Time e do Grupo, Mapa de Férias), para achar a aba certa entre muitas |
+| **Selo** | "Visual experimental" discreto no canto inferior direito, ao lado do botão de tema |
+
+| O que não muda | |
+|---|---|
+| **Funcionalidades** | Todas as do main. A versão experimental é montada a partir das mesmas fontes a cada pacote (`tools/build_experimental.py`), e a CI roda nela os testes de ponta a ponta, do Mapa de Férias e do aviso sem pastas |
+| **Dados, senhas e chaves** | Os mesmos arquivos. Dá para abrir o mesmo arquivo de dados na versão atual e na experimental, e alternar quando quiser |
+| **Tema** | Claro, escuro ou automático, com a mesma escolha das outras ferramentas |
+
+**Como usar:** abra `experimental/hub.html` (ou `experimental/inicio.html`, que gera ferramentas já no visual novo). Para voltar, abra o `hub.html` da pasta principal. Passo a passo na [seção 15](passo-a-passo.md#15-experimentar-o-visual-novo).
 

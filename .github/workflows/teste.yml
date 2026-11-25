@@ -65,6 +65,9 @@ jobs:
       - name: Teste dos contratos de integração
         run: node contratos/testes/teste-contratos.js
 
+      - name: Versão experimental (visual novo) montada do main e testada
+        run: python3 tools/build_experimental.py --testar
+
       - name: Montar o pacote .zip
         run: python3 tools/empacotar.py
 
