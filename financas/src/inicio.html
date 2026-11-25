@@ -318,6 +318,7 @@ async function criarTudo() {
     }
   }
   await salvarNovo('onde-fica-cada-coisa.html', cartao(), 'MAP', 'Cartão em claro (sem dados nem senhas) com o mapa dos seus arquivos.');
+  await gravarLocal(dir, 'apresentacao.html', await lerEmbutido('apresEmb')); st.criados.push({ nome: 'apresentacao.html', tipo: 'AP', desc: 'Página que apresenta a Remessa (abre da tela de entrada de cada ferramenta).' });
   if (st.raiz) await prepararCaixaPostal();
   if (g) await gerarPacotes();
   await lembrarTudo();
@@ -530,6 +531,7 @@ async function gerarPacotes() {
       itens.push(`quadro_${t.slug}.html: quadro de tarefas do time`); st.criados.push({ nome: `para-os-times/${t.slug}/quadro_${t.slug}.html`, tipo: 'QT', desc: `Quadro do Time ${t.nome}, com a chave de tarefas.` }); }
     if (fin) { await gravarLocal(dirT, `financas_${t.slug}.html`, aplicarPreset(fin, 'FIN-PRESET', { schema: 'financas-preset/1', team: { nome: t.nome, slug: t.slug, prefixo: t.prefixo }, ano: d.ano, anos: [d.ano], moeda: d.moeda, pasta, chave: t.kFin, contato: d.pessoa, geradoEm: iso }));
       itens.push(`financas_${t.slug}.html: finanças do time (só para quem cuida do dinheiro do time)`); st.criados.push({ nome: `para-os-times/${t.slug}/financas_${t.slug}.html`, tipo: 'FT', desc: `Finanças do Time ${t.nome}, com a chave de finanças.` }); }
+    await gravarLocal(dirT, 'apresentacao.html', await lerEmbutido('apresEmb'));
     await gravarLocal(dirT, 'LEIA-ME.txt', `Ferramentas da ${MARCA} para o time ${t.nome}, geradas por ${d.pessoa} em ${agora.toLocaleDateString('pt-BR')}.\r\n\r\n` +
       `1. Copie esta pasta para uma pasta só sua (de preferência no seu OneDrive, como backup; nunca na pasta compartilhada) e abra os HTMLs no Edge ou no Chrome.\r\n` +
       `2. ${itens.join('. ')}.\r\n` +
@@ -640,5 +642,6 @@ desenhar();
 <!--EMB:centralEmb-->
 <!--EMB:quadroEmb-->
 <!--EMB:hubEmb-->
+<!--EMB:apresEmb-->
 </body>
 </html>

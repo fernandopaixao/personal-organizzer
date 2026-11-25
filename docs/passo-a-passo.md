@@ -25,7 +25,7 @@ Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é ind
 
 ## 1. Montar a solução pela primeira vez
 
-0. Descompacte o **.zip da solução** (`gestao-solucao-AAAA-MM-DD.zip`) numa pasta qualquer; ele traz o `inicio.html`, as ferramentas, a documentação e um LEIA-ME.
+0. Descompacte o **.zip da solução** (`gestao-solucao-AAAA-MM-DD.zip`) numa pasta qualquer; ele traz o `inicio.html`, as ferramentas, a documentação e um LEIA-ME. Para mostrar a solução a alguém antes de começar, abra `apresentacao.html`.
 1. Crie uma **pasta pessoal**, só sua, de preferência dentro do **seu OneDrive** (por exemplo `OneDrive - Empresa\GestaoPessoal`). Ela é o seu backup se trocar de computador. Não use a pasta compartilhada com os times.
 2. Garanta que a **biblioteca do SharePoint** do grupo (`Gestao-Compartilhado`) está sincronizada no seu computador pelo OneDrive. Depois, clique com o botão direito na pasta e escolha **Sempre manter neste dispositivo** (Windows: no Explorador de Arquivos; Mac: no Finder). O ícone vira um círculo verde cheio. Sem isso, os arquivos ficam só na nuvem e as ferramentas não leem o que os outros publicam. Vale fazer o mesmo na sua pasta pessoal.
 3. Copie `inicio.html` para a pasta pessoal e abra com dois cliques. As boas-vindas (**Vamos montar sua Remessa**) explicam o nome da solução: envelopes lacrados numa caixa postal.

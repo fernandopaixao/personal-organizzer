@@ -25,6 +25,7 @@ def main():
     nome = f'gestao-solucao-{hoje}'
     arquivos = {
         'hub.html': RAIZ / 'hub.html',
+        'apresentacao.html': RAIZ / 'apresentacao.html',
         'inicio.html': RAIZ / 'inicio.html',
         central().name: central(),
         'quadro_do_time_v1.html': RAIZ / 'ferramenta-time' / 'quadro_do_time_v1.html',

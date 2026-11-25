@@ -16,6 +16,7 @@ const ok = (c, msg) => { console.log((c ? '  ok  ' : '  FALHOU  ') + msg); if (!
 { const ler = f => fs.readFileSync(path.join(RAIZ, f), 'utf8'), central = fs.readdirSync(RAIZ).filter(n => /^gestao_pessoal_v\d+\.html$/.test(n)).sort((a, b) => parseInt(a.slice(15)) - parseInt(b.slice(15))).pop();
   const fav = ['hub.html', 'inicio.html', central, 'ferramenta-time/quadro_do_time_v1.html', 'financas/financas_grupo.html', 'financas/financas_time.html', 'ferias/ferias.html'].filter(f => !/<link rel="icon" id="favicon" type="image\/svg\+xml" href="data:image\/svg\+xml,[^"]*%230b2155[^"]*%234d86ff/.test(ler(f)));
   ok(!fav.length, 'ícone da aba da Remessa (lacre azul) em todas as ferramentas' + (fav.length ? ': falta em ' + fav.join(', ') : ''));
+  ok(!/\{\{V:|<!--ICONE/.test(ler('apresentacao.html')) && /Por que Remessa/.test(ler('apresentacao.html')) && /v\d+\.\d+/.test(ler('apresentacao.html')), 'página de apresentação montada, com ícones e versões');
   ok(/\['rec','Remessas'\]/.test(ler(central)) && /nova remessa|novas remessas/i.test(ler(central)), 'Central chama de remessa o arquivo de integração recebido'); }
 
 const srv = http.createServer((q, r) => {
@@ -226,6 +227,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   fs.writeFileSync(path.join(SAIDA, 'gestao_gerada.html'), await opfs(a2, async () => ler('LocalGestor2', 'gestao_pessoal.html')));
   const c = await nova(SAIDA_URL + 'gestao_gerada.html', {});
   await c.evaluate(() => { window.__abrir = { dir: 'LocalGestor2', arq: 'gestao-tecnologia.json' }; });
+  ok(await c.evaluate(() => { const l = document.querySelector('#lock.rm-tela > .rm-lado'); return !!l && /Remessa/.test(l.textContent) && /v15\.\d+/.test(l.textContent) && getComputedStyle(document.getElementById('lock')).backgroundImage.includes('gradient'); }), 'tela de entrada da Central: fundo da Remessa, painel com a versão e a caixa à direita');
   await c.fill('#lockPass', SENHA2); await c.click('#btnOpen'); await c.waitForTimeout(1500);
   ok(await c.evaluate(() => !document.querySelector('#app').classList.contains('hidden')), 'Central abre o arquivo cifrado criado pelo assistente');
   ok(await c.evaluate(() => document.querySelectorAll('#home .inss .ins').length === 4 && /Delegadas no prazo/.test(document.querySelector('#home .inss').textContent)), 'Hoje da Central abre com quatro cards de leitura');
@@ -511,6 +513,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   await ls.click('#sCx'); await ls.click('#dlg [data-r="ok"]').catch(() => {}); await ls.waitForSelector('#pCx.feito', { timeout: 30000 });
   const lid = await opfs(ls, async () => ler('LocalSorte/para-a-lideranca', 'LEIA-ME.txt'));
   ok(/GK1\.tecnologia-fin-\d{4}\./.test(lid || '') && /\+ Grupo de outro gestor/.test(lid || ''), 'envelope para a liderança com a chave do grupo e onde colar');
+  ok((await opfs(ls, async () => [await listar('LocalSorte'), await listar('LocalSorte/para-os-times/pagamentos')])).every(l => l.includes('apresentacao.html')), 'apresentação da Remessa na pasta do gestor e na de cada time');
   const locS = await opfs(ls, async () => [await listar('LocalSorte'), await listar('LocalSorte/para-os-times'), await listar('LocalSorte/para-os-times/pagamentos')]);
   ok(['hub.html', 'gestao_pessoal.html', 'financas_grupo.html', 'onde-fica-cada-coisa.html', 'hub-tecnologia.json', 'gestao-tecnologia.json', 'financas-grupo-tecnologia.json'].every(n => locS[0].includes(n)), 'Estou com sorte: ferramentas do gestor geradas na pasta');
   ok(!locS[0].includes('ferias.html') && !locS[0].includes('ferias-tecnologia.json'), 'Estou com sorte: gestor não recebe Mapa de Férias à parte (férias ficam na Central, ADR-0033)');

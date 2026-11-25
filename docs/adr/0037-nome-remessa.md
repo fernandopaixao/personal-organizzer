@@ -14,7 +14,12 @@ A forma como as ferramentas conversam já é a de um correio: cada uma põe o qu
 4. **"Nova remessa"** é o termo para um arquivo de integração que chegou de outra pessoa e ainda não foi aplicado: na Central (aba **Remessas** da Integração, cartão **Dos times**, aviso no menu), no Finanças do Grupo (planos dos times), no Finanças do Time (diretriz do grupo) e no Quadro (catálogo da Central). Os post-its continuam post-its.
 5. **Por que o nome:** o Início explica o nome num parágrafo nas boas-vindas, e o mesmo texto (`POR_QUE_REMESSA` em `financas/src/inicio.html`) vai para o LEIA-ME da pasta compartilhada, o LEIA-ME de cada pasta em `para-os-times/` e o cartão "Onde fica cada coisa".
 
+6. **Tela de entrada comum** (`financas/src/marca.js`, injetado pelo build em todas as ferramentas): quando a tela de entrada aparece (o cadeado da Central, a entrada do hub, a tela inicial das outras), o fundo vira o marinho da marca com envelopes em marca-d'água. À esquerda aparece o painel da Remessa, com o nome da ferramenta, a versão e o link **Conheça a Remessa**; a caixa de senha ou de abertura fica à direita. No hub, o texto do cockpit vai para o painel da esquerda. A tela não muda quando a ferramenta está embutida em outra (Férias dentro da Central).
+7. **Página de apresentação** (`apresentacao.html`, fonte em `financas/src/apresentacao.html`). Explica a analogia com um desenho, as ferramentas (com ícones e as versões atuais, preenchidos pelo build), quem usa, a segurança e como começar. Vai no .zip, e o assistente a grava na pasta do gestor e na de cada time.
+
 ## Consequências
 - Ícone novo ou ferramenta nova: desenhe o SVG em `financas/src/icones/<nome>.svg` (32×32, fundo `#0b2155`, um detalhe `#4d86ff` e o lacre azul no canto (círculo `#4d86ff` em 25.5, 25.5, raio 4)) e inclua o título dela em `ICONES` de `tools/build_financas.py`; o build recusa um HTML sem ícone.
 - Texto novo que fale de um arquivo que chegou pela pasta usa "remessa" ("nova remessa", "remessas na caixa postal"). Texto que fale de "a solução" para quem usa pode dizer "a Remessa".
+- Tela de entrada nova numa ferramenta: use `.welcome` (ou `.lock` com `.lockcard`) para ela ganhar o fundo e o painel da Remessa.
+- Ferramenta nova ou versão nova: a apresentação lê as versões no build; inclua a ferramenta em `financas/src/apresentacao.html`.
 - O teste de ponta a ponta confere o ícone com o lacre azul em todas as ferramentas, a aba Remessas e o parágrafo do Início.

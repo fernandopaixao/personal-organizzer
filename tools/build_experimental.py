@@ -35,6 +35,7 @@ def saidas(raiz):
     c = central(raiz)
     return {
         'hub.html': raiz / 'hub.html',
+        'apresentacao.html': raiz / 'apresentacao.html',
         'inicio.html': raiz / 'inicio.html',
         c.name: c,
         'quadro_do_time_v1.html': raiz / 'ferramenta-time' / 'quadro_do_time_v1.html',

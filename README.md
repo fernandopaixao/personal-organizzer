@@ -2,6 +2,8 @@
 
 **Remessa** é o nome da solução ([ADR-0037](docs/adr/0037-nome-remessa.md)): as ferramentas trocam envelopes lacrados (arquivos cifrados com a chave de cada time) numa caixa postal (a pasta compartilhada do OneDrive). Só quem tem a chave abre; o que chega de outra pessoa aparece como **nova remessa**. Cada ferramenta tem um ícone na aba com um lacre azul no canto; o hub usa o envelope lacrado.
 
+Para apresentar a solução a alguém, abra [`apresentacao.html`](apresentacao.html). Ela também abre pelo link **Conheça a Remessa**, na tela de entrada de cada ferramenta.
+
 Ferramenta de gestão pessoal em um único arquivo HTML, sem servidor e sem instalação.
 
 - **Abrir:** dê dois cliques em `gestao_pessoal_v15.html` (Chrome ou Edge recomendados, para salvar direto no arquivo e usar a pasta de integração).

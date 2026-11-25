@@ -970,8 +970,8 @@ function ajustes() {
 async function telaInicial(msg = '') {
   const ult = lembrarAtivo() ? await kv.get('hub-local') : null;
   const li = (ic, t) => `<li>${ico(ic, '')}<span>${t}</span></li>`;
-  $('#app').innerHTML = `<div class="entrada"><div class="vitrine"><span class="selo" title="${MARCA}">${MARCA_SVG}</span>
-      <h2>${MARCA} · seu cockpit de gestão</h2><p>Uma senha, uma tela: o que pede a sua atenção em todos os módulos. Cada time deixa os seus envelopes lacrados na caixa postal (a pasta compartilhada) e o hub avisa quando chega uma nova remessa.</p>
+  $('#app').innerHTML = `<div class="entrada"><div class="vitrine">
+      <h2>Seu cockpit de gestão</h2><p>Uma senha, uma tela: o que pede a sua atenção em todos os módulos. Cada time deixa os seus envelopes lacrados na caixa postal (a pasta compartilhada) e o hub avisa quando chega uma nova remessa.</p>
       <ul>${li('central', '<b>Central</b>: suas tarefas, delegadas, iniciativas e 1:1')}${li('quadro', '<b>Quadros dos times</b>: iniciativas, bloqueios e métricas publicadas')}${li('fin', '<b>Finanças</b>: previsto, orçado e realizado de cada time')}${li('ferias', '<b>Férias</b>: quem está fora hoje e nos próximos dias')}${li('cadeado', 'Entre uma vez: as ferramentas abertas pelo hub não pedem a senha de novo')}</ul></div>
     <div class="acoes"><h2 style="margin:0 0 2px;font-family:var(--title);font-weight:600">${TOOL_NOME}</h2><div class="small muted">Entre com a senha do hub (a mesma das outras ferramentas, se você usou o assistente).</div>
     ${msg ? `<div class="banner warn" style="margin-top:12px">${esc(msg)}</div>` : ''}
