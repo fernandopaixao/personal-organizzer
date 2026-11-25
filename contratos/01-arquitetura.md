@@ -21,7 +21,7 @@ As ferramentas não conversam por rede: cada uma grava **arquivos JSON cifrados*
         │        times/<time>/postits/<gestor>-<computador>.json
         │                     chaves do TIME: GK1.<time>-AAMM (tarefas) e GK1.<time>-fin-AAMM (finanças)
   TIME
-  Quadro do Time (ou ferramenta própria) · Finanças do Time · férias só por outra solução (ADR-0035)
+  Quadro do Time (ou ferramenta própria) · Finanças do Time · férias só por outra solução (ADR-0036)
 ```
 
 **Regra dos níveis** ([ADR-0025](../docs/adr/0025-consolidacao-em-niveis.md), [ADR-0026](../docs/adr/0026-ferias-em-niveis.md)): cada nível é "um time" para o nível de cima. O gestor soma os times e publica **um consolidado** como uma unidade do tipo `grupo`; a liderança soma os grupos (e times diretos, se tiver) do mesmo jeito. Funciona com quantos níveis forem precisos: um diretor que recebe vários líderes de líderes cadastra cada um como unidade `grupo`, e cada um deles publica o próprio consolidado em `grupos/<slug>/`.
@@ -50,7 +50,7 @@ A raiz é a pasta sincronizada (`Gestao-Compartilhado`; o nome antigo `Gestao-In
 | `grupo/financas/diretriz-<time>.json` | [`gestao-financas-diretriz/1`](schemas/gestao-financas-diretriz-1.schema.json) | finanças do time | Finanças do Grupo do gestor | Finanças do Time | Pelo botão do gestor |
 | `grupos/<grupo>/financas/plano.json` | `gestao-financas-plano/1` com `source.level = "group"` | do grupo | Gestor do grupo (consolidado) | Hub e Finanças do Grupo da liderança | Pelo botão, depois da prévia "o que sobe" |
 | `grupos/<grupo>/financas/diretriz.json` | `gestao-financas-diretriz/1` | do grupo | Liderança | Finanças do Grupo do gestor | Pelo botão da liderança |
-| `times/<time>/ferias/<w>.json` | [`gestao-ferias/1`](schemas/gestao-ferias-1.schema.json) (`level` `team`) | tarefas do time | Outra solução do time (a solução não grava aqui desde a Central 15.10: o gestor cadastra as férias do time na própria Central, [ADR-0035](../docs/adr/0035-ferias-so-o-gestor-cadastra.md)) | Página Férias da Central do gestor | Automático a cada mudança |
+| `times/<time>/ferias/<w>.json` | [`gestao-ferias/1`](schemas/gestao-ferias-1.schema.json) (`level` `team`) | tarefas do time | Outra solução do time (a solução não grava aqui desde a Central 15.11: o gestor cadastra as férias do time na própria Central, [ADR-0036](../docs/adr/0036-ferias-so-o-gestor-cadastra.md)) | Página Férias da Central do gestor | Automático a cada mudança |
 | `grupos/<grupo>/ferias/<w>.json` | `gestao-ferias/1` (`level` `group`) | do grupo | Gestor do grupo (consolidado, pela página Férias da Central) | Página Férias da liderança | Pelo botão, depois da prévia |
 | `times/<time>/postits/<w>.json` | [`gestao-postits/1`](schemas/gestao-postits-1.schema.json) | tarefas do time | Cada autor (Hub) | Quadro do Time, Hub | Automático a cada mudança |
 | `times/<time>/postits/vistos/<w>.json` | [`gestao-postits-vistos/1`](schemas/gestao-postits-vistos-1.schema.json) | tarefas do time | Cada pessoa do time (Quadro) | Hub | Ao clicar em "Vi" |

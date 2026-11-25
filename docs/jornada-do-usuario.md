@@ -112,7 +112,7 @@ Esta revisão olhou a solução como um todo em 24/11/2026. Os pontos abaixo nã
 
 ## 8. Jornada das férias (gestor e liderança)
 
-O Mapa de Férias é apoio para a visão do grupo; o pedido oficial de férias continua na ferramenta da empresa. O gestor e a liderança usam a página **Férias da Central** (mesmo arquivo e mesma senha; [ADR-0033](adr/0033-ferias-dentro-da-central.md)). Desde a Central 15.10, só o gestor cadastra: as pessoas dos times não usam ferramenta de férias ([ADR-0035](adr/0035-ferias-so-o-gestor-cadastra.md)).
+O Mapa de Férias é apoio para a visão do grupo; o pedido oficial de férias continua na ferramenta da empresa. O gestor e a liderança usam a página **Férias da Central** (mesmo arquivo e mesma senha; [ADR-0033](adr/0033-ferias-dentro-da-central.md)). Desde a Central 15.11, só o gestor cadastra: as pessoas dos times não usam ferramenta de férias ([ADR-0036](adr/0036-ferias-so-o-gestor-cadastra.md)).
 
 | Etapa | Quem | O que faz | Ferramenta | Ponto de atenção |
 |---|---|---|---|---|

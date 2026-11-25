@@ -1,6 +1,6 @@
 # Funcionalidades, usos e objetivos
 
-*25/11/2026 · Central v15.10, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.4 (dentro da Central), assistente 2.6, contratos 1.0 · visual experimental em `experimental/`*
+*25/11/2026 · Central v15.11, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.4 (dentro da Central), assistente 2.6, contratos 1.0 · visual experimental em `experimental/`*
 
 Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. Para as regras técnicas por trás, veja as [decisões de arquitetura](adr/README.md). Para o caminho de quem usa, veja a [jornada do usuário](jornada-do-usuario.md) e o [passo a passo](passo-a-passo.md).
 
@@ -82,7 +82,7 @@ A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados
 
 **Sempre manter neste dispositivo (2.5).** Com os "Arquivos sob demanda" do OneDrive, a pasta compartilhada pode ficar só na nuvem, e o navegador não lê os arquivos que os outros publicam. O assistente orienta marcar a pasta como **"Sempre manter neste dispositivo"** (botão direito na pasta, no Explorador de Arquivos do Windows ou no Finder do Mac) em quatro lugares: no desenho de como funciona, na etapa Pastas (e na tela do Estou com sorte), no checklist final e nos LEIA-ME que ele grava na pasta compartilhada e em `para-os-times/<time>/`. O item da pasta pessoal sugere o mesmo ([ADR-0004](adr/0004-troca-por-arquivos-na-pasta-sincronizada.md)).
 
-**Sem ferramenta de férias para os times (2.6, [ADR-0035](adr/0035-ferias-so-o-gestor-cadastra.md)).** Quem marca Férias é só o gestor: ele recebe a Central com a página Férias pronta. O assistente não gera mais `ferias.html`, nem para o gestor nem em `para-os-times/<time>/`, e não cria `times/<time>/ferias/`.
+**Sem ferramenta de férias para os times (2.6, [ADR-0036](adr/0036-ferias-so-o-gestor-cadastra.md)).** Quem marca Férias é só o gestor: ele recebe a Central com a página Férias pronta. O assistente não gera mais `ferias.html`, nem para o gestor nem em `para-os-times/<time>/`, e não cria `times/<time>/ferias/`.
 
 **Quando usar:** uma vez, ou ao trocar de computador. O gestor manda a cada time a pasta `para-os-times/<time>/` (ou o mesmo `inicio.html`, com a chave por mensagem direta), e o time monta tudo sozinho.
 
@@ -106,11 +106,11 @@ A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados
 
 ---
 
-## 5. Central de Gestão (v15.10)
+## 5. Central de Gestão (v15.11)
 
 **Férias dentro da Central (15.9, [ADR-0033](adr/0033-ferias-dentro-da-central.md)).** O Mapa de Férias do gestor e da liderança deixou de ser uma ferramenta à parte: é a página **Férias** (menu Pessoas), no mesmo arquivo e com a mesma senha da Central. Os times com pasta e as chaves de tarefas da Integração entram sozinhos; a pasta compartilhada é a da Integração. A página **Hoje** mostra quem está **fora hoje**.
 
-**Só o gestor cadastra as férias (15.10, [ADR-0035](adr/0035-ferias-so-o-gestor-cadastra.md)).** Os times não recebem ferramenta de férias: o `ferias.html` saiu do pacote, do assistente e de `para-os-times/`. Na aba **Pessoas** da página Férias, o gestor cadastra as próprias férias, as dos diretos e as das pessoas de cada time; **Trazer pessoas da Central** traz as pessoas cadastradas, cada uma com o seu time. Todos os times da Central viram unidades, com ou sem pasta.
+**Só o gestor cadastra as férias (15.11, [ADR-0036](adr/0036-ferias-so-o-gestor-cadastra.md)).** Os times não recebem ferramenta de férias: o `ferias.html` saiu do pacote, do assistente e de `para-os-times/`. Na aba **Pessoas** da página Férias, o gestor cadastra as próprias férias, as dos diretos e as das pessoas de cada time; **Trazer pessoas da Central** traz as pessoas cadastradas, cada uma com o seu time. Todos os times da Central viram unidades, com ou sem pasta.
 
 **Chave de integração dentro do time (15.8).** Na visão do time, a aba **Integração** mostra a chave em destaque: **Gerar chave de integração** (um clique; se faltar, a Central sugere a pasta e o prefixo), **HTML do time (com a chave)**, **Copiar chave**, **Mensagem para o time**, **Chave de finanças** e **Vazou: trocar chave**, mais o que chega do time (backlog, métricas, plano). Time sem chave mostra o aviso com o botão também na **Visão do time** e no card da página Times.
 
@@ -144,7 +144,7 @@ Navegação em 9 páginas (teclas 1 a 9) e o botão **Importar e agentes** no to
 
 ### 5.5 Férias (5)
 - **Uso:** o Mapa de Férias do grupo, dentro da Central: **Mapa** (mapa de calor dos dias com mais e menos gente fora, semanas mais cheias e mais tranquilas, por unidade), **Calendário**, **Pessoas** (as suas férias, as dos diretos e as das pessoas de cada time, agrupadas por time; **Trazer pessoas da Central** traz todo mundo com o time), **Unidades** (todos os times da Central entram sozinhos; a liderança adiciona os grupos dos gestores) e **Ajustes** (chave do nível acima, publicar para a liderança, limite, dias úteis, feriados). Detalhes na [seção 9](#9-mapa-de-férias-dentro-da-central-14).
-- **Sem módulo à parte:** sem `ferias.html`, sem `ferias-<grupo>.json`, sem outra senha e sem ferramenta de férias para os times (15.10). Quem usava o Mapa separado clica **Trazer do Mapa de Férias separado** (Ajustes ou primeira tela) e digita a senha do arquivo antigo, que só é lido.
+- **Sem módulo à parte:** sem `ferias.html`, sem `ferias-<grupo>.json`, sem outra senha e sem ferramenta de férias para os times (15.11). Quem usava o Mapa separado clica **Trazer do Mapa de Férias separado** (Ajustes ou primeira tela) e digita a senha do arquivo antigo, que só é lido.
 - **Objetivo:** planejar as ausências junto com o resto da gestão, sem mais um arquivo para abrir e guardar.
 
 ### 5.6 Iniciativas (6)
@@ -270,7 +270,7 @@ O grupo enxerga os anos do próprio horizonte **mais os anos publicados pelos ti
 
 ## 9. Mapa de Férias (dentro da Central, 1.4)
 
-Apoio para **enxergar e planejar as ausências** do time e do grupo. Não substitui a ferramenta oficial de férias da empresa: não aprova, não controla saldo. **Onde fica (1.4, [ADR-0033](adr/0033-ferias-dentro-da-central.md) e [ADR-0035](adr/0035-ferias-so-o-gestor-cadastra.md)):** na página **Férias da Central** (mesmo código, aberto dentro dela, com os dados no arquivo da Central). Só o gestor cadastra: as pessoas dos times não usam ferramenta de férias e o `ferias.html` não vai mais no pacote. Plano e decisões: [`plano-ferias.md`](plano-ferias.md).
+Apoio para **enxergar e planejar as ausências** do time e do grupo. Não substitui a ferramenta oficial de férias da empresa: não aprova, não controla saldo. **Onde fica (1.4, [ADR-0033](adr/0033-ferias-dentro-da-central.md) e [ADR-0036](adr/0036-ferias-so-o-gestor-cadastra.md)):** na página **Férias da Central** (mesmo código, aberto dentro dela, com os dados no arquivo da Central). Só o gestor cadastra: as pessoas dos times não usam ferramenta de férias e o `ferias.html` não vai mais no pacote. Plano e decisões: [`plano-ferias.md`](plano-ferias.md).
 
 | Tela | O que faz | Para quê |
 |---|---|---|

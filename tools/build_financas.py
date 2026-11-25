@@ -9,7 +9,7 @@
 - financas/financas_time.html   ← src/time.html
 - financas/financas_grupo.html  ← src/grupo.html (+ Finanças do Time embutido, para gerar o HTML de cada time)
 - hub.html                      ← src/hub.html (tela inicial do dia a dia, sem nada embutido)
-- ferias/ferias.html            ← src/ferias.html (Mapa de Férias montado: fonte da cópia na Central e dos testes; não vai no pacote, ADR-0035)
+- ferias/ferias.html            ← src/ferias.html (Mapa de Férias montado: fonte da cópia na Central e dos testes; não vai no pacote, ADR-0036)
 - Central (gestao_pessoal_v*.html, a mais nova) ← cópia do Mapa de Férias embutida em #feriasEmb: a página Férias (ADR-0033)
 - inicio.html                   ← src/inicio.html (+ Finanças do Time, Finanças do Grupo, Central, Quadro e Hub embutidos)
 

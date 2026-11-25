@@ -126,7 +126,7 @@ const dia = n => { const d = new Date(seg); d.setDate(d.getDate() + n); return d
   await ana2.waitForSelector('#tNova'); await ana2.click('[data-v="pessoas"]');
   ok((await ana2.textContent('#pg')).includes('Férias'), 'reabre o arquivo e mantém as férias');
 
-  console.log('6. Central 15.10: férias dentro da Central (ADR-0033) e só o gestor cadastra (ADR-0035)');
+  console.log('6. Central 15.11: férias dentro da Central (ADR-0033) e só o gestor cadastra (ADR-0036)');
   const kProd = chave('produto-fin-2611');
   const novaC = async () => { const p = await ctxB.newPage(); p.on('pageerror', e => erros.push('central: ' + e.message)); await p.goto(base + '/gestao_pessoal_v15.html');
     await p.evaluate(async k => { db = normalizeDb(Object.assign(emptyDb(), { settings: { selfName: 'Paula' }, teams: [{ id: 't1', name: 'Pagamentos', prefix: 'PAG', slug: 'pagamentos', createdAt: Date.now() }, { id: 't2', name: 'Sem pasta', createdAt: Date.now() }],

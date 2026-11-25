@@ -78,7 +78,7 @@ O `cifrar` não lê a pasta nem calcula a revisão: quem chama garante a revisã
 
 ### D. Férias de um time com ferramenta própria
 
-Opcional: desde a Central 15.10 o gestor cadastra as férias do time na própria Central ([ADR-0035](../docs/adr/0035-ferias-so-o-gestor-cadastra.md)). Use este caminho só se o time já tem um sistema com as férias e quer que elas apareçam sozinhas; a Central soma esse arquivo às pessoas que o gestor cadastrou.
+Opcional: desde a Central 15.11 o gestor cadastra as férias do time na própria Central ([ADR-0036](../docs/adr/0036-ferias-so-o-gestor-cadastra.md)). Use este caminho só se o time já tem um sistema com as férias e quer que elas apareçam sozinhas; a Central soma esse arquivo às pessoas que o gestor cadastrou.
 
 - Cada pessoa (ou o sistema, em nome dela) publica `times/<time>/ferias/<pessoa>-<computador>.json` com a **chave de tarefas do time** ([exemplo](exemplos/conteudo/times/pagamentos/ferias/ana-k3f9a.json)).
 - `people[].id` é o slug do nome (`ana-souza`): o mesmo nome em dois arquivos é a mesma pessoa. Publique `hlc`.

@@ -67,9 +67,9 @@ Pedido do Fernando: "Não trate férias como um item a parte. Trate como uma fer
 - **Teste:** seção 6 de `financas/testes/teste-ferias.js` (abre na Central, times e chave da Integração, lê o time, publica, nota fica na Central, "Fora hoje", time novo, migração do arquivo antigo) e o caminho do assistente no `teste-e2e.js`.
 - **Decidido em 25/11:** só o gestor cadastra (seção abaixo).
 
-## Só o gestor cadastra (1.4, Central 15.10, 25/11/2026)
+## Só o gestor cadastra (1.4, Central 15.11, 25/11/2026)
 
-Decisão do Fernando no card do thread: "Só o gestor cadastra". Registrada em [ADR-0035](adr/0035-ferias-so-o-gestor-cadastra.md).
+Decisão do Fernando no card do thread: "Só o gestor cadastra". Registrada em [ADR-0036](adr/0036-ferias-so-o-gestor-cadastra.md).
 
 - **Os times não recebem ferramenta de férias.** O `ferias.html` saiu do pacote (`tools/empacotar.py`), do assistente 2.6 (nem para o gestor, nem para os times, nem em `para-os-times/<time>/`) e do hub. O assistente não cria mais `times/<time>/ferias/`; só `grupos/<grupo>/ferias/` para o gestor. O arquivo continua no repositório como fonte da cópia embutida na Central e dos testes.
 - **Aba Pessoas** (antes "Diretos"): agrupada em "Você e diretos" e um grupo por time. O formulário de pessoa tem o campo **Time**; a ausência mostra o time da pessoa.

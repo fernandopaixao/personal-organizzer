@@ -1,6 +1,6 @@
 # Passo a passo · como lidar com a solução
 
-*25/11/2026 · Central v15.10, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.4 (dentro da Central), assistente 2.6, contratos 1.0 · visual experimental em `experimental/`*
+*25/11/2026 · Central v15.11, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.4 (dentro da Central), assistente 2.6, contratos 1.0 · visual experimental em `experimental/`*
 
 Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é independente. Antes de começar: use **Edge ou Chrome** no computador, abrindo o arquivo com dois cliques (não pela pré-visualização do Outlook, Teams ou OneDrive, nem de dentro do .zip), e tenha à mão um **cofre de senhas** (o gerenciador de senhas da empresa).
 
@@ -213,7 +213,7 @@ Os outros times não são afetados.
 
 ## 13. Férias: do gestor à liderança
 
-O **Mapa de Férias** é apoio para enxergar e planejar ausências; o pedido oficial continua na ferramenta da empresa. Fica na página **Férias da Central** ([ADR-0033](adr/0033-ferias-dentro-da-central.md)), sem outro arquivo nem outra senha, e **só o gestor cadastra** (Central 15.10, [ADR-0035](adr/0035-ferias-so-o-gestor-cadastra.md)): as pessoas dos times não usam ferramenta de férias.
+O **Mapa de Férias** é apoio para enxergar e planejar ausências; o pedido oficial continua na ferramenta da empresa. Fica na página **Férias da Central** ([ADR-0033](adr/0033-ferias-dentro-da-central.md)), sem outro arquivo nem outra senha, e **só o gestor cadastra** (Central 15.11, [ADR-0036](adr/0036-ferias-so-o-gestor-cadastra.md)): as pessoas dos times não usam ferramenta de férias.
 
 **No gestor (Central › Férias)**
 1. Na Central, abra **Férias** (menu Pessoas, tecla 5). Na primeira vez, informe o nome do grupo e o identificador, o mesmo das Finanças do Grupo (ex.: `tecnologia`), e clique **Começar**. As pessoas cadastradas na Central entram sozinhas, cada uma com o seu time. Se você já usava o Mapa de Férias separado, clique **Trazer do Mapa de Férias separado**, escolha o `ferias-<grupo>.json` e digite a senha dele: tudo vem para a Central.

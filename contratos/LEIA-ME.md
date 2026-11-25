@@ -1,6 +1,6 @@
 # Contratos de integração · solução de gestão
 
-*Contratos 1.0 · 25/11/2026 · vale para Central v15.10, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5, Finanças do Time 1.4 e Mapa de Férias 1.4 (dentro da Central)*
+*Contratos 1.0 · 25/11/2026 · vale para Central v15.11, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5, Finanças do Time 1.4 e Mapa de Férias 1.4 (dentro da Central)*
 
 Esta pasta é **tudo o que outra solução precisa respeitar** para gravar arquivos que as ferramentas da solução leem e conciliam, até a visão da **liderança** (líder de líderes): o Hub da liderança, as Finanças do Grupo da liderança e a página Férias da Central. Vale para um time com ferramenta própria, um gestor par com planilha ou sistema próprio, um agente que gera arquivos, ou qualquer ferramenta nova.
 
@@ -78,6 +78,6 @@ O validador sai com código 1 quando há erro (bom para usar em CI ou num agente
 | 24/11/2026 | `gestao-postits/1`, `gestao-postits-vistos/1` (Hub); plano e diretriz multianuais (`fiscalYears`, `byYear`, `totalsByYear`); consolidado do grupo (`source.level = "group"`, `units`); `gestao-ferias/1` |
 | 24/11/2026 | Contratos 1.0: esta pasta única, com especificação, vetores de teste, exemplos de todos os arquivos e validador ([ADR-0032](../docs/adr/0032-pasta-de-contratos.md)) |
 | 24/11/2026 | Nenhum formato mudou. Quem lê e publica as férias do gestor e da liderança passou a ser a página Férias da Central ([ADR-0033](../docs/adr/0033-ferias-dentro-da-central.md)); os arquivos `times/<time>/ferias/` e `grupos/<grupo>/ferias/` continuam iguais |
-| 25/11/2026 | Nenhum formato mudou. Só o gestor cadastra as férias, na Central ([ADR-0035](../docs/adr/0035-ferias-so-o-gestor-cadastra.md)): as pessoas dos times entram no consolidado com `people[].id` `<time>.<slug>` e `unit` do time, como já previa o schema; `times/<time>/ferias/` fica para outra solução do time |
+| 25/11/2026 | Nenhum formato mudou. Só o gestor cadastra as férias, na Central ([ADR-0036](../docs/adr/0036-ferias-so-o-gestor-cadastra.md)): as pessoas dos times entram no consolidado com `people[].id` `<time>.<slug>` e `unit` do time, como já previa o schema; `times/<time>/ferias/` fica para outra solução do time |
 
 Mudou um contrato? Atualize nesta pasta o schema, o exemplo (`exemplos/gerar.js`), a regra no `validar.js` e esta tabela, no mesmo PR da ferramenta ([ADR-0022](../docs/adr/0022-documentacao-no-mesmo-pr.md)).
