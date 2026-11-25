@@ -1,6 +1,6 @@
 # Funcionalidades, usos e objetivos
 
-*25/11/2026 · Remessa · Central v15.12, Quadro do Time 2.3, Hub 2.1, Finanças do Grupo 1.6 e do Time 1.4, Mapa de Férias 1.4 (dentro da Central), assistente 2.7, contratos 1.0 · visual experimental em `experimental/`*
+*25/11/2026 · Remessa · Central v15.13, Quadro do Time 2.3, Hub 2.2, Finanças do Grupo 1.6 e do Time 1.4, Mapa de Férias 1.4 (dentro da Central), assistente 2.8, contratos 1.0 · visual experimental em `experimental/`*
 
 Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. Para as regras técnicas por trás, veja as [decisões de arquitetura](adr/README.md). Para o caminho de quem usa, veja a [jornada do usuário](jornada-do-usuario.md) e o [passo a passo](passo-a-passo.md).
 
@@ -10,7 +10,7 @@ Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. 
 
 **Nome: Remessa** ([ADR-0037](adr/0037-nome-remessa.md)). A solução funciona como um serviço de envelopes lacrados com uma caixa postal: cada ferramenta põe o que tem para contar num envelope cifrado com a chave do time (o lacre) e deixa na pasta compartilhada (a caixa postal). Só quem tem a chave abre. Um arquivo que chegou de outra pessoa e ainda não foi aplicado é uma **nova remessa**. Cada ferramenta tem o seu ícone na aba do navegador, com o lacre azul da Remessa no canto; o hub usa o envelope lacrado.
 
-**Tela de entrada e apresentação (Central 15.12, Hub 2.1, assistente 2.7).** Todas as ferramentas abrem com a mesma tela de entrada: fundo marinho com envelopes em marca-d'água, o painel da Remessa à esquerda (nome da ferramenta, versão e o link **Conheça a Remessa**) e a caixa de senha ou de abertura à direita. O link leva à `apresentacao.html`, uma página que apresenta a solução: a analogia em desenho, as ferramentas com as versões, quem usa, a segurança e como começar. Ela vai no .zip e o assistente grava uma cópia na pasta do gestor e na de cada time.
+**Tela de entrada e apresentação (Central 15.13, Hub 2.2, assistente 2.8).** Todas as ferramentas abrem com a mesma tela de entrada: fundo marinho com envelopes em marca-d'água, o painel da Remessa à esquerda (nome da ferramenta, versão e o link **Conheça a Remessa**) e a caixa de senha ou de abertura à direita. O link leva à `apresentacao.html`, uma página que apresenta a solução: a analogia em desenho, as ferramentas com as versões, quem usa, a segurança e como começar. Ela vai no .zip e o assistente grava uma cópia na pasta do gestor e na de cada time.
 
 Dar a um gestor de vários times, e aos próprios times, **um lugar organizado para tarefas, pessoas, rituais, portfólio de iniciativas, fluxo dos times e finanças**, sem servidor, sem instalação e com tudo cifrado. Os objetivos que guiam cada funcionalidade:
 
@@ -121,7 +121,7 @@ A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados
 
 ---
 
-## 5. Central de Gestão (v15.12)
+## 5. Central de Gestão (v15.13)
 
 **Férias dentro da Central (15.9, [ADR-0033](adr/0033-ferias-dentro-da-central.md)).** O Mapa de Férias do gestor e da liderança deixou de ser uma ferramenta à parte: é a página **Férias** (menu Pessoas), no mesmo arquivo e com a mesma senha da Central. Os times com pasta e as chaves de tarefas da Integração entram sozinhos; a pasta compartilhada é a da Integração. A página **Hoje** mostra quem está **fora hoje**.
 

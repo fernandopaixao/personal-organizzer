@@ -1,6 +1,6 @@
 # Passo a passo · como lidar com a solução
 
-*25/11/2026 · Remessa · Central v15.12, Quadro do Time 2.3, Hub 2.1, Finanças do Grupo 1.6 e do Time 1.4, Mapa de Férias 1.4 (dentro da Central), assistente 2.7, contratos 1.0 · visual experimental em `experimental/`*
+*25/11/2026 · Remessa · Central v15.13, Quadro do Time 2.3, Hub 2.2, Finanças do Grupo 1.6 e do Time 1.4, Mapa de Férias 1.4 (dentro da Central), assistente 2.8, contratos 1.0 · visual experimental em `experimental/`*
 
 Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é independente. Antes de começar: use **Edge ou Chrome** no computador, abrindo o arquivo com dois cliques (não pela pré-visualização do Outlook, Teams ou OneDrive, nem de dentro do .zip), e tenha à mão um **cofre de senhas** (o gerenciador de senhas da empresa).
 

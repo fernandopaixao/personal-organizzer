@@ -954,7 +954,7 @@ textarea.paste:focus{border-color:var(--bv)}
 <div class="lock" id="lock">
   <div class="lockcard">
     <div class="logo" style="margin:0">CG</div>
-    <h1>Central de Gestão <span class="appver" title="Versão desta Central">v15.12</span></h1>
+    <h1>Central de Gestão <span class="appver" title="Versão desta Central">v15.13</span></h1>
     <div class="muted small">Seus dados ficam em um arquivo JSON criptografado (AES-GCM 256, chave derivada da senha), separado deste HTML. Este arquivo não guarda nenhum dado.</div>
     <div class="field"><label for="lockPass">Senha</label><input type="password" id="lockPass" autocomplete="off" placeholder="Mínimo de 8 caracteres"></div>
     <div class="stack2">
@@ -968,7 +968,7 @@ textarea.paste:focus{border-color:var(--bv)}
   </div>
 </div>
 <div class="hidden" id="app">
-  <nav class="rail"><div class="logo">CG</div><div id="nav" style="display:contents"></div><div class="railver" title="Versão desta Central">v15.12</div></nav>
+  <nav class="rail"><div class="logo">CG</div><div id="nav" style="display:contents"></div><div class="railver" title="Versão desta Central">v15.13</div></nav>
   <main class="main"><div class="wrap">
     <div class="top">
       <h1 id="pageTitle"></h1>
@@ -1177,7 +1177,7 @@ const horizon=d=>{const n=dayDiff(today(),d);if(n<0)return'atrasada';if(n===0)re
 const KINDS={geral:'Geral',forte:'Ponto forte',desenv:'Desenvolvimento'};
 /* ============ Estado e migração (dados desacoplados, versionados e aditivos) ============ */
 const ME='me';
-const DB_VERSION=15,APP_VERSION='15.12'; /* versão exibida na página (rail e tela de senha); DB_VERSION é a do arquivo de dados */
+const DB_VERSION=15,APP_VERSION='15.13'; /* versão exibida na página (rail e tela de senha); DB_VERSION é a do arquivo de dados */
 const emptyDb=()=>({version:DB_VERSION,settings:{selfName:'Eu',hideFeedback:false,staffForumId:''},people:[],teams:[],initiatives:[],tasks:[],notes:[],cycles:[],staffs:[],weeklyReports:[],dateLog:[],forums:[],agendaItems:[],agreements:[],meetings:[],ooSessions:[]});
 let db=emptyDb();
 let password='',handle=null,dirty=false,saveTimer=null,pendingMigration=false;

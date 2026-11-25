@@ -1,6 +1,6 @@
 # Jornada do usuário
 
-*25/11/2026 · como cada papel conhece, monta, usa e mantém a Remessa · Central v15.12, Hub 2.1, assistente 2.7*
+*25/11/2026 · como cada papel conhece, monta, usa e mantém a Remessa · Central v15.13, Hub 2.2, assistente 2.8*
 
 A solução tem quatro papéis. A mesma pessoa pode ter mais de um (o gestor costuma ser também o dono das finanças do grupo; o líder do time costuma ser também o responsável financeiro). Quem integra uma **outra solução** pelos contratos tem a jornada própria na [seção 9](#9-jornada-de-quem-integra-outra-solução).
 
