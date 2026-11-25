@@ -115,6 +115,66 @@ async function conferirSemApi(frame, t, rotulo, espera) {
     await ctx.close(); fs.rmSync(tmp, { recursive: true, force: true });
   }
 
+  // 5) Visual experimental pela tela de entrada (ADR-0038): liga, lembra, volta, e nunca leva a arquivo que não existe.
+  //    Pasta pessoal simulada: HTMLs do visual atual na raiz (inclusive os com nome do assistente) e experimental/ ao lado.
+  //    O "experimental" aqui é o mesmo HTML com EXP = true (é só isso que o build muda no visual.js).
+  {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'vis-')), exp = path.join(tmp, 'experimental'); fs.mkdirSync(exp);
+    const central = fs.readdirSync(RAIZ).filter(n => /^gestao_pessoal_v\d+\.html$/.test(n)).sort((a, b) => parseInt(a.match(/\d+/)) - parseInt(b.match(/\d+/))).at(-1);
+    const copiar = (de, para, ex, troca = x => x) => fs.writeFileSync(para, troca(fs.readFileSync(path.join(RAIZ, de), 'utf8').replace(/const EXP = (true|false);/, `const EXP = ${ex};`)));
+    for (const [de, nome] of [['hub.html', 'hub.html'], ['inicio.html', 'inicio.html'], [central, central], [central, 'gestao_pessoal.html']]) copiar(de, path.join(tmp, nome), false);
+    copiar('ferramenta-time/quadro_do_time_v1.html', path.join(tmp, 'quadro_pagamentos.html'), false, x => x.replace('<title>Quadro do Time</title>', '<title>Quadro do Time · Pagamentos</title>'));
+    for (const n of ['hub.html', 'inicio.html', central]) copiar(n, path.join(exp, n), true);
+    const u = (...n) => 'file://' + path.join(tmp, ...n);
+    const ctx = await browser.newContext();
+    const p = await ctx.newPage(); const erros = []; p.on('pageerror', e => erros.push(e.message));
+    const abrir = async (...n) => { await p.goto(u(...n)); await p.waitForTimeout(350); };
+    const botao = () => p.locator('[data-rm-vis]').innerText().catch(() => '');
+    const pref = () => p.evaluate(() => localStorage.getItem('remessa-visual'));
+
+    await abrir('hub.html');
+    ok(/Experimentar o visual novo/.test(await botao()), 'visual: a tela de entrada do hub oferece o visual experimental');
+    await p.click('[data-rm-vis]'); await p.waitForURL(/experimental\/hub\.html$/);
+    await p.waitForTimeout(350);
+    ok(/Voltar ao visual atual/.test(await botao()), 'visual: o hub experimental abre e oferece voltar');
+    ok(await pref() === '"experimental"', 'visual: a escolha fica lembrada neste navegador');
+    await abrir('hub.html');
+    ok(p.url().endsWith('/experimental/hub.html'), 'visual: com o experimental escolhido, o hub.html da pasta abre o experimental');
+    await p.click('[data-rm-vis]'); await p.waitForURL(u('hub.html')); await p.waitForTimeout(350);
+    ok(p.url() === u('hub.html') && await pref() === '"atual"', 'visual: "Voltar ao visual atual" volta e fica no atual');
+    await abrir('hub.html');
+    ok(p.url() === u('hub.html'), 'visual: depois de voltar, o hub.html não troca mais sozinho');
+
+    // Central gerada pelo assistente (gestao_pessoal.html): troca para a do pacote e volta para ela mesma.
+    await p.evaluate(() => localStorage.setItem('remessa-visual', '"experimental"'));
+    await abrir('gestao_pessoal.html');
+    ok(p.url() === u('gestao_pessoal.html'), 'visual: não troca sozinho para uma versão experimental que nunca abriu aqui');
+    await p.click('[data-rm-vis]'); await p.waitForURL(u('experimental', central)); await p.waitForTimeout(350);
+    ok(true, 'visual: a Central gerada (gestao_pessoal.html) troca para ' + central + ' do experimental');
+    await p.click('[data-rm-vis]'); await p.waitForURL(u('gestao_pessoal.html'));
+    ok(true, 'visual: e volta para o gestao_pessoal.html de onde veio');
+    await p.evaluate(() => localStorage.setItem('remessa-visual', '"experimental"'));
+    await abrir('inicio.html');
+    ok(/Experimentar o visual novo/.test(await botao()), 'visual: o assistente (inicio.html) também oferece a troca');
+    await abrir('gestao_pessoal.html');
+    ok(p.url() === u('experimental', central), 'visual: com o experimental escolhido e já aberto, a Central troca sozinha');
+    await p.goto(u('gestao_pessoal.html') + '?visual=atual'); await p.waitForTimeout(350);
+    ok(p.url().startsWith(u('gestao_pessoal.html')) && await pref() === '"atual"', 'visual: ?visual=atual no endereço volta ao atual sem trocar');
+
+    // Quadro gerado para um time leva a configuração dele no HTML: não troca (a cópia genérica abriria sem ela).
+    await p.evaluate(() => localStorage.setItem('remessa-visual', '"experimental"'));
+    await abrir('quadro_pagamentos.html');
+    ok(p.url() === u('quadro_pagamentos.html') && !(await p.$('[data-rm-vis]')), 'visual: o Quadro gerado para um time não oferece a troca');
+
+    // Links do hub aberto de experimental/: a versão experimental quando existe, senão a da pasta pessoal (um nível acima).
+    await abrir('experimental', 'hub.html');
+    const links = await p.evaluate(c => { expArqs = new Set(['hub.html', 'inicio.html', c]);
+      return [hrefDe({ arquivo: 'gestao_pessoal.html', titulo: 'Central de Gestão' }), hrefDe({ arquivo: 'quadro_pagamentos.html', titulo: 'Quadro do Time' }), hrefDe({ arquivo: 'inicio.html', titulo: 'Início da solução' })]; }, central);
+    ok(links[0] === central && links[1] === '../quadro_pagamentos.html' && links[2] === 'inicio.html', 'visual: links do hub experimental ' + links.join(', '));
+    ok(!erros.length, 'visual: sem erro de JavaScript ' + erros.join(' | '));
+    await ctx.close(); fs.rmSync(tmp, { recursive: true, force: true });
+  }
+
   await browser.close();
   console.log(falhas ? `\n${falhas} falha(s)` : '\nTudo certo.');
   process.exit(falhas ? 1 : 0);

@@ -1,6 +1,6 @@
 # Decisões de arquitetura (ADRs)
 
-*25/11/2026 · estado: Remessa · Central v15.15, Quadro do Time 2.3.2, Hub 2.3, Finanças do Grupo 1.7 e do Time 1.5, Mapa de Férias 1.5 (dentro da Central), assistente 2.8, contratos 1.0, visual experimental*
+*25/11/2026 · estado: Remessa · Central v15.17, Quadro do Time 2.3.3, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.1, contratos 1.0, visual experimental*
 
 Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequências e o que observar ao evoluir. Elas existem para que uma funcionalidade nova comece pelas regras certas, sem precisar reler todos os planos.
 
@@ -45,6 +45,7 @@ Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequê
 | [0035](0035-hub-cockpit-de-gestao.md) | Hub como cockpit, com login único | O hub lê (nunca grava) a Central, os quadros e as finanças e mostra cards de todos os módulos; a Central entra direto com a senha da sessão; senha própria da Central vai junto nos links (sessão 1.1); revê a 0018 |
 | [0036](0036-ferias-so-o-gestor-cadastra.md) | Férias: só o gestor cadastra | Times não usam ferramenta de férias; o gestor marca as de todos na Central, pessoa com time; `ferias.html` sai do pacote |
 | [0037](0037-nome-remessa.md) | Nome Remessa | A solução se chama Remessa (envelopes lacrados numa caixa postal); ícone da aba com o lacre azul em todas as ferramentas; arquivo de integração que chegou é "nova remessa" |
+| [0038](0038-ligar-visual-experimental-na-entrada.md) | Ligar o visual experimental pela tela de entrada | Caixa **Visual experimental** no painel da Remessa: troca para a pasta `experimental/` e lembra a escolha no navegador; só troca sozinho para arquivos que já abriram; Quadro e Finanças do Time de um time não trocam |
 
 ## Checklist para uma funcionalidade nova
 

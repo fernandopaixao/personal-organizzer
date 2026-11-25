@@ -263,6 +263,74 @@ dialog::backdrop{background:rgba(22,26,35,.35)}
 pre.json{background:#f6f7fb;border-radius:10px;padding:12px;font-size:11.5px;max-height:420px;overflow:auto;white-space:pre-wrap;word-break:break-all}
 @media (max-width:720px){.rail{position:fixed;top:auto;bottom:0;left:0;right:0;width:auto;height:62px;flex-direction:row;justify-content:space-around;padding:4px;border-right:0;border-top:1px solid var(--line)}.logo{display:none}.main{margin-left:0;padding-bottom:90px}.fg{grid-template-columns:1fr}.nv{width:auto;padding:6px 4px}}
 </style>
+<script id="visual">
+/* visual 1.0 · liga e desliga o visual experimental pela tela de entrada (ADR-0038)
+   Injetado pelo build no <head> de todas as ferramentas, antes do tema e da senha por sessão. O build troca
+   EXP pelo valor certo: true só nos HTMLs montados por tools/build_experimental.py (pasta experimental/ do pacote).
+   - A escolha fica neste navegador (localStorage 'remessa-visual': 'experimental' ou 'atual'). Abrir uma ferramenta
+     da pasta experimental/ já conta como escolher o experimental.
+   - Uma ferramenta do visual atual, com o experimental escolhido, abre a versão experimental dela (location.replace),
+     mas só quando essa versão já abriu antes neste navegador (lista 'remessa-visual-vistas'). Nunca leva a um
+     arquivo que não existe; se a pasta experimental/ sumir, basta abrir com ?visual=atual no fim do endereço.
+   - O par de cada ferramenta: o mesmo nome na outra pasta; para as que o assistente gera com outro nome e sem
+     configuração embutida (Central, Hub, Finanças do Grupo, Início), o nome do pacote. Quadro e Finanças do Time
+     gerados para um time levam a configuração do time no próprio HTML: esses não trocam (a cópia genérica abriria sem ela).
+   Os dados são os mesmos nas duas versões: nada aqui toca em arquivo de dados. */
+(() => {
+  if (window.remessaVisual) return;
+  const EXP = false;
+  const K = 'remessa-visual', KV = 'remessa-visual-vistas', KP = 'remessa-visual-par';
+  const PACOTE = { 'Central de Gestão': 'gestao_pessoal_v15.html', 'Hub da solução': 'hub.html', 'Início da solução': 'inicio.html', 'Finanças do Grupo': 'financas_grupo.html', 'Remessa': 'apresentacao.html' };
+  const ler = (k, padrao) => { try { const v = localStorage.getItem(k); return v == null ? padrao : JSON.parse(v); } catch { return padrao; } };
+  const gravar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+  let embutido = false; try { embutido = window.top !== window; } catch { embutido = true; }
+  const partes = decodeURIComponent(location.pathname).split('/');
+  const nome = partes.at(-1) || '', pasta = partes.at(-2) || '';
+  const naPastaExp = EXP && pasta === 'experimental';
+  const titulo = () => (document.title || '').split('·')[0].trim();
+  const url = rel => { try { return new URL(rel, location.href).href.split(/[?#]/)[0]; } catch { return ''; } };
+  // O par desta página na outra versão (endereço completo), ou '' quando não há par seguro.
+  function par() {
+    if (embutido || !/\.html?$/i.test(nome)) return '';
+    const pares = ler(KP, {}), aqui = url(nome);
+    if (pares[aqui]) return pares[aqui];
+    if (EXP) return naPastaExp ? url('../' + nome) : '';   // experimental fora da pasta experimental/: sem par conhecido
+    const arq = Object.entries(PACOTE).find(([t]) => titulo().startsWith(t))?.[1];
+    if (arq) return url('experimental/' + arq);
+    // Quadro e Finanças do Time: só a cópia do pacote (mesmo nome) troca; a gerada para um time leva a configuração dele.
+    return ['quadro_do_time_v1.html', 'financas_time.html'].includes(nome) ? url('experimental/' + nome) : '';
+  }
+  const params = new URLSearchParams(location.search);
+  if (params.get('visual') === 'atual') gravar(K, 'atual');
+  const escolhido = () => ler(K, 'atual');
+  if (naPastaExp && !embutido) {
+    const vistas = ler(KV, []), aqui = url(nome);
+    if (!vistas.includes(aqui)) gravar(KV, [aqui, ...vistas].slice(0, 60));
+    if (escolhido() !== 'experimental') gravar(K, 'experimental');
+  }
+  // Visual atual com o experimental escolhido: abre a versão experimental, se ela já abriu antes neste navegador.
+  if (!EXP && !embutido && escolhido() === 'experimental' && params.get('visual') !== 'atual') {
+    const alvo = par();
+    // __remessaTroca: a senha por sessão não pede a senha ao abridor nesta página, e sim na que abre em seguida.
+    if (alvo && ler(KV, []).includes(alvo)) { window.__remessaTroca = true; location.replace(alvo + location.search + location.hash); }
+  }
+  window.remessaVisual = {
+    experimental: EXP, naPastaExp,
+    get escolhido() { return escolhido(); },
+    par,
+    // Nome no pacote da ferramenta com este título, quando ela não leva configuração embutida (Central, Hub, Grupo, Início).
+    pacote: t => Object.entries(PACOTE).find(([k]) => String(t || '').startsWith(k))?.[1] || '',
+    // Troca de visual pela tela de entrada: lembra a escolha e abre a outra versão na mesma aba.
+    trocar() {
+      const alvo = par(); if (!alvo) return false;
+      const pares = ler(KP, {}); pares[alvo] = url(nome); gravar(KP, pares);
+      gravar(K, EXP ? 'atual' : 'experimental');
+      location.assign(alvo);
+      return true;
+    }
+  };
+})();
+</script>
 <script id="tema">
 /* Tema claro, escuro ou automático (segue o sistema), comum a todas as ferramentas da solução.
    Injetado no <head> de cada HTML por tools/build_financas.py e tools/injetar_seguranca.py.
@@ -540,7 +608,8 @@ pre.json{background:#f6f7fb;border-radius:10px;padding:12px;font-size:11.5px;max
       window.dispatchEvent(new Event('gestao-sessao'));
     }
   });
-  if (window.opener) try { window.opener.postMessage({ schema: SC, tipo: 'pedir' }, '*'); } catch {}
+  // Página que vai trocar de visual (visual.js, ADR-0038): quem pede a senha é a versão que abre em seguida.
+  if (window.opener && !window.__remessaTroca) try { window.opener.postMessage({ schema: SC, tipo: 'pedir' }, '*'); } catch {}
   window.gestaoSessao = {
     // definir(senha) troca a senha da sessão; definir(null) esquece todas; definir(senha, 'central') guarda a de uma ferramenta.
     definir(s, para) {
@@ -561,7 +630,8 @@ pre.json{background:#f6f7fb;border-radius:10px;padding:12px;font-size:11.5px;max
    (.ent-*: 1 arquivo, 2 senha), usado pela Central e pelo núcleo das outras ferramentas. Quando a tela de entrada aparece
    (.lock da Central, .entrada do hub, .welcome das outras), põe o fundo da marca, o painel
    da Remessa à esquerda com o nome e a versão da ferramenta, e desloca a caixa para a direita.
-   Não mexe em nada quando a ferramenta está embutida em outra (Férias dentro da Central). */
+   Não mexe em nada quando a ferramenta está embutida em outra (Férias dentro da Central).
+   No painel da Remessa fica também a troca do visual experimental (visual.js, ADR-0038). */
 (() => {
   const SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#0b2155"/><rect x="5" y="9" width="22" height="15" rx="2" fill="#fff"/><path d="M5.8 10l10.2 7.6L26.2 10" fill="none" stroke="#0b2155" stroke-width="1.6" stroke-linejoin="round"/><circle cx="16" cy="17.6" r="3.2" fill="#4d86ff" stroke="#fff" stroke-width="1.1"/></svg>';
   const PADRAO = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='96' viewBox='0 0 120 96'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.07' stroke-width='1.4'%3E%3Crect x='14' y='18' width='40' height='26' rx='3'/%3E%3Cpath d='M15 20l19 13l19-13'/%3E%3Crect x='74' y='60' width='32' height='21' rx='3'/%3E%3Cpath d='M75 62l15 10l15-10'/%3E%3C/g%3E%3C/svg%3E\")";
@@ -577,6 +647,9 @@ pre.json{background:#f6f7fb;border-radius:10px;padding:12px;font-size:11.5px;max
 .rm-tela .lockcard .appver{display:none}
 .rm-lado .rm-ver{display:inline-flex;gap:8px;align-items:center;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);font-size:12.5px;color:#fff}
 .rm-lado .rm-ver b{font-weight:700}.rm-lado .rm-sob{display:block;margin-top:14px;font-size:12px;color:rgba(255,255,255,.6)}
+.rm-vis{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:18px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16)}
+.rm-vis-t{flex:1 1 220px;font-size:12px;line-height:1.45;color:rgba(255,255,255,.78)}.rm-vis-t b{color:#fff;font-weight:650}
+.rm-vis-b{flex:none;font-family:inherit;font-size:12.5px;font-weight:600;line-height:1;color:#0b2155;background:#fff;border:0;border-radius:999px;padding:8px 13px;cursor:pointer}.rm-vis-b:hover{background:#e6edff}.rm-vis-b:focus-visible{outline:2px solid #4d86ff;outline-offset:2px}
 .rm-lado a{color:#fff;text-decoration:underline;text-underline-offset:3px}
 .rm-tela>.welcome,.rm-tela>.entrada,.rm-tela>.lockcard{margin:0!important;width:100%;max-width:none!important;box-sizing:border-box}
 .rm-tela>.entrada,.rm-tela>.lockcard,.rm-tela>.welcome>.card,.rm-tela>.welcome>:only-child{box-shadow:0 30px 80px rgba(3,10,40,.45)!important}
@@ -603,9 +676,17 @@ pre.json{background:#f6f7fb;border-radius:10px;padding:12px;font-size:11.5px;max
     const d = document.createElement('div'); d.className = 'rm-lado';
     d.innerHTML = `<div class="rm-logo">${SVG}<span class="rm-nome">Remessa</span></div>
       <p class="rm-frase">Envelopes lacrados numa caixa postal. Cada ferramenta guarda o que é seu num arquivo cifrado com a sua senha e troca com os times só o necessário, lacrado com a chave de cada time.</p>
-      <span class="rm-sob">Nada sai do seu computador · <a href="apresentacao.html" target="_blank" rel="noopener">Conheça a Remessa</a></span>`;
+      <span class="rm-sob">Nada sai do seu computador · <a href="apresentacao.html" target="_blank" rel="noopener">Conheça a Remessa</a></span>${troca()}`;
     return d;
   };
+  // Visual experimental (visual.js, ADR-0038): liga e desliga aqui, na tela de entrada. Só aparece quando há o par seguro.
+  const troca = () => {
+    const v = window.remessaVisual; if (!v || !v.par()) return '';
+    return v.experimental
+      ? `<div class="rm-vis"><span class="rm-vis-t"><b>Visual experimental ligado.</b> As mesmas ferramentas e os mesmos dados.</span><button type="button" class="rm-vis-b" data-rm-vis>Voltar ao visual atual</button></div>`
+      : `<div class="rm-vis"><span class="rm-vis-t"><b>Visual experimental.</b> As mesmas ferramentas e os mesmos dados, com outro visual. Dá para voltar quando quiser.</span><button type="button" class="rm-vis-b" data-rm-vis>Experimentar o visual novo</button></div>`;
+  };
+  document.addEventListener('click', e => { const b = e.target && e.target.closest && e.target.closest('[data-rm-vis]'); if (b && !window.remessaVisual?.trocar()) b.disabled = true; });
   // A versão aparece uma vez só, no rodapé da tela de entrada.
   const rodape = () => {
     const d = document.createElement('div'); d.className = 'rm-rodape';
@@ -650,7 +731,7 @@ pre.json{background:#f6f7fb;border-radius:10px;padding:12px;font-size:11.5px;max
      gestao-status/1, gestao-metricas/1 dentro de gestao-envelope/1 (AES-256-GCM).
    - Só métricas de time, calculadas a partir da movimentação dos cards.
    ========================================================================= */
-const TOOL = 'quadro_do_time_v1.html', TOOL_VERSION = '2.3.2';
+const TOOL = 'quadro_do_time_v1.html', TOOL_VERSION = '2.3.3';
 /* Pré-configuração gravada pela Central de Gestão (Pessoas › Times › HTML do time).
    No arquivo original fica null; a Central troca o trecho entre os marcadores por um
    objeto quadro-preset/1: { team: { name, slug, prefix, contact }, people: [{ name, role }], key? }.

@@ -1,6 +1,6 @@
 # Passo a passo · como lidar com a solução
 
-*25/11/2026 · Remessa · Central v15.15, Quadro do Time 2.3.2, Hub 2.3, Finanças do Grupo 1.7 e do Time 1.5, Mapa de Férias 1.5 (dentro da Central), assistente 2.8, contratos 1.0 · visual experimental em `experimental/`*
+*25/11/2026 · Remessa · Central v15.17, Quadro do Time 2.3.3, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.1, contratos 1.0 · visual experimental em `experimental/`*
 
 Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é independente. Antes de começar: use **Edge ou Chrome** no computador, abrindo o arquivo com dois cliques (não pela pré-visualização do Outlook, Teams ou OneDrive, nem de dentro do .zip), e tenha à mão um **cofre de senhas** (o gerenciador de senhas da empresa).
 
@@ -263,10 +263,12 @@ Quando um time ou um gestor par usa uma ferramenta própria e quer aparecer no s
 O .zip traz a pasta **`experimental/`** com as mesmas ferramentas num visual novo (trilho marinho, fontes novas). O ícone da aba é o mesmo das atuais. Elas fazem tudo o que as atuais fazem e usam **os mesmos arquivos de dados**.
 
 1. Copie a pasta `experimental/` do .zip para dentro da sua pasta local (ao lado dos HTMLs atuais).
-2. Abra `experimental/hub.html` com dois cliques e escolha o mesmo arquivo de sempre, com a mesma senha. As ferramentas que o hub abre daí também são as experimentais.
-3. Quer gerar as ferramentas dos times já no visual novo? Use a Central ou o `experimental/inicio.html`: tudo o que eles geram sai no visual novo.
-4. Para voltar, abra o `hub.html` da pasta principal. Nada precisa ser convertido.
-5. O selo "Visual experimental", no canto inferior direito, mostra em qual versão você está.
+2. Abra o `hub.html` de sempre. Na tela de entrada, no painel azul à esquerda, clique em **Experimentar o visual novo** (a mesma caixa aparece em todas as ferramentas e na primeira tela do assistente).
+3. O hub abre de novo, no visual novo. Escolha o mesmo arquivo de sempre, com a mesma senha. As ferramentas que o hub abre daí também são as experimentais.
+4. A escolha fica lembrada neste navegador: da próxima vez, o `hub.html` de sempre já abre no visual novo.
+5. Para voltar, clique em **Voltar ao visual atual** na tela de entrada. Nada precisa ser convertido. Se a pasta `experimental/` sumir, abra o `hub.html` com `?visual=atual` no fim do endereço.
+6. Quer gerar as ferramentas dos times já no visual novo? Use a Central ou o `experimental/inicio.html`: tudo o que eles geram sai no visual novo. O Quadro e o Finanças do Time de um time não trocam pela caixa, porque levam a configuração do time no próprio HTML.
+7. O selo "Visual experimental", no canto inferior direito, mostra em qual versão você está.
 
 Achou algo estranho só na versão experimental (uma cor fora do lugar, um texto difícil de ler)? Anote a tela e a ferramenta: o ajuste vai em `experimental/src/` ([ADR-0034](adr/0034-visual-experimental.md)).
 

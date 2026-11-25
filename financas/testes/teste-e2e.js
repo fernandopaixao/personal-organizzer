@@ -250,7 +250,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   ok(await c.evaluate(() => initById('i1').updates.length === 1), 'atualização de iniciativa no formulário no lugar');
   await c.evaluate(() => { $('#importDialog').showModal(); $('#impText').value = JSON.stringify({ schema: 'gestao-import/3', tasks: [{ title: 'A' }], updates: [{ initiative: 'Não existe', text: 'y' }] }); analyzeImport(); });
   ok(await c.evaluate(() => $('#impGo').textContent === 'Importar 1 item' && document.querySelectorAll('#impPrev .ipv button').length === 5), 'prévia da importação com contadores e verbo no botão');
-  // v15.15: descartar linhas na prévia antes de confirmar (a tarefa descartada não entra; a pessoa criada por ela também não)
+  // v15.17: descartar linhas na prévia antes de confirmar (a tarefa descartada não entra; a pessoa criada por ela também não)
   await c.evaluate(() => { $('#impText').value = JSON.stringify({ schema: 'gestao-import/3', tasks: [{ title: 'Fica' }, { title: 'Sai', assignee: 'Pessoa Nova Descartada' }, { title: 'Sai também' }] }); impDrop = new Set(); analyzeImport(); });
   ok(await c.evaluate(() => $('#impGo').textContent === 'Importar 4 itens' && document.querySelectorAll('#impPrev [data-impdrop]').length === 3), 'prévia mostra uma caixa por linha que pode ser descartada (a pessoa criada pela tarefa não tem caixa)');
   await c.click('#impPrev [data-impdrop="tasks:1"]'); await c.waitForTimeout(100);

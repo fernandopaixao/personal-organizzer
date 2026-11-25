@@ -5,6 +5,7 @@
 
 - injeta o núcleo comum (financas/src/nucleo.css e nucleo.js) em cada HTML;
 - injeta o tema claro/escuro/automático (financas/src/tema.js) e a senha por sessão (financas/src/sessao.js) no <head> de cada HTML;
+- injeta a troca de visual pela tela de entrada (financas/src/visual.js, ADR-0038) antes do tema;
 - ícone da aba da marca Remessa em cada HTML (financas/src/icones/, ADR-0037) e, só na versão experimental
   (tools/build_experimental.py), a identidade visual (função visual, ADR-0034);
 - financas/financas_time.html   ← src/time.html
@@ -66,8 +67,21 @@ def marca(html):
     i = html.index('</head>')
     return html[:i] + tag + '\n' + html[i:]
 
+def modo(html):
+    """Põe (ou troca) <script id="visual"> com financas/src/visual.js logo antes do tema: liga e desliga o visual
+    experimental pela tela de entrada (ADR-0038). EXP vira true só na cópia que tools/build_experimental.py monta
+    (é lá que identidade.css existe); {{CENTRAL}} vira o nome do arquivo da Central no pacote."""
+    js = (SRC / 'visual.js').read_text(encoding='utf-8')
+    assert '</script' not in js.lower() and '/*EXP*/false' in js
+    js = js.replace('/*EXP*/false', 'true' if (SRC / 'identidade.css').exists() else 'false', 1).replace('{{CENTRAL}}', central().name)
+    tag = f'<script id="visual">\n{js}</script>'
+    if '<script id="visual">' in html:
+        return re.sub(r'<script id="visual">.*?</script>', lambda m: tag, html, count=1, flags=re.S)
+    i = html.index('<script id="tema">')
+    return html[:i] + tag + '\n' + html[i:]
+
 def visual(html):
-    html = marca(html)
+    html = modo(marca(html))
     if (SRC / 'identidade.css').exists():
         css = (SRC / 'identidade.css').read_text(encoding='utf-8')
         for nome in re.findall(r'/\*FONTE:([\w.-]+)\*/', css):
