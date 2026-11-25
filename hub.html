@@ -131,7 +131,7 @@ svg.ch{max-height:280px}
 .hub{max-width:1240px;margin:0 auto;padding:0 clamp(16px,2.6vw,40px) 80px}
 .hub .top .logo{margin:0}
 .hub .top{gap:10px}.hub .top h1{font-size:18px}.hub .top .pill{padding:3px 9px}
-.marca{width:38px;height:38px;border-radius:12px;background:linear-gradient(140deg,#4359e6,#223ad2 55%,#002bab);color:#fff;display:grid;place-items:center;flex:none;box-shadow:0 4px 12px rgba(34,58,210,.28)}
+.marca{width:38px;height:38px;border-radius:12px;background:linear-gradient(140deg,var(--bv) 0%,var(--bv-deep) 100%);color:#fff;display:grid;place-items:center;flex:none;box-shadow:0 4px 12px rgba(34,58,210,.28)}
 .marca svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .nav{display:flex;gap:2px;align-items:center;flex-wrap:wrap;background:#f0f1f6;border-radius:12px;padding:3px}
 .nav a,.nav summary{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:9px;color:var(--muted);font-weight:550;font-size:12.5px;text-decoration:none;cursor:pointer;list-style:none;white-space:nowrap}
@@ -143,7 +143,7 @@ svg.ch{max-height:280px}
 .nav .menu{position:absolute;top:34px;left:0;background:#fff;border:1px solid var(--line);border-radius:12px;padding:4px;box-shadow:0 12px 32px rgba(20,30,70,.16);min-width:220px;z-index:30;display:flex;flex-direction:column}
 .nav .menu a{justify-content:flex-start}
 /* topo do cockpit */
-.hero{position:relative;overflow:hidden;border-radius:22px;padding:24px 26px;margin:4px 0 18px;background:linear-gradient(125deg,#2f47de 0%,#223ad2 45%,#0a2a9e 100%);color:#fff;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:end}
+.hero{position:relative;overflow:hidden;border-radius:22px;padding:24px 26px;margin:4px 0 18px;background:linear-gradient(125deg,var(--bv) 0%,var(--bv-deep) 100%);color:#fff;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:end}
 .hero:after{content:"";position:absolute;right:-60px;top:-90px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.16),rgba(255,255,255,0) 65%);pointer-events:none}
 .hero .dia{font-size:12.5px;color:rgba(255,255,255,.75)}
 .hero .dia:first-letter{text-transform:uppercase}
@@ -235,7 +235,7 @@ details.pis>summary::-webkit-details-marker{display:none}
 details.pis>summary:before{content:"▸";transition:transform .15s}details.pis[open]>summary:before{transform:rotate(90deg)}
 /* tela de entrada */
 .entrada{max-width:980px;margin:7vh auto;padding:0 20px;display:grid;grid-template-columns:1fr 1fr;gap:0;border-radius:24px;overflow:hidden;border:1px solid var(--line);background:var(--card);box-shadow:0 20px 50px rgba(20,30,70,.10)}
-.entrada .vitrine{background:linear-gradient(150deg,#2f47de 0%,#223ad2 50%,#0a2a9e 100%);color:#fff;padding:34px 32px;display:flex;flex-direction:column;gap:16px}
+.entrada .vitrine{background:linear-gradient(150deg,var(--bv) 0%,var(--bv-deep) 100%);color:#fff;padding:34px 32px;display:flex;flex-direction:column;gap:16px}
 .entrada .vitrine h2{font-family:var(--title);font-size:26px;font-weight:600;margin:0;color:#fff;letter-spacing:-.02em}
 .entrada .vitrine p{margin:0;color:rgba(255,255,255,.85);font-size:13.5px}
 .entrada .vitrine ul{margin:4px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
@@ -490,7 +490,7 @@ details.pis>summary:before{content:"▸";transition:transform .15s}details.pis[o
 })();
 </script>
 <script id="sessao">
-/* sessao 1.1 · uma senha por sessão (ADR-0029, ADR-0034)
+/* sessao 1.1 · uma senha por sessão (ADR-0029, ADR-0035)
    Quem abre (hub, Central) guarda só em memória a senha que abriu o próprio arquivo. Quando a pessoa clica num link
    para outra ferramenta (target=_blank rel=opener), a janela nova pede a senha e o abridor responde uma vez, só nos
    90 segundos seguintes ao clique e só para uma janela aberta por ele (e.source.opener === window).
@@ -1114,7 +1114,7 @@ const pctTxt = (a, b) => b ? Math.round(a / b * 100) + '%' : '—';
       cifrado com a chave do time, um arquivo por autor (ninguém grava o arquivo de outra pessoa).
       O Quadro do Time mostra os post-its e grava quem já viu em times/<time>/postits/vistos/<pessoa>-<computador>.json.
    O arquivo pessoal do hub (times, chaves e seus post-its) é cifrado com a sua senha e fica numa pasta só sua (de preferência no seu OneDrive), nunca na compartilhada.
-   3) Hub 2.0 · cockpit de gestão (ADR-0034): com a senha da sessão, o hub lê SÓ PARA LEITURA o arquivo da Central
+   3) Hub 2.0 · cockpit de gestão (ADR-0035): com a senha da sessão, o hub lê SÓ PARA LEITURA o arquivo da Central
       (tarefas, iniciativas, 1:1 e férias) e o status e as métricas que cada Quadro publica, e mostra cards de todos os
       módulos numa tela. Os dados lidos ficam só em memória, resumidos; o hub nunca grava no arquivo de outra ferramenta.
    ===================================================================== */
@@ -1335,7 +1335,7 @@ function sparkline(vs) {
 }
 
 /* ------------------------- cockpit: leitura da Central ------------------------- */
-// Só leitura (ADR-0034). O hub acha o arquivo da Central (o que a própria Central lembra neste navegador, o escolhido
+// Só leitura (ADR-0035). O hub acha o arquivo da Central (o que a própria Central lembra neste navegador, o escolhido
 // aqui ou o .json da Central na pasta pessoal), abre com a senha da sessão, resume e descarta o resto. Nunca grava nele.
 const CENTRAL_FMT = 'gestao-cripto/2';
 let central = { estado: 'nada', arquivo: '', resumo: null, erro: '', lm: 0 }, centralH = null, senhaSessao = null, senhaCentral = null, lendoCentral = null;

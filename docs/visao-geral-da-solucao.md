@@ -1,6 +1,6 @@
 # Visão geral da solução · Central de Gestão, Quadro do Time e integração
 
-*25/11/2026 · estado atual: Central v15.9, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.3 e contratos 1.0 (detalhes em `docs/plano-v15.md`, `docs/plano-hub.md`, `docs/plano-financas.md` e [`contratos/`](../contratos/LEIA-ME.md))*
+*25/11/2026 · estado atual: Central v15.10, Quadro do Time 2.3, Hub 2.0, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.3 e contratos 1.0 (detalhes em `docs/plano-v15.md`, `docs/plano-hub.md`, `docs/plano-financas.md` e [`contratos/`](../contratos/LEIA-ME.md))*
 
 > **Por onde começar:** [funcionalidades, usos e objetivos](funcionalidades.md) · [jornada do usuário](jornada-do-usuario.md) · [passo a passo](passo-a-passo.md) · [decisões de arquitetura (ADRs)](adr/README.md)
 
@@ -39,7 +39,7 @@ A solução é um pequeno ecossistema de **ferramentas HTML de arquivo único**,
 
 | Peça | O que é | Quem usa | Onde está |
 |---|---|---|---|
-| **Hub da solução** | Tela inicial do dia a dia: abre as outras ferramentas e deixa post-its cifrados para os times, que aparecem no Quadro | Fernando (e quem quiser) | Repositório: `hub.html`, plano em `docs/plano-hub.md` |
+| **Hub da solução** | Cockpit de gestão (2.0): login único, cards e lista de atenção de todos os módulos (lidos sem gravar), abre as outras ferramentas e deixa post-its cifrados para os times, que aparecem no Quadro | Fernando (e quem quiser) | Repositório: `hub.html`, plano em `docs/plano-hub.md` |
 | **Central de Gestão v15** | Gestão pessoal e de portfólio do gestor: tarefas, delegação, iniciativas e features, rituais, pessoas, métricas e integração com os times | Fernando | Repositório: `gestao_pessoal_v15.html`, plano em `docs/plano-v15.md`. Projeto: `gestao-v15/` |
 | **Quadro do Time 2.2** | Quadro de cards, backlog, sprints, iniciativas ligadas à Central e métricas de fluxo do time | Cada time | Repositório e projeto: `ferramenta-time/` (HTML, guia, telas) |
 | **Finanças do Grupo e do Time** | Plano financeiro multianual de cada time (lançamentos locais, plano agregado publicado) e consolidado do grupo ano a ano contra o orçamento, com cards de leitura e gráficos | Fernando (grupo) e responsável financeiro de cada time | Repositório: `financas/`, plano em `docs/plano-financas.md` |
@@ -99,6 +99,7 @@ Teclas 1 a 9 trocam de página. O botão do topo **Importar e agentes** reúne a
 | v14 | Modelo Iniciativa › Feature, integração com os times, métricas dos times, importação `gestao-import/3` com 12 prompts para agentes, menu agrupado, painel da iniciativa redesenhado |
 | v15 | Navegação em 8 páginas sem telas duplicadas, Pessoa 360 no 1:1 com modo Em conversa e sessões registradas, formulários num padrão único |
 | v15.9 | Página **Férias**: o Mapa de Férias do gestor e da liderança entra na Central (mesmo arquivo e senha, times e chaves da Integração) e a Hoje mostra quem está fora |
+| v15.10 | Aberta pelo hub, entra direto com a senha da sessão quando o navegador já liberou o arquivo; o Hub 2.0 vira o cockpit de gestão e lê o resumo dela sem gravar ([ADR-0035](adr/0035-hub-cockpit-de-gestao.md)) |
 
 Detalhes da v15: `docs/plano-v15.md` (e da v14 em `docs/plano-v14.md`).
 
