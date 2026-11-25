@@ -127,32 +127,102 @@ svg.ch{width:100%;height:auto;display:block}
 .al.compact{padding:6px 0}
 svg.ch{max-height:280px}
 
-.hub{max-width:1180px;margin:0 auto;padding:0 clamp(16px,2.6vw,40px) 80px}
+/* ---------- Hub 2.0 · cockpit de gestão ---------- */
+.hub{max-width:1240px;margin:0 auto;padding:0 clamp(16px,2.6vw,40px) 80px}
 .hub .top .logo{margin:0}
-.tools{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-bottom:22px}
-.tool{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;text-decoration:none;color:inherit;min-width:0}
-.tool:hover{border-color:var(--bv-mid);box-shadow:0 2px 10px rgba(34,58,210,.08)}
-.tool .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-weight:700;font-size:11px;flex:none;background:var(--bv-soft);color:var(--bv)}
-.tool .ic.fin{background:var(--ok-soft);color:var(--ok)}.tool .ic.aux{background:#f2f3f8;color:var(--muted)}
-.tool b{display:block;font-size:13.5px}.tool .code{color:var(--faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
-.tool .go{margin-left:auto;color:var(--bv);font-size:12px;font-weight:600;white-space:nowrap}
-.team{padding:16px 18px}
+.hub .top{gap:10px}.hub .top h1{font-size:18px}.hub .top .pill{padding:3px 9px}
+.marca{width:38px;height:38px;border-radius:12px;background:linear-gradient(140deg,#4359e6,#223ad2 55%,#002bab);color:#fff;display:grid;place-items:center;flex:none;box-shadow:0 4px 12px rgba(34,58,210,.28)}
+.marca svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nav{display:flex;gap:2px;align-items:center;flex-wrap:wrap;background:#f0f1f6;border-radius:12px;padding:3px}
+.nav a,.nav summary{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:9px;color:var(--muted);font-weight:550;font-size:12.5px;text-decoration:none;cursor:pointer;list-style:none;white-space:nowrap}
+.nav summary::-webkit-details-marker{display:none}
+.nav a:hover,.nav summary:hover{color:var(--ink);background:#fff}
+.nav a.on{background:#fff;color:var(--bv);box-shadow:0 1px 2px rgba(20,30,70,.1)}
+.nav svg,.ico{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav details{position:relative}
+.nav .menu{position:absolute;top:34px;left:0;background:#fff;border:1px solid var(--line);border-radius:12px;padding:4px;box-shadow:0 12px 32px rgba(20,30,70,.16);min-width:220px;z-index:30;display:flex;flex-direction:column}
+.nav .menu a{justify-content:flex-start}
+/* topo do cockpit */
+.hero{position:relative;overflow:hidden;border-radius:22px;padding:24px 26px;margin:4px 0 18px;background:linear-gradient(125deg,#2f47de 0%,#223ad2 45%,#0a2a9e 100%);color:#fff;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:end}
+.hero:after{content:"";position:absolute;right:-60px;top:-90px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.16),rgba(255,255,255,0) 65%);pointer-events:none}
+.hero .dia{font-size:12.5px;color:rgba(255,255,255,.75)}
+.hero .dia:first-letter{text-transform:uppercase}
+.hero h2{margin:4px 0 6px;font-family:var(--title);font-size:clamp(22px,2.6vw,30px);font-weight:600;letter-spacing:-.02em;color:#fff}
+.hero .resumo{font-size:14px;color:rgba(255,255,255,.9);max-width:640px}
+.hero .resumo b{color:#fff}
+.hero .lado{display:flex;flex-direction:column;gap:8px;align-items:flex-end;position:relative;z-index:1}
+.hero .num{font-family:var(--title);font-size:40px;font-weight:600;line-height:1}
+.hero .num small{font-size:13px;font-weight:500;color:rgba(255,255,255,.75);display:block;text-align:right;margin-top:4px;font-family:var(--font)}
+.sessao{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:99px;padding:4px 6px 4px 11px;font-size:12px;color:#fff}
+.sessao button{background:rgba(255,255,255,.18);color:#fff;border-radius:99px;padding:3px 10px;font-size:11.5px;font-weight:600}
+.sessao button:hover{background:rgba(255,255,255,.3)}
+/* seções */
+.sec{display:flex;align-items:center;gap:10px;margin:26px 0 12px;flex-wrap:wrap}
+.sec h3{margin:0;font-family:var(--title);font-size:17px;font-weight:600;letter-spacing:-.01em}
+.sec .sub2{margin-left:2px}
+.inss{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+.ins .mod{font-size:10.5px;font-weight:650;letter-spacing:.05em;text-transform:uppercase;color:var(--faint)}
+.ins.hi .mod{color:rgba(255,255,255,.6)}
+.ins.bad .v{color:var(--late)}
+/* módulos */
+.tools{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-bottom:8px}
+.tool{position:relative;display:flex;flex-direction:column;gap:10px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px;text-decoration:none;color:inherit;min-width:0;transition:border-color .15s,box-shadow .15s,transform .15s}
+.tool:hover{border-color:var(--bv-mid);box-shadow:0 6px 18px rgba(34,58,210,.10);transform:translateY(-1px)}
+.tool .hd{display:flex;gap:12px;align-items:center;min-width:0}
+.tool .ic{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex:none;background:var(--bv-soft);color:var(--bv)}
+.tool .ic svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tool .ic.fin{background:var(--ok-soft);color:var(--ok)}.tool .ic.aux{background:#f2f3f8;color:var(--muted)}.tool .ic.fer{background:#fff4e0;color:#b26a00}
+.tool b{display:block;font-size:14px}.tool .code{color:var(--faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.tool .go{margin-left:auto;color:var(--bv);font-size:12px;font-weight:600;white-space:nowrap;align-self:flex-start}
+.tool .vivo{font-size:12.5px;color:var(--muted);border-top:1px dashed var(--line);padding-top:9px;display:block}
+.tool .vivo b{display:inline;font-size:12.5px;color:var(--ink)}
+.tool.aux{flex-direction:row;align-items:center;padding:10px 14px}
+.tool.aux .ic{width:30px;height:30px;border-radius:9px}
+/* atenção e agenda */
+.duas{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:14px;align-items:start}
+.lista{display:flex;flex-direction:column}
+.it{display:flex;gap:10px;align-items:flex-start;padding:9px 4px;border-bottom:1px solid var(--line);text-decoration:none;color:inherit}
+.it:last-child{border-bottom:0}
+a.it:hover{background:var(--bv-soft);border-radius:10px}
+.it .dot{width:8px;height:8px;border-radius:50%;margin-top:6px;flex:none;background:var(--bv)}
+.it .dot.late{background:var(--late)}.it .dot.attn{background:#d99a2b}.it .dot.ok{background:var(--ok)}
+.it .tx{flex:1;min-width:0;font-size:13px}
+.it .tx small{display:block;color:var(--muted);font-size:11.5px;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.it .tg{font-size:10.5px;font-weight:650;letter-spacing:.04em;text-transform:uppercase;color:var(--faint);white-space:nowrap;margin-top:2px}
+.pessoas{display:flex;flex-wrap:wrap;gap:6px}
+.av{display:inline-flex;align-items:center;gap:6px;padding:3px 10px 3px 3px;border-radius:99px;background:#f2f3f8;font-size:12px}
+.av i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--bv);color:#fff;font-style:normal;font-size:10px;font-weight:700}
+.bloq{border:1px dashed var(--bv-line);border-radius:14px;padding:12px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-bottom:12px}
+.bloq b{color:var(--ink)}
+/* times */
+.times{display:grid;grid-template-columns:repeat(auto-fill,minmax(520px,1fr));gap:14px}
+.team{padding:16px 18px;margin:0}
 .team .hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
-.team .hd h3{font-family:var(--title);font-size:16px;font-weight:600}
-.act{font-size:12px;color:var(--muted);margin:0 0 12px}
-.wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
-.pi{position:relative;border-radius:4px 4px 14px 4px;padding:12px 12px 10px;min-height:120px;display:flex;flex-direction:column;gap:6px;box-shadow:0 1px 2px rgba(20,30,70,.08),0 6px 14px rgba(20,30,70,.06);font-size:13px;line-height:1.4;word-break:break-word}
+.team .hd h3{font-family:var(--title);font-size:16px;font-weight:600;margin:0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:8px 0 10px}
+.kpi{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:8px 10px;min-width:0}
+.kpi .k{font-size:11px;color:var(--muted);font-weight:550;line-height:1.3}
+.kpi .v{font-family:var(--title);font-size:17px;font-weight:600;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.kpi .v small{font-family:var(--font);font-size:11px;font-weight:500;color:var(--muted)}
+.kpi .v.late{color:var(--late)}.kpi .v.ok{color:var(--ok)}.kpi .v.attn{color:#b57a14}
+.kpi svg.sp{width:64px;height:20px;flex:none}
+.semaf{display:flex;gap:4px;align-items:center;font-family:var(--font);font-size:12px;font-weight:600}
+.semaf span{display:inline-flex;align-items:center;gap:3px}.semaf i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.act{font-size:12px;color:var(--muted);margin:0 0 10px}
+.wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.pi{position:relative;border-radius:4px 4px 14px 4px;padding:12px 12px 10px;min-height:110px;display:flex;flex-direction:column;gap:6px;box-shadow:0 1px 2px rgba(20,30,70,.08),0 6px 14px rgba(20,30,70,.06);font-size:13px;line-height:1.4;word-break:break-word}
 .pi .tx{white-space:pre-wrap;flex:1}
 .pi .ft{font-size:11px;color:rgba(22,26,35,.62);display:flex;flex-wrap:wrap;gap:4px 8px}
 .pi .para{font-size:11px;font-weight:650;color:rgba(22,26,35,.7)}
 .pi .ac{position:absolute;top:6px;right:6px;display:flex;gap:2px;opacity:0;transition:opacity .15s}
 .pi:hover .ac,.pi:focus-within .ac{opacity:1}
-.pi .ac button{width:24px;height:24px;border-radius:6px;background:rgba(255,255,255,.7);font-size:12px;color:var(--ink)}
+.pi .ac button{width:24px;height:24px;border-radius:6px;background:rgba(255,255,255,.7);font-size:12px;color:#161a23}
 .pi.exp{opacity:.55}
 .pi.novo{border:1.5px dashed var(--bv-line);background:#fff;box-shadow:none;align-items:center;justify-content:center;color:var(--bv);font-weight:600;cursor:pointer}
 .pi.novo:hover{background:var(--bv-soft)}
 .pi.novo:disabled{color:var(--faint);cursor:not-allowed;background:#fff}
 .c-amarelo{background:#fff4b8}.c-rosa{background:#ffdbe4}.c-verde{background:#d8f2e0}.c-azul{background:#dde7ff}.c-lilas{background:#ebdfff}
+.pi[class*="c-"]{color:#161a23}
 .cores{display:flex;gap:8px}.cores label{width:28px;height:28px;border-radius:8px;cursor:pointer;border:2px solid transparent;display:block}
 .cores input{display:none}.cores input:checked+label{border-color:var(--ink)}
 .tchk{display:flex;flex-wrap:wrap;gap:6px}.tchk label{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);border-radius:99px;padding:3px 10px;font-size:12px;cursor:pointer}
@@ -160,7 +230,21 @@ svg.ch{max-height:280px}
 .sub2{font-size:12px;color:var(--muted)}
 .finl{display:grid;grid-template-columns:auto minmax(80px,180px) 1fr;gap:10px;align-items:center;margin:2px 0 8px}
 .finl .m{height:6px;border-radius:99px;background:var(--bv-soft);position:relative;overflow:hidden}.finl .m i{position:absolute;inset:0 auto 0 0;background:var(--bv);border-radius:99px}.finl .m.over i{background:var(--late)}
-@media (max-width:720px){.tools{grid-template-columns:1fr}.wall{grid-template-columns:1fr 1fr}}
+details.pis>summary{cursor:pointer;list-style:none;font-size:12px;font-weight:600;color:var(--bv);padding:4px 0 8px;display:flex;gap:6px;align-items:center}
+details.pis>summary::-webkit-details-marker{display:none}
+details.pis>summary:before{content:"▸";transition:transform .15s}details.pis[open]>summary:before{transform:rotate(90deg)}
+/* tela de entrada */
+.entrada{max-width:980px;margin:7vh auto;padding:0 20px;display:grid;grid-template-columns:1fr 1fr;gap:0;border-radius:24px;overflow:hidden;border:1px solid var(--line);background:var(--card);box-shadow:0 20px 50px rgba(20,30,70,.10)}
+.entrada .vitrine{background:linear-gradient(150deg,#2f47de 0%,#223ad2 50%,#0a2a9e 100%);color:#fff;padding:34px 32px;display:flex;flex-direction:column;gap:16px}
+.entrada .vitrine h2{font-family:var(--title);font-size:26px;font-weight:600;margin:0;color:#fff;letter-spacing:-.02em}
+.entrada .vitrine p{margin:0;color:rgba(255,255,255,.85);font-size:13.5px}
+.entrada .vitrine ul{margin:4px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+.entrada .vitrine li{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:rgba(255,255,255,.92)}
+.entrada .vitrine li svg{width:18px;height:18px;flex:none;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;margin-top:1px}
+.entrada .acoes{padding:30px 30px 26px}
+@media (max-width:1100px){.times{grid-template-columns:1fr}}
+@media (max-width:860px){.duas{grid-template-columns:1fr}.entrada{grid-template-columns:1fr}.hero{grid-template-columns:1fr}.hero .lado{align-items:flex-start}}
+@media (max-width:720px){.hub .top{position:static}.tools{grid-template-columns:1fr}.wall{grid-template-columns:1fr 1fr}.nav{width:100%}}
 </style>
 <script id="tema">
 /* Tema claro, escuro ou automático (segue o sistema), comum a todas as ferramentas da solução.
@@ -406,28 +490,33 @@ svg.ch{max-height:280px}
 })();
 </script>
 <script id="sessao">
-/* sessao 1.0 · uma senha por sessão (ADR-0029)
+/* sessao 1.1 · uma senha por sessão (ADR-0029, ADR-0034)
    Quem abre (hub, Central) guarda só em memória a senha que abriu o próprio arquivo. Quando a pessoa clica num link
    para outra ferramenta (target=_blank rel=opener), a janela nova pede a senha e o abridor responde uma vez, só nos
    90 segundos seguintes ao clique e só para uma janela aberta por ele (e.source.opener === window).
+   1.1: o abridor também pode guardar a senha de uma ferramenta específica (definir(senha, 'central')); o link com
+   data-sessao="central" leva essa senha em vez da senha da sessão. Serve para a Central com senha própria.
    A ferramenta aberta usa a senha só para abrir o próprio arquivo; se não servir, pede a senha como sempre.
    Nada vai para disco, localStorage ou para a pasta. Injetado em todos os HTMLs pelo build, junto com o tema. */
 (() => {
   if (window.gestaoSessao) return;
   const SC = 'gestao-sessao/1', JANELA = 90e3;
-  let senha = null, cliqueEm = 0, recebida = null, usada = false;
+  let senha = null, cliqueEm = 0, alvo = '', recebida = null, usada = false;
+  const porAlvo = {};
+  const temAlguma = () => !!senha || Object.keys(porAlvo).length > 0;
   document.addEventListener('click', e => {
     const a = e.target && e.target.closest && e.target.closest('a[target="_blank"][rel~="opener"]');
-    if (a && senha) cliqueEm = Date.now();
+    if (a && temAlguma()) { cliqueEm = Date.now(); alvo = (a.dataset && a.dataset.sessao) || ''; }
   }, true);
   window.addEventListener('message', e => {
     const m = e.data; if (!m || m.schema !== SC) return;
     if (m.tipo === 'pedir') {
-      if (!senha || !cliqueEm || Date.now() - cliqueEm > JANELA) return;
+      const s = (alvo && porAlvo[alvo]) || senha;
+      if (!s || !cliqueEm || Date.now() - cliqueEm > JANELA) return;
       let filha = false; try { filha = !!e.source && e.source.opener === window; } catch {}
       if (!filha) return;
-      cliqueEm = 0;
-      try { e.source.postMessage({ schema: SC, tipo: 'senha', senha }, '*'); } catch {}
+      cliqueEm = 0; alvo = '';
+      try { e.source.postMessage({ schema: SC, tipo: 'senha', senha: s }, '*'); } catch {}
     } else if (m.tipo === 'senha') {
       if (!window.opener || e.source !== window.opener || recebida !== null || typeof m.senha !== 'string' || !m.senha) return;
       recebida = m.senha.slice(0, 500);
@@ -436,7 +525,12 @@ svg.ch{max-height:280px}
   });
   if (window.opener) try { window.opener.postMessage({ schema: SC, tipo: 'pedir' }, '*'); } catch {}
   window.gestaoSessao = {
-    definir(s) { senha = s ? String(s) : null; if (!s) cliqueEm = 0; },
+    // definir(senha) troca a senha da sessão; definir(null) esquece todas; definir(senha, 'central') guarda a de uma ferramenta.
+    definir(s, para) {
+      if (para) { if (s) porAlvo[para] = String(s); else delete porAlvo[para]; return; }
+      senha = s ? String(s) : null;
+      if (!s) { cliqueEm = 0; alvo = ''; for (const k of Object.keys(porAlvo)) delete porAlvo[k]; }
+    },
     get recebida() { return recebida; },
     // Entrega a senha recebida uma única vez (para abrir o próprio arquivo).
     usar() { if (recebida == null || usada) return null; usada = true; return recebida; },
@@ -1020,10 +1114,13 @@ const pctTxt = (a, b) => b ? Math.round(a / b * 100) + '%' : '—';
       cifrado com a chave do time, um arquivo por autor (ninguém grava o arquivo de outra pessoa).
       O Quadro do Time mostra os post-its e grava quem já viu em times/<time>/postits/vistos/<pessoa>-<computador>.json.
    O arquivo pessoal do hub (times, chaves e seus post-its) é cifrado com a sua senha e fica numa pasta só sua (de preferência no seu OneDrive), nunca na compartilhada.
+   3) Hub 2.0 · cockpit de gestão (ADR-0034): com a senha da sessão, o hub lê SÓ PARA LEITURA o arquivo da Central
+      (tarefas, iniciativas, 1:1 e férias) e o status e as métricas que cada Quadro publica, e mostra cards de todos os
+      módulos numa tela. Os dados lidos ficam só em memória, resumidos; o hub nunca grava no arquivo de outra ferramenta.
    ===================================================================== */
-const TOOL = 'hub', TOOL_NOME = 'Hub da solução', TOOL_VERSION = '1.4.0';
+const TOOL = 'hub', TOOL_NOME = 'Hub da solução', TOOL_VERSION = '2.0.0';
 try { window.name = 'gestao-hub'; } catch {}   // o botão "← Hub" das ferramentas volta para esta aba sem recarregar
-const LOCAL_SCHEMA = 'gestao-hub-local/1', POSTITS = 'gestao-postits/1', VISTOS = 'gestao-postits-vistos/1', PLANO = 'gestao-financas-plano/1';
+const LOCAL_SCHEMA = 'gestao-hub-local/1', POSTITS = 'gestao-postits/1', VISTOS = 'gestao-postits-vistos/1', PLANO = 'gestao-financas-plano/1', STATUS = 'gestao-status/1', METRICAS = 'gestao-metricas/1';
 const CORES = [['amarelo', 'Amarelo'], ['rosa', 'Rosa'], ['verde', 'Verde'], ['azul', 'Azul'], ['lilas', 'Lilás']];
 const MAX_TEXTO = 500;
 
@@ -1090,13 +1187,13 @@ async function colarChave(t, texto, origem = 'colada', fin = false) {
 // Reconhece cada HTML da pasta local pelo <title> e, quando houver, pela pré-configuração do time.
 // O hub nunca abre nem lê os arquivos de dados das ferramentas: só lista os HTMLs e cria links.
 const TIPOS = {
-  'Central de Gestão': { ic: 'CT', cls: '', ordem: 1, desc: 'Tarefas consolidado: iniciativas, times, rituais e pessoas' },
-  'Finanças do Grupo': { ic: 'FG', cls: 'fin', ordem: 2, desc: 'Consolidado das finanças dos times' },
-  'Quadro do Time': { ic: 'QT', cls: '', ordem: 3, desc: 'Quadro, backlog, sprints e métricas do time' },
-  'Finanças do Time': { ic: 'FT', cls: 'fin', ordem: 4, desc: 'Dia a dia e futuro das finanças do time' },
-  'Mapa de Férias': { ic: 'FÉ', cls: '', ordem: 5, desc: 'Quem está fora e quando: dias com mais e menos gente ausente' },
-  'Início da solução': { ic: 'IN', cls: 'aux', ordem: 8, desc: 'Assistente: gera as ferramentas de novo' },
-  'Onde fica cada coisa': { ic: '?', cls: 'aux', ordem: 9, desc: 'Cartão com o mapa dos seus arquivos' }
+  'Central de Gestão': { ic: 'CT', svg: 'central', cls: '', ordem: 1, desc: 'Tarefas consolidado: iniciativas, times, rituais e pessoas' },
+  'Finanças do Grupo': { ic: 'FG', svg: 'fin', cls: 'fin', ordem: 2, desc: 'Consolidado das finanças dos times' },
+  'Quadro do Time': { ic: 'QT', svg: 'quadro', cls: '', ordem: 3, desc: 'Quadro, backlog, sprints e métricas do time' },
+  'Finanças do Time': { ic: 'FT', svg: 'fin', cls: 'fin', ordem: 4, desc: 'Dia a dia e futuro das finanças do time' },
+  'Mapa de Férias': { ic: 'FÉ', svg: 'ferias', cls: 'fer', ordem: 5, desc: 'Quem está fora e quando: dias com mais e menos gente ausente' },
+  'Início da solução': { ic: 'IN', svg: 'inicio', cls: 'aux', ordem: 8, desc: 'Assistente: gera as ferramentas de novo' },
+  'Onde fica cada coisa': { ic: '?', svg: 'mapa', cls: 'aux', ordem: 9, desc: 'Cartão com o mapa dos seus arquivos' }
 };
 function presetDe(txt, marca) {
   const i = txt.indexOf(`/*${marca}*/`), j = txt.indexOf(`/*FIM-${marca}*/`);
@@ -1163,7 +1260,7 @@ const anoCorrente = () => { const a = String(new Date().getFullYear()); const pl
   return !pls.length || pls.some(p => p.porAno[a]) ? a : String(Math.max(...pls.map(p => p.ano || 0))); };
 function totaisAno(pl, ano = anoCorrente()) { return pl?.porAno?.[ano] || null; }
 async function lerTime(t) {
-  const r = { notas: [], vistos: {}, atividade: {}, erros: [], copias: 0, plano: null, planoErro: '' };
+  const r = { notas: [], vistos: {}, atividade: {}, erros: [], copias: 0, plano: null, planoErro: '', status: null, metricas: null };
   if (t.tipo === 'grupo') return lerGestor(t, r);
   const dt = await subpasta(raiz, ['times', t.slug]);
   if (!dt) return r;
@@ -1175,8 +1272,14 @@ async function lerTime(t) {
   if (df && temChaveFin(t)) {
     try { const e = await lerEnvelopes(df, 'plano', mapaFinDoTime(t), { team: t.slug, content: PLANO }); if (e.melhor) r.plano = resumoPlano(e.melhor.payload); else if (e.invalidos.some(x => x.principal)) r.planoErro = 'o plano não abriu com a chave de finanças cadastrada'; } catch {}
   }
+  // Cockpit (Hub 2.0): o status e as métricas que o Quadro publica para a Central, lidos com a mesma chave de tarefas.
+  const mapa = mapaDoTime(t);
+  if (mapa.size) {
+    try { const e = await lerEnvelopes(dt, 'status', mapa, { team: t.slug, content: STATUS }); if (e.melhor) r.status = resumoStatus(e.melhor.payload); } catch {}
+    try { const e = await lerEnvelopes(dt, 'metricas', mapa, { team: t.slug, content: METRICAS }); if (e.melhor) r.metricas = resumoMetricas(e.melhor.payload); } catch {}
+  }
   const dp = await subpasta(dt, ['postits']); if (!dp) return r;
-  const mapa = mapaDoTime(t), meu = writer(), porAutor = new Map();
+  const meu = writer(), porAutor = new Map();
   const ler = async (dir, conteudo, fn) => {
     for await (const [n, h] of dir.entries()) {
       if (h.kind !== 'file' || !n.endsWith('.json') || n.startsWith('.')) continue;
@@ -1204,6 +1307,135 @@ async function lerTime(t) {
   }
   return r;
 }
+// Status publicado pelo Quadro (gestao-status/1): contagem das iniciativas por situação e bloqueios abertos.
+function resumoStatus(p) {
+  const its = (Array.isArray(p.initiatives) ? p.initiatives : []).filter(i => i && i.status !== 'done');
+  const cont = k => its.filter(i => i.status === k).length;
+  const bloqueios = its.flatMap(i => (Array.isArray(i.blockers) ? i.blockers : []).map(b => ({ texto: clamp(b?.text || '', 140), desde: b?.since || '', ini: clamp(i.name || i.ref || '', 80) })));
+  const atencao = its.filter(i => i.status === 'late' || i.status === 'attn').sort((a, b) => (a.status === 'late' ? 0 : 1) - (b.status === 'late' ? 0 : 1))
+    .slice(0, 4).map(i => ({ nome: clamp(i.name || i.ref || '', 80), ref: clamp(i.ref || '', 20), k: i.status, prev: i.forecastEnd || '' }));
+  return { total: its.length, ok: cont('ok'), attn: cont('attn'), late: cont('late'), bloqueios, atencao, em: p.generatedAt || '' };
+}
+// Métricas publicadas pelo Quadro (gestao-metricas/1): as de destaque do time, com o último valor, a situação e a série.
+function resumoMetricas(p) {
+  const cmp = (v, op, x) => op === '<' ? v < x : op === '<=' ? v <= x : op === '>' ? v > x : op === '>=' ? v >= x : op === '==' ? v === x : false;
+  const ms = (Array.isArray(p.metrics) ? p.metrics : []).filter(m => m && m.scope?.level !== 'person' && m.data?.series?.[0]?.points?.length)
+    .sort((a, b) => (b.highlight === true) - (a.highlight === true) || (a.order ?? 99) - (b.order ?? 99)).slice(0, 3).map(m => {
+      const pts = m.data.series[0].points.filter(x => Number.isFinite(+x?.v)).slice(-10), v = pts.length ? +pts.at(-1).v : null;
+      const th = (Array.isArray(m.thresholds) ? m.thresholds : []).find(t => v != null && cmp(v, t.op, +t.value));
+      return { nome: clamp(m.name || m.id, 40), unidade: clamp(m.unit || '', 12), dec: +m.decimals || 0, v, serie: pts.map(x => +x.v), k: th?.status || '', dir: m.direction || '' };
+    });
+  return { sprint: clamp(p.sprint?.name || '', 40), ms, em: p.generatedAt || '' };
+}
+const fmtNum = (v, dec = 0) => v == null ? '—' : (+v).toLocaleString('pt-BR', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+function sparkline(vs) {
+  if (!vs || vs.length < 2) return '';
+  const mn = Math.min(...vs), mx = Math.max(...vs), W = 64, H = 20, X = i => (i * (W - 4) / (vs.length - 1) + 2).toFixed(1), Y = v => (H - 3 - (mx === mn ? .5 : (v - mn) / (mx - mn)) * (H - 6)).toFixed(1);
+  return `<svg class="sp" viewBox="0 0 ${W} ${H}" aria-hidden="true"><polyline points="${vs.map((v, i) => X(i) + ',' + Y(v)).join(' ')}" fill="none" stroke="var(--bv)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${X(vs.length - 1)}" cy="${Y(vs.at(-1))}" r="2.2" fill="var(--bv)"/></svg>`;
+}
+
+/* ------------------------- cockpit: leitura da Central ------------------------- */
+// Só leitura (ADR-0034). O hub acha o arquivo da Central (o que a própria Central lembra neste navegador, o escolhido
+// aqui ou o .json da Central na pasta pessoal), abre com a senha da sessão, resume e descarta o resto. Nunca grava nele.
+const CENTRAL_FMT = 'gestao-cripto/2';
+let central = { estado: 'nada', arquivo: '', resumo: null, erro: '', lm: 0 }, centralH = null, senhaSessao = null, senhaCentral = null, lendoCentral = null;
+const kdfCache = new Map();
+function idbCentral(k) {   // o mesmo banco que a Central usa (gestao-local/kv); cria o depósito igual a ela, para não quebrá-la
+  return new Promise(ok => { try { const r = indexedDB.open('gestao-local', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv');
+    r.onsuccess = () => { try { const q = r.result.transaction('kv').objectStore('kv').get(k); q.onsuccess = () => ok(q.result || null); q.onerror = () => ok(null); } catch { ok(null); } }; r.onerror = () => ok(null); } catch { ok(null); } });
+}
+async function permLeitura(h, pedir) {
+  try { if (!h?.queryPermission || await h.queryPermission({ mode: 'read' }) === 'granted') return true; return pedir ? (await h.requestPermission({ mode: 'read' })) === 'granted' : false; } catch { return false; }
+}
+async function ehCentral(h) { try { const f = await h.getFile(); const cab = await f.slice(0, 400).text(); return /"format"\s*:\s*"gestao-cripto\/2"/.test(cab) ? f : null; } catch { return null; } }
+async function acharCentral(pedir = false) {
+  const lembradas = [await pastaLembrada('hub-central'), lembrarAtivo() ? await idbCentral('handle') : null].filter(h => h && h.kind === 'file');
+  for (const h of lembradas) {
+    const st = await permLeitura(h, pedir);
+    if (st && await ehCentral(h)) return { h };
+  }
+  let melhor = null;
+  if (dirLocal) for await (const [n, h] of dirLocal.entries()) {
+    if (h.kind !== 'file' || !/\.json$/i.test(n) || /^hub-/.test(n) || /-copia-|backup/i.test(n)) continue;
+    const f = await ehCentral(h); if (f && (!melhor || f.lastModified > melhor.lm)) melhor = { h, lm: f.lastModified };
+  }
+  if (melhor) return { h: melhor.h };
+  return lembradas.length ? { semPermissao: lembradas[0] } : null;
+}
+async function decifrarCentral(texto, senha) {
+  const pack = JSON.parse(texto);
+  if (!pack?.encrypted || pack.format !== CENTRAL_FMT) throw Object.assign(new Error('Este arquivo não é da Central de Gestão.'), { code: 'FORMATO' });
+  const ck = pack.salt + '|' + (pack.iterations || 250000) + '|' + senha;
+  let key = kdfCache.get(ck); if (!key) { key = await chaveDaSenha(senha, b64.dec(pack.salt), pack.iterations || 250000); kdfCache.clear(); kdfCache.set(ck, key); }
+  try { return JSON.parse(td.decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64.dec(pack.iv) }, key, b64.dec(pack.data)))); }
+  catch { throw Object.assign(new Error('senha'), { code: 'SENHA' }); }
+}
+async function lerCentral({ pedir = false, forcar = false } = {}) {
+  if (lendoCentral) return lendoCentral;
+  lendoCentral = (async () => {
+    try {
+      if (!centralH || pedir) {
+        const a = await acharCentral(pedir);
+        if (!a) { central = { estado: 'nada', arquivo: '', resumo: null, erro: '', lm: 0 }; return; }
+        if (a.semPermissao) { central = { ...central, estado: 'permissao', arquivo: a.semPermissao.name }; centralH = null; return; }
+        if (!centralH || !(await centralH.isSameEntry?.(a.h))) central.lm = 0;
+        centralH = a.h;
+      }
+      const f = await centralH.getFile();
+      if (!forcar && central.resumo && f.lastModified === central.lm) return;
+      const texto = await f.text();
+      let obj = null, ultimoErro = null;
+      for (const s of [senhaCentral, senhaSessao].filter(Boolean)) { try { obj = await decifrarCentral(texto, s); if (s !== senhaSessao) senhaCentral = s; break; } catch (e) { ultimoErro = e; if (e.code !== 'SENHA') break; } }
+      if (!obj) { central = { estado: ultimoErro?.code === 'FORMATO' ? 'erro' : 'senha', arquivo: centralH.name, resumo: null, erro: ultimoErro?.message || '', lm: 0 }; return; }
+      central = { estado: 'ok', arquivo: centralH.name, resumo: resumoCentral(obj), erro: '', lm: f.lastModified };
+      obj = null;
+    } catch (e) { central = { ...central, estado: 'erro', erro: e.message }; }
+  })();
+  try { await lendoCentral; } finally { lendoCentral = null; }
+}
+// O resumo segue as mesmas regras da tela Hoje da Central (tarefas atrasadas, delegadas, saúde das iniciativas, 1:1, férias).
+function resumoCentral(o, T = hoje()) {
+  const arr = x => Array.isArray(x) ? x : [], okD = d => /^\d{4}-\d{2}-\d{2}$/.test(d || ''), dias = (a, b) => Math.round((new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 864e5);
+  const mais = n => { const d = new Date(T + 'T12:00:00'); d.setDate(d.getDate() + n); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; };
+  const tasks = arr(o.tasks), inits = arr(o.initiatives), people = arr(o.people), notes = arr(o.notes), oos = arr(o.ooSessions);
+  const mine = t => !t.assigneeId || t.assigneeId === 'me', late = t => !t.done && okD(t.end) && t.end < T;
+  const byId = new Map(tasks.map(t => [t.id, t])), blocked = t => !t.done && t.dependsOn && byId.get(t.dependsOn) && !byId.get(t.dependsOn).done;
+  const abertas = tasks.filter(t => !t.done), minhas = abertas.filter(mine);
+  const atrasadas = minhas.filter(late).sort((a, b) => a.end.localeCompare(b.end));
+  const hojeL = minhas.filter(t => !late(t) && (t.end === T || t.state === 'doing' || (!t.end && t.start === T)));
+  const feitasHoje = tasks.filter(t => t.done && mine(t) && t.doneAt === T).length;
+  const deleg = abertas.filter(t => !mine(t)), delegAtr = deleg.filter(late), cobrar = deleg.filter(t => !late(t) && okD(t.followUp) && t.followUp <= T);
+  const nomeDe = id => clamp(people.find(p => p.id === id)?.name || '', 60);
+  const porIni = new Map(); for (const t of tasks) if (t.initiativeId) (porIni.get(t.initiativeId) || porIni.set(t.initiativeId, []).get(t.initiativeId)).push(t);
+  const progresso = i => { const all = porIni.get(i.id) || [], fs = all.filter(t => t.type === 'feature'), ts = fs.length ? fs : all; return i.autoProgress !== false && ts.length ? Math.round(ts.filter(t => t.done).length / ts.length * 100) : Math.max(0, Math.min(100, +i.progress || 0)); };
+  const saude = i => {
+    const ts = porIni.get(i.id) || [], pr = progresso(i), ph = arr(i.phases), sete = mais(7);
+    if (pr >= 100 && ts.every(t => t.done) && ph.every(p => p.done)) return 'done';
+    if (ts.some(late) || ph.some(p => !p.done && okD(p.end) && p.end < T) || (okD(i.end) && i.end < T && pr < 100)) return 'late';
+    if (ts.some(blocked) || ts.some(t => !t.done && t.type !== 'task' && okD(t.end) && t.end <= sete)) return 'attn';
+    return 'ok';
+  };
+  const agora = inits.filter(i => i.bucket === 'now').map(i => ({ i, k: saude(i), pr: progresso(i) })).filter(x => x.k !== 'done');
+  const ultimaConversa = pid => notes.filter(n => n.personId === pid).map(n => n.date).concat(oos.filter(s => s.personId === pid && s.endedAt).map(s => s.date)).filter(okD).sort().pop() || '';
+  const oo = people.filter(p => !p.calSeries).map(p => { const l = ultimaConversa(p.id), c = +p.cadence || 14; return { nome: clamp(p.name, 60), dias: l ? dias(l, T) : null, atrasado: !l || dias(l, T) > c }; }).filter(x => x.atrasado);
+  const F = o.ferias && Array.isArray(o.ferias.ausencias) ? o.ferias : null, fora = [], proximas = [], ja = new Set();
+  if (F) {
+    const add = (lista, nome, un, a) => { const k = un + '|' + nome + '|' + a.inicio; if (!ja.has(k)) { ja.add(k); lista.push({ nome: clamp(nome, 60), un: clamp(un, 60), inicio: a.inicio, fim: a.fim }); } };
+    const ver = (nome, un, a) => { if (a.inicio <= T && T <= a.fim) add(fora, nome, un, a); else if (a.inicio > T && a.inicio <= mais(14)) add(proximas, nome, un, a); };
+    for (const a of arr(F.ausencias)) { const p = arr(F.pessoas).find(x => x.id === a.pessoa); if (p && p.ativo !== false) ver(p.nome, '', a); }
+    for (const u of arr(F.unidades)) { const r = F.retratos?.[u.slug]; if (!r) continue; for (const a of arr(r.ausencias)) { const p = arr(r.pessoas).find(x => x.id === a.person); ver(p?.name || a.person, u.nome || u.slug, { inicio: a.start, fim: a.end }); } }
+    proximas.sort((a, b) => a.inicio.localeCompare(b.inicio));
+  }
+  return {
+    eu: clamp(o.settings?.selfName || '', 60), versao: o.version || 0,
+    atrasadas: atrasadas.length, hoje: hojeL.length, feitasHoje, listaAtrasadas: atrasadas.slice(0, 5).map(t => ({ titulo: clamp(t.title, 90), fim: t.end })),
+    deleg: deleg.length, delegAtr: delegAtr.length, cobrar: cobrar.length, listaDeleg: delegAtr.concat(cobrar).slice(0, 4).map(t => ({ titulo: clamp(t.title, 90), quem: nomeDe(t.assigneeId), fim: t.end, atrasada: late(t) })),
+    inic: { total: agora.length, ok: agora.filter(x => x.k === 'ok').length, attn: agora.filter(x => x.k === 'attn').length, late: agora.filter(x => x.k === 'late').length,
+      lista: agora.filter(x => x.k !== 'ok').sort((a, b) => (a.k === 'late' ? 0 : 1) - (b.k === 'late' ? 0 : 1)).slice(0, 5).map(x => ({ nome: clamp(x.i.name, 80), k: x.k, pr: x.pr, fim: x.i.end || '' })) },
+    oo: { atrasados: oo.length, lista: oo.slice(0, 6) }, ferias: !!F, fora, proximas: proximas.slice(0, 6), pessoas: people.length, times: arr(o.teams).length
+  };
+}
+
 // Liderança (Hub 1.3): um gestor par é uma unidade "grupo" no Finanças do Grupo da liderança. O hub lê o consolidado
 // que ele publica para a liderança (grupos/<grupo>/financas/plano.json, ADR-0025) com a chave de finanças do grupo.
 async function lerGestor(t, r) {
@@ -1215,13 +1447,15 @@ async function lerGestor(t, r) {
   return r;
 }
 async function lerTudo() {
-  if (!raiz || !db) return;
+  if (!db) return;
+  await lerCentral();
+  if (!raiz) return;
   try {
     for (const t of db.times) recebidos[t.slug] = await lerTime(t);
     situacao = { lidoEm: new Date().toISOString(), erro: '' };
   } catch (e) { situacao.erro = e.message; }
 }
-async function atualizar() { if (!raiz || !db) return; await lerTudo(); if (!dlg().open) render(); else renderTopo(); }
+async function atualizar() { if (!db) return; await lerTudo(); if (!dlg().open) render(); else renderTopo(); }
 
 /* ------------------------------ publicação ------------------------------ */
 // Um arquivo por autor e computador: times/<time>/postits/<pessoa>-<computador>.json.
@@ -1252,63 +1486,206 @@ async function publicar(slug) {
 
 /* --------------------------------- telas --------------------------------- */
 const tempo = ms => { if (!ms) return '—'; const m = (Date.now() - ms) / 60000; return m < 1 ? 'agora' : m < 60 ? `há ${Math.round(m)} min` : m < 1440 ? `há ${Math.round(m / 60)} h` : `há ${Math.round(m / 1440)} d`; };
+const ICO = {
+  painel: '<path d="M4 15a8 8 0 1 1 16 0"/><path d="M12 15l4-5"/><circle cx="12" cy="15" r="1.3"/><path d="M4 19h16"/>',
+  central: '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
+  quadro: '<rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="10" rx="1.5"/><rect x="17" y="4" width="4" height="13" rx="1.5"/>',
+  fin: '<path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 6-7"/>',
+  ferias: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  inicio: '<path d="M12 3l1.8 4.2L18 9l-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8z"/><path d="M19 15l.8 1.9 1.9.8-1.9.8L19 20.5l-.8-2-1.9-.8 1.9-.8z"/>',
+  mapa: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17h.01"/>',
+  cadeado: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  pessoas: '<circle cx="9" cy="8" r="3.2"/><path d="M3 20c.8-3.4 3.2-5 6-5s5.2 1.6 6 5"/><path d="M16 4.5a3 3 0 0 1 0 6M18 15c1.6.6 2.6 2.2 3 5"/>',
+  times: '<circle cx="12" cy="7" r="3"/><circle cx="5" cy="10" r="2.2"/><circle cx="19" cy="10" r="2.2"/><path d="M7 20c.6-3 2.6-4.6 5-4.6s4.4 1.6 5 4.6M1.5 18c.4-2 1.6-3.2 3.5-3.4M22.5 18c-.4-2-1.6-3.2-3.5-3.4"/>',
+  alerta: '<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/>'
+};
+const ico = (n, cls = 'ico') => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICO[n] || ''}</svg>`;
+const ehCentralF = f => f.titulo === 'Central de Gestão';
+// Link para outra ferramenta: aba nova com opener (senha da sessão, ADR-0029). A Central pode ter senha própria (data-sessao).
+const linkF = (f, cls, html, extra = '') => `<a class="${cls}" href="${encodeURI(f.arquivo)}" target="_blank" rel="opener" data-f="${esc(f.arquivo)}"${ehCentralF(f) ? ' data-sessao="central"' : ''} ${extra}>${html}</a>`;
+const fCentral = () => ferramentas.find(ehCentralF);
+const fQuadro = slug => ferramentas.find(f => f.titulo === 'Quadro do Time' && f.time?.slug === slug);
+const fFinTime = slug => ferramentas.find(f => f.titulo === 'Finanças do Time' && f.time?.slug === slug);
+const plural = (n, s, p = s + 's') => `${n} ${n === 1 ? s : p}`;
+const juntar = xs => xs.length < 2 ? xs.join('') : xs.slice(0, -1).join(', ') + ' e ' + xs.at(-1);
+const ddmm = iso => iso ? fmtData(iso).slice(0, 5) : '';
+function navHtml() {
+  const c = fCentral(), g = ferramentas.find(f => f.titulo === 'Finanças do Grupo'), fe = ferramentas.find(f => f.titulo === 'Mapa de Férias'), qs = ferramentas.filter(f => f.titulo === 'Quadro do Time');
+  return `<a class="on" href="#topo">${ico('painel')}Visão geral</a>
+    ${c ? linkF(c, '', ico('central') + 'Central') : ''}
+    ${qs.length === 1 ? linkF(qs[0], '', ico('quadro') + 'Quadro') : qs.length ? `<details><summary>${ico('quadro')}Quadros ▾</summary><div class="menu">${qs.map(f => linkF(f, '', ico('quadro') + esc(f.time?.nome || f.arquivo))).join('')}</div></details>` : ''}
+    ${g ? linkF(g, '', ico('fin') + 'Finanças') : ''}
+    ${fe ? linkF(fe, '', ico('ferias') + 'Férias') : ''}
+    <a href="#secTimes">${ico('times')}Times</a>`;
+}
 function renderTopo() {
   const el = $('#topo'); if (!el || !db) return;
   const pend = Object.values(pubEstado).filter(x => x.pendente).length;
-  el.innerHTML = `<div class="logo">HUB</div><div style="min-width:0"><h1>${esc(db.nome || TOOL_NOME)}</h1><div class="sub">${esc(db.pessoa.nome)} · ${TOOL_NOME}</div></div><span class="grow"></span>
-    <span class="pill"><span class="led ${sujo || salvando ? 'wait' : ''}"></span>${sujo || salvando ? 'Salvando…' : 'Salvo'}</span>
+  el.innerHTML = `<span class="marca">${ico('painel', '')}</span><div style="min-width:0"><h1>${esc(db.nome || TOOL_NOME)}</h1><div class="sub">${esc(db.pessoa.nome)} · Hub ${TOOL_VERSION} · <span title="Arquivo do hub">${sujo || salvando ? 'salvando…' : 'salvo'}</span></div></div>
+    <nav class="nav" aria-label="Módulos">${navHtml()}</nav><span class="grow"></span>
     <button class="pill" id="tPasta" title="Pasta sincronizada pelo OneDrive"><span class="led ${raiz ? '' : 'err'}"></span>${raiz ? esc(raiz.name) + (situacao.lidoEm ? ' · lida ' + esc(fmtDataHora(situacao.lidoEm)) : '') : 'Ligar pasta sincronizada'}</button>
     ${pend ? `<span class="pill"><span class="led wait"></span>${pend} time(s) aguardando publicação</span>` : ''}
-    <button class="btn sm" id="tAtu" ${raiz ? '' : 'disabled'}>Ler a pasta</button><button class="btn sm" id="tOnde">Onde estou?</button><button class="btn sm" id="tAj">Ajustes</button>`;
+    <button class="btn sm" id="tAtu" title="Ler de novo a pasta sincronizada e o arquivo da Central">Atualizar</button><button class="btn sm" id="tOnde">Onde estou?</button><button class="btn sm" id="tAj">Ajustes</button>`;
   $('#tPasta').onclick = async () => { let h; try { h = await escolherPasta('fin-comum'); } catch { return; } await ligarPasta(h); };
-  $('#tAtu').onclick = async () => { await atualizar(); toast('Pasta lida.'); };
+  $('#tAtu').onclick = async () => { await lerCentral({ forcar: true }); await atualizar(); toast(raiz ? 'Pasta e Central lidas.' : 'Central lida. Ligue a pasta sincronizada para ver os times.'); };
   $('#tOnde').onclick = () => ondeEstou({ ferramenta: TOOL_NOME, versao: TOOL_VERSION, arquivo, pastaLocal: dirLocal?.name, pastaComum: raiz?.name || '', writer: writer(),
-    local: [`${arquivo}: times, chaves dos times e seus post-its (cifrado com a sua senha)`, 'Os HTMLs das ferramentas que o hub abre'], comum: [`times/<time>/postits/${baseArq()}.json: seus post-its para cada time (só você grava)`, 'Leitura: post-its de outras pessoas, quem já viu (postits/vistos/) e a data da última publicação de cada time'] });
+    local: [`${arquivo}: times, chaves dos times e seus post-its (cifrado com a sua senha)`, 'Os HTMLs das ferramentas que o hub abre', `Leitura, sem gravar: ${central.arquivo ? esc(central.arquivo) + ', o arquivo da Central' : 'o arquivo da Central'} (resumo no cockpit)`],
+    comum: [`times/<time>/postits/${baseArq()}.json: seus post-its para cada time (só você grava)`, 'Leitura: post-its de outras pessoas, quem já viu (postits/vistos/), o status, as métricas e o plano financeiro de cada time'] });
   $('#tAj').onclick = ajustes;
+  $$('.nav details', el).forEach(d => d.addEventListener('click', e => { if (e.target.closest('a')) d.open = false; }));
 }
 function render() {
   if (!db) return;
   const ph = pastaDoHub(), mesma = !ph || !dirLocal || ph.nome === dirLocal.name;
-  const ferr = ferramentas.map(f => `<a class="tool" href="${encodeURI(f.arquivo)}" target="_blank" rel="opener" data-f="${esc(f.arquivo)}"><span class="ic ${f.cls}">${esc(f.ic)}</span>
-    <span style="min-width:0;flex:1"><b>${esc(f.titulo)}${f.time?.nome ? ' · ' + esc(f.time.nome) : ''}</b><span class="small muted">${esc(f.desc)}</span><span class="code">${esc(f.arquivo)}</span></span><span class="go">Abrir ↗</span></a>`).join('');
   $('#app').innerHTML = `<div class="hub"><header class="top" id="topo"></header>
     ${ph && [PASTA_COMUM, PASTA_COMUM_ANTIGA].includes(ph.nome) ? '<div class="banner warn">Este hub está na pasta compartilhada com os times. O arquivo de dados dele (com as chaves dos times) deve ficar numa pasta só sua (de preferência no seu OneDrive).</div>' : ''}
     ${!mesma ? `<div class="banner warn">Este hub.html não está na pasta local <b class="code">${esc(dirLocal.name)}</b>, então os links podem não abrir. Copie o hub.html para a mesma pasta das ferramentas.</div>` : ''}
-    <p class="lbl">Ferramentas <button class="btn sm ghost" id="fAtu">Procurar de novo</button></p>
-    ${ferr ? `<div class="tools">${ferr}</div>` : `<div class="card"><div class="empty">Nenhuma ferramenta encontrada na pasta local <b class="code">${esc(dirLocal?.name || '')}</b>. Coloque o hub.html na mesma pasta dos HTMLs (Central, Quadro, Finanças) ou gere as ferramentas pelo <b>Início da solução</b>.</div></div>`}
+    ${hero()}
     ${painel()}
-    <p class="lbl">Times e post-its <button class="btn sm ghost" id="aTime">+ Time</button><button class="btn sm ghost" id="aImp">Importar da Central</button><button class="btn sm ghost" id="aImpF">Importar do Finanças do Grupo</button></p>
-    ${!raiz ? `<div class="banner">Ligue a pasta sincronizada pelo OneDrive (<span class="code">${PASTA_COMUM}</span>) para publicar post-its e ver a atividade dos times. <button class="btn sm pri" id="bPasta">Ligar pasta</button></div>` : ''}
-    ${db.times.length ? db.times.map(timeHtml).join('') : '<div class="card"><div class="empty">Nenhum time ainda. Use "+ Time" ou importe os times e as chaves da Central.</div></div>'}
-    <p class="small muted" style="margin-top:20px">Hub ${TOOL_VERSION} · cada ferramenta continua separada, com o próprio arquivo. Os post-its vão cifrados com a chave de cada time, um arquivo por autor, e o Quadro do Time mostra os recebidos.</p></div>`;
+    ${blocoAtencao()}
+    ${modulos()}
+    <div class="sec" id="secTimes"><h3>Times e post-its</h3><span class="grow"></span><button class="btn sm ghost" id="aTime">+ Time</button><button class="btn sm ghost" id="aImp">Importar da Central</button><button class="btn sm ghost" id="aImpF">Importar do Finanças do Grupo</button></div>
+    ${!raiz ? `<div class="banner">Ligue a pasta sincronizada pelo OneDrive (<span class="code">${PASTA_COMUM}</span>) para ver o status, as métricas e as finanças dos times e publicar post-its. <button class="btn sm pri" id="bPasta">Ligar pasta</button></div>` : ''}
+    ${db.times.length ? `<div class="times">${db.times.map(timeHtml).join('')}</div>` : '<div class="card"><div class="empty">Nenhum time ainda. Use "+ Time" ou importe os times e as chaves da Central.</div></div>'}
+    <p class="small muted" style="margin-top:22px">Hub ${TOOL_VERSION} · o hub só lê: cada ferramenta continua com o próprio arquivo e é a única que grava nele. Os post-its vão cifrados com a chave de cada time, um arquivo por autor.</p></div>`;
   renderTopo(); ligar();
 }
-// Painel do topo: cards de leitura e barras, só com o que o hub já lê da pasta (atividade, post-its, planos agregados).
+// Faixa do topo: saudação, uma frase com o que importa hoje e a sessão aberta (uma senha para todas as ferramentas).
+function hero() {
+  const c = central.resumo, h = new Date().getHours(), saud = h < 5 ? 'Boa noite' : h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+  const nome = String(db.pessoa.nome || '').split(/\s+/)[0], att = itensAtencao(), urg = att.filter(x => x.k === 'late').length;
+  const partes = [];
+  if (c) {
+    if (c.atrasadas) partes.push(`<b>${plural(c.atrasadas, 'tarefa atrasada', 'tarefas atrasadas')}</b>`);
+    if (c.hoje) partes.push(`${plural(c.hoje, 'tarefa', 'tarefas')} para hoje`);
+    if (c.inic.late) partes.push(`<b>${plural(c.inic.late, 'iniciativa atrasada', 'iniciativas atrasadas')}</b>`);
+    if (c.fora.length) partes.push(`${plural(c.fora.length, 'pessoa fora', 'pessoas fora')} hoje`);
+  }
+  const bloq = db.times.reduce((a, t) => a + (recebidos[t.slug]?.status?.bloqueios.length || 0), 0);
+  if (bloq) partes.push(`${plural(bloq, 'bloqueio', 'bloqueios')} nos times`);
+  if (!partes.length && att.length) partes.push(plural(att.length, 'ponto de atenção', 'pontos de atenção') + ' nos times');
+  const frase = partes.length ? 'Hoje: ' + juntar(partes) + '.' : c || raiz ? 'Nada pedindo a sua atenção agora.' : 'Abra a Central e ligue a pasta sincronizada para ver aqui tudo o que pede a sua atenção.';
+  const dia = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+  return `<section class="hero"><div style="position:relative;z-index:1;min-width:0"><div class="dia">${esc(dia)}</div><h2>${saud}${nome ? ', ' + esc(nome) : ''}</h2><div class="resumo">${frase}</div></div>
+    <div class="lado"><div class="num">${att.length}<small>${att.length === 1 ? 'ponto de atenção' : 'pontos de atenção'}${urg ? ` · ${urg} urgente${urg > 1 ? 's' : ''}` : ''}</small></div>
+    <span class="sessao" title="Abra as ferramentas pelos links do hub: cada uma recebe a senha da sessão uma vez, só em memória (ADR-0029).">${ico('cadeado')}Sessão aberta: as ferramentas abrem sem pedir a senha<button id="tSair">Encerrar sessão</button></span></div></section>`;
+}
+// Aviso no lugar do card da Central quando o hub ainda não conseguiu lê-la.
+function avisoCentral() {
+  const tem = !!fCentral();
+  if (central.estado === 'ok') return '';
+  if (central.estado === 'senha') return `<div class="bloq">${ico('cadeado')}<span>A Central (<span class="code">${esc(central.arquivo)}</span>) usa <b>outra senha</b>. Digite uma vez: ela fica só na memória desta sessão e também abre a Central pelos links do hub.</span><span class="grow"></span><button class="btn sm pri" id="cSenha">Digitar a senha da Central</button></div>`;
+  if (central.estado === 'permissao') return `<div class="bloq">${ico('central')}<span>O navegador precisa da sua confirmação para o hub <b>ler</b> o arquivo da Central (<span class="code">${esc(central.arquivo)}</span>).</span><span class="grow"></span><button class="btn sm pri" id="cLigar">Ler a Central</button></div>`;
+  if (central.estado === 'erro') return `<div class="bloq">${ico('alerta')}<span>Não consegui ler a Central: ${esc(central.erro)}</span><span class="grow"></span><button class="btn sm" id="cEsc">Escolher o arquivo da Central</button></div>`;
+  return tem ? `<div class="bloq">${ico('central')}<span>Não achei o arquivo de dados da Central nesta pasta. Mostre onde ele está para ver as suas tarefas, iniciativas, 1:1 e férias aqui.</span><span class="grow"></span><button class="btn sm" id="cEsc">Escolher o arquivo da Central</button></div>` : '';
+}
+// Cards de leitura de todos os módulos: Central (meu dia, delegadas, iniciativas, pessoas) e times (finanças, atividade, quadros, post-its).
 function painel() {
+  const c = central.resumo, cards = [], tag = m => `<span class="grow"></span><span class="mod">${m}</span>`;
+  if (c) {
+    const total = c.atrasadas + c.hoje + c.feitasHoje;
+    cards.push(cardLeitura({ hi: true, k: 'Meu dia', tag: tag('Central'), v: total ? `${c.feitasHoje} <span style="font-size:15px;opacity:.75">de ${total}</span>` : 'Dia livre', pct: total ? c.feitasHoje / total : null,
+      s: c.atrasadas ? `<b>${c.atrasadas}</b> atrasada${c.atrasadas > 1 ? 's' : ''} · ${c.hoje} para hoje` : c.hoje ? `${c.hoje} para hoje, nada atrasado` : 'Nada atrasado' }));
+    cards.push(cardLeitura({ k: 'Delegadas no prazo', tag: tag('Central'), v: c.deleg ? `${c.deleg - c.delegAtr} <span class="faint" style="font-size:15px">de ${c.deleg}</span>` : '—', pct: c.deleg ? (c.deleg - c.delegAtr) / c.deleg : null,
+      s: !c.deleg ? 'Nada delegado em aberto' : c.delegAtr ? `<b>${c.delegAtr}</b> atrasada${c.delegAtr > 1 ? 's' : ''}${c.cobrar ? ` · ${c.cobrar} a cobrar` : ''}` : c.cobrar ? `<b>${c.cobrar}</b> a cobrar hoje` : 'Tudo em dia' }));
+    cards.push(cardLeitura({ k: 'Iniciativas em andamento', tag: tag('Central'), v: c.inic.total ? `${c.inic.ok} <span class="faint" style="font-size:15px">de ${c.inic.total} em dia</span>` : '—', pct: c.inic.total ? c.inic.ok / c.inic.total : null,
+      s: !c.inic.total ? 'Nenhuma iniciativa em andamento' : c.inic.late + c.inic.attn ? `<b>${c.inic.late}</b> atrasada${c.inic.late === 1 ? '' : 's'} · ${c.inic.attn} pedindo atenção` : 'Nenhuma pedindo atenção' }));
+    cards.push(cardLeitura({ k: c.ferias ? 'Fora hoje' : '1:1 em atraso', tag: tag(c.ferias ? 'Férias' : 'Central'), v: String(c.ferias ? c.fora.length : c.oo.atrasados),
+      s: c.ferias ? (c.fora.length ? esc(c.fora.slice(0, 3).map(x => x.nome).join(', ')) + (c.fora.length > 3 ? ` e mais ${c.fora.length - 3}` : '') : c.proximas.length ? `Próxima: <b>${esc(c.proximas[0].nome)}</b> em ${ddmm(c.proximas[0].inicio)}` : 'Ninguém fora nos próximos 14 dias') + (c.oo.atrasados ? ` · <b>${c.oo.atrasados}</b> 1:1 em atraso` : '')
+        : c.oo.atrasados ? esc(c.oo.lista.slice(0, 3).map(x => x.nome).join(', ')) : 'Conversas em dia' }));
+  }
+  const lid = db.times.length && db.times.every(t => t.tipo === 'grupo'), U = lid ? ['dos gestores', 'gestor'] : ['dos times', 'time'];
+  const visao = lid ? 'Visão dos gestores' : db.times.some(t => t.tipo === 'grupo') ? 'Visão dos times e gestores' : 'Visão dos times';
+  if (raiz && db.times.length) {
+    const ano = anoCorrente(), semana = Date.now() - 7 * 864e5;
+    const comPlano = db.times.map(t => ({ t, pl: recebidos[t.slug]?.plano })).filter(x => totaisAno(x.pl, ano));
+    if (comPlano.length) {
+      const moeda = comPlano[0].pl.moeda, mesmos = comPlano.filter(x => x.pl.moeda === moeda);
+      const tot = mesmos.reduce((a, { pl }) => { const x = totaisAno(pl, ano); a.o += x.orcado; a.p += x.previsto; a.r += x.realizado; return a; }, { o: 0, p: 0, r: 0 });
+      const fm = v => fmtMoeda(v, moeda), folga = tot.o - tot.p, mesIdx = +ano === new Date().getFullYear() ? new Date().getMonth() + 1 : +ano < new Date().getFullYear() ? 12 : 0;
+      cards.push(cardLeitura({ hi: !c, k: `Previsto ${U[0]} em ${ano}`, tag: tag('Finanças'), v: fm(tot.p), pct: tot.o ? tot.p / tot.o : null,
+        s: tot.o ? (folga >= 0 ? `Folga de <b>${fm(folga)}</b> no orçado de ${fmtCurto(tot.o)}` : `<b>${fm(-folga)}</b> acima do orçado de ${fmtCurto(tot.o)}`) : 'Os times ainda não informaram o orçado' }));
+      cards.push(cardLeitura({ k: `Realizado em ${ano}`, tag: tag('Finanças'), v: fm(tot.r), pct: tot.p ? tot.r / tot.p : null, marca: mesIdx / 12, s: `<b>${pctTxt(tot.r, tot.p)}</b> do previsto · ${mesmos.length} ${mesmos.length === 1 ? U[1] : U[0].slice(4)} com plano` }));
+    }
+    const comStatus = db.times.map(t => recebidos[t.slug]?.status).filter(Boolean);
+    if (comStatus.length) {
+      const tot = comStatus.reduce((a, s) => ({ n: a.n + s.total, ok: a.ok + s.ok, b: a.b + s.bloqueios.length, l: a.l + s.late }), { n: 0, ok: 0, b: 0, l: 0 });
+      cards.push(cardLeitura({ k: 'Iniciativas nos quadros', tag: tag('Quadros'), v: tot.n ? `${tot.ok} <span class="faint" style="font-size:15px">de ${tot.n} no prazo</span>` : '—', pct: tot.n ? tot.ok / tot.n : null,
+        s: tot.b || tot.l ? `${tot.l ? `<b>${tot.l}</b> atrasada${tot.l > 1 ? 's' : ''} · ` : ''}<b>${tot.b}</b> bloqueio${tot.b === 1 ? '' : 's'} aberto${tot.b === 1 ? '' : 's'}` : 'Sem bloqueios abertos' }));
+    }
+    const ativos = db.times.filter(t => { const a = recebidos[t.slug]?.atividade || {}; return Math.max(a.quadro || 0, a.status || 0, a.plano || 0) > semana; });
+    cards.push(cardLeitura({ k: 'Times ativos na semana', tag: tag('Quadros'), v: `${ativos.length} <span class="faint" style="font-size:15px">de ${db.times.length}</span>`, pct: ativos.length / db.times.length,
+      s: ativos.length === db.times.length ? 'Todos publicaram nos últimos 7 dias' : `Sem publicação: <b>${esc(db.times.filter(t => !ativos.includes(t)).map(t => t.nome).join(', '))}</b>` }));
+    const minhas = db.times.flatMap(t => notasDe(t.slug).filter(n => !expirada(n)).map(n => ({ t, n })));
+    if (minhas.length) {
+      const vistas = minhas.filter(({ t, n }) => (recebidos[t.slug]?.vistos?.[n.id] || []).length).length;
+      cards.push(cardLeitura({ k: 'Seus post-its ativos', tag: tag('Post-its'), v: String(minhas.length), pct: vistas / minhas.length, s: vistas === minhas.length ? 'Todos já foram vistos' : `<b>${minhas.length - vistas}</b> ainda sem "Vi"` }));
+    }
+  }
+  const sub = [c ? 'Central' : '', raiz && db.times.length ? visao : ''].filter(Boolean).join(' · ');
+  return `<div class="sec"><h3>Visão geral</h3>${sub ? `<span class="sub2">${esc(sub)}</span>` : ''}<span class="grow"></span>${c ? `<span class="sub2">Central lida ${tempo(central.lm)}</span>` : ''}</div>
+    ${avisoCentral()}${cards.length ? `<div class="inss">${cards.join('')}</div>` : !avisoCentral() ? '<div class="card"><div class="empty">Abra a Central ou ligue a pasta sincronizada para ver os indicadores aqui.</div></div>' : ''}`;
+}
+// Tudo o que pede atenção, de todos os módulos, numa lista só (atrasado primeiro).
+function itensAtencao() {
+  const c = central.resumo, out = [], fc = fCentral();
+  if (c) {
+    for (const t of c.listaAtrasadas) out.push({ k: 'late', tx: esc(t.titulo), sub: `Sua tarefa · prazo ${ddmm(t.fim)}`, tg: 'Central', f: fc });
+    if (c.atrasadas > c.listaAtrasadas.length) out.push({ k: 'late', tx: `e mais ${c.atrasadas - c.listaAtrasadas.length} tarefa(s) atrasada(s)`, sub: 'Veja na tela Hoje da Central', tg: 'Central', f: fc });
+    for (const t of c.listaDeleg) out.push({ k: t.atrasada ? 'late' : 'attn', tx: esc(t.titulo), sub: `Com ${esc(t.quem || 'outra pessoa')} · ${t.atrasada ? 'atrasada desde ' + ddmm(t.fim) : 'cobrar hoje'}`, tg: 'Delegada', f: fc });
+    for (const i of c.inic.lista) out.push({ k: i.k, tx: 'Iniciativa ' + esc(i.nome), sub: `${i.k === 'late' ? 'Atrasada' : 'Atenção'} · ${i.pr}% concluído${i.fim ? ' · termina ' + ddmm(i.fim) : ''}`, tg: 'Central', f: fc });
+    if (c.oo.atrasados) out.push({ k: 'attn', tx: `1:1 em atraso com ${esc(juntar(c.oo.lista.map(x => x.nome)))}${c.oo.atrasados > c.oo.lista.length ? ' e outros' : ''}`, sub: 'Pela cadência de cada pessoa', tg: '1:1', f: fc });
+  }
+  if (raiz) for (const t of db.times) {
+    const r = recebidos[t.slug]; if (!r) continue;
+    const fq = fQuadro(t.slug), ff = fFinTime(t.slug);
+    for (const i of r.status?.atencao || []) out.push({ k: i.k, tx: esc(i.nome), sub: `${i.k === 'late' ? 'Atrasada' : 'Atenção'} no quadro${i.prev ? ' · previsão ' + ddmm(i.prev) : ''}`, tg: esc(t.nome), f: fq });
+    for (const b of (r.status?.bloqueios || []).slice(0, 3)) out.push({ k: 'attn', tx: 'Bloqueio: ' + esc(b.texto), sub: `${esc(b.ini)}${b.desde ? ' · desde ' + ddmm(b.desde) : ''}`, tg: esc(t.nome), f: fq });
+    const x = totaisAno(r.plano); if (x && x.orcado && x.previsto > x.orcado) out.push({ k: 'late', tx: `Previsto acima do orçado em ${fmtMoeda(x.previsto - x.orcado, r.plano.moeda)}`, sub: `Finanças ${anoCorrente()}`, tg: esc(t.nome), f: ff });
+    if (r.planoErro) out.push({ k: 'attn', tx: 'Finanças: ' + esc(r.planoErro), sub: 'Confira a chave de finanças em Ajustes', tg: esc(t.nome) });
+    const a = r.atividade || {}, ult = Math.max(a.quadro || 0, a.status || 0, a.plano || 0);
+    if (t.tipo !== 'grupo' && ult && ult < Date.now() - 7 * 864e5) out.push({ k: 'info', tx: 'Sem publicar há mais de 7 dias', sub: `Última publicação ${tempo(ult)}`, tg: esc(t.nome), f: fq });
+  }
+  const ord = { late: 0, attn: 1, info: 2 };
+  return out.sort((a, b) => ord[a.k] - ord[b.k]);
+}
+function blocoAtencao() {
+  const c = central.resumo, att = itensAtencao();
+  if (!c && !raiz) return '';
+  const item = x => { const corpo = `<span class="dot ${x.k}"></span><span class="tx">${x.tx}<small>${x.sub}</small></span><span class="tg">${x.tg}</span>`; return x.f ? linkF(x.f, 'it', corpo) : `<div class="it">${corpo}</div>`; };
+  const lista = att.length ? `<div class="lista">${att.slice(0, 8).map(item).join('')}</div>${att.length > 8 ? `<details><summary class="small muted" style="cursor:pointer;padding:8px 4px">Ver mais ${att.length - 8}</summary><div class="lista">${att.slice(8).map(item).join('')}</div></details>` : ''}` : '<div class="empty">Nada pedindo a sua atenção. Tudo em dia nos módulos que o hub consegue ler.</div>';
+  const av = n => `<i>${esc(String(n || '?').trim().slice(0, 1).toUpperCase())}</i>`;
+  const pessoas = c ? `<div class="card"><p class="lbl" style="margin-top:0">${ico('pessoas')} Pessoas</p>
+      ${c.ferias ? `<p class="small muted" style="margin:0 0 6px">Fora hoje</p>${c.fora.length ? `<div class="pessoas">${c.fora.map(x => `<span class="av" title="${esc(x.un || 'você e diretos')} · até ${ddmm(x.fim)}">${av(x.nome)}${esc(x.nome)}</span>`).join('')}</div>` : '<div class="small muted">Ninguém fora hoje.</div>'}
+      ${c.proximas.length ? `<p class="small muted" style="margin:12px 0 4px">Próximos 14 dias</p><div class="lista">${c.proximas.map(x => `<div class="it"><span class="dot"></span><span class="tx">${esc(x.nome)}<small>${ddmm(x.inicio)} a ${ddmm(x.fim)}${x.un ? ' · ' + esc(x.un) : ''}</small></span></div>`).join('')}</div>` : ''}` : ''}
+      <p class="small muted" style="margin:12px 0 4px">1:1</p>${c.oo.atrasados ? `<div class="pessoas">${c.oo.lista.map(x => `<span class="av" title="${x.dias == null ? 'sem conversa registrada' : 'última há ' + x.dias + ' dias'}">${av(x.nome)}${esc(x.nome)}</span>`).join('')}</div>` : '<div class="small muted">Todas as conversas em dia.</div>'}</div>` : '';
+  return `<div class="duas"><div class="card"><p class="lbl" style="margin-top:0">${ico('alerta')} Pede sua atenção${att.length ? `<span class="chip ${att.some(x => x.k === 'late') ? 'late' : ''}">${att.length}</span>` : ''}</p>${lista}</div>
+    <div>${pessoas}${barrasFin()}</div></div>`;
+}
+function barrasFin() {
   if (!raiz || !db.times.length) return '';
-  const ano = anoCorrente(), semana = Date.now() - 7 * 864e5, cards = [];
-  const ativos = db.times.filter(t => { const a = recebidos[t.slug]?.atividade || {}; return Math.max(a.quadro || 0, a.status || 0, a.plano || 0) > semana; });
-  cards.push(cardLeitura({ k: 'Times ativos na semana', v: `${ativos.length} <span class="faint" style="font-size:15px">de ${db.times.length}</span>`, pct: ativos.length / db.times.length,
-    s: ativos.length === db.times.length ? 'Todos publicaram nos últimos 7 dias' : `Sem publicação: <b>${esc(db.times.filter(t => !ativos.includes(t)).map(t => t.nome).join(', '))}</b>` }));
-  const minhas = db.times.flatMap(t => notasDe(t.slug).filter(n => !expirada(n)).map(n => ({ t, n })));
-  if (minhas.length) {
-    const vistas = minhas.filter(({ t, n }) => (recebidos[t.slug]?.vistos?.[n.id] || []).length).length;
-    cards.push(cardLeitura({ k: 'Seus post-its ativos', v: String(minhas.length), pct: vistas / minhas.length, s: vistas === minhas.length ? 'Todos já foram vistos' : `<b>${minhas.length - vistas}</b> ainda sem "Vi"` }));
-  }
-  const lid = db.times.every(t => t.tipo === 'grupo'), U = lid ? ['dos gestores', 'gestor'] : ['dos times', 'time'];
-  const comPlano = db.times.map(t => ({ t, pl: recebidos[t.slug]?.plano })).filter(x => totaisAno(x.pl, ano));
-  let barras = '';
-  if (comPlano.length) {
-    const moeda = comPlano[0].pl.moeda, mesmos = comPlano.filter(x => x.pl.moeda === moeda);
-    const tot = mesmos.reduce((a, { pl }) => { const x = totaisAno(pl, ano); a.o += x.orcado; a.p += x.previsto; a.r += x.realizado; return a; }, { o: 0, p: 0, r: 0 });
-    const fm = v => fmtMoeda(v, moeda), folga = tot.o - tot.p, mesIdx = +ano === new Date().getFullYear() ? new Date().getMonth() + 1 : +ano < new Date().getFullYear() ? 12 : 0;
-    cards.unshift(cardLeitura({ hi: true, k: `Previsto ${U[0]} em ${ano}`, v: fm(tot.p), pct: tot.o ? tot.p / tot.o : null,
-      s: tot.o ? (folga >= 0 ? `Folga de <b>${fm(folga)}</b> no orçado de ${fmtCurto(tot.o)}` : `<b>${fm(-folga)}</b> acima do orçado de ${fmtCurto(tot.o)}`) : 'Os times ainda não informaram o orçado' }));
-    cards.splice(1, 0, cardLeitura({ k: `Realizado em ${ano}`, v: fm(tot.r), pct: tot.p ? tot.r / tot.p : null, marca: mesIdx / 12, s: `<b>${pctTxt(tot.r, tot.p)}</b> do previsto · ${mesmos.length} time(s) com plano` }));
-    barras = `<div class="card"><p class="lbl" style="margin-top:0">Previsto por ${U[1]} em ${ano} <span class="faint">· marca = orçado</span></p>${barrasH(mesmos.map(({ t, pl }) => { const x = totaisAno(pl, ano); return { nome: esc(t.nome), valor: x.previsto, ref: x.orcado, cor: x.orcado && x.previsto > x.orcado ? 'var(--late)' : '', titulo: `Orçado ${fm(x.orcado)} · previsto ${fm(x.previsto)} · realizado ${fm(x.realizado)}` }; }), v => fmtCurto(v))}
-      ${mesmos.length < comPlano.length ? `<p class="small muted">${comPlano.length - mesmos.length} time(s) em outra moeda ficaram fora da soma.</p>` : ''}</div>`;
-  }
-  return `<p class="lbl">${db.times.every(t => t.tipo === 'grupo') ? 'Visão dos gestores' : db.times.some(t => t.tipo === 'grupo') ? 'Visão dos times e gestores' : 'Visão dos times'}</p><div class="inss">${cards.join('')}</div>${barras}`;
+  const ano = anoCorrente(), lid = db.times.every(t => t.tipo === 'grupo'), U1 = lid ? 'gestor' : 'time';
+  const comPlano = db.times.map(t => ({ t, pl: recebidos[t.slug]?.plano })).filter(x => totaisAno(x.pl, ano)); if (!comPlano.length) return '';
+  const moeda = comPlano[0].pl.moeda, mesmos = comPlano.filter(x => x.pl.moeda === moeda), fm = v => fmtMoeda(v, moeda);
+  return `<div class="card"><p class="lbl" style="margin-top:0">${ico('fin')} Previsto por ${U1} em ${ano} <span class="faint">· marca = orçado</span></p>${barrasH(mesmos.map(({ t, pl }) => { const x = totaisAno(pl, ano); return { nome: esc(t.nome), valor: x.previsto, ref: x.orcado, cor: x.orcado && x.previsto > x.orcado ? 'var(--late)' : '', titulo: `Orçado ${fm(x.orcado)} · previsto ${fm(x.previsto)} · realizado ${fm(x.realizado)}` }; }), v => fmtCurto(v))}
+    ${mesmos.length < comPlano.length ? `<p class="small muted">${comPlano.length - mesmos.length} time(s) em outra moeda ficaram fora da soma.</p>` : ''}</div>`;
+}
+// Módulos: cada ferramenta da pasta, com uma linha viva do que o hub já leu dela.
+function vivoDe(f) {
+  const c = central.resumo;
+  if (ehCentralF(f)) return c ? `<b>${c.atrasadas}</b> atrasada${c.atrasadas === 1 ? '' : 's'} · <b>${c.inic.late + c.inic.attn}</b> iniciativa${c.inic.late + c.inic.attn === 1 ? '' : 's'} pedindo atenção${c.ferias ? ` · <b>${c.fora.length}</b> fora hoje` : ''}` : central.estado === 'senha' ? 'Outra senha: digite no cockpit uma vez' : '';
+  const r = f.time?.slug ? recebidos[f.time.slug] : null;
+  if (f.titulo === 'Quadro do Time' && r) { const s = r.status, m = r.metricas?.ms?.[0]; return [s ? `<b>${s.ok}</b>/${s.total} no prazo` : '', s?.bloqueios.length ? `<b>${s.bloqueios.length}</b> bloqueio${s.bloqueios.length > 1 ? 's' : ''}` : '', m ? `${esc(m.nome)} <b>${fmtNum(m.v, m.dec)}</b> ${esc(m.unidade)}` : '', `publicado ${tempo(r.atividade?.quadro || r.atividade?.status)}`].filter(Boolean).join(' · '); }
+  if (f.titulo === 'Finanças do Time' && r) { const x = totaisAno(r.plano); return x ? `<b>${fmtCurto(x.previsto)}</b> previsto${x.orcado ? ` de ${fmtCurto(x.orcado)}` : ''} · ${fmtCurto(x.realizado)} realizado` : `plano ${tempo(r.atividade?.plano)}`; }
+  if (f.titulo === 'Finanças do Grupo' && raiz) { const ano = anoCorrente(), xs = db.times.map(t => totaisAno(recebidos[t.slug]?.plano, ano)).filter(Boolean); if (!xs.length) return ''; const p = xs.reduce((a, x) => a + x.previsto, 0), o = xs.reduce((a, x) => a + x.orcado, 0); return `<b>${fmtCurto(p)}</b> previsto${o ? ` de ${fmtCurto(o)} orçado` : ''} em ${ano}`; }
+  return '';
+}
+function modulos() {
+  const principais = ferramentas.filter(f => f.cls !== 'aux'), apoio = ferramentas.filter(f => f.cls === 'aux');
+  const tile = f => { const v = vivoDe(f); return linkF(f, 'tool', `<span class="hd"><span class="ic ${f.cls}">${ico(f.svg)}</span><span style="min-width:0;flex:1"><b>${esc(f.titulo)}${f.time?.nome ? ' · ' + esc(f.time.nome) : ''}</b><span class="small muted">${esc(f.desc)}</span><span class="code">${esc(f.arquivo)}</span></span><span class="go">Abrir ↗</span></span>${v ? `<span class="vivo">${v}</span>` : ''}`); };
+  const aux = f => linkF(f, 'tool aux', `<span class="ic aux">${ico(f.svg)}</span><span style="min-width:0;flex:1"><b>${esc(f.titulo)}</b><span class="small muted">${esc(f.desc)}</span></span><span class="go">Abrir ↗</span>`);
+  return `<div class="sec"><h3>Módulos</h3><span class="sub2">abrem numa aba nova, já com a senha da sessão</span><span class="grow"></span><button class="btn sm ghost" id="fAtu">Procurar de novo</button></div>
+    ${ferramentas.length ? `<div class="tools">${principais.map(tile).join('')}</div>${apoio.length ? `<div class="tools">${apoio.map(aux).join('')}</div>` : ''}` : `<div class="card"><div class="empty">Nenhuma ferramenta encontrada na pasta local <b class="code">${esc(dirLocal?.name || '')}</b>. Coloque o hub.html na mesma pasta dos HTMLs (Central, Quadro, Finanças) ou gere as ferramentas pelo <b>Início da solução</b>.</div></div>`}`;
 }
 function gestorHtml(t) {
   const r = recebidos[t.slug] || { atividade: {} }, kf = (t.chavesFin || []).slice(-1)[0];
@@ -1318,10 +1695,18 @@ function gestorHtml(t) {
     ${linhaFin(t, r)}
     ${!r.plano && raiz && !r.planoErro ? '<p class="small muted">Este gestor ainda não publicou o consolidado para a liderança (Finanças do Grupo › Ajustes › Nível acima).</p>' : ''}</div>`;
 }
+function kpisTime(r) {
+  if (!raiz) return '';
+  const s = r.status, ms = r.metricas?.ms || [], out = [];
+  out.push(`<div class="kpi"><div class="k">Iniciativas no quadro</div><div class="v">${s ? `<span class="semaf"><span title="no prazo"><i style="background:var(--ok)"></i>${s.ok}</span><span title="atenção"><i style="background:#d99a2b"></i>${s.attn}</span><span title="atrasadas"><i style="background:var(--late)"></i>${s.late}</span></span>` : '<small>sem status publicado</small>'}</div></div>`);
+  if (s) out.push(`<div class="kpi"><div class="k">Bloqueios abertos</div><div class="v ${s.bloqueios.length ? 'late' : 'ok'}">${s.bloqueios.length}</div></div>`);
+  for (const m of ms.slice(0, 2)) out.push(`<div class="kpi" title="${esc(m.nome)}${r.metricas.sprint ? ' · ' + esc(r.metricas.sprint) : ''}"><div class="k">${esc(m.nome)}</div><div class="v ${m.k}">${fmtNum(m.v, m.dec)} <small>${esc(m.unidade)}</small>${sparkline(m.serie)}</div></div>`);
+  return `<div class="kpis">${out.join('')}</div>`;
+}
 function timeHtml(t) {
   if (t.tipo === 'grupo') return gestorHtml(t);
   const r = recebidos[t.slug] || { notas: [], vistos: {}, atividade: {}, erros: [] }, k = chaveDoTime(t), pe = pubEstado[t.slug], pb = db.publicacao[t.slug];
-  const qd = ferramentas.find(f => f.titulo === 'Quadro do Time' && f.time?.slug === t.slug), fn = ferramentas.find(f => f.titulo === 'Finanças do Time' && f.time?.slug === t.slug);
+  const qd = fQuadro(t.slug), fn = fFinTime(t.slug);
   const a = r.atividade || {};
   const minhas = notasDe(t.slug).slice().sort((x, y) => String(y.atualizadoEm).localeCompare(String(x.atualizadoEm)));
   const pi = (n, meu) => {
@@ -1331,15 +1716,16 @@ function timeHtml(t) {
       ${meu && !expirada(n) ? `<span title="${esc(vis.map(v => v.quem + ' em ' + fmtDataHora(v.em)).join('\n'))}">${vis.length ? 'visto por ' + esc(vis.map(v => v.quem).join(', ')) : 'ainda não visto'}</span>` : ''}</div>
       ${meu ? `<div class="ac"><button data-ed="${esc(t.slug)}|${esc(n.id)}" title="Editar">✎</button><button data-rm="${esc(t.slug)}|${esc(n.id)}" title="Remover">✕</button></div>` : ''}</div>`;
   };
-  const estado = !k ? '<span class="chip late">sem chave do time</span>' : pe?.erro ? `<span class="chip late" title="${esc(pe.erro)}">não publicado: ${esc(pe.erro)}</span>` : pe?.pendente ? '<span class="chip">publicando…</span>' : pb?.revision ? `<span class="chip ok" title="Revisão ${pb.revision}">publicado ${esc(fmtDataHora(pb.em))}</span>` : '';
-  return `<div class="card team" data-time="${esc(t.slug)}"><div class="hd"><h3>${esc(t.nome)}</h3><span class="chip code">times/${esc(t.slug)}/</span>${t.prefixo ? `<span class="chip bv">${esc(t.prefixo)}</span>` : ''}
-    ${k ? `<span class="chip bv code" title="Chave do time (tarefas)">${esc(k.kid)}</span>` : ''}${estado}<span class="grow"></span>
-    ${qd ? `<a class="btn sm" href="${encodeURI(qd.arquivo)}" target="_blank" rel="opener">Quadro ↗</a>` : ''}${fn ? `<a class="btn sm" href="${encodeURI(fn.arquivo)}" target="_blank" rel="opener">Finanças ↗</a>` : ''}</div>
-    ${raiz ? `<p class="act">Quadro atualizado ${tempo(a.quadro)} · status para a Central ${tempo(a.status)} · métricas ${tempo(a.metricas)} · plano financeiro ${tempo(a.plano)}</p>` : ''}
+  const estado = !k ? '<span class="chip late">sem chave do time</span>' : pe?.erro ? `<span class="chip late" title="${esc(pe.erro)}">não publicado: ${esc(pe.erro)}</span>` : pe?.pendente ? '<span class="chip">publicando…</span>' : pb?.revision ? `<span class="chip ok" title="Revisão ${pb.revision}">post-its publicados ${esc(fmtDataHora(pb.em))}</span>` : '';
+  return `<div class="card team" data-time="${esc(t.slug)}"><div class="hd"><h3>${esc(t.nome)}</h3>${t.prefixo ? `<span class="chip bv">${esc(t.prefixo)}</span>` : ''}${r.metricas?.sprint ? `<span class="chip">${esc(r.metricas.sprint)}</span>` : ''}${estado}<span class="grow"></span>
+    ${qd ? linkF(qd, 'btn sm', 'Quadro ↗') : ''}${fn ? linkF(fn, 'btn sm', 'Finanças ↗') : ''}</div>
+    ${raiz ? `<p class="act"><span class="code">times/${esc(t.slug)}/</span>${k ? ` · chave <span class="code">${esc(k.kid)}</span>` : ''} · quadro ${tempo(a.quadro)} · status ${tempo(a.status)} · métricas ${tempo(a.metricas)} · plano ${tempo(a.plano)}</p>` : ''}
+    ${kpisTime(r)}
     ${linhaFin(t, r)}
-    ${!k ? `<div class="banner warn">Para deixar post-its, cole a chave de tarefas do time (a mesma do Quadro) em <b>Ajustes</b>, ou importe da Central. <button class="btn sm" data-ch="${esc(t.slug)}">Colar chave</button></div>` : ''}
+    ${!k ? `<div class="banner warn">Para ver o status e as métricas do quadro e deixar post-its, cole a chave de tarefas do time (a mesma do Quadro) em <b>Ajustes</b>, ou importe da Central. <button class="btn sm" data-ch="${esc(t.slug)}">Colar chave</button></div>` : ''}
     ${r.erros?.length ? `<div class="banner warn" title="${esc(r.erros.join('\n'))}">${r.erros.length} arquivo(s) de post-it não abriram com a chave cadastrada (chave antiga ou arquivo incompleto).</div>` : ''}
     ${r.copias ? '<div class="banner">Há cópia de conflito do OneDrive do seu arquivo; ela é resolvida na próxima publicação.</div>' : ''}
+    <p class="lbl" style="margin:6px 0 8px">Post-its${minhas.length + r.notas.length ? ` <span class="faint">${minhas.length + r.notas.length}</span>` : ''}</p>
     <div class="wall"><button class="pi novo" data-novo="${esc(t.slug)}" ${k ? '' : 'disabled'}>+ Post-it</button>${minhas.map(n => pi(n, true)).join('')}${r.notas.map(n => pi(n, false)).join('')}</div></div>`;
 }
 function linhaFin(t, r) {
@@ -1352,10 +1738,14 @@ function linhaFin(t, r) {
 }
 function ligar() {
   const on = (id, f) => { const e = $('#' + id); if (e) e.onclick = f; };
-  on('fAtu', async () => { ferramentas = await procurarFerramentas(); render(); });
+  on('fAtu', async () => { ferramentas = await procurarFerramentas(); await lerCentral({ forcar: true }); render(); });
   on('aTime', () => editarTime());
   on('aImp', importarDaCentral);
   on('aImpF', importarDoGrupo);
+  on('tSair', encerrarSessao);
+  on('cSenha', senhaDaCentral);
+  on('cLigar', async () => { await lerCentral({ pedir: true, forcar: true }); render(); });
+  on('cEsc', escolherCentral);
   on('bPasta', async () => { let h; try { h = await escolherPasta('fin-comum'); } catch { return; } await ligarPasta(h); });
   $$('[data-novo]').forEach(b => b.onclick = () => editarNota(b.dataset.novo));
   $$('[data-ed]').forEach(b => b.onclick = () => { const [s, id] = b.dataset.ed.split('|'); editarNota(s, notasDe(s).find(n => n.id === id)); });
@@ -1365,6 +1755,31 @@ function ligar() {
     db.notas[s] = notasDe(s).filter(n => n.id !== id); agendarSalvar(); agendarPublicar(s, 300); render();
   });
   $$('[data-ch]').forEach(b => b.onclick = () => pedirChave(timePorSlug(b.dataset.ch)));
+}
+// A Central com senha própria: a pessoa digita uma vez; fica só na memória e vai junto nos links para a Central.
+async function senhaDaCentral() {
+  for (let i = 0; i < 3; i++) {
+    const s = await pedirSenhaDlg('Senha da Central', i > 0); if (s == null) return;
+    senhaCentral = s; await lerCentral({ forcar: true });
+    if (central.estado === 'ok') { window.gestaoSessao?.definir(s, 'central'); render(); toast('Central lida. Os links do hub para a Central levam essa senha nesta sessão.'); return; }
+    senhaCentral = null;
+  }
+  render(); toast('Senha da Central não confere.');
+}
+async function escolherCentral() {
+  let fh; try { [fh] = await window.showOpenFilePicker({ id: 'hub-central', types: [{ description: 'Dados da Central', accept: { 'application/json': ['.json'] } }] }); } catch { return; }
+  if (!await ehCentral(fh)) return toast('Este arquivo não é da Central de Gestão.');
+  lembrarPasta('hub-central', fh); centralH = fh; central.lm = 0;
+  await lerCentral({ forcar: true }); render();
+}
+// Encerrar a sessão: grava o que falta, esquece as senhas da memória e volta para a tela de entrada.
+async function encerrarSessao() {
+  for (const s of Object.keys(pubT)) { clearTimeout(pubT[s]); delete pubT[s]; await publicar(s); }
+  clearTimeout(salvarT); if (sujo) await salvar();
+  window.gestaoSessao?.definir(null);
+  senhaSessao = senhaCentral = null; kdfCache.clear(); centralH = null; central = { estado: 'nada', arquivo: '', resumo: null, erro: '', lm: 0 };
+  clearInterval(pollT); db = null; ctx = null; recebidos = {}; raiz = null; chaves = new Map(); chavesFin = new Map();
+  telaInicial('Sessão encerrada. As abas das ferramentas que você abriu continuam abertas: feche-as se for sair do computador.');
 }
 
 /* ------------------------------- post-its ------------------------------- */
@@ -1521,16 +1936,19 @@ function ajustes() {
 /* ---------------------------- abertura e criação ---------------------------- */
 async function telaInicial(msg = '') {
   const ult = lembrarAtivo() ? await kv.get('hub-local') : null;
-  $('#app').innerHTML = `<div class="welcome"><div class="card">
-    <div class="row"><div class="logo" style="margin:0">HUB</div><div><h2 style="margin:0">${TOOL_NOME}</h2><div class="small muted">Abra as ferramentas da solução e deixe post-its para os times</div></div></div>
+  const li = (ic, t) => `<li>${ico(ic, '')}<span>${t}</span></li>`;
+  $('#app').innerHTML = `<div class="entrada"><div class="vitrine"><span class="marca" style="background:rgba(255,255,255,.16);box-shadow:none">${ico('painel', '')}</span>
+      <h2>Seu cockpit de gestão</h2><p>Uma senha, uma tela: o que pede a sua atenção em todos os módulos da solução.</p>
+      <ul>${li('central', '<b>Central</b>: suas tarefas, delegadas, iniciativas e 1:1')}${li('quadro', '<b>Quadros dos times</b>: iniciativas, bloqueios e métricas publicadas')}${li('fin', '<b>Finanças</b>: previsto, orçado e realizado de cada time')}${li('ferias', '<b>Férias</b>: quem está fora hoje e nos próximos dias')}${li('cadeado', 'Entre uma vez: as ferramentas abertas pelo hub não pedem a senha de novo')}</ul></div>
+    <div class="acoes"><h2 style="margin:0 0 2px;font-family:var(--title);font-weight:600">${TOOL_NOME}</h2><div class="small muted">Entre com a senha do hub (a mesma das outras ferramentas, se você usou o assistente).</div>
     ${msg ? `<div class="banner warn" style="margin-top:12px">${esc(msg)}</div>` : ''}
     ${avisoFS()}
-    ${ult ? `<button class="opt" id="iUlt" style="margin-top:18px"><b>Abrir ${esc(ult.arquivo)}</b><span>Pasta local <span class="code">${esc(ult.dir.name)}</span>, usada por último neste computador.</span></button>` : ''}
+    ${ult ? `<button class="opt" id="iUlt" style="margin-top:18px"><b>Entrar com ${esc(ult.arquivo)}</b><span>Pasta local <span class="code">${esc(ult.dir.name)}</span>, usada por último neste computador.</span></button>` : ''}
     <p class="lbl" style="margin-top:20px">Já tenho o hub</p>
     <button class="opt" id="iAbrir"><b>Abrir a pasta local</b><span>A pasta deste computador (só sua; de preferência no seu OneDrive) com as ferramentas e o arquivo <span class="code">hub-&lt;nome&gt;.json</span>.</span></button>
     <p class="lbl" style="margin-top:16px">É a primeira vez?</p>
     <button class="opt" id="iNovo"><b>Criar o hub</b><span>Seu nome, a pasta local e a senha. Depois você liga a pasta sincronizada e cola as chaves dos times (ou importa da Central).</span></button>
-    <p class="small muted" style="margin-top:16px">O hub não guarda dados das outras ferramentas: só abre cada uma. Seus post-its vão cifrados com a chave de cada time para a pasta sincronizada pelo OneDrive.</p>
+    <p class="small muted" style="margin-top:16px">O hub só lê os outros módulos, nunca grava neles. Seus post-its vão cifrados com a chave de cada time para a pasta sincronizada pelo OneDrive.</p>
   </div></div>`;
   $('#iNovo').onclick = criarDlg;
   $('#iAbrir').onclick = abrirPasta;
@@ -1551,7 +1969,7 @@ async function abrirArquivo(h, nome) {
   if (!texto) return telaInicial('Arquivo não encontrado.');
   for (let i = 0; i < 3; i++) {
     const s = await pedirSenhaDlg('Senha do hub', i > 0, { sessao: true }); if (s == null) return;
-    try { const r = await decifrarLocal(texto, s); db = normalizar(r.dados); ctx = r.ctx; dirLocal = h; arquivo = nome; window.gestaoSessao?.definir(s); break; }
+    try { const r = await decifrarLocal(texto, s); db = normalizar(r.dados); ctx = r.ctx; dirLocal = h; arquivo = nome; senhaSessao = s; window.gestaoSessao?.definir(s); break; }
     catch (e) { if (e.code !== 'SENHA') return telaInicial(e.message); }
   }
   if (!db) return telaInicial('Senha incorreta três vezes.');
@@ -1562,6 +1980,7 @@ async function aposAbrir() {
   await carregarChaves();
   ferramentas = await procurarFerramentas();
   render();
+  await lerCentral(); render();
   if (await lembreteTesteSenha(db.seg, ctx)) agendarSalvar();
   { const h = await pastaLembrada('hub-raiz'); if (h && await permissao(h, false)) await ligarPasta(h, true); }
   clearInterval(pollT); pollT = setInterval(atualizar, 30000);
@@ -1596,13 +2015,13 @@ async function criarArquivo({ nome, pessoa }) {
   const senha = await criarSenhaDlg('Senha do hub'); if (!senha) return false;
   db = novoDb({ nome: nome || pessoa, pessoa });
   db.seg.cofreConfirmadoEm = new Date().toISOString();
-  ctx = await novoCtx(senha, TOOL); dirLocal = h; arquivo = nomeArq; window.gestaoSessao?.definir(senha);
+  ctx = await novoCtx(senha, TOOL); dirLocal = h; arquivo = nomeArq; senhaSessao = senha; window.gestaoSessao?.definir(senha);
   await gravarLocal(h, nomeArq, await cifrarLocal(db, ctx));
   await aposAbrir();
   toast('Hub criado e cifrado. Agora ligue a pasta sincronizada e cadastre os times.', 5000);
   return true;
 }
-window.__hub = { get db() { return db; }, get recebidos() { return recebidos; }, importarDoGrupo, painel, novoDb, lerTime, publicar, atualizar, procurarFerramentas, get ferramentas() { return ferramentas; }, ligarPasta, colarChave, abrirArquivo };
+window.__hub = { get db() { return db; }, get recebidos() { return recebidos; }, get central() { return central; }, lerCentral, resumoCentral, resumoStatus, resumoMetricas, itensAtencao, encerrarSessao, importarDoGrupo, painel, novoDb, lerTime, publicar, atualizar, procurarFerramentas, get ferramentas() { return ferramentas; }, ligarPasta, colarChave, abrirArquivo };
 // Aberto pelo assistente ou de novo neste computador: abre direto o último hub quando a pasta ainda está liberada.
 (async () => { const u = lembrarAtivo() ? await kv.get('hub-local') : null; let ok = false;
   try { ok = !!(u?.dir && await permissao(u.dir, false) && await lerTexto(u.dir, u.arquivo)); } catch {}
