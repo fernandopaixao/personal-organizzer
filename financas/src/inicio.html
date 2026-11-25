@@ -42,7 +42,7 @@
    Pergunta o uso esperado, cria o primeiro arquivo (sempre cifrado), gera os HTMLs
    desacoplados de cada uso e o cartão "Onde fica cada coisa".
    ===================================================================== */
-const TOOL_NOME = 'Início da solução', TOOL_VERSION = '2.4.0';
+const TOOL_NOME = 'Início da solução', TOOL_VERSION = '2.5.0';
 $('#ver').textContent = TOOL_VERSION;
 const st = { modo: '', sp: 0, sorteTimes: [], passo: 0, papel: '', usos: [], dados: {}, dirLocal: null, raiz: null, senha: null, criados: [], temChave: null, chaves: [], kErr: '', pastaDoLider: '', cofreChaves: false };
 // Perfil: quem lidera, se quer finanças e tarefas, e se o líder já mandou chaves e a pasta.
@@ -51,7 +51,7 @@ const PAPEIS = [
   ['responsavel', 'Sim, lidero 1 time', 'Você cuida do dia a dia de um time: quadro de tarefas e, se quiser, o plano financeiro.'],
   ['membro', 'Não, faço parte de um time', 'Você usa o quadro de tarefas do time.']
 ];
-const USOS = [['tarefas', 'Tarefas', 'Iniciativas, quadro, backlog e acompanhamento.'], ['financas', 'Finanças', 'Orçado, previsto e realizado; contratos; previsão de vários anos.'], ['ferias', 'Férias', 'Quem está fora e quando; dias com muita gente fora no time e no grupo.']];
+const USOS = [['tarefas', 'Tarefas', 'Iniciativas, quadro, backlog e acompanhamento.'], ['financas', 'Finanças', 'Orçado, previsto e realizado; contratos; previsão de vários anos.'], ['ferias', 'Férias', 'Quem está fora e quando: você marca as férias do grupo na Central, com os dias de muita gente fora.']];
 // O que cada combinação gera. Cada HTML é desacoplado e tem o próprio arquivo de dados.
 function plano() {
   const g = st.papel === 'gestor', out = [{ id: 'hb', nome: 'Hub da solução', desc: 'Tela inicial do dia a dia: abre as outras ferramentas, mostra os times e deixa post-its.', html: 'hub.html' }];
@@ -60,7 +60,7 @@ function plano() {
   // Férias do gestor ficam dentro da Central (ADR-0033): marcar Férias já basta para gerar a Central.
   if (g ? st.usos.includes('tarefas') || st.usos.includes('ferias') : st.usos.includes('tarefas')) out.push(g ? { id: 'ct', nome: 'Central de Gestão', desc: st.usos.includes('ferias') ? 'Tarefas consolidado: iniciativas, times, rituais e pessoas, com a página Férias (onde há mais e menos gente fora).' : 'Tarefas consolidado: iniciativas, times, rituais e pessoas.', html: 'gestao_pessoal.html' }
                                             : { id: 'qt', nome: 'Quadro do Time', desc: 'Tarefas de um time: quadro, backlog, sprints e métricas.', html: `quadro_${st.dados.slug || '<time>'}.html` });
-  if (st.usos.includes('ferias') && !g) out.push({ id: 'fe', nome: 'Mapa de Férias', desc: 'Férias do time: cada pessoa marca as suas e o time vê os picos.', html: 'ferias.html' });
+  // Férias: só o gestor cadastra, na Central (ADR-0034). Responsável e membro não recebem ferramenta de férias.
   return out;
 }
 // Chaves coladas: o kid diz o que cada uma é. "<time>-AAMM" é de tarefas; "<time>-fin-AAMM" é de finanças.
@@ -72,7 +72,7 @@ function classificarChave(texto) {
   if (g && !fin) aviso = 'Chave de tarefas de um time. Se for de um dos times que você vai listar, ela é reaproveitada; para os outros times o assistente gera chaves novas.';
   if (!g && fin && st.papel === 'membro') aviso = 'Chave de finanças: as finanças do time ficam com quem lidera o time. Será ignorada.';
   if (!g && fin && !st.usos.includes('financas')) aviso = 'Chave de finanças, mas você não marcou Finanças. Será ignorada.';
-  if (!g && !fin && !st.usos.includes('tarefas') && !st.usos.includes('ferias')) aviso = 'Chave de tarefas, mas você não marcou Tarefas nem Férias. Será guardada só no hub, para post-its.';
+  if (!g && !fin && !st.usos.includes('tarefas')) aviso = 'Chave de tarefas, mas você não marcou Tarefas. Será guardada só no hub, para post-its.';
   return { texto: texto.trim(), kid: k.kid, slug, tipo: fin ? 'fin' : 'tarefas', papel, aviso, ignorar: /ignorada/.test(aviso) };
 }
 const chavesUteis = () => st.chaves.filter(c => !c.ignorar);
@@ -115,13 +115,13 @@ function desenhar() {
   if (st.modo === 'sorte') return desenharSorte(el);
   if (p === 0) el.innerHTML = `${topo}<h1>Vamos montar sua solução</h1><p class="muted">Primeiro, como ela funciona em quatro desenhos. Depois, três perguntas sobre o seu perfil e, se o seu líder já mandou, a chave e a pasta.</p>
     ${comoFunciona()}
-    ${temFS() ? `<div class="sorte"><div class="grow"><b>Estou com sorte</b>Lidero times e quero tudo pronto de uma vez: Central, Finanças do Grupo, Mapa de Férias, hub e, para cada time, o Quadro, o Finanças do Time e o Mapa de Férias, já com as chaves e a pasta.</div><button class="btn pri" id="sorte">Estou com sorte</button></div>` : avisoFS()}
+    ${temFS() ? `<div class="sorte"><div class="grow"><b>Estou com sorte</b>Lidero times e quero tudo pronto de uma vez: Central (com as férias), Finanças do Grupo, hub e, para cada time, o Quadro e o Finanças do Time, já com as chaves e a pasta.</div><button class="btn pri" id="sorte">Estou com sorte</button></div>` : avisoFS()}
     <button class="btn ghost" id="mapa">Ver todas as ferramentas da solução</button>${nav(true, 'Começar')}`;
   if (p === 1) el.innerHTML = `${topo}<h1>Seu perfil</h1>
     <p class="lbl">1 · Você lidera times?</p>
     ${PAPEIS.map(([k, n, d]) => `<button class="opt ${st.papel === k ? 'on' : ''}" data-p="${k}"><b>${n}</b><span>${d}</span></button>`).join('')}
     ${st.papel ? `<p class="lbl" style="margin-top:16px">2 · O que você quer organizar?</p>
-    <div class="combo">${USOS.map(([k, n, d]) => `<button class="opt ${st.usos.includes(k) ? 'on' : ''}" data-u="${k}" ${st.papel === 'membro' && k === 'financas' ? 'disabled style="opacity:.5"' : ''}><b>${n}</b><span>${d}</span></button>`).join('')}</div>
+    <div class="combo">${USOS.filter(([k]) => k !== 'ferias' || st.papel === 'gestor').map(([k, n, d]) => `<button class="opt ${st.usos.includes(k) ? 'on' : ''}" data-u="${k}" ${st.papel === 'membro' && k === 'financas' ? 'disabled style="opacity:.5"' : ''}><b>${n}</b><span>${d}</span></button>`).join('')}</div>
     ${st.papel === 'membro' ? '<p class="small muted">As finanças do time ficam com quem lidera o time.</p>' : ''}` : ''}
     ${st.usos.length ? `<p class="lbl" style="margin-top:14px">Você vai receber</p>${plano().map(x => `<div class="res"><span class="ic">${x.id.toUpperCase()}</span><div><b>${x.nome}</b><br><span class="small muted">${x.desc}</span></div></div>`).join('')}` : ''}${nav(!!st.papel && st.usos.length > 0)}`;
   if (p === 2) {
@@ -297,23 +297,12 @@ async function criarTudo() {
       await salvarNovo(`quadro-${d.slug}.json`, await cifrarQuadro({ schema: 'quadro-time/1', createdAt: isoComFuso(), upd: t, team: { name: d.nome, slug: d.slug, contact: '', upd: t }, people: [{ id: 'P1', name: d.pessoa, upd: t }] }, st.senha), 'DB', 'Dados do Quadro, cifrados com a sua senha.');
     }
   }
-  if (plano().some(x => x.id === 'fe')) {
-    // Mapa de Férias: no time, a chave do time publica as férias; no grupo, os times entram como unidades
-    // (lidos com a chave de tarefas de cada um) e a chave da liderança, se houver, publica o consolidado.
-    const eu = { id: 'p' + Math.random().toString(36).slice(2, 9), nome: d.pessoa, ativo: true };
-    const db = { schema: 'gestao-ferias-local/1', version: 1, tool: 'ferias', criadoEm: agora, nivel: g ? 'grupo' : 'time', unidade: { nome: d.nome, slug: d.slug }, pessoa: { nome: d.pessoa, slug: slugify(d.pessoa).split('-')[0] || 'eu' }, eu: eu.id,
-      pessoas: [eu], ausencias: [], feriados: [], config: { limite: 30, diasUteis: [1, 2, 3, 4, 5], nomesAcima: true },
-      chaves: (g ? chAcima : chTar.filter(c => c.slug === d.slug)).map(reg), unidades: g ? d.times.map(t => ({ nome: t.nome, slug: t.slug, tipo: 'time', chaves: chTar.filter(c => c.slug === t.slug).map(reg) })) : [],
-      retratos: {}, publicacao: { revision: 0 }, seg };
-    await salvarNovo('ferias.html', aplicarPreset(await lerEmbutido('feriasEmb'), 'FERIAS-PRESET', { unidade: { nome: d.nome, slug: d.slug } }), 'FE', 'Mapa de Férias, já configurado.');
-    await salvarNovo(`ferias-${d.slug}.json`, await cifrarLocal(db, await novoCtx(st.senha, 'ferias')), 'DB', 'Dados do Mapa de Férias, cifrados com a sua senha.');
-  }
   await salvarNovo('onde-fica-cada-coisa.html', cartao(), 'MAP', 'Cartão em claro (sem dados nem senhas) com o mapa dos seus arquivos.');
   if (st.raiz) {
     await subpasta(st.raiz, ['grupo', 'financas'], true);
     const slugs = g ? d.times.map(t => t.slug) : [d.slug];
     for (const s of slugs) await subpasta(st.raiz, ['times', s, 'financas'], true);
-    if (st.usos.includes('ferias')) { if (g) await subpasta(st.raiz, ['grupos', d.slug, 'ferias'], true); for (const s of slugs) await subpasta(st.raiz, ['times', s, 'ferias'], true); }
+    if (st.usos.includes('ferias') && g) await subpasta(st.raiz, ['grupos', d.slug, 'ferias'], true);
     if (!await lerTexto(st.raiz, 'LEIA-ME.md')) await gravarSeguro(st.raiz, 'LEIA-ME.md', `# ${PASTA_COMUM}\n\nPasta compartilhada da solução (sincronizada pelo OneDrive). Tudo aqui é cifrado com a chave de cada time; nunca coloque senhas ou chaves aqui.\n\n- grupo/: só as ferramentas do gestor escrevem.\n- times/<time>/: as ferramentas do time escrevem; o hub escreve só os post-its, em postits/<pessoa>-<computador>.json (um arquivo por autor).\n- Arquivos com nome de computador no final são cópias de conflito do OneDrive: as ferramentas resolvem sozinhas.\n`);
   }
   if (g) await gerarPacotes();
@@ -393,8 +382,8 @@ function desenharSorte(el) {
   const n = st.sorteTimes.length, htmls = st.criados.filter(c => /\.html$/.test(c.nome)).length, json = st.criados.filter(c => /\.json$/.test(c.nome)).length;
   el.innerHTML = `<h1>Tudo pronto</h1><p class="muted">Grupo <b>${esc(d.nome)}</b>, ${n} ${n === 1 ? 'time' : 'times'}, na pasta <span class="code">${esc(st.dirLocal.name)}</span>.</p>
     <div class="inss">${[
-      cardLeitura({ hi: true, k: 'Ferramentas geradas', v: String(htmls), s: `${htmls - n * 3} suas e ${n * 3} dos times` }),
-      cardLeitura({ k: 'Times prontos', v: String(n), pct: 1, s: 'Quadro, Finanças e Férias de cada um' }),
+      cardLeitura({ hi: true, k: 'Ferramentas geradas', v: String(htmls), s: `${htmls - n * 2} suas e ${n * 2} dos times` }),
+      cardLeitura({ k: 'Times prontos', v: String(n), pct: 1, s: 'Quadro e Finanças de cada um' }),
       cardLeitura({ k: 'Chaves criadas', v: String(n * 2), s: 'tarefas e finanças, já dentro dos arquivos' }),
       cardLeitura({ k: 'Arquivos cifrados', v: String(json), s: 'todos abrem com a sua senha' })].join('')}</div>
     <div class="card" style="padding:14px 16px;margin:4px 0 16px">${mapaSorte()}</div>
@@ -436,15 +425,13 @@ function gerarChavesTimes(times) {
 // para-os-times/<time>/: as ferramentas de cada time, já com a chave, a pasta e o nome de quem gerou.
 async function gerarPacotes() {
   const d = st.dados, agora = new Date(), iso = agora.toISOString(), pasta = st.raiz?.name || PASTA_COMUM, u = st.usos;
-  const quadro = u.includes('tarefas') ? await lerEmbutido('quadroEmb') : '', fin = u.includes('financas') ? await lerEmbutido('finTimeEmb') : '', fer = u.includes('ferias') ? await lerEmbutido('feriasEmb') : '';
+  const quadro = u.includes('tarefas') ? await lerEmbutido('quadroEmb') : '', fin = u.includes('financas') ? await lerEmbutido('finTimeEmb') : '';
   for (const t of st.sorteTimes) {
     const dirT = await subpasta(st.dirLocal, ['para-os-times', t.slug], true), itens = [];
     if (quadro) { await gravarLocal(dirT, `quadro_${t.slug}.html`, aplicarPreset(quadro, 'QUADRO-PRESET', { schema: 'quadro-preset/1', generatedAt: isoComFuso(), team: { name: t.nome, slug: t.slug, ...(t.prefixo ? { prefix: t.prefixo } : {}), contact: d.pessoa }, key: t.kTar }));
       itens.push(`quadro_${t.slug}.html: quadro de tarefas do time`); st.criados.push({ nome: `para-os-times/${t.slug}/quadro_${t.slug}.html`, tipo: 'QT', desc: `Quadro do Time ${t.nome}, com a chave de tarefas.` }); }
     if (fin) { await gravarLocal(dirT, `financas_${t.slug}.html`, aplicarPreset(fin, 'FIN-PRESET', { schema: 'financas-preset/1', team: { nome: t.nome, slug: t.slug, prefixo: t.prefixo }, ano: d.ano, anos: [d.ano], moeda: d.moeda, pasta, chave: t.kFin, contato: d.pessoa, geradoEm: iso }));
       itens.push(`financas_${t.slug}.html: finanças do time (só para quem cuida do dinheiro do time)`); st.criados.push({ nome: `para-os-times/${t.slug}/financas_${t.slug}.html`, tipo: 'FT', desc: `Finanças do Time ${t.nome}, com a chave de finanças.` }); }
-    if (fer) { await gravarLocal(dirT, 'ferias.html', aplicarPreset(fer, 'FERIAS-PRESET', { unidade: { nome: t.nome, slug: t.slug }, chave: t.kTar }));
-      itens.push('ferias.html: Mapa de Férias (cada pessoa marca as suas; escolha "Sou de um time")'); st.criados.push({ nome: `para-os-times/${t.slug}/ferias.html`, tipo: 'FE', desc: `Mapa de Férias do time ${t.nome}, com a chave do time.` }); }
     await gravarLocal(dirT, 'LEIA-ME.txt', `Ferramentas do time ${t.nome}, geradas por ${d.pessoa} em ${agora.toLocaleDateString('pt-BR')}.\r\n\r\n` +
       `1. Copie esta pasta para uma pasta só sua (de preferência no seu OneDrive, como backup; nunca na pasta compartilhada) e abra os HTMLs no Edge ou no Chrome.\r\n` +
       `2. ${itens.join('. ')}.\r\n` +
@@ -464,7 +451,6 @@ async function lembrarTudo() {
   if (ids.includes('hb')) { await kv.set('hub-local', { dir, arquivo: `hub-${s}.json` }); if (raiz) await kv.set('hub-raiz', raiz); }
   if (ids.includes('fg')) { await kv.set('local:financas-grupo', { dir, arquivo: `financas-grupo-${s}.json` }); if (raiz) await kv.set('fin-grupo-raiz:' + s, raiz); }
   if (ids.includes('ft')) { await kv.set('local:financas-time:' + s, { dir, arquivo: `financas-${s}.json` }); if (raiz) await kv.set('fin-time-raiz:' + s, raiz); }
-  if (ids.includes('fe')) { await kv.set('local:ferias:' + s, { dir, arquivo: `ferias-${s}.json` }); if (raiz) await kv.set('ferias-raiz:' + s, raiz); }
   if (ids.includes('ct')) { const h = await arq(`gestao-${s}.json`); if (h) await idbPut('gestao-local', 'handle', h); if (raiz) await idbPut('gestao-local', 'igDir', raiz); }
   if (ids.includes('qt')) { const h = await arq(`quadro-${s}.json`); if (h) await idbPut('quadro-do-time', 'dataFile', h); if (raiz) await idbPut('quadro-do-time', 'root', raiz); }
 }
@@ -554,6 +540,5 @@ desenhar();
 <!--EMB:centralEmb-->
 <!--EMB:quadroEmb-->
 <!--EMB:hubEmb-->
-<!--EMB:feriasEmb-->
 </body>
 </html>

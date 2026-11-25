@@ -26,7 +26,7 @@ def main():
         'quadro_do_time_v1.html': RAIZ / 'ferramenta-time' / 'quadro_do_time_v1.html',
         'financas_grupo.html': RAIZ / 'financas' / 'financas_grupo.html',
         'financas_time.html': RAIZ / 'financas' / 'financas_time.html',
-        'ferias.html': RAIZ / 'ferias' / 'ferias.html',   # papel de time; o gestor usa a página Férias da Central (ADR-0033)
+        # Sem ferias.html: as férias ficam na página Férias da Central e só o gestor cadastra (ADR-0034).
     }
     # Pasta de contratos inteira (ADR-0032): especificação, schemas, referência de cripto, validador,
     # vetores e exemplos com chaves públicas. Fica de fora só o teste do repositório (precisa do Playwright).

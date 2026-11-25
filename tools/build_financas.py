@@ -8,7 +8,7 @@
 - financas/financas_time.html   ← src/time.html
 - financas/financas_grupo.html  ← src/grupo.html (+ Finanças do Time embutido, para gerar o HTML de cada time)
 - hub.html                      ← src/hub.html (tela inicial do dia a dia, sem nada embutido)
-- ferias/ferias.html            ← src/ferias.html (Mapa de Férias no papel de time; o gestor usa a cópia dentro da Central)
+- ferias/ferias.html            ← src/ferias.html (Mapa de Férias montado: fonte da cópia na Central e dos testes; não vai no pacote, ADR-0034)
 - Central (gestao_pessoal_v*.html, a mais nova) ← cópia do Mapa de Férias embutida em #feriasEmb: a página Férias (ADR-0033)
 - inicio.html                   ← src/inicio.html (+ Finanças do Time, Finanças do Grupo, Central, Quadro e Hub embutidos)
 
@@ -103,7 +103,6 @@ def main():
     ini, _ = embutir(ini, 'centralEmb', c.read_bytes(), c.stem)
     ini, _ = embutir(ini, 'quadroEmb', q.read_bytes(), versao(q.read_text(encoding='utf-8')))
     ini, _ = embutir(ini, 'hubEmb', hub.encode('utf-8'), versao(hub))
-    ini, _ = embutir(ini, 'feriasEmb', fer.encode('utf-8'), versao(fer))
     (RAIZ / 'inicio.html').write_text(ini, encoding='utf-8')
     for p in [RAIZ / 'financas' / 'financas_time.html', RAIZ / 'financas' / 'financas_grupo.html', RAIZ / 'hub.html', RAIZ / 'ferias' / 'ferias.html', RAIZ / 'inicio.html']:
         print(f'{p.relative_to(RAIZ)}: {p.stat().st_size // 1024} KB')

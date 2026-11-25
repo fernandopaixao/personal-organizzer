@@ -109,17 +109,17 @@ Esta revisão olhou a solução como um todo em 24/11/2026. Os pontos abaixo nã
 
 ---
 
-## 8. Jornada das férias (time, gestor e liderança)
+## 8. Jornada das férias (gestor e liderança)
 
-O Mapa de Férias é apoio para a visão do grupo; o pedido oficial de férias continua na ferramenta da empresa. Desde a Central 15.9, o gestor e a liderança usam a página **Férias da Central** (mesmo arquivo e mesma senha; [ADR-0033](adr/0033-ferias-dentro-da-central.md)); o `ferias.html` à parte fica para as pessoas do time.
+O Mapa de Férias é apoio para a visão do grupo; o pedido oficial de férias continua na ferramenta da empresa. O gestor e a liderança usam a página **Férias da Central** (mesmo arquivo e mesma senha; [ADR-0033](adr/0033-ferias-dentro-da-central.md)). Desde a Central 15.10, só o gestor cadastra: as pessoas dos times não usam ferramenta de férias ([ADR-0034](adr/0034-ferias-so-o-gestor-cadastra.md)).
 
 | Etapa | Quem | O que faz | Ferramenta | Ponto de atenção |
 |---|---|---|---|---|
-| **1. Cadastrar** | Membro do time (ou o responsável) | Cria o próprio arquivo como "time", cola a chave do time e marca as férias | Mapa de Férias › Pessoas | Usar o mesmo nome em todos os arquivos para não duplicar a pessoa |
-| **2. Subir para o gestor** | Automático | Cada mudança publica `times/<time>/ferias/<pessoa>-<computador>.json` | Pasta sincronizada | Sem a chave do time, nada sobe (aviso no Mapa) |
-| **3. Enxergar o grupo** | Gestor | Abre a página Férias da Central: os times com pasta e chave na Integração já estão somados; vê os dias com mais e menos gente fora, as semanas tranquilas e quem está fora em cada dia | Central › Férias › Mapa, Calendário | Time sem pasta ou sem chave na Integração não aparece; limite de pessoas fora ajustável (padrão 30%) |
-| **4. Planejar** | Gestor e times | Ao marcar uma ausência, vê o impacto e pede sugestões de períodos com menos gente fora | Formulário de ausência | Apoio: o pedido oficial é feito na ferramenta da empresa |
-| **5. Cadastrar as próprias** | Gestor | Marca as próprias férias e as dos diretos | Central › Férias › Diretos | Notas ficam só no arquivo da Central. A página Hoje mostra quem está fora hoje |
+| **1. Trazer as pessoas** | Gestor | Na primeira vez, as pessoas cadastradas na Central vêm sozinhas, cada uma com o seu time; depois, **Trazer pessoas da Central** traz quem entrou | Central › Férias › Pessoas | Todos os times da Central viram unidades, com ou sem pasta |
+| **2. Cadastrar as férias** | Gestor | Marca as férias de cada pessoa, a partir do que o time combinou com ele (1:1, ritual, ferramenta oficial) | Central › Férias › Pessoas | O time não cadastra nada; se outra solução publicar em `times/<time>/ferias/`, a Central soma do mesmo jeito |
+| **3. Enxergar o grupo** | Gestor | Abre a página Férias da Central e vê os dias com mais e menos gente fora, as semanas tranquilas e quem está fora em cada dia | Central › Férias › Mapa, Calendário | Limite de pessoas fora ajustável (padrão 30%) |
+| **4. Planejar** | Gestor | Ao marcar uma ausência, vê o impacto e pede sugestões de períodos com menos gente fora | Formulário de ausência | Apoio: o pedido oficial é feito na ferramenta da empresa |
+| **5. Cadastrar as próprias** | Gestor | Marca as próprias férias e as dos diretos | Central › Férias › Pessoas | Notas ficam só no arquivo da Central. A página Hoje mostra quem está fora hoje |
 | **6. Subir para a liderança** | Gestor | Cola a chave do grupo (a mesma das Finanças), confere e publica o consolidado | Central › Férias › Ajustes | Opção de trocar nomes por "Pessoa N" |
 | **7. Visão da liderança** | Liderança | Na página Férias da própria Central, cadastra cada gestor como unidade e soma tudo, em quantos níveis existirem | Central › Férias › Unidades, Mapa | A liderança precisa ler a mesma pasta compartilhada |
 | **Mudança (15.9)** | Gestor que usava o Mapa separado | Central › Férias › **Trazer do Mapa de Férias separado**, escolhe `ferias-<grupo>.json` e digita a senha dele | Central › Férias | O arquivo antigo só é lido; depois pode ser guardado como cópia |
@@ -132,10 +132,10 @@ Times e gestores pares que já têm ferramenta própria não precisam trocar: el
 
 | Etapa | Quem | O que faz | Onde | Ponto de atenção |
 |---|---|---|---|---|
-| **1. Combinar** | Gestor (ou liderança) e o responsável da outra solução | Cadastra o time ou o gestor como unidade, combina slug e prefixo, envia as chaves por mensagem direta e a pasta `contratos/` | Central, Finanças do Grupo, Mapa de Férias | Chave nunca na pasta nem no código |
+| **1. Combinar** | Gestor (ou liderança) e o responsável da outra solução | Cadastra o time ou o gestor como unidade, combina slug e prefixo, envia as chaves por mensagem direta e a pasta `contratos/` | Central (com a página Férias), Finanças do Grupo | Chave nunca na pasta nem no código |
 | **2. Entender** | Quem integra | Lê o LEIA-ME e a receita do seu caso; acha o arquivo e a chave na tabela do layout | `contratos/LEIA-ME.md`, `01` e `05` | Só publica arquivos cujo dono é o seu papel |
 | **3. Implementar** | Quem integra | Usa a referência de criptografia ou confere a própria com os vetores; monta o conteúdo a partir do exemplo | `referencia/cripto.js`, `vetores/`, `exemplos/` | Retrato completo, revisão sempre maior, totais = soma dos meses |
 | **4. Validar** | Quem integra | Confere conteúdo e pasta com o validador | `node contratos/validar.js` | Avisos não reprovam; erros fazem o arquivo ser ignorado |
-| **5. Aparecer** | Gestor ou liderança | Vê o arquivo no hub, na Central, nas Finanças do Grupo ou no Mapa de Férias; aplica pela prévia | Ferramenta de quem lê | Moeda e categorias iguais às do grupo |
+| **5. Aparecer** | Gestor ou liderança | Vê o arquivo no hub, na Central, nas Finanças do Grupo ou na página Férias da Central; aplica pela prévia | Ferramenta de quem lê | Moeda e categorias iguais às do grupo |
 | **6. Manter** | Ambos | Contrato novo ou versão `/2` vem com ADR, schema, exemplo e período de convivência | `contratos/LEIA-ME.md`, histórico | Leitor tolerante: campo desconhecido é ignorado |
 

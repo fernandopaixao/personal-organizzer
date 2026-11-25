@@ -65,4 +65,15 @@ Pedido do Fernando: "Não trate férias como um item a parte. Trate como uma fer
 - **Assistente 2.4:** o gestor que marca Férias recebe a Central com `db.ferias` pronto (grupo, times e chaves) e não recebe mais `ferias.html` nem `ferias-<grupo>.json`. Os times continuam recebendo `para-os-times/<time>/ferias.html`.
 - **Contrato:** nada muda. A página lê `times/<time>/ferias/` e publica em `grupos/<grupo>/ferias/` como antes.
 - **Teste:** seção 6 de `financas/testes/teste-ferias.js` (abre na Central, times e chave da Integração, lê o time, publica, nota fica na Central, "Fora hoje", time novo, migração do arquivo antigo) e o caminho do assistente no `teste-e2e.js`.
-- **Em aberto:** onde o time marca as férias (dentro do Quadro do Time, só pelo gestor ou no `ferias.html` à parte).
+- **Decidido em 25/11:** só o gestor cadastra (seção abaixo).
+
+## Só o gestor cadastra (1.4, Central 15.10, 25/11/2026)
+
+Decisão do Fernando no card do thread: "Só o gestor cadastra". Registrada em [ADR-0034](adr/0034-ferias-so-o-gestor-cadastra.md).
+
+- **Os times não recebem ferramenta de férias.** O `ferias.html` saiu do pacote (`tools/empacotar.py`), do assistente 2.5 (nem para o gestor, nem para os times, nem em `para-os-times/<time>/`) e do hub. O assistente não cria mais `times/<time>/ferias/`; só `grupos/<grupo>/ferias/` para o gestor. O arquivo continua no repositório como fonte da cópia embutida na Central e dos testes.
+- **Aba Pessoas** (antes "Diretos"): agrupada em "Você e diretos" e um grupo por time. O formulário de pessoa tem o campo **Time**; a ausência mostra o time da pessoa.
+- **Trazer pessoas da Central:** botão na aba Pessoas e passo automático na primeira vez. Lê as pessoas da Central (`FERIAS_HOST.pessoas`), cada uma com o primeiro time dela, e só acrescenta quem falta.
+- **Todos os times da Central viram unidades**, com ou sem pasta e chave (o identificador cai para o nome do time quando não há slug). Time sem pasta não gera aviso.
+- **Consolidado:** as pessoas de cada time sobem com `people[].id` `<time>.<slug>` e `unit` do time, deduplicadas contra o que outra solução publicar em `times/<time>/ferias/`. Contrato `gestao-ferias/1` sem mudança.
+- **Teste:** seção 6 de `teste-ferias.js` (pessoas da Central por time, ausência de pessoa de time no consolidado, "3 fora", sem aviso de pasta) e `teste-e2e.js` (para-os-times sem `ferias.html`).

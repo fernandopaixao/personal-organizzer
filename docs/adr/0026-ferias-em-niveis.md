@@ -1,6 +1,6 @@
 # ADR-0026 · Férias em níveis: chave do time no time, chave do grupo entre níveis
 
-**Status:** aceita, item 1 revisto pela [ADR-0033](0033-ferias-dentro-da-central.md) (o gestor e a liderança usam a página Férias da Central) · **Data:** 24/11/2026 · **Origem:** Mapa de Férias 1.0 (`docs/plano-ferias.md`), aplicando a [ADR-0025](0025-consolidacao-em-niveis.md) (consolidação em níveis)
+**Status:** aceita, item 1 revisto pela [ADR-0033](0033-ferias-dentro-da-central.md) (o gestor e a liderança usam a página Férias da Central); papel de time revisto pela [ADR-0034](0034-ferias-so-o-gestor-cadastra.md) (só o gestor cadastra) · **Data:** 24/11/2026 · **Origem:** Mapa de Férias 1.0 (`docs/plano-ferias.md`), aplicando a [ADR-0025](0025-consolidacao-em-niveis.md) (consolidação em níveis)
 
 ## Contexto
 O Fernando pediu férias com a mesma lógica de níveis das Finanças do Grupo 1.3: o time cadastra, sobe para o gestor, que cadastra as próprias e sobe para a liderança. O papel do líder é enxergar e planejar as ausências (dias com mais e menos gente fora). É apoio: não substitui a ferramenta oficial de férias.
