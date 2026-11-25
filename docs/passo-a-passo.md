@@ -1,6 +1,6 @@
 # Passo a passo · como lidar com a solução
 
-*25/11/2026 · Central v15.10, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.4 (dentro da Central), assistente 2.5, contratos 1.0*
+*25/11/2026 · Central v15.10, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.4 (dentro da Central), assistente 2.6, contratos 1.0*
 
 Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é independente. Antes de começar: use **Edge ou Chrome** no computador, abrindo o arquivo com dois cliques (não pela pré-visualização do Outlook, Teams ou OneDrive, nem de dentro do .zip), e tenha à mão um **cofre de senhas** (o gerenciador de senhas da empresa).
 
@@ -26,7 +26,7 @@ Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é ind
 
 0. Descompacte o **.zip da solução** (`gestao-solucao-AAAA-MM-DD.zip`) numa pasta qualquer; ele traz o `inicio.html`, as ferramentas, a documentação e um LEIA-ME.
 1. Crie uma **pasta pessoal**, só sua, de preferência dentro do **seu OneDrive** (por exemplo `OneDrive - Empresa\GestaoPessoal`). Ela é o seu backup se trocar de computador. Não use a pasta compartilhada com os times.
-2. Garanta que a **biblioteca do SharePoint** do grupo (`Gestao-Compartilhado`) está sincronizada no seu computador pelo OneDrive.
+2. Garanta que a **biblioteca do SharePoint** do grupo (`Gestao-Compartilhado`) está sincronizada no seu computador pelo OneDrive. Depois, clique com o botão direito na pasta e escolha **Sempre manter neste dispositivo** (Windows: no Explorador de Arquivos; Mac: no Finder). O ícone vira um círculo verde cheio. Sem isso, os arquivos ficam só na nuvem e as ferramentas não leem o que os outros publicam. Vale fazer o mesmo na sua pasta pessoal.
 3. Copie `inicio.html` para a pasta pessoal e abra com dois cliques.
 4. **Perfil:** responda **Você lidera times?** (2 ou mais, 1, ou não) e **O que você quer organizar?** (tarefas, finanças ou os dois).
 5. **Chaves:** se o seu líder mandou chaves (`GK1.…`), escolha **Sim, recebi**, cole uma por linha, clique **Conferir chaves** e informe o nome da pasta sincronizada que ele indicou. O assistente mostra o que cada chave é. Sem chave, escolha **Não, ainda não**: dá para colar depois dentro de cada ferramenta.
@@ -177,7 +177,7 @@ Times criados pelo assistente já têm prefixo, pasta e chave: pule para o passo
 
 1. Se a sua pasta pessoal está no seu OneDrive, ela já está no computador novo: entre no OneDrive e espere sincronizar. Senão, copie a **pasta pessoal inteira** do computador antigo (ou baixe uma cópia de cada arquivo: **Ajustes › Baixar cópia cifrada** nas Finanças e **Baixar cópia** nos Ajustes do Quadro).
 2. Feche as ferramentas no computador antigo: use um computador de cada vez, para o OneDrive não criar cópia de conflito.
-3. Sincronize a biblioteca `Gestao-Compartilhado` pelo OneDrive.
+3. Sincronize a biblioteca `Gestao-Compartilhado` pelo OneDrive e marque-a como **Sempre manter neste dispositivo** (botão direito na pasta).
 4. Abra o `hub.html` e cada ferramenta com a **senha do cofre**; reconecte as pastas quando o navegador pedir.
 5. No Quadro e em Finanças do Time, informe o novo nome de computador. Você passa a gravar um arquivo novo (`<você>-<computador novo>.json`); o antigo continua sendo lido.
 
@@ -197,7 +197,7 @@ Os outros times não são afetados.
 | "Senha incorreta" | Senha diferente da guardada | Tente a do cofre; não há recuperação |
 | Ferramenta diz que o arquivo é de outra ferramenta | Arquivo errado | Abra no HTML indicado na mensagem |
 | Aviso "cópia de conflito encontrada" | O OneDrive gravou duas versões | Aceite a resolução; a ferramenta fica com a maior revisão |
-| Time não aparece como atualizado no hub ou na Central | Sincronização do OneDrive atrasada, ou time sem chave | Espere alguns minutos; confira a chave e a pasta em **Onde estou?** |
+| Time não aparece como atualizado no hub ou na Central | Sincronização do OneDrive atrasada, pasta só na nuvem, ou time sem chave | Botão direito na pasta compartilhada › **Sempre manter neste dispositivo**; espere alguns minutos; confira a chave e a pasta em **Onde estou?** |
 | Post-it não chegou ao Quadro | Atraso de sincronização, post-it vencido ou chave errada | Confira o "mostrar até" e a chave do time no hub |
 | ← Hub abre uma aba nova | O hub não estava aberto | Normal; abra as ferramentas sempre a partir do hub |
 | Hub não acha as ferramentas | O hub não está na mesma pasta dos HTMLs | Mova o `hub.html` para a pasta local das ferramentas |

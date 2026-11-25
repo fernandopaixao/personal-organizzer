@@ -71,7 +71,7 @@ Pedido do Fernando: "Não trate férias como um item a parte. Trate como uma fer
 
 Decisão do Fernando no card do thread: "Só o gestor cadastra". Registrada em [ADR-0034](adr/0034-ferias-so-o-gestor-cadastra.md).
 
-- **Os times não recebem ferramenta de férias.** O `ferias.html` saiu do pacote (`tools/empacotar.py`), do assistente 2.5 (nem para o gestor, nem para os times, nem em `para-os-times/<time>/`) e do hub. O assistente não cria mais `times/<time>/ferias/`; só `grupos/<grupo>/ferias/` para o gestor. O arquivo continua no repositório como fonte da cópia embutida na Central e dos testes.
+- **Os times não recebem ferramenta de férias.** O `ferias.html` saiu do pacote (`tools/empacotar.py`), do assistente 2.6 (nem para o gestor, nem para os times, nem em `para-os-times/<time>/`) e do hub. O assistente não cria mais `times/<time>/ferias/`; só `grupos/<grupo>/ferias/` para o gestor. O arquivo continua no repositório como fonte da cópia embutida na Central e dos testes.
 - **Aba Pessoas** (antes "Diretos"): agrupada em "Você e diretos" e um grupo por time. O formulário de pessoa tem o campo **Time**; a ausência mostra o time da pessoa.
 - **Trazer pessoas da Central:** botão na aba Pessoas e passo automático na primeira vez. Lê as pessoas da Central (`FERIAS_HOST.pessoas`), cada uma com o primeiro time dela, e só acrescenta quem falta.
 - **Todos os times da Central viram unidades**, com ou sem pasta e chave (o identificador cai para o nome do time quando não há slug). Time sem pasta não gera aviso.

@@ -1,6 +1,6 @@
 # ADR-0034 · Férias: só o gestor cadastra
 
-**Status:** aceita · **Data:** 25/11/2026 (Central 15.10, Mapa de Férias 1.4 dentro da Central, assistente 2.5) · **Origem:** escolha do Fernando na decisão aberta pela [ADR-0033](0033-ferias-dentro-da-central.md): "Só o gestor cadastra". Revê o papel de time da [ADR-0026](0026-ferias-em-niveis.md).
+**Status:** aceita · **Data:** 25/11/2026 (Central 15.10, Mapa de Férias 1.4 dentro da Central, assistente 2.6) · **Origem:** escolha do Fernando na decisão aberta pela [ADR-0033](0033-ferias-dentro-da-central.md): "Só o gestor cadastra". Revê o papel de time da [ADR-0026](0026-ferias-em-niveis.md).
 
 ## Contexto
 Com as férias do gestor dentro da Central (ADR-0033), sobrava um módulo só para os times: o `ferias.html` no papel de time, em que cada pessoa marcava as próprias férias e publicava em `times/<time>/ferias/`. O objetivo do Fernando é reduzir os módulos a gerir; as férias oficiais já ficam na ferramenta da empresa, e o gestor já sabe quem vai sair.
