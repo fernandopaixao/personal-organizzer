@@ -61,9 +61,10 @@ def main():
    (a migração é automática e baixa um backup).
 3. Depois, abra sempre o hub.html: ele leva às outras ferramentas.
 
-Quer experimentar o visual novo? Abra experimental/hub.html (ou experimental/inicio.html).
+Quer experimentar o visual novo? Na tela de entrada do hub, clique em
+"Experimentar o visual novo" (deixe a pasta experimental/ ao lado dos HTMLs).
 São as mesmas ferramentas, com os mesmos arquivos de dados, só com outro visual.
-Para voltar, abra de novo o hub.html desta pasta.
+A escolha fica lembrada; para voltar, "Voltar ao visual atual" na mesma tela.
 
 Este pacote não contém dados. Senhas e chaves ficam no seu cofre de senhas.
 Guia completo: docs/passo-a-passo.md

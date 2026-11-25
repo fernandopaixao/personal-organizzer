@@ -1,6 +1,6 @@
 # Funcionalidades, usos e objetivos
 
-*25/11/2026 · Remessa · Central v15.14, Quadro do Time 2.3.2, Hub 2.3, Finanças do Grupo 1.7 e do Time 1.5, Mapa de Férias 1.5 (dentro da Central), assistente 2.8, contratos 1.0 · visual experimental em `experimental/`*
+*25/11/2026 · Remessa · Central v15.16, Quadro do Time 2.3.3, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.1, contratos 1.0 · visual experimental em `experimental/`*
 
 Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. Para as regras técnicas por trás, veja as [decisões de arquitetura](adr/README.md). Para o caminho de quem usa, veja a [jornada do usuário](jornada-do-usuario.md) e o [passo a passo](passo-a-passo.md).
 
@@ -10,7 +10,7 @@ Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. 
 
 **Nome: Remessa** ([ADR-0037](adr/0037-nome-remessa.md)). A solução funciona como um serviço de envelopes lacrados com uma caixa postal: cada ferramenta põe o que tem para contar num envelope cifrado com a chave do time (o lacre) e deixa na pasta compartilhada (a caixa postal). Só quem tem a chave abre. Um arquivo que chegou de outra pessoa e ainda não foi aplicado é uma **nova remessa**. Cada ferramenta tem o seu ícone na aba do navegador, com o lacre azul da Remessa no canto; o hub usa o envelope lacrado.
 
-**Tela de entrada e apresentação (Central 15.14, Hub 2.3, assistente 2.8).** Todas as ferramentas abrem com a mesma tela de entrada: fundo marinho com envelopes em marca-d'água, o painel da Remessa à esquerda (com o link **Conheça a Remessa**), a caixa de abertura à direita e a versão da ferramenta uma vez só, no rodapé. A caixa tem dois passos: **1 · Arquivo** (o último usado neste computador já vem escolhido; **Escolher outro arquivo** abre na pasta dele) e **2 · Senha**, que só libera depois de haver arquivo e mostra o erro embaixo do campo, sem janela por cima. O link leva à `apresentacao.html`, uma página que apresenta a solução: a analogia em desenho, as ferramentas com as versões, quem usa, a segurança e como começar. Ela vai no .zip e o assistente grava uma cópia na pasta do gestor e na de cada time.
+**Tela de entrada e apresentação (Central 15.16, Hub 2.4, assistente 2.8.1).** Todas as ferramentas abrem com a mesma tela de entrada: fundo marinho com envelopes em marca-d'água, o painel da Remessa à esquerda (com o link **Conheça a Remessa**), a caixa de abertura à direita e a versão da ferramenta uma vez só, no rodapé. A caixa tem dois passos: **1 · Arquivo** (o último usado neste computador já vem escolhido; **Escolher outro arquivo** abre na pasta dele) e **2 · Senha**, que só libera depois de haver arquivo e mostra o erro embaixo do campo, sem janela por cima. O link leva à `apresentacao.html`, uma página que apresenta a solução: a analogia em desenho, as ferramentas com as versões, quem usa, a segurança e como começar. Ela vai no .zip e o assistente grava uma cópia na pasta do gestor e na de cada time. No painel da Remessa fica também a caixa **Visual experimental**, que liga e desliga o visual novo ([seção 11](#11-visual-experimental-pasta-experimental), [ADR-0038](adr/0038-ligar-visual-experimental-na-entrada.md)).
 
 Dar a um gestor de vários times, e aos próprios times, **um lugar organizado para tarefas, pessoas, rituais, portfólio de iniciativas, fluxo dos times e finanças**, sem servidor, sem instalação e com tudo cifrado. Os objetivos que guiam cada funcionalidade:
 
@@ -121,7 +121,7 @@ A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados
 
 ---
 
-## 5. Central de Gestão (v15.14)
+## 5. Central de Gestão (v15.16)
 
 **Férias dentro da Central (15.9, [ADR-0033](adr/0033-ferias-dentro-da-central.md)).** O Mapa de Férias do gestor e da liderança deixou de ser uma ferramenta à parte: é a página **Férias** (menu Pessoas), no mesmo arquivo e com a mesma senha da Central. Os times com pasta e as chaves de tarefas da Integração entram sozinhos; a pasta compartilhada é a da Integração. A página **Hoje** mostra quem está **fora hoje**.
 
@@ -190,7 +190,7 @@ Navegação em 9 páginas (teclas 1 a 9) e o botão **Importar e agentes** no to
 
 ---
 
-## 6. Quadro do Time (2.3.2)
+## 6. Quadro do Time (2.3.3)
 
 **Objetivo:** dar ao time uma ferramenta de fluxo pronta, que publica sozinha o que a Central precisa.
 
@@ -344,5 +344,5 @@ O pacote traz, numa pasta `experimental/`, **as mesmas seis ferramentas com um v
 | **Tema** | Claro, escuro ou automático, com a mesma escolha das outras ferramentas |
 | **Ícone da aba** | O mesmo da versão atual: um por ferramenta, com o lacre azul da Remessa ([ADR-0037](adr/0037-nome-remessa.md)) |
 
-**Como usar:** abra `experimental/hub.html` (ou `experimental/inicio.html`, que gera ferramentas já no visual novo). Para voltar, abra o `hub.html` da pasta principal. Passo a passo na [seção 15](passo-a-passo.md#15-experimentar-o-visual-novo).
+**Como ligar:** na tela de entrada de qualquer ferramenta (e na primeira tela do assistente), a caixa **Visual experimental** tem o botão **Experimentar o visual novo**. A escolha fica lembrada neste navegador: o `hub.html` de sempre, e cada ferramenta que já abriu no visual novo, passam a abrir a versão experimental sozinhos. Para desligar, **Voltar ao visual atual** na mesma caixa (ou `?visual=atual` no fim do endereço). Precisa da pasta `experimental/` ao lado dos HTMLs. Quadro e Finanças do Time gerados para um time não trocam: levam a configuração do time no próprio HTML ([ADR-0038](adr/0038-ligar-visual-experimental-na-entrada.md)). Também dá para abrir `experimental/hub.html` direto, e o `experimental/inicio.html` gera as ferramentas já no visual novo. Passo a passo na [seção 15](passo-a-passo.md#15-experimentar-o-visual-novo).
 

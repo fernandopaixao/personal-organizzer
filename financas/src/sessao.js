@@ -31,7 +31,8 @@
       window.dispatchEvent(new Event('gestao-sessao'));
     }
   });
-  if (window.opener) try { window.opener.postMessage({ schema: SC, tipo: 'pedir' }, '*'); } catch {}
+  // Página que vai trocar de visual (visual.js, ADR-0038): quem pede a senha é a versão que abre em seguida.
+  if (window.opener && !window.__remessaTroca) try { window.opener.postMessage({ schema: SC, tipo: 'pedir' }, '*'); } catch {}
   window.gestaoSessao = {
     // definir(senha) troca a senha da sessão; definir(null) esquece todas; definir(senha, 'central') guarda a de uma ferramenta.
     definir(s, para) {

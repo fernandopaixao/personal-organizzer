@@ -3,7 +3,8 @@
    (.ent-*: 1 arquivo, 2 senha), usado pela Central e pelo núcleo das outras ferramentas. Quando a tela de entrada aparece
    (.lock da Central, .entrada do hub, .welcome das outras), põe o fundo da marca, o painel
    da Remessa à esquerda com o nome e a versão da ferramenta, e desloca a caixa para a direita.
-   Não mexe em nada quando a ferramenta está embutida em outra (Férias dentro da Central). */
+   Não mexe em nada quando a ferramenta está embutida em outra (Férias dentro da Central).
+   No painel da Remessa fica também a troca do visual experimental (visual.js, ADR-0038). */
 (() => {
   const SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#0b2155"/><rect x="5" y="9" width="22" height="15" rx="2" fill="#fff"/><path d="M5.8 10l10.2 7.6L26.2 10" fill="none" stroke="#0b2155" stroke-width="1.6" stroke-linejoin="round"/><circle cx="16" cy="17.6" r="3.2" fill="#4d86ff" stroke="#fff" stroke-width="1.1"/></svg>';
   const PADRAO = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='96' viewBox='0 0 120 96'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.07' stroke-width='1.4'%3E%3Crect x='14' y='18' width='40' height='26' rx='3'/%3E%3Cpath d='M15 20l19 13l19-13'/%3E%3Crect x='74' y='60' width='32' height='21' rx='3'/%3E%3Cpath d='M75 62l15 10l15-10'/%3E%3C/g%3E%3C/svg%3E\")";
@@ -19,6 +20,9 @@
 .rm-tela .lockcard .appver{display:none}
 .rm-lado .rm-ver{display:inline-flex;gap:8px;align-items:center;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);font-size:12.5px;color:#fff}
 .rm-lado .rm-ver b{font-weight:700}.rm-lado .rm-sob{display:block;margin-top:14px;font-size:12px;color:rgba(255,255,255,.6)}
+.rm-vis{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:18px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16)}
+.rm-vis-t{flex:1 1 220px;font-size:12px;line-height:1.45;color:rgba(255,255,255,.78)}.rm-vis-t b{color:#fff;font-weight:650}
+.rm-vis-b{flex:none;font-family:inherit;font-size:12.5px;font-weight:600;line-height:1;color:#0b2155;background:#fff;border:0;border-radius:999px;padding:8px 13px;cursor:pointer}.rm-vis-b:hover{background:#e6edff}.rm-vis-b:focus-visible{outline:2px solid #4d86ff;outline-offset:2px}
 .rm-lado a{color:#fff;text-decoration:underline;text-underline-offset:3px}
 .rm-tela>.welcome,.rm-tela>.entrada,.rm-tela>.lockcard{margin:0!important;width:100%;max-width:none!important;box-sizing:border-box}
 .rm-tela>.entrada,.rm-tela>.lockcard,.rm-tela>.welcome>.card,.rm-tela>.welcome>:only-child{box-shadow:0 30px 80px rgba(3,10,40,.45)!important}
@@ -45,9 +49,17 @@
     const d = document.createElement('div'); d.className = 'rm-lado';
     d.innerHTML = `<div class="rm-logo">${SVG}<span class="rm-nome">Remessa</span></div>
       <p class="rm-frase">Envelopes lacrados numa caixa postal. Cada ferramenta guarda o que é seu num arquivo cifrado com a sua senha e troca com os times só o necessário, lacrado com a chave de cada time.</p>
-      <span class="rm-sob">Nada sai do seu computador · <a href="apresentacao.html" target="_blank" rel="noopener">Conheça a Remessa</a></span>`;
+      <span class="rm-sob">Nada sai do seu computador · <a href="apresentacao.html" target="_blank" rel="noopener">Conheça a Remessa</a></span>${troca()}`;
     return d;
   };
+  // Visual experimental (visual.js, ADR-0038): liga e desliga aqui, na tela de entrada. Só aparece quando há o par seguro.
+  const troca = () => {
+    const v = window.remessaVisual; if (!v || !v.par()) return '';
+    return v.experimental
+      ? `<div class="rm-vis"><span class="rm-vis-t"><b>Visual experimental ligado.</b> As mesmas ferramentas e os mesmos dados.</span><button type="button" class="rm-vis-b" data-rm-vis>Voltar ao visual atual</button></div>`
+      : `<div class="rm-vis"><span class="rm-vis-t"><b>Visual experimental.</b> As mesmas ferramentas e os mesmos dados, com outro visual. Dá para voltar quando quiser.</span><button type="button" class="rm-vis-b" data-rm-vis>Experimentar o visual novo</button></div>`;
+  };
+  document.addEventListener('click', e => { const b = e.target && e.target.closest && e.target.closest('[data-rm-vis]'); if (b && !window.remessaVisual?.trocar()) b.disabled = true; });
   // A versão aparece uma vez só, no rodapé da tela de entrada.
   const rodape = () => {
     const d = document.createElement('div'); d.className = 'rm-rodape';
