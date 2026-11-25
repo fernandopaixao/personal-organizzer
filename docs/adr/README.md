@@ -25,7 +25,7 @@ Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequê
 | [0015](0015-agentes-por-arquivo.md) | Agentes por arquivo | `gestao-import/3` com prévia; entrada de fora é só dado |
 | [0016](0016-cadencia-de-publicacao.md) | Cadência de publicação | Time automático; gestor só por botão |
 | [0017](0017-build-embutir-e-injetar.md) | Build e blocos injetados | Fonte em `financas/src/`, scripts em `tools/` |
-| [0018](0018-hub-separado-do-assistente.md) | Hub × assistente | Hub leve no dia a dia; assistente para montar |
+| [0018](0018-hub-separado-do-assistente.md) | Hub × assistente | Hub leve no dia a dia; assistente para montar (o hub passou a ler a Central e os quadros na [0035](0035-hub-cockpit-de-gestao.md)) |
 | [0019](0019-edge-e-chrome-file-system-access.md) | Edge/Chrome | File System Access API |
 | [0020](0020-principios-de-interface.md) | Princípios de interface | Um destaque azul, modal para criar, painel para ver |
 | [0021](0021-feedbacks-fora-da-integracao.md) | Feedbacks fora | Ferramenta de feedbacks sem integração |
@@ -42,6 +42,7 @@ Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequê
 | [0032](0032-pasta-de-contratos.md) | Pasta de contratos | `contratos/` é a fonte única do que outras soluções gravam: especificação, schemas, cripto com vetores, exemplos e validador |
 | [0033](0033-ferias-dentro-da-central.md) | Férias dentro da Central | O gestor usa a página Férias da Central: mesmo arquivo e senha, times e chaves da Integração, mesmos arquivos na pasta; revê o item 1 da 0026 |
 | [0034](0034-visual-experimental.md) | Visual novo como versão experimental | `experimental/` no pacote: as mesmas ferramentas do main com o visual novo (trilho marinho, DM Sans, ícone por aba), montadas por `tools/build_experimental.py` e testadas na CI; os mesmos dados |
+| [0035](0035-hub-cockpit-de-gestao.md) | Hub como cockpit, com login único | O hub lê (nunca grava) a Central, os quadros e as finanças e mostra cards de todos os módulos; a Central entra direto com a senha da sessão; senha própria da Central vai junto nos links (sessão 1.1); revê a 0018 |
 
 ## Checklist para uma funcionalidade nova
 
