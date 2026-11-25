@@ -43,9 +43,9 @@ O desenho mostra só a troca de tarefas. Pela mesma pasta passam as finanças, o
 
 | Peça | O que é | Quem usa | Onde está |
 |---|---|---|---|
-| **Hub da solução** | Cockpit de gestão (2.1): login único, cards e lista de atenção de todos os módulos (lidos sem gravar), abre as outras ferramentas e deixa post-its cifrados para os times, que aparecem no Quadro | Fernando (e quem quiser) | Repositório: `hub.html`, plano em `docs/plano-hub.md` |
+| **Hub da solução** | Cockpit de gestão (2.3): login único, cards e lista de atenção de todos os módulos (lidos sem gravar), abre as outras ferramentas e deixa post-its cifrados para os times, que aparecem no Quadro | Fernando (e quem quiser) | Repositório: `hub.html`, plano em `docs/plano-hub.md` |
 | **Central de Gestão v15** | Gestão pessoal e de portfólio do gestor: tarefas, delegação, iniciativas e features, rituais, pessoas, métricas e integração com os times | Fernando | Repositório: `gestao_pessoal_v15.html`, plano em `docs/plano-v15.md`. Projeto: `gestao-v15/` |
-| **Quadro do Time 2.3** | Quadro de cards, backlog, sprints, iniciativas ligadas à Central e métricas de fluxo do time | Cada time | Repositório e projeto: `ferramenta-time/` (HTML, guia, telas) |
+| **Quadro do Time 2.3.2** | Quadro de cards, backlog, sprints, iniciativas ligadas à Central e métricas de fluxo do time | Cada time | Repositório e projeto: `ferramenta-time/` (HTML, guia, telas) |
 | **Finanças do Grupo e do Time** | Plano financeiro multianual de cada time (lançamentos locais, plano agregado publicado) e consolidado do grupo ano a ano contra o orçamento, com cards de leitura e gráficos | Fernando (grupo) e responsável financeiro de cada time | Repositório: `financas/`, plano em `docs/plano-financas.md` |
 | **Férias (página da Central)** | Férias e ausências em níveis (gestor → liderança): mapa de calor dos dias com mais e menos gente fora, calendário e sugestão de períodos. Fica na página **Férias da Central** (mesmo arquivo e senha, [ADR-0033](adr/0033-ferias-dentro-da-central.md)) e só o gestor cadastra, inclusive as pessoas dos times ([ADR-0036](adr/0036-ferias-so-o-gestor-cadastra.md)). Apoio, não substitui a ferramenta oficial | Gestores e liderança | Repositório: página Férias em `gestao_pessoal_v15.html`, montada a partir de `financas/src/ferias.html`; plano em `docs/plano-ferias.md` |
 | **Assistente inicial** | Monta a solução para o papel da pessoa e cria os primeiros arquivos cifrados | Quem está começando | Repositório: `inicio.html` |
@@ -106,6 +106,8 @@ Teclas 1 a 9 trocam de página. O botão do topo **Importar e agentes** reúne a
 | v15.10 | Aberta pelo hub, entra direto com a senha da sessão quando o navegador já liberou o arquivo; o Hub 2.0 vira o cockpit de gestão e lê o resumo dela sem gravar ([ADR-0035](adr/0035-hub-cockpit-de-gestao.md)) |
 | v15.11 | Só o gestor cadastra as férias: aba **Pessoas** com as pessoas de cada time e **Trazer pessoas da Central**; todos os times viram unidades; o `ferias.html` sai do pacote e do assistente ([ADR-0036](adr/0036-ferias-so-o-gestor-cadastra.md)) |
 | v15.12 | Remessa: o nome da solução, o ícone da aba com o lacre azul e a aba **Remessas** na Integração; arquivo que chegou dos times é uma "nova remessa" ([ADR-0037](adr/0037-nome-remessa.md)) |
+| v15.13 | Tela de entrada da Remessa (fundo marinho, painel com o link **Conheça a Remessa**) e a página `apresentacao.html` ([ADR-0037](adr/0037-nome-remessa.md)) |
+| v15.14 | Entrada em dois passos em todas as ferramentas: primeiro o arquivo, depois a senha; versão só no rodapé ([ADR-0037](adr/0037-nome-remessa.md)) |
 
 Detalhes da v15: `docs/plano-v15.md` (e da v14 em `docs/plano-v14.md`).
 
@@ -136,7 +138,7 @@ Documento detalhado: `integracao-time/04-modelo-iniciativa-feature.md`.
 
 ---
 
-## 5. Quadro do Time (2.3)
+## 5. Quadro do Time (2.3.2)
 
 A ferramenta pronta para os times. Também é um HTML único (`ferramenta-time/quadro_do_time_v1.html`), aberto no Edge ou Chrome.
 

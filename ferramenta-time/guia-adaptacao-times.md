@@ -1,6 +1,6 @@
 # Guia para os times · Quadro do Time e adaptação das ferramentas atuais
 
-*15/11/2026, revisto em 25/11/2026 (Quadro do Time 2.3, Remessa) · para os times e para os agentes de desenvolvimento deles*
+*15/11/2026, revisto em 25/11/2026 (Quadro do Time 2.3.2, Remessa) · para os times e para os agentes de desenvolvimento deles*
 
 > **Para quem é:** cada time que acompanha iniciativas em nível de card e precisa enviar backlog e métricas para a Central de Gestão do gestor.
 > **O que este guia resolve:** escolher entre (A) **usar o Quadro do Time** (`quadro_do_time_v1.html`, pronto) ou (B) **adaptar a ferramenta HTML que o time já tem**, seguindo a mesma arquitetura.

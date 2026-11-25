@@ -190,7 +190,7 @@ Navegação em 9 páginas (teclas 1 a 9) e o botão **Importar e agentes** no to
 
 ---
 
-## 6. Quadro do Time (2.3)
+## 6. Quadro do Time (2.3.2)
 
 **Objetivo:** dar ao time uma ferramenta de fluxo pronta, que publica sozinha o que a Central precisa.
 
@@ -214,7 +214,7 @@ Cada pessoa grava o **próprio arquivo** (`quadro/<pessoa>-<computador>.json`) e
 
 ---
 
-## 7. Finanças (Finanças do Time 1.4 e do Grupo 1.6)
+## 7. Finanças (Finanças do Time 1.5 e do Grupo 1.7)
 
 Desde a 1.2, com interface minimalista e planejamento multianual, as duas ferramentas de finanças planejam **vários anos**: o **ano base** é o ano em curso (meses fechados, realizado, alertas) e o **horizonte** é a lista de anos planejados. Um seletor de ano no topo troca o ano em exibição. As telas seguem o princípio de mais gráfico do que texto: **cards de leitura** (número, medidor e uma frase que interpreta, com o card principal em azul cheio), curva acumulada do ano e barras por categoria ou por time. Só tons de azul; vermelho apenas para o que passou do orçado ou do teto.
 

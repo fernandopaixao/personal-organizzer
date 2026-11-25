@@ -1,6 +1,6 @@
 # Contratos de integração · Remessa
 
-*Contratos 1.0 · 25/11/2026 · vale para Central v15.12, Quadro do Time 2.3, Hub 2.1, Finanças do Grupo 1.6, Finanças do Time 1.4 e Mapa de Férias 1.4 (dentro da Central)*
+*Contratos 1.0 · 25/11/2026 · vale para Central v15.14, Quadro do Time 2.3.2, Hub 2.3, Finanças do Grupo 1.7, Finanças do Time 1.5 e Mapa de Férias 1.5 (dentro da Central)*
 
 A solução se chama **Remessa** ([ADR-0037](../docs/adr/0037-nome-remessa.md)): cada arquivo desta pasta é um envelope lacrado com a chave do time, deixado na caixa postal (a pasta compartilhada). Nas ferramentas, um arquivo que chegou e ainda não foi aplicado aparece como **nova remessa**.
 
