@@ -933,8 +933,7 @@ const FERRAMENTAS = [
   ['Finanças do Grupo', 'financas_grupo.html', 'Consolidado: soma os planos publicados pelos times. Uso do gestor.'],
   ['Finanças do Time', 'financas_<time>.html', 'Dia a dia e futuro das finanças de um time. Publica o plano para o grupo.'],
   ['Central de Gestão', 'gestao_pessoal_vNN.html', 'Ferramenta do gestor: tarefas consolidado, iniciativas, times e a página Férias (onde há mais e menos gente fora).'],
-  ['Quadro do Time', 'quadro_<time>.html', 'Tarefas de um time: quadro, backlog, sprints e métricas.'],
-  ['Mapa de Férias', 'ferias.html', 'Férias do time: cada pessoa marca as suas. O gestor e a liderança usam a página Férias da Central.']
+  ['Quadro do Time', 'quadro_<time>.html', 'Tarefas de um time: quadro, backlog, sprints e métricas.']
 ];
 function ondeEstou(info) {
   const lin = (k, v) => `<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line);padding:6px 0"><span class="muted">${k}</span><b style="text-align:right">${v}</b></div>`;
@@ -1038,7 +1037,7 @@ const pctTxt = (a, b) => b ? Math.round(a / b * 100) + '%' : '—';
      (a mesma chave GK1.<grupo>-fin-… das Finanças do Grupo serve). Funciona em quantos níveis forem precisos.
    Notas das ausências ficam só no arquivo local cifrado. Conteúdo comum: gestao-ferias/1.
    ===================================================================== */
-const TOOL = 'ferias', TOOL_NOME = 'Mapa de Férias', TOOL_VERSION = '1.3.0';
+const TOOL = 'ferias', TOOL_NOME = 'Mapa de Férias', TOOL_VERSION = '1.4.0';
 const LOCAL_SCHEMA = 'gestao-ferias-local/1', FERIAS_SCHEMA = 'gestao-ferias/1';
 const PRESET = /*FERIAS-PRESET*/null/*FIM-FERIAS-PRESET*/;
 // Dentro da Central de Gestão (ADR-0033): a Central abre esta ferramenta num quadro da própria página e entrega
@@ -1083,6 +1082,10 @@ const pastaPropria = () => [ehGrupo() ? 'grupos' : 'times', db.unidade.slug, 'fe
 const pastaUnidade = u => [u.tipo === 'grupo' ? 'grupos' : 'times', u.slug, 'ferias'];
 const unPorSlug = s => db.unidades.find(u => u.slug === s);
 const pessoaPorId = id => db.pessoas.find(p => p.id === id);
+// Pessoa cadastrada por você pode pertencer a um dos seus times (p.un = identificador do time). Sem time: você e diretos.
+// 1.4 (ADR-0036): o gestor cadastra as férias das pessoas dos times; elas somam no time certo.
+const unDaPessoa = p => p?.un && ehGrupo() && db.unidades.some(u => u.slug === p.un && u.tipo === 'time') ? p.un : '';
+const chavePessoa = p => unDaPessoa(p) ? `${p.un}:${slugify(p.nome)}` : `${db.unidade.slug}/${slugify(p?.nome || '')}`;
 
 /* ------------------------------- datas ------------------------------- */
 const ymd = d => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
@@ -1138,8 +1141,8 @@ function visao() {
   const pessoas = new Map(), aus = [], un0 = db.unidade.slug;
   const addP = (key, p) => { if (!pessoas.has(key)) pessoas.set(key, p); return key; };
   const addA = (key, a) => { const sig = `${key}|${a.inicio}|${a.fim}`; if (!aus.some(x => x.sig === sig)) aus.push({ ...a, key, sig }); };
-  for (const p of db.pessoas.filter(p => p.ativo)) addP(`${un0}/${slugify(p.nome)}`, { key: `${un0}/${slugify(p.nome)}`, nome: p.nome, un: '', sub: db.unidade.nome, editavel: true, id: p.id });
-  for (const a of db.ausencias) { const p = pessoaPorId(a.pessoa); if (p?.ativo) addA(`${un0}/${slugify(p.nome)}`, { inicio: a.inicio, fim: a.fim, tipo: a.tipo, id: a.id, editavel: true }); }
+  for (const p of db.pessoas.filter(p => p.ativo)) { const k = chavePessoa(p), un = unDaPessoa(p); addP(k, { key: k, nome: p.nome, un, sub: un ? nomeUn(un) : db.unidade.nome, editavel: true, id: p.id }); }
+  for (const a of db.ausencias) { const p = pessoaPorId(a.pessoa); if (p?.ativo) addA(chavePessoa(p), { inicio: a.inicio, fim: a.fim, tipo: a.tipo, id: a.id, editavel: true }); }
   // Time: os outros membros publicam o próprio arquivo na mesma pasta; somam aqui.
   const pares = db.retratos['.'];
   if (pares && !ehGrupo()) for (const p of pares.pessoas) { const k = `${un0}/${p.id}`; addP(k, { key: k, nome: p.name, un: '', sub: db.unidade.nome, editavel: false }); }
@@ -1191,14 +1194,17 @@ function semanas(serie) {
 function montarPayload(meta) {
   const un0 = db.unidade.slug, people = [], absences = [], units = [{ slug: un0, name: db.unidade.nome, kind: db.nivel, parent: null }];
   const anon = new Map(), nome = (id, n) => db.config.nomesAcima || !ehGrupo() ? clamp(n, 80) : (anon.get(id) || (anon.set(id, `Pessoa ${anon.size + 1}`), anon.get(id)));
-  for (const p of db.pessoas.filter(p => p.ativo)) people.push({ id: slugify(p.nome) || p.id, name: nome(p.id, p.nome), unit: un0 });
-  for (const a of db.ausencias) { const p = pessoaPorId(a.pessoa); if (p?.ativo) absences.push({ person: slugify(p.nome) || p.id, start: a.inicio, end: a.fim, kind: a.tipo }); }
+  const idDe = p => { const un = unDaPessoa(p), sl = slugify(p.nome) || p.id; return un ? `${un}.${sl}` : sl; };
+  for (const p of db.pessoas.filter(p => p.ativo)) people.push({ id: idDe(p), name: nome(idDe(p), p.nome), unit: unDaPessoa(p) || un0 });
+  for (const a of db.ausencias) { const p = pessoaPorId(a.pessoa); if (p?.ativo) absences.push({ person: idDe(p), start: a.inicio, end: a.fim, kind: a.tipo }); }
   if (ehGrupo()) for (const u of db.unidades) {
-    const r = db.retratos[u.slug]; if (!r) continue;
+    const r = db.retratos[u.slug], meus = db.pessoas.some(p => p.ativo && unDaPessoa(p) === u.slug); if (!r && !meus) continue;
     units.push({ slug: u.slug, name: u.nome, kind: u.tipo, parent: un0 });
+    if (!r) continue;
     for (const x of r.units || []) if (x.slug !== u.slug) units.push({ slug: x.slug, name: x.name, kind: x.kind, parent: x.parent === r.slugRaiz ? u.slug : x.parent });
-    for (const p of r.pessoas) people.push({ id: `${u.slug}.${p.id}`, name: nome(`${u.slug}.${p.id}`, p.name), unit: p.unit || u.slug });
-    for (const a of r.ausencias) absences.push({ person: `${u.slug}.${a.person}`, start: a.start, end: a.end, kind: a.kind });
+    // Quem você já cadastrou no time vale primeiro; o que o time (ou outra solução) publicou soma sem duplicar.
+    for (const p of r.pessoas) { const id = `${u.slug}.${p.id}`; if (!people.some(x => x.id === id)) people.push({ id, name: nome(id, p.name), unit: p.unit || u.slug }); }
+    for (const a of r.ausencias) { const person = `${u.slug}.${a.person}`; if (!absences.some(x => x.person === person && x.start === a.start && x.end === a.end)) absences.push({ person, start: a.start, end: a.end, kind: a.kind }); }
   }
   absences.sort((a, b) => a.start.localeCompare(b.start) || a.person.localeCompare(b.person));
   return { schema: FERIAS_SCHEMA, ...meta, source: { team: un0, tool: TOOL, toolVersion: TOOL_VERSION, level: ehGrupo() ? 'group' : 'team' },
@@ -1280,11 +1286,11 @@ async function lerPasta(silencioso = false) {
       }
     } else {
       for (const u of db.unidades) {
-        const ch = mapaDe(u.chaves); if (!ch.size) { u.status = 'sem chave'; continue; }
+        const ch = mapaDe(u.chaves), quieto = u.origem === 'central'; if (!ch.size) { u.status = quieto ? '' : 'sem chave'; continue; }
         const dir = await subpasta(raiz, pastaUnidade(u), false);
-        if (!dir) { u.status = 'ainda não publicou'; continue; }
+        if (!dir) { u.status = quieto ? '' : 'ainda não publicou'; continue; }
         const r = await lerPastaFerias(dir, u.slug, ch);
-        u.status = r.writers.length ? '' : r.erros.length ? `${r.erros.length} arquivo(s) não abriram com a chave cadastrada` : 'ainda não publicou';
+        u.status = r.writers.length ? '' : r.erros.length ? `${r.erros.length} arquivo(s) não abriram com a chave cadastrada` : quieto ? '' : 'ainda não publicou';
         if (r.writers.length) db.retratos[u.slug] = { ...r, lidoEm: new Date().toISOString() };
       }
       const dir = await subpasta(raiz, pastaPropria(), false);
@@ -1334,7 +1340,7 @@ const ICONES = {
   unidades: '<svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><rect x="15" y="16" width="6" height="5" rx="1"/><path d="M12 8v4M6 16v-4h12v4"/></svg>',
   ajustes: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.6-2-3.4-2.4 1a7 7 0 0 0-1.7-1L14.5 3h-4l-.4 2.6a7 7 0 0 0-1.7 1L6 5.6l-2 3.4L6 10.6a7 7 0 0 0 0 2.8L4 15l2 3.4 2.4-1a7 7 0 0 0 1.7 1l.4 2.6h4l.4-2.6a7 7 0 0 0 1.7-1l2.4 1 2-3.4-2-1.6c.1-.3.1-.7.1-1z"/></svg>'
 };
-const NAV = () => [['painel', 'Mapa'], ['calendario', 'Calendário'], ['pessoas', ehGrupo() ? 'Diretos' : 'Pessoas'], ...(ehGrupo() ? [['unidades', 'Unidades']] : []), ['ajustes', 'Ajustes']];
+const NAV = () => [['painel', 'Mapa'], ['calendario', 'Calendário'], ['pessoas', 'Pessoas'], ...(ehGrupo() ? [['unidades', 'Unidades']] : []), ['ajustes', 'Ajustes']];
 const kpi = (r, v, c = '') => `<div class="kpi ${c}"><span>${r}</span><b>${v}</b></div>`;
 function render() {
   if (!db) return;
@@ -1476,14 +1482,15 @@ function vCalendario(el) {
 function vPessoas(el) {
   const ativas = db.pessoas.filter(p => p.ativo), h = hojeISO();
   el.innerHTML = `<div class="quick"><span class="pl">+</span><input id="qk" placeholder="Ex.: Ana 05/01 a 23/01 férias  ·  Bruno 14/02 folga" title="Nome (padrão: você), uma ou duas datas dd/mm e o tipo (férias, folga, treinamento, outra). Enter abre a confirmação."></div>
-    <div class="bar"><span class="muted">${ehGrupo() ? 'Você e as pessoas que respondem direto a você (fora dos times). Os times e grupos entram pela aba Unidades.' : 'Você e, se quiser, as outras pessoas do time. Cada um também pode cadastrar as próprias férias no próprio Mapa de Férias: tudo soma.'}</span><span class="grow"></span><button class="btn" id="pNova">+ Pessoa</button></div>
-    ${ativas.map(p => { const as = db.ausencias.filter(a => a.pessoa === p.id).sort((a, b) => a.inicio.localeCompare(b.inicio)), fut = as.filter(a => a.fim >= h), pas = as.filter(a => a.fim < h);
+    <div class="bar"><span class="muted">${ehGrupo() ? 'Você, os seus diretos e as pessoas de cada time: você marca as férias de todos. Grupos de outros gestores entram pela aba Unidades.' : 'Você e, se quiser, as outras pessoas do time. Cada um também pode cadastrar as próprias férias no próprio Mapa de Férias: tudo soma.'}</span><span class="grow"></span>${HOST?.pessoas ? '<button class="btn" id="pCentral">Trazer pessoas da Central</button>' : ''}<button class="btn" id="pNova">+ Pessoa</button></div>
+    ${[...new Set(['', ...ativas.map(unDaPessoa)])].sort((a, b) => a === '' ? -1 : b === '' ? 1 : nomeUn(a).localeCompare(nomeUn(b), 'pt-BR')).map(g => `${ehGrupo() && ativas.some(unDaPessoa) ? `<p class="lbl" style="margin:18px 0 8px">${esc(g ? nomeUn(g) : 'Você e diretos')}</p>` : ''}${ativas.filter(p => unDaPessoa(p) === g).map(p => { const as = db.ausencias.filter(a => a.pessoa === p.id).sort((a, b) => a.inicio.localeCompare(b.inicio)), fut = as.filter(a => a.fim >= h), pas = as.filter(a => a.fim < h);
       return `<div class="card"><div class="row"><h3>${esc(p.nome)}</h3>${p.id === db.eu ? '<span class="chip bv">você</span>' : ''}<span class="grow"></span><button class="btn sm" data-np="${p.id}">+ Ausência</button>${p.id === db.eu ? '' : `<button class="btn sm ghost" data-ep="${p.id}">Editar</button>`}</div>
         ${fut.length ? `<div class="pp" style="margin-top:10px">${fut.map(a => `<button class="chip ${a.inicio <= h ? 'bv' : ''}" data-a="${a.id}" title="${esc(a.nota || '')}">${esc(TIPOS[a.tipo])} · ${fmtCurta(a.inicio)}${a.fim !== a.inicio ? ' a ' + fmtCurta(a.fim) : ''} · ${diasUteisEntre(a.inicio, a.fim)} dia(s) útil(eis)</button>`).join('')}</div>` : '<div class="empty" style="padding:8px 0 0">Nenhuma ausência futura.</div>'}
-        ${pas.length ? `<details style="margin-top:8px"><summary class="small muted">${pas.length} ausência(s) passada(s)</summary><div class="pp" style="margin-top:6px">${pas.map(a => `<button class="chip" data-a="${a.id}">${esc(TIPOS[a.tipo])} · ${fmtCurta(a.inicio)} a ${fmtCurta(a.fim)}/${a.fim.slice(2, 4)}</button>`).join('')}</div></details>` : ''}</div>`; }).join('')}
+        ${pas.length ? `<details style="margin-top:8px"><summary class="small muted">${pas.length} ausência(s) passada(s)</summary><div class="pp" style="margin-top:6px">${pas.map(a => `<button class="chip" data-a="${a.id}">${esc(TIPOS[a.tipo])} · ${fmtCurta(a.inicio)} a ${fmtCurta(a.fim)}/${a.fim.slice(2, 4)}</button>`).join('')}</div></details>` : ''}</div>`; }).join('')}`).join('')}
     ${db.pessoas.some(p => !p.ativo) ? `<p class="small muted">Inativas (não aparecem no mapa): ${db.pessoas.filter(p => !p.ativo).map(p => `<button class="bvc" data-rv="${p.id}">${esc(p.nome)}</button>`).join(', ')}</p>` : ''}`;
   const qk = $('#qk'); qk.onkeydown = e => { if (e.key === 'Enter' && qk.value.trim()) { const pre = interpretar(qk.value); qk.value = ''; ausenciaDlg(null, pre); } };
   $('#pNova').onclick = () => pessoaDlg(null);
+  if ($('#pCentral')) $('#pCentral').onclick = () => { const n = trazerPessoasDaCentral(); toast(n ? `${n} pessoa(s) trazida(s) da Central.` : 'Todas as pessoas da Central já estão aqui.'); };
   $$('[data-np]', el).forEach(b => b.onclick = () => ausenciaDlg(null, { pessoa: b.dataset.np }));
   $$('[data-ep]', el).forEach(b => b.onclick = () => pessoaDlg(b.dataset.ep));
   $$('[data-a]', el).forEach(b => b.onclick = () => ausenciaDlg(b.dataset.a));
@@ -1504,14 +1511,16 @@ function pessoaDlg(id) {
   const p = id ? pessoaPorId(id) : { nome: '' };
   const d = modal(`<div class="mh"><h2>${id ? 'Editar pessoa' : 'Nova pessoa'}</h2></div><div class="mb">
     <label class="field"><span>Nome</span><input class="sin" id="pN" value="${esc(p.nome)}"></label>
-    <p class="small muted">Use o mesmo nome que a pessoa usa no Mapa de Férias dela, se ela também cadastrar: assim as duas listas se somam sem duplicar.</p></div>
+    ${ehGrupo() && id !== db.eu && db.unidades.some(u => u.tipo === 'time') ? `<label class="field"><span>Time</span><select class="sel" id="pU"><option value="">Nenhum (você e diretos)</option>${db.unidades.filter(u => u.tipo === 'time').map(u => `<option value="${esc(u.slug)}" ${unDaPessoa(p) === u.slug ? 'selected' : ''}>${esc(u.nome)}</option>`).join('')}</select></label>` : ''}
+    <p class="small muted">${ehGrupo() ? 'O time define em que unidade a pessoa conta no mapa e no que sobe para a liderança.' : 'Use o mesmo nome que a pessoa usa no Mapa de Férias dela, se ela também cadastrar: assim as duas listas se somam sem duplicar.'}</p></div>
     <div class="mf">${id ? '<button class="btn danger" id="pX">Tirar do mapa</button><span class="grow"></span>' : ''}<button class="btn" onclick="fecharModal()">Cancelar</button><button class="btn pri" id="pOk">Salvar</button></div>`);
   setTimeout(() => $('#pN', d)?.focus(), 30);
   if (id) $('#pX', d).onclick = () => { p.ativo = false; fecharModal(); agendarSalvar(); toast('Pessoa tirada do mapa. As ausências ficam guardadas.'); };
   $('#pOk', d).onclick = () => {
     const n = clamp($('#pN', d).value.trim(), 80); if (!n) return;
     if (!id && db.pessoas.some(x => x.ativo && slugify(x.nome) === slugify(n))) return toast('Já existe uma pessoa com esse nome.');
-    if (id) p.nome = n; else db.pessoas.push({ id: uid('p'), nome: n, ativo: true });
+    const un = $('#pU', d)?.value || '';
+    if (id) { p.nome = n; if ($('#pU', d)) { if (un) p.un = un; else delete p.un; } } else db.pessoas.push({ id: uid('p'), nome: n, ativo: true, ...(un ? { un } : {}) });
     fecharModal(); agendarSalvar();
   };
 }
@@ -1540,7 +1549,7 @@ async function ausenciaDlg(id, pre = {}) {
   const a = id ? db.ausencias.find(x => x.id === id) : { pessoa: pre.pessoa || db.eu, inicio: pre.inicio || '', fim: pre.fim || pre.inicio || '', tipo: pre.tipo || 'ferias', nota: '' };
   if (!a) return;
   const d = modal(`<div class="mh"><h2>${id ? 'Editar ausência' : 'Nova ausência'}</h2></div><div class="mb">
-    <label class="field"><span>Pessoa</span><select class="sel" id="aP">${db.pessoas.filter(p => p.ativo || p.id === a.pessoa).map(p => `<option value="${p.id}" ${p.id === a.pessoa ? 'selected' : ''}>${esc(p.nome)}${p.id === db.eu ? ' (você)' : ''}</option>`).join('')}</select></label>
+    <label class="field"><span>Pessoa</span><select class="sel" id="aP">${db.pessoas.filter(p => p.ativo || p.id === a.pessoa).map(p => `<option value="${p.id}" ${p.id === a.pessoa ? 'selected' : ''}>${esc(p.nome)}${p.id === db.eu ? ' (você)' : unDaPessoa(p) ? ' · ' + esc(nomeUn(p.un)) : ''}</option>`).join('')}</select></label>
     <div class="f2"><label class="field"><span>De</span><input class="sin" type="date" id="aI" value="${esc(a.inicio)}"></label><label class="field"><span>Até (inclusive)</span><input class="sin" type="date" id="aF" value="${esc(a.fim)}"></label></div>
     <label class="field"><span>Tipo</span><select class="sel" id="aT">${Object.entries(TIPOS).map(([k, n]) => `<option value="${k}" ${a.tipo === k ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
     <label class="field"><span>Nota (só neste computador)</span><input class="sin" id="aN" value="${esc(a.nota || '')}" placeholder="Opcional. Não vai para a pasta."></label>
@@ -1548,7 +1557,7 @@ async function ausenciaDlg(id, pre = {}) {
     <div class="row"><button class="btn sm" id="aSug">Sugerir períodos com menos gente fora</button></div><div id="aSugL" class="small" style="margin-top:8px"></div>
     <p class="small muted">Apoio para planejar: não substitui o pedido na ferramenta oficial de férias da empresa.</p></div>
     <div class="mf">${id ? '<button class="btn danger" id="aX">Excluir</button><span class="grow"></span>' : ''}<button class="btn" onclick="fecharModal()">Cancelar</button><button class="btn pri" id="aOk">${id ? 'Salvar' : 'Marcar'}</button></div>`);
-  const chaveP = () => { const p = pessoaPorId($('#aP', d).value); return `${db.unidade.slug}/${slugify(p?.nome || '')}`; };
+  const chaveP = () => chavePessoa(pessoaPorId($('#aP', d).value));
   const atualizar = () => {
     const i = $('#aI', d).value, f = $('#aF', d).value || i;
     if (!i || f < i) { $('#aImp', d).innerHTML = i && f < i ? '<span class="latec">A data final é antes da inicial.</span>' : ''; return; }
@@ -1578,13 +1587,13 @@ async function ausenciaDlg(id, pre = {}) {
 
 /* --- Unidades (gestor): times e grupos de outros gestores --- */
 function vUnidades(el) {
-  el.innerHTML = `<div class="bar"><span class="muted">${HOST ? 'Os <b>times da Central</b> entram sozinhos, com a chave de tarefas cadastrada na Integração. Grupos de outros gestores usam a chave que você gerou para eles (a mesma das Finanças do Grupo serve).' : 'Times usam a <b>chave do time</b> (a mesma do Quadro). Grupos de outros gestores usam a chave que você gerou para eles (a mesma das Finanças do Grupo serve).'}</span><span class="grow"></span>
+  el.innerHTML = `<div class="bar"><span class="muted">${HOST ? 'Os <b>times da Central</b> entram sozinhos; as pessoas de cada time você cadastra na aba Pessoas. Grupos de outros gestores usam a chave que você gerou para eles (a mesma das Finanças do Grupo serve).' : 'Times usam a <b>chave do time</b> (a mesma do Quadro). Grupos de outros gestores usam a chave que você gerou para eles (a mesma das Finanças do Grupo serve).'}</span><span class="grow"></span>
       ${HOST ? '' : '<button class="btn" id="uHub">Importar times do Hub</button>'}<button class="btn" id="uFin">Importar grupos das Finanças do Grupo</button><button class="btn ${HOST ? 'pri' : ''}" id="uNovoG">+ Grupo de outro gestor</button>${HOST ? '' : '<button class="btn pri" id="uNovo">+ Time</button>'}</div>
     ${db.unidades.map(u => { const c = u.chaves.filter(x => !x.revogada).at(-1), r = db.retratos[u.slug], daCentral = HOST && u.origem === 'central';
       return `<div class="card"><div class="row"><h3>${esc(u.nome)}</h3><span class="code faint">${esc(pastaUnidade(u).join('/'))}</span>${u.tipo === 'grupo' ? '<span class="chip bv">grupo</span>' : ''}${daCentral ? '<span class="chip">time da Central</span>' : ''}<span class="grow"></span>
         ${c ? `<span class="chip ok code">${esc(c.kid)}</span>` : '<span class="chip late">sem chave</span>'}${r ? `<span class="chip">${r.pessoas.length} pessoas · ${r.ausencias.length} ausências</span>` : ''}</div>
         <p class="small muted" style="margin:8px 0">${u.status ? esc(u.status) : r ? `Lido ${fmtDataHora(r.lidoEm)} · ${r.writers.length} arquivo(s): ${r.writers.map(w => `<span class="code">${esc(w.writer)}</span> rev. ${w.revision}`).join(', ')}` : raiz ? 'Ainda não lido.' : 'Ligue a pasta sincronizada para ler.'}</p>
-        ${daCentral ? `<p class="small muted" style="margin:0">${c ? 'A chave vem da Integração da Central (aba Integração do time). Para trocar, gere ou cole a nova lá.' : 'Sem chave: gere ou cole a chave de tarefas do time na Central, aba Integração do time.'} Para tirar do mapa, tire a pasta do time na Central.</p>`
+        ${daCentral ? `<p class="small muted" style="margin:0">Você marca as férias das pessoas deste time na aba Pessoas (${db.pessoas.filter(p => p.ativo && unDaPessoa(p) === u.slug).length} cadastrada(s)). ${c ? 'Se outra solução do time publicar férias na pasta, elas somam aqui, lidas com a chave de tarefas da Integração.' : ''} Para tirar do mapa, tire o time da Central.</p>`
           : `<div class="row"><button class="btn sm" data-ch="${esc(u.slug)}">${c ? 'Trocar chave' : 'Colar chave'}</button>${u.tipo === 'grupo' ? `<button class="btn sm" data-gk="${esc(u.slug)}">Gerar chave para o gestor</button>` : ''}${c ? `<button class="btn sm" data-cp="${esc(u.slug)}">Copiar chave</button>` : ''}<span class="grow"></span><button class="btn sm danger" data-rm="${esc(u.slug)}">Remover</button></div>`}</div>`; }).join('') || `<div class="card empty">${HOST ? 'Nenhuma unidade. Os times com pasta (identificador) na Central aparecem aqui sozinhos; se você for liderança, adicione os grupos dos gestores abaixo de você.' : 'Nenhuma unidade. Adicione os times que você lidera e, se for liderança, os grupos dos gestores abaixo de você.'}</div>`}`;
   if ($('#uNovo')) $('#uNovo').onclick = () => unidadeDlg('time');
   $('#uNovoG').onclick = () => unidadeDlg('grupo');
@@ -1810,6 +1819,19 @@ function sincronizarUnidades() {
   db.unidades = db.unidades.filter(u => !fora.includes(u));
   return JSON.stringify(db.unidades) !== antes;
 }
+// Pessoas cadastradas na Central (1:1, times) entram com o time delas; quem já está aqui não muda.
+function trazerPessoasDaCentral() {
+  if (!HOST?.pessoas || !db) return 0;
+  let n = 0;
+  for (const x of HOST.pessoas() || []) {
+    const nome = clamp(String(x?.nome || '').trim(), 80); if (!nome || slugify(nome) === slugify(db.pessoa.nome)) continue;
+    const ja = db.pessoas.find(p => slugify(p.nome) === slugify(nome));
+    if (ja) { if (!ja.ativo) { ja.ativo = true; n++; } if (!ja.un && x.time && unPorSlug(x.time)) ja.un = x.time; continue; }
+    db.pessoas.push({ id: uid('p'), nome, ativo: true, ...(x.time && unPorSlug(x.time) ? { un: x.time } : {}) }); n++;
+  }
+  if (n) agendarSalvar();
+  return n;
+}
 async function aposAbrirEmbutido() {
   if (sincronizarUnidades()) { sujo = true; salvar(); }
   arquivo = HOST.nomeArquivo?.() || 'arquivo da Central';
@@ -1842,9 +1864,9 @@ function telaEmbutida(msg = '') {
   $('#eOk').onclick = async () => {
     const nome = $('#eN').value.trim(), slug = slugify($('#eS').value), pessoa = $('#eP').value.trim();
     if (!nome || !slug || !pessoa) return toast('Preencha o nome do grupo, o identificador e o seu nome.');
-    db = novoDb({ nivel: 'grupo', nome, slug, pessoa }); view = 'unidades';
-    sincronizarUnidades(); sujo = true; await salvar(); await aposAbrirEmbutido();
-    toast('Pronto. Os times da Central já estão no mapa; marque as suas férias e as dos diretos.', 5000);
+    db = novoDb({ nivel: 'grupo', nome, slug, pessoa }); view = 'pessoas';
+    sincronizarUnidades(); trazerPessoasDaCentral(); sujo = true; await salvar(); await aposAbrirEmbutido();
+    toast('Pronto. Os times e as pessoas da Central já estão aqui; marque as férias de cada um.', 5000);
   };
   $('#eAntigo').onclick = trazerArquivoAntigo;
 }

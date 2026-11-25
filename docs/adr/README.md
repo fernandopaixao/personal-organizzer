@@ -1,6 +1,6 @@
 # Decisões de arquitetura (ADRs)
 
-*25/11/2026 · estado: Central v15.9, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.3, assistente 2.4, contratos 1.0, visual experimental*
+*25/11/2026 · estado: Central v15.11, Quadro do Time 2.3, Hub 2.0, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.4 (dentro da Central), assistente 2.6, contratos 1.0, visual experimental*
 
 Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequências e o que observar ao evoluir. Elas existem para que uma funcionalidade nova comece pelas regras certas, sem precisar reler todos os planos.
 
@@ -33,7 +33,7 @@ Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequê
 | [0023](0023-onboarding-por-perfil-e-chave.md) | Onboarding por perfil e chave | O assistente pergunta o perfil e lê as chaves do líder; o identificador vem da chave |
 | [0024](0024-distribuicao-por-zip.md) | Distribuição por .zip | A empresa recebe um .zip autossuficiente; a CI roda só no repositório pessoal |
 | [0025](0025-consolidacao-em-niveis.md) | Consolidação em níveis | Gestor publica o consolidado para a liderança como uma unidade |
-| [0026](0026-ferias-em-niveis.md) | Férias em níveis | Mapa de Férias: chave do time no time, chave do grupo entre níveis, um arquivo por pessoa (item 1 revisto pela [0033](0033-ferias-dentro-da-central.md)) |
+| [0026](0026-ferias-em-niveis.md) | Férias em níveis | Mapa de Férias: chave do time no time, chave do grupo entre níveis, um arquivo por pessoa (item 1 revisto pela [0033](0033-ferias-dentro-da-central.md); papel de time revisto pela [0034](0036-ferias-so-o-gestor-cadastra.md)) |
 | [0027](0027-tema-claro-escuro-compartilhado.md) | Tema claro/escuro | Uma camada `tema.js` injetada em todos os HTMLs; escolha salva só no computador |
 | [0028](0028-financas-na-central-so-leitura.md) | Finanças na Central | A Central lê o plano e o teto dos times com a chave de finanças; não escreve em finanças |
 | [0029](0029-uma-senha-por-sessao.md) | Uma senha por sessão | O hub e a Central passam a senha, só em memória, para a janela que acabaram de abrir |
@@ -43,6 +43,7 @@ Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequê
 | [0033](0033-ferias-dentro-da-central.md) | Férias dentro da Central | O gestor usa a página Férias da Central: mesmo arquivo e senha, times e chaves da Integração, mesmos arquivos na pasta; revê o item 1 da 0026 |
 | [0034](0034-visual-experimental.md) | Visual novo como versão experimental | `experimental/` no pacote: as mesmas ferramentas do main com o visual novo (trilho marinho, DM Sans, ícone por aba), montadas por `tools/build_experimental.py` e testadas na CI; os mesmos dados |
 | [0035](0035-hub-cockpit-de-gestao.md) | Hub como cockpit, com login único | O hub lê (nunca grava) a Central, os quadros e as finanças e mostra cards de todos os módulos; a Central entra direto com a senha da sessão; senha própria da Central vai junto nos links (sessão 1.1); revê a 0018 |
+| [0036](0036-ferias-so-o-gestor-cadastra.md) | Férias: só o gestor cadastra | Times não usam ferramenta de férias; o gestor marca as de todos na Central, pessoa com time; `ferias.html` sai do pacote |
 
 ## Checklist para uma funcionalidade nova
 

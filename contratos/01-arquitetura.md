@@ -21,7 +21,7 @@ As ferramentas não conversam por rede: cada uma grava **arquivos JSON cifrados*
         │        times/<time>/postits/<gestor>-<computador>.json
         │                     chaves do TIME: GK1.<time>-AAMM (tarefas) e GK1.<time>-fin-AAMM (finanças)
   TIME
-  Quadro do Time (ou ferramenta própria) · Finanças do Time · Mapa de Férias (nível time)
+  Quadro do Time (ou ferramenta própria) · Finanças do Time · férias só por outra solução (ADR-0036)
 ```
 
 **Regra dos níveis** ([ADR-0025](../docs/adr/0025-consolidacao-em-niveis.md), [ADR-0026](../docs/adr/0026-ferias-em-niveis.md)): cada nível é "um time" para o nível de cima. O gestor soma os times e publica **um consolidado** como uma unidade do tipo `grupo`; a liderança soma os grupos (e times diretos, se tiver) do mesmo jeito. Funciona com quantos níveis forem precisos: um diretor que recebe vários líderes de líderes cadastra cada um como unidade `grupo`, e cada um deles publica o próprio consolidado em `grupos/<slug>/`.
@@ -32,7 +32,7 @@ O que a liderança enxerga de cada gestor:
 |---|---|---|---|
 | Finanças | `grupos/<grupo>/financas/plano.json` | Hub da liderança (totais por ano) e Finanças do Grupo da liderança (soma mês a mês, por categoria) | Orçado, previsto e realizado por ano, por unidade e categoria; versão do plano; data |
 | Teto | `grupos/<grupo>/financas/diretriz.json` (a liderança escreve) | Finanças do Grupo do gestor | Teto por ano e prazo de publicação |
-| Férias | `grupos/<grupo>/ferias/<gestor>-<computador>.json` | Página Férias da Central da liderança (ou Mapa de Férias) | Ausências de todas as pessoas do grupo (nomes opcionais), feriados, árvore de unidades |
+| Férias | `grupos/<grupo>/ferias/<gestor>-<computador>.json` | Página Férias da Central da liderança | Ausências de todas as pessoas do grupo (nomes opcionais), feriados, árvore de unidades |
 
 O detalhe dos times (linhas do plano, cards, notas) **não sobe**: o consolidado leva uma linha por unidade × categoria ([ADR-0008](../docs/adr/0008-local-individual-comum-sincronizado.md)).
 
@@ -50,7 +50,7 @@ A raiz é a pasta sincronizada (`Gestao-Compartilhado`; o nome antigo `Gestao-In
 | `grupo/financas/diretriz-<time>.json` | [`gestao-financas-diretriz/1`](schemas/gestao-financas-diretriz-1.schema.json) | finanças do time | Finanças do Grupo do gestor | Finanças do Time | Pelo botão do gestor |
 | `grupos/<grupo>/financas/plano.json` | `gestao-financas-plano/1` com `source.level = "group"` | do grupo | Gestor do grupo (consolidado) | Hub e Finanças do Grupo da liderança | Pelo botão, depois da prévia "o que sobe" |
 | `grupos/<grupo>/financas/diretriz.json` | `gestao-financas-diretriz/1` | do grupo | Liderança | Finanças do Grupo do gestor | Pelo botão da liderança |
-| `times/<time>/ferias/<w>.json` | [`gestao-ferias/1`](schemas/gestao-ferias-1.schema.json) (`level` `team`) | tarefas do time | Cada pessoa que cadastra férias | Mapa de Férias do time e página Férias da Central do gestor | Automático a cada mudança |
+| `times/<time>/ferias/<w>.json` | [`gestao-ferias/1`](schemas/gestao-ferias-1.schema.json) (`level` `team`) | tarefas do time | Outra solução do time (a solução não grava aqui desde a Central 15.11: o gestor cadastra as férias do time na própria Central, [ADR-0036](../docs/adr/0036-ferias-so-o-gestor-cadastra.md)) | Página Férias da Central do gestor | Automático a cada mudança |
 | `grupos/<grupo>/ferias/<w>.json` | `gestao-ferias/1` (`level` `group`) | do grupo | Gestor do grupo (consolidado, pela página Férias da Central) | Página Férias da liderança | Pelo botão, depois da prévia |
 | `times/<time>/postits/<w>.json` | [`gestao-postits/1`](schemas/gestao-postits-1.schema.json) | tarefas do time | Cada autor (Hub) | Quadro do Time, Hub | Automático a cada mudança |
 | `times/<time>/postits/vistos/<w>.json` | [`gestao-postits-vistos/1`](schemas/gestao-postits-vistos-1.schema.json) | tarefas do time | Cada pessoa do time (Quadro) | Hub | Ao clicar em "Vi" |
@@ -88,7 +88,7 @@ Gestao-Compartilhado/
 | **Pasta com um arquivo por pessoa** (férias, post-its, vistos) | Lê todos os `.json` da pasta (menos os que começam com `.`); decifra; descarta outro `team` ou `content`. Férias: fica com o arquivo de **maior `hlc`** de cada pessoa (prefixo do `writer` antes do `~`), para a mesma pessoa em dois computadores não somar em dobro. Post-its e vistos: maior `revision` por `writer`. |
 | **Finanças do Grupo** (gestor e liderança) | Só soma plano na mesma moeda do grupo; casa `lines[].category` pelo `id` com as categorias do grupo (o que não casa vai para "Outras"); soma os meses (`months`), não os totais; mostra a revisão nova numa **prévia** e só aplica quando a pessoa confirma ([ADR-0013](../docs/adr/0013-downstream-previa-e-conciliacao.md)). |
 | **Hub da liderança** | Mostra `totalsByYear` (ou `totals` do `fiscalYear`), `currency`, quantidade de `closedMonths` e `generatedAt`. Por isso os totais precisam bater com a soma dos meses. |
-| **Mapa de Férias** | Usa `people`, `absences` (datas válidas, `start ≤ end`), `units` (árvore) e `holidays`; tipos fora da lista viram "outro". |
+| **Mapa de Férias** (página Férias da Central) | Usa `people`, `absences` (datas válidas, `start ≤ end`), `units` (árvore) e `holidays`; tipos fora da lista viram "outro". |
 | **Central** | Lê status e métricas só de times cadastrados, com chave cadastrada e não revogada; mostra itens do time como *downstream*, nunca como tarefa do gestor ([ADR-0013](../docs/adr/0013-downstream-previa-e-conciliacao.md)). |
 
 Arquivo com problema (não decifra, cabeçalho diferente do conteúdo, outro time) é ignorado e aparece como aviso; nunca derruba a leitura dos outros.

@@ -146,7 +146,7 @@ details.pis>summary:before{content:"▸";transition:transform .15s}details.pis[o
       (tarefas, iniciativas, 1:1 e férias) e o status e as métricas que cada Quadro publica, e mostra cards de todos os
       módulos numa tela. Os dados lidos ficam só em memória, resumidos; o hub nunca grava no arquivo de outra ferramenta.
    ===================================================================== */
-const TOOL = 'hub', TOOL_NOME = 'Hub da solução', TOOL_VERSION = '2.0.0';
+const TOOL = 'hub', TOOL_NOME = 'Hub da solução', TOOL_VERSION = '2.0.1';
 try { window.name = 'gestao-hub'; } catch {}   // o botão "← Hub" das ferramentas volta para esta aba sem recarregar
 const LOCAL_SCHEMA = 'gestao-hub-local/1', POSTITS = 'gestao-postits/1', VISTOS = 'gestao-postits-vistos/1', PLANO = 'gestao-financas-plano/1', STATUS = 'gestao-status/1', METRICAS = 'gestao-metricas/1';
 const CORES = [['amarelo', 'Amarelo'], ['rosa', 'Rosa'], ['verde', 'Verde'], ['azul', 'Azul'], ['lilas', 'Lilás']];
@@ -450,7 +450,7 @@ function resumoCentral(o, T = hoje()) {
   if (F) {
     const add = (lista, nome, un, a) => { const k = un + '|' + nome + '|' + a.inicio; if (!ja.has(k)) { ja.add(k); lista.push({ nome: clamp(nome, 60), un: clamp(un, 60), inicio: a.inicio, fim: a.fim }); } };
     const ver = (nome, un, a) => { if (a.inicio <= T && T <= a.fim) add(fora, nome, un, a); else if (a.inicio > T && a.inicio <= mais(14)) add(proximas, nome, un, a); };
-    for (const a of arr(F.ausencias)) { const p = arr(F.pessoas).find(x => x.id === a.pessoa); if (p && p.ativo !== false) ver(p.nome, '', a); }
+    for (const a of arr(F.ausencias)) { const p = arr(F.pessoas).find(x => x.id === a.pessoa); if (p && p.ativo !== false) ver(p.nome, p.un ? (arr(F.unidades).find(u => u.slug === p.un)?.nome || p.un) : '', a); }
     for (const u of arr(F.unidades)) { const r = F.retratos?.[u.slug]; if (!r) continue; for (const a of arr(r.ausencias)) { const p = arr(r.pessoas).find(x => x.id === a.person); ver(p?.name || a.person, u.nome || u.slug, { inicio: a.start, fim: a.end }); } }
     proximas.sort((a, b) => a.inicio.localeCompare(b.inicio));
   }
