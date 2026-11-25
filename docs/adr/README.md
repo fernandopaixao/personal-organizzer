@@ -33,14 +33,14 @@ Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequê
 | [0023](0023-onboarding-por-perfil-e-chave.md) | Onboarding por perfil e chave | O assistente pergunta o perfil e lê as chaves do líder; o identificador vem da chave |
 | [0024](0024-distribuicao-por-zip.md) | Distribuição por .zip | A empresa recebe um .zip autossuficiente; a CI roda só no repositório pessoal |
 | [0025](0025-consolidacao-em-niveis.md) | Consolidação em níveis | Gestor publica o consolidado para a liderança como uma unidade |
-| [0026](0026-ferias-em-niveis.md) | Férias em níveis | Mapa de Férias: chave do time no time, chave do grupo entre níveis, um arquivo por pessoa (item 1 revisto pela [0033](0033-ferias-dentro-da-central.md); papel de time revisto pela [0034](0034-ferias-so-o-gestor-cadastra.md)) |
+| [0026](0026-ferias-em-niveis.md) | Férias em níveis | Mapa de Férias: chave do time no time, chave do grupo entre níveis, um arquivo por pessoa (item 1 revisto pela [0033](0033-ferias-dentro-da-central.md); papel de time revisto pela [0034](0035-ferias-so-o-gestor-cadastra.md)) |
 | [0027](0027-tema-claro-escuro-compartilhado.md) | Tema claro/escuro | Uma camada `tema.js` injetada em todos os HTMLs; escolha salva só no computador |
 | [0028](0028-financas-na-central-so-leitura.md) | Finanças na Central | A Central lê o plano e o teto dos times com a chave de finanças; não escreve em finanças |
 | [0029](0029-uma-senha-por-sessao.md) | Uma senha por sessão | O hub e a Central passam a senha, só em memória, para a janela que acabaram de abrir |
 | [0031](0031-ferramentas-abrem-prontas.md) | Ferramentas abrem prontas depois do assistente | O assistente lembra arquivo e pastas de cada ferramenta neste navegador; o gestor recebe as chaves dos times também no caminho normal; prefixo sugerido; aba Integração no time da Central |
 | [0030](0030-aviso-quando-nao-da-para-abrir-pastas.md) | Aviso quando não dá para abrir pastas | O aviso diz o motivo (Safari, pré-visualização, zip...) e o que fazer; todo botão responde ao clique |
 | [0032](0032-pasta-de-contratos.md) | Pasta de contratos | `contratos/` é a fonte única do que outras soluções gravam: especificação, schemas, cripto com vetores, exemplos e validador |
-| [0034](0034-ferias-so-o-gestor-cadastra.md) | Férias: só o gestor cadastra | Times não usam ferramenta de férias; o gestor marca as de todos na Central, pessoa com time; `ferias.html` sai do pacote |
+| [0035](0035-ferias-so-o-gestor-cadastra.md) | Férias: só o gestor cadastra | Times não usam ferramenta de férias; o gestor marca as de todos na Central, pessoa com time; `ferias.html` sai do pacote |
 | [0033](0033-ferias-dentro-da-central.md) | Férias dentro da Central | O gestor usa a página Férias da Central: mesmo arquivo e senha, times e chaves da Integração, mesmos arquivos na pasta; revê o item 1 da 0026 |
 
 ## Checklist para uma funcionalidade nova

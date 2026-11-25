@@ -3381,7 +3381,7 @@ const FE={frame:null};
 window.FERIAS_HOST={
   carregar:()=>db.ferias?JSON.parse(JSON.stringify(db.ferias)):null,
   gravar:d=>{const s=JSON.stringify(d);if(JSON.stringify(db.ferias||null)===s)return;db.ferias=JSON.parse(s);touch()},
-  // 15.10 (ADR-0034): todo time entra (sem pasta, o identificador vem do nome), porque o gestor cadastra as férias das pessoas do time.
+  // 15.10 (ADR-0035): todo time entra (sem pasta, o identificador vem do nome), porque o gestor cadastra as férias das pessoas do time.
   unidades:()=>feTimes().map(({t,slug})=>({nome:t.name,slug,chaves:(db.integ?.keys?.[t.id]||[]).filter(k=>!k.revokedAt).map(k=>({texto:k.key,em:k.createdAt||''}))})),
   pessoas:()=>{const sl=new Map(feTimes().map(x=>[x.t.id,x.slug]));return db.people.map(p=>({nome:p.name,time:sl.get((p.teamIds||[])[0])||''}))},
   pasta:async pedir=>(await igPerm(!!pedir))?IG.dir:null,

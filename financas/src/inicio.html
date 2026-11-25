@@ -60,7 +60,7 @@ function plano() {
   // Férias do gestor ficam dentro da Central (ADR-0033): marcar Férias já basta para gerar a Central.
   if (g ? st.usos.includes('tarefas') || st.usos.includes('ferias') : st.usos.includes('tarefas')) out.push(g ? { id: 'ct', nome: 'Central de Gestão', desc: st.usos.includes('ferias') ? 'Tarefas consolidado: iniciativas, times, rituais e pessoas, com a página Férias (onde há mais e menos gente fora).' : 'Tarefas consolidado: iniciativas, times, rituais e pessoas.', html: 'gestao_pessoal.html' }
                                             : { id: 'qt', nome: 'Quadro do Time', desc: 'Tarefas de um time: quadro, backlog, sprints e métricas.', html: `quadro_${st.dados.slug || '<time>'}.html` });
-  // Férias: só o gestor cadastra, na Central (ADR-0034). Responsável e membro não recebem ferramenta de férias.
+  // Férias: só o gestor cadastra, na Central (ADR-0035). Responsável e membro não recebem ferramenta de férias.
   return out;
 }
 // Chaves coladas: o kid diz o que cada uma é. "<time>-AAMM" é de tarefas; "<time>-fin-AAMM" é de finanças.

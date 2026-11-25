@@ -1,4 +1,4 @@
-# ADR-0034 · Férias: só o gestor cadastra
+# ADR-0035 · Férias: só o gestor cadastra
 
 **Status:** aceita · **Data:** 25/11/2026 (Central 15.10, Mapa de Férias 1.4 dentro da Central, assistente 2.6) · **Origem:** escolha do Fernando na decisão aberta pela [ADR-0033](0033-ferias-dentro-da-central.md): "Só o gestor cadastra". Revê o papel de time da [ADR-0026](0026-ferias-em-niveis.md).
 

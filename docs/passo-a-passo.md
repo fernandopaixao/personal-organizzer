@@ -212,7 +212,7 @@ Os outros times não são afetados.
 
 ## 13. Férias: do gestor à liderança
 
-O **Mapa de Férias** é apoio para enxergar e planejar ausências; o pedido oficial continua na ferramenta da empresa. Fica na página **Férias da Central** ([ADR-0033](adr/0033-ferias-dentro-da-central.md)), sem outro arquivo nem outra senha, e **só o gestor cadastra** (Central 15.10, [ADR-0034](adr/0034-ferias-so-o-gestor-cadastra.md)): as pessoas dos times não usam ferramenta de férias.
+O **Mapa de Férias** é apoio para enxergar e planejar ausências; o pedido oficial continua na ferramenta da empresa. Fica na página **Férias da Central** ([ADR-0033](adr/0033-ferias-dentro-da-central.md)), sem outro arquivo nem outra senha, e **só o gestor cadastra** (Central 15.10, [ADR-0035](adr/0035-ferias-so-o-gestor-cadastra.md)): as pessoas dos times não usam ferramenta de férias.
 
 **No gestor (Central › Férias)**
 1. Na Central, abra **Férias** (menu Pessoas, tecla 5). Na primeira vez, informe o nome do grupo e o identificador, o mesmo das Finanças do Grupo (ex.: `tecnologia`), e clique **Começar**. As pessoas cadastradas na Central entram sozinhas, cada uma com o seu time. Se você já usava o Mapa de Férias separado, clique **Trazer do Mapa de Férias separado**, escolha o `ferias-<grupo>.json` e digite a senha dele: tudo vem para a Central.
