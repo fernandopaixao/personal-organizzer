@@ -1,6 +1,6 @@
 # ADR-0034 · Visual novo como versão experimental, montada do main
 
-**Status:** aceita; ícone da aba revisto pela [ADR-0037](0037-nome-remessa.md) (vale também para o main) · **Data:** 25/11/2026 · **Origem:** pedido do Fernando ("faça um merge da branch que tem outro modelo visual... crie uma pasta chamada experimental, coloque essa nova versão de interface lá... verifique se tem as mesmas funcionalidades do main"); visual desenhado na branch `claude/awesome-ride-0ctbfp` (design system "Organizzer"); fonte em `experimental/src/` e `tools/build_experimental.py`
+**Status:** aceita; ícone da aba revisto pela [ADR-0037](0037-nome-remessa.md) (vale também para o main); ligar e desligar pela tela de entrada na [ADR-0038](0038-ligar-visual-experimental-na-entrada.md) · **Data:** 25/11/2026 · **Origem:** pedido do Fernando ("faça um merge da branch que tem outro modelo visual... crie uma pasta chamada experimental, coloque essa nova versão de interface lá... verifique se tem as mesmas funcionalidades do main"); visual desenhado na branch `claude/awesome-ride-0ctbfp` (design system "Organizzer"); fonte em `experimental/src/` e `tools/build_experimental.py`
 
 ## Contexto
 Em 24/11/2026 foi desenhada uma identidade visual nova para todas as ferramentas: azul `#1e4fc8` com trilho lateral marinho `#0b2155`, fundo cinza-azulado `#f4f7fc`, sinais em carmim, âmbar e verde-azulado da mesma família, fontes DM Sans (texto) e Plus Jakarta Sans (títulos) embutidas, e um ícone de aba próprio para cada ferramenta. Ela ficou numa branch à parte enquanto o main seguia: entraram os contratos (ADR-0032) e as férias dentro da Central (ADR-0033).
@@ -17,7 +17,7 @@ Na comparação (merge do main na branch do visual, 25/11/2026), a branch não t
 5. **Mesmos dados.** A versão experimental lê e grava os mesmos arquivos, com as mesmas senhas e chaves. Dá para alternar entre as duas a qualquer momento; o tema (claro, escuro ou automático) é o mesmo.
 
 ## Consequências
-- Quem quiser experimentar abre `experimental/hub.html` (ou `experimental/inicio.html`) e volta quando quiser para o `hub.html` da pasta principal.
+- Quem quiser experimentar abre `experimental/hub.html` (ou `experimental/inicio.html`) e volta quando quiser para o `hub.html` da pasta principal. *Desde a [ADR-0038](0038-ligar-visual-experimental-na-entrada.md), liga e desliga pela tela de entrada, e a escolha fica lembrada.*
 - Os HTMLs experimentais são maiores (cerca de 120 KB a mais cada, pelas fontes; o assistente com tudo embutido passa de 2 MB). Continuam arquivos locais, sem rede.
 - O build da CI ganha cerca de 2 minutos (os testes rodam duas vezes: atual e experimental).
 - Uma cor fixa nova criada no main entra na experimental com o tom antigo até alguém pôr o par em `trocas.json`. Variáveis (`var(--bv)`, `var(--card)`...) já mudam sozinhas.

@@ -147,7 +147,7 @@ details.pis>summary:before{content:"▸";transition:transform .15s}details.pis[o
       (tarefas, iniciativas, 1:1 e férias) e o status e as métricas que cada Quadro publica, e mostra cards de todos os
       módulos numa tela. Os dados lidos ficam só em memória, resumidos; o hub nunca grava no arquivo de outra ferramenta.
    ===================================================================== */
-const TOOL = 'hub', TOOL_NOME = 'Hub da solução', TOOL_VERSION = '2.3.0';
+const TOOL = 'hub', TOOL_NOME = 'Hub da solução', TOOL_VERSION = '2.4.0';
 // Marca da solução (ADR-0037): envelope com lacre azul. Arquivo que um time publicou há pouco = "nova remessa".
 const MARCA = 'Remessa', MARCA_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#0b2155"/><rect x="5" y="9" width="22" height="15" rx="2" fill="#fff"/><path d="M5.8 10l10.2 7.6L26.2 10" fill="none" stroke="#0b2155" stroke-width="1.6" stroke-linejoin="round"/><circle cx="16" cy="17.6" r="3.2" fill="#4d86ff" stroke="#fff" stroke-width="1.1"/></svg>`;
 try { window.name = 'gestao-hub'; } catch {}   // o botão "← Hub" das ferramentas volta para esta aba sem recarregar
@@ -533,7 +533,22 @@ const ICO = {
 const ico = (n, cls = 'ico') => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICO[n] || ''}</svg>`;
 const ehCentralF = f => f.titulo === 'Central de Gestão';
 // Link para outra ferramenta: aba nova com opener (senha da sessão, ADR-0029). A Central pode ter senha própria (data-sessao).
-const linkF = (f, cls, html, extra = '') => `<a class="${cls}" href="${encodeURI(f.arquivo)}" target="_blank" rel="opener" data-f="${esc(f.arquivo)}"${ehCentralF(f) ? ' data-sessao="central"' : ''} ${extra}>${html}</a>`;
+// Hub aberto da pasta experimental/ (visual.js, ADR-0038): as ferramentas continuam na pasta pessoal, um nível acima.
+// Cada link vai para a versão experimental quando ela existe em experimental/ (mesmo nome, ou o nome do pacote para
+// as ferramentas sem configuração embutida); senão, para a do visual atual. No hub do visual atual, nada muda.
+let expArqs = new Set();
+async function lerExperimental() {
+  expArqs = new Set(); if (!dirLocal || !window.remessaVisual?.naPastaExp) return;
+  try { const d = await dirLocal.getDirectoryHandle('experimental'); for await (const [n, h] of d.entries()) if (h.kind === 'file') expArqs.add(n); } catch {}
+}
+function hrefDe(f) {
+  if (!window.remessaVisual?.naPastaExp) return f.arquivo;
+  const pac = window.remessaVisual.pacote(f.titulo);
+  if (expArqs.has(f.arquivo)) return f.arquivo;
+  if (pac && expArqs.has(pac)) return pac;
+  return '../' + f.arquivo;
+}
+const linkF = (f, cls, html, extra = '') => `<a class="${cls}" href="${encodeURI(hrefDe(f))}" target="_blank" rel="opener" data-f="${esc(f.arquivo)}"${ehCentralF(f) ? ' data-sessao="central"' : ''} ${extra}>${html}</a>`;
 const fCentral = () => ferramentas.find(ehCentralF);
 const fQuadro = slug => ferramentas.find(f => f.titulo === 'Quadro do Time' && f.time?.slug === slug);
 const fFinTime = slug => ferramentas.find(f => f.titulo === 'Finanças do Time' && f.time?.slug === slug);
@@ -771,7 +786,7 @@ function linhaFin(t, r) {
 }
 function ligar() {
   const on = (id, f) => { const e = $('#' + id); if (e) e.onclick = f; };
-  on('fAtu', async () => { ferramentas = await procurarFerramentas(); await lerCentral({ forcar: true }); render(); });
+  on('fAtu', async () => { ferramentas = await procurarFerramentas(); await lerExperimental(); await lerCentral({ forcar: true }); render(); });
   on('aTime', () => editarTime());
   on('aImp', importarDaCentral);
   on('aImpF', importarDoGrupo);
@@ -993,7 +1008,7 @@ async function abrirArquivo(h, nome) { escolherNaEntrada(h, nome); await telaIni
 async function aposAbrir() {
   if (lembrarAtivo()) kv.set('hub-local', { dir: dirLocal, arquivo });
   await carregarChaves();
-  ferramentas = await procurarFerramentas();
+  ferramentas = await procurarFerramentas(); await lerExperimental();
   render();
   await lerCentral(); render();
   if (await lembreteTesteSenha(db.seg, ctx)) agendarSalvar();

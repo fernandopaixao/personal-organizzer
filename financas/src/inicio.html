@@ -21,6 +21,7 @@
 .dois .g2s{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;font-size:12.5px}@media(max-width:640px){.dois .g2s{grid-template-columns:1fr}}
 .ilu .f1,.mapa-svg .f1{fill:var(--bv-soft)}.ilu .f2,.mapa-svg .f2{fill:var(--bv)}.ilu .fw,.mapa-svg .fw{fill:#fff}
 .ilu .t,.mapa-svg .t{fill:var(--ink);font-size:11px;font-weight:600}.ilu .tm,.mapa-svg .tm{fill:var(--muted);font-size:10px}.ilu .tb{fill:var(--bv);font-size:15px;font-weight:700}.ilu .tx,.mapa-svg .tx{fill:#9aa1b4;font-size:10px;font-family:ui-monospace,Consolas,monospace}
+.visbox{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px;padding:10px 14px;border:1px dashed var(--line);border-radius:14px;font-size:12.5px;color:var(--muted)}.visbox b{display:block;color:var(--ink);font-size:13px}
 .porque{display:flex;gap:14px;align-items:flex-start;margin:12px 0 4px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;font-size:13px;color:var(--muted);line-height:1.55}.porque svg{width:40px;height:40px;flex:none}.porque b{color:var(--ink)}
 .sorte{margin:4px 0 6px;border:1px solid var(--bv-line);background:linear-gradient(160deg,#fff 0%,var(--bv-soft) 100%);border-radius:14px;padding:14px 16px;display:flex;gap:14px;align-items:center}
 .sorte .grow{font-size:12.5px;color:var(--muted)}.sorte b{display:block;color:var(--ink);font-size:14px;margin-bottom:2px}
@@ -53,7 +54,7 @@
    Pergunta o uso esperado, cria o primeiro arquivo (sempre cifrado), gera os HTMLs
    desacoplados de cada uso e o cartão "Onde fica cada coisa".
    ===================================================================== */
-const TOOL_NOME = 'Início da solução', TOOL_VERSION = '2.8.0';
+const TOOL_NOME = 'Início da solução', TOOL_VERSION = '2.8.1';
 // Nome da solução (ADR-0037): envelopes lacrados numa caixa postal. Arquivo novo de outra pessoa = "nova remessa".
 const MARCA = 'Remessa';
 const MARCA_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#0b2155"/><rect x="5" y="9" width="22" height="15" rx="2" fill="#fff"/><path d="M5.8 10l10.2 7.6L26.2 10" fill="none" stroke="#0b2155" stroke-width="1.6" stroke-linejoin="round"/><circle cx="16" cy="17.6" r="3.2" fill="#4d86ff" stroke="#fff" stroke-width="1.1"/></svg>`;
@@ -126,6 +127,9 @@ const comoFunciona = () => `<div class="ilus">${ILU.map(x => `<div class="ilu">$
 // Arquivos sob demanda do OneDrive: sem "Sempre manter neste dispositivo", a pasta pode ficar só na nuvem e o navegador não vê os arquivos novos dos outros.
 const MANTER = 'Sempre manter neste dispositivo';
 const MANTER_COMO = `No Windows, clique com o botão direito na pasta, no Explorador de Arquivos, e escolha "${MANTER}". No Mac, no Finder, botão direito na pasta › "${MANTER}".`;
+// Visual experimental (visual.js e marca.js, ADR-0038): o botão data-rm-vis troca para a outra versão e lembra a escolha.
+const trocaVisual = () => { const v = window.remessaVisual; if (!v || !v.par()) return '';
+  return `<div class="visbox"><div class="grow"><b>${v.experimental ? 'Visual experimental ligado' : 'Visual experimental'}</b>${v.experimental ? 'As mesmas ferramentas e os mesmos dados. O assistente gera as ferramentas com este visual.' : 'As mesmas ferramentas e os mesmos dados, com outro visual. Dá para voltar quando quiser.'}</div><button class="btn" data-rm-vis>${v.experimental ? 'Voltar ao visual atual' : 'Experimentar o visual novo'}</button></div>`; };
 const PASSOS = ['Boas-vindas', 'Perfil', 'Chaves', 'Dados', 'Pastas', 'Senha', 'Pronto'];
 function desenhar() {
   const p = st.passo, el = $('#wz');
@@ -135,7 +139,7 @@ function desenhar() {
   if (p === 0) el.innerHTML = `${topo}<h1>Vamos montar sua ${MARCA}</h1>${porQue()}<p class="muted">Primeiro, como ela funciona em quatro desenhos. Depois, três perguntas sobre o seu perfil e, se o seu líder já mandou, a chave e a pasta.</p>
     ${comoFunciona()}
     ${temFS() ? `<div class="sorte"><div class="grow"><b>Estou com sorte</b>Lidero times e quero tudo pronto de uma vez: Central (com as férias), Finanças do Grupo, hub e, para cada time, o Quadro e o Finanças do Time, já com as chaves e a pasta.</div><button class="btn pri" id="sorte">Estou com sorte</button></div>` : avisoFS()}
-    <button class="btn ghost" id="mapa">Ver todas as ferramentas da Remessa</button>${nav(true, 'Começar')}`;
+    <button class="btn ghost" id="mapa">Ver todas as ferramentas da Remessa</button>${trocaVisual()}${nav(true, 'Começar')}`;
   if (p === 1) el.innerHTML = `${topo}<h1>Seu perfil</h1>
     <p class="lbl">1 · Você lidera times?</p>
     ${PAPEIS.map(([k, n, d]) => `<button class="opt ${st.papel === k ? 'on' : ''}" data-p="${k}"><b>${n}</b><span>${d}</span></button>`).join('')}
