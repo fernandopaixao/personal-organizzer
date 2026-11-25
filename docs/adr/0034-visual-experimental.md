@@ -26,7 +26,7 @@ Na comparação (merge do main na branch do visual, 25/11/2026), a branch não t
 ## Ao evoluir
 - **Tela nova:** use variáveis de cor; assim ela fica certa no atual, no experimental e no escuro.
 - **Cor fixa nova** que deve mudar no experimental: inclua o par em `experimental/src/trocas.json` (`cores`).
-- **Ferramenta nova:** desenhe o ícone em `financas/src/icones/<nome>.svg` (desde a [ADR-0036](0036-nome-remessa.md) os ícones valem também para o main; 32×32, fundo `#0b2155`, um detalhe `#4d86ff` e o lacre da Remessa) e inclua o título dela em `ICONES` de `tools/build_financas.py`; sem isso o build experimental para com erro. Inclua o HTML em `saidas()` de `tools/build_experimental.py`.
+- **Ferramenta nova:** desenhe o ícone em `financas/src/icones/<nome>.svg` (desde a [ADR-0036](0036-nome-remessa.md) os ícones valem também para o main; 32×32, fundo `#0b2155`, um detalhe `#4d86ff` e o lacre azul da Remessa no canto) e inclua o título dela em `ICONES` de `tools/build_financas.py`; sem isso o build experimental para com erro. Inclua o HTML em `saidas()` de `tools/build_experimental.py`.
 - **Promover o visual novo a padrão:** aplique as trocas nas fontes do repositório (é o mesmo `build_experimental.py`, gravando por cima), mova `identidade.css` e `fontes/` para `financas/src/`, ajuste os fundos esperados no teste §14 e apague `experimental/`. Registre numa ADR que substitui esta.
 - Relacionadas: [0017](0017-build-embutir-e-injetar.md) (build e blocos injetados), [0020](0020-principios-de-interface.md) (princípios de interface), [0024](0024-distribuicao-por-zip.md) (pacote .zip), [0027](0027-tema-claro-escuro-compartilhado.md) (tema claro/escuro).
 

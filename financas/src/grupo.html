@@ -21,7 +21,7 @@
    compara com o orçamento do grupo e publica diretrizes grupo/financas/diretriz-<time>.json.
    Orçamento aprovado, itens do grupo, chaves e versões ficam no arquivo local cifrado.
    ===================================================================== */
-const TOOL = 'financas-grupo', TOOL_NOME = 'Finanças do Grupo', TOOL_VERSION = '1.5.1';
+const TOOL = 'financas-grupo', TOOL_NOME = 'Finanças do Grupo', TOOL_VERSION = '1.6.0';
 const LOCAL_SCHEMA = 'gestao-financas-local/1', PLANO_SCHEMA = 'gestao-financas-plano/1', DIRETRIZ_SCHEMA = 'gestao-financas-diretriz/1';
 const PRESET = /*FING-PRESET*/null/*FIM-FING-PRESET*/;
 // Onde o arquivo desta ferramenta ficou neste navegador (gravado pelo assistente ou na última abertura).
@@ -495,6 +495,7 @@ function timeDlg(slug, tipo = 'time') {
   const v = c => c ? (c / 100).toLocaleString('pt-BR') : '';
   const d = modal(`<div class="mh"><h2>${slug ? esc(t.nome) : ehGrupo(t) ? 'Novo grupo de outro gestor' : 'Novo time'}</h2></div><div class="mb">${ehGrupo(t) && !slug ? '<p class="small muted" style="margin-top:0">Use como identificador o mesmo do grupo do gestor (aparece em Ajustes das Finanças do Grupo dele). Depois gere a chave e envie a ele por mensagem direta.</p>' : ''}
     <div class="f2"><label class="field"><span>Nome</span><input class="sin" id="mN" value="${esc(t.nome)}"></label><label class="field"><span>Identificador (pasta)</span><input class="sin code" id="mS" value="${esc(t.slug)}" ${slug ? 'disabled' : ''}></label></div>
+    ${ehGrupo(t) && !slug ? '<label class="field"><span>Chave que o gestor mandou (opcional: se ele gerou a chave no Estou com sorte, cole aqui em vez de gerar outra)</span><input class="sin code" id="mK" placeholder="GK1.grupo-fin-AAMM.…"></label>' : ''}
     <div class="f2"><label class="field"><span>Prefixo de código (opcional)</span><input class="sin" id="mP" value="${esc(t.prefixo || '')}" maxlength="5"></label><label class="field"><span>Publicar plano até</span><input class="sin" type="date" id="mD" value="${esc(t.publishBy || '')}"></label></div>
     <p class="lbl">Teto de ${anoV()} (vai na diretriz; troque o ano no topo para os outros anos)</p>
     <label class="field"><span>Teto total</span><input class="sin" id="mT" value="${v(tetoAno(t).total)}"></label>
@@ -505,13 +506,14 @@ function timeDlg(slug, tipo = 'time') {
   $('#mNo', d).onclick = fecharModal;
   if (slug) $('#mX', d).onclick = async () => { fecharModal(); if (await perguntar('Remover time?', '<p>O time sai do consolidado e as chaves dele são apagadas deste arquivo. Os arquivos na pasta não são apagados.</p>', [['no', 'Cancelar'], ['ok', 'Remover', 'danger']]) !== 'ok') return; db.times = db.times.filter(x => x.slug !== slug); delete db.retratos[slug]; agendarSalvar(); };
   $('#mOk', d).onclick = () => {
-    const nome = clamp($('#mN', d).value.trim(), 80), s = slugify($('#mS', d).value);
+    const nome = clamp($('#mN', d).value.trim(), 80), s = slugify($('#mS', d).value), kTxt = $('#mK', d)?.value.trim() || '';
+    let kCol = null; if (kTxt) { try { kCol = lerChaveTexto(kTxt); } catch (e) { return toast('Chave inválida: ' + e.message, 6000); } if (!kCol.kid.startsWith(s + '-fin')) return toast(`Esta chave é de "${kCol.kid.split('-fin')[0]}", não do identificador "${s}". Use o identificador do grupo do gestor.`, 7000); }
     if (!nome || !s) return toast('Preencha nome e identificador.'); if (!slug && timePorSlug(s)) return toast('Já existe um time com esse identificador.');
     t.nome = nome; t.prefixo = clamp($('#mP', d).value.trim().toUpperCase(), 5); t.publishBy = $('#mD', d).value; t.nota = clamp($('#mR', d).value.trim(), 500);
     const te = tetoEditavel(t); te.total = parseValor($('#mT', d).value) || 0; te.caps = {}; $$('[data-cap]', d).forEach(i => { const x = parseValor(i.value); if (x) te.caps[i.dataset.cap] = x; });
     if (anoV() === db.ano) t.teto = structuredClone(te);   // compatibilidade com arquivos 1.0
     if (!db.anos.includes(anoV())) db.anos = [...db.anos, anoV()].sort();
-    if (!slug) { t.slug = s; db.times.push(t); }
+    if (!slug) { t.slug = s; if (kCol) t.chaves.push({ kid: kCol.kid, texto: kTxt, em: new Date().toISOString(), origem: 'colada' }); db.times.push(t); }
     fecharModal(); agendarSalvar();
     if (slug && t.diretriz.revision) toast('Lembre de publicar a diretriz de novo para o time ver o teto atualizado.', 5000);
   };

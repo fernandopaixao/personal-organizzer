@@ -1,6 +1,6 @@
 # Funcionalidades, usos e objetivos
 
-*25/11/2026 · Remessa · Central v15.11, Quadro do Time 2.3, Hub 2.1, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.3, assistente 2.6, contratos 1.0 · visual experimental em `experimental/`*
+*25/11/2026 · Remessa · Central v15.11, Quadro do Time 2.3, Hub 2.1, Finanças do Grupo 1.6 e do Time 1.4, Mapa de Férias 1.3, assistente 2.7, contratos 1.0 · visual experimental em `experimental/`*
 
 Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. Para as regras técnicas por trás, veja as [decisões de arquitetura](adr/README.md). Para o caminho de quem usa, veja a [jornada do usuário](jornada-do-usuario.md) e o [passo a passo](passo-a-passo.md).
 
@@ -8,7 +8,7 @@ Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. 
 
 ## 1. Objetivo da solução
 
-**Nome: Remessa** ([ADR-0036](adr/0036-nome-remessa.md)). A solução funciona como um serviço de envelopes lacrados com uma caixa postal: cada ferramenta põe o que tem para contar num envelope cifrado com a chave do time (o lacre) e deixa na pasta compartilhada (a caixa postal). Só quem tem a chave abre. Um arquivo que chegou de outra pessoa e ainda não foi aplicado é uma **nova remessa**. Cada ferramenta tem o seu ícone na aba do navegador, com o lacre vermelho "R" da Remessa no canto; o hub usa o envelope inteiro.
+**Nome: Remessa** ([ADR-0036](adr/0036-nome-remessa.md)). A solução funciona como um serviço de envelopes lacrados com uma caixa postal: cada ferramenta põe o que tem para contar num envelope cifrado com a chave do time (o lacre) e deixa na pasta compartilhada (a caixa postal). Só quem tem a chave abre. Um arquivo que chegou de outra pessoa e ainda não foi aplicado é uma **nova remessa**. Cada ferramenta tem o seu ícone na aba do navegador, com o lacre azul da Remessa no canto; o hub usa o envelope lacrado.
 
 Dar a um gestor de vários times, e aos próprios times, **um lugar organizado para tarefas, pessoas, rituais, portfólio de iniciativas, fluxo dos times e finanças**, sem servidor, sem instalação e com tudo cifrado. Os objetivos que guiam cada funcionalidade:
 
@@ -75,14 +75,17 @@ Todas têm, no topo, **Onde estou?** (qual ferramenta, qual arquivo, o que é lo
 
 Onde as chaves coladas vão parar: no hub (tarefas e finanças de cada time), no Quadro (chave de tarefas), no Finanças do Time (chave de finanças) e no Finanças do Grupo (`acima`, a chave da liderança). Nenhuma chave vai para a pasta compartilhada.
 
-**Estou com sorte (2.1).** Para quem lidera times e quer tudo de uma vez. Uma tela só (grupo, times, seu nome, pasta, pasta sincronizada opcional e senha) e o assistente:
+**Estou com sorte (2.1; passo a passo da Remessa no 2.7).** Para quem lidera times e quer tudo de uma vez. Uma tela só (grupo, times, seu nome, pasta pessoal, senha e se a liderança também usa a Remessa) e o assistente:
 
 | Gera | Onde | Com o quê |
 |---|---|---|
 | Chaves de tarefas e de finanças de cada time | Dentro dos arquivos cifrados e dos HTMLs dos times | Aviso de cofre antes; botões para copiar cada chave depois |
 | Hub, Central (com a página Férias), Finanças do Grupo e "Onde fica cada coisa" | Na pasta escolhida | Times, prefixos, pastas e chaves já cadastrados; uma senha para todos |
 | Quadro do Time, Finanças do Time, Mapa de Férias e LEIA-ME de cada time | `para-os-times/<time>/` | A chave do time e a pasta sincronizada já configuradas |
-| Estrutura da pasta sincronizada | `times/<time>/…`, `grupos/<grupo>/ferias/` | Só pastas vazias |
+| Chave do grupo para a liderança (2.7, se escolhida) e `para-a-lideranca/LEIA-ME.txt` | Finanças do Grupo (Nível acima), Férias da Central e o envelope para a liderança | Ou a chave que a liderança mandou, colada no formulário |
+| Estrutura da pasta sincronizada | `times/<time>/…`, `grupos/<grupo>/` | Só pastas vazias, criadas quando você aponta a pasta no último passo |
+
+**Passo a passo da Remessa (2.7).** A tela final organiza tudo em quatro passos numerados, cada um com um desenho e um exemplo: **Sua mesa** (o que fica na pasta pessoal), **Remessas para os times** (um envelope por time, com a tabela de quem recebe cada arquivo), **Remessa para a liderança** (o que sobe e como a chave chega) e **Aponte a caixa postal** (para que serve cada pasta da pasta sincronizada). A pasta sincronizada saiu do formulário: é o último passo, a única escolha que resta, e configura todas as ferramentas de uma vez. No Finanças do Grupo da liderança (1.6), **+ Grupo de outro gestor** aceita colar a chave que o gestor mandou.
 
 A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados), um desenho do que ficou em cada pasta, as chaves por time e um **checklist** (senha no cofre, pasta pessoal só sua e no seu OneDrive, pasta compartilhada sincronizando, pasta compartilhada marcada como **"Sempre manter neste dispositivo"**, hub mostrando os times, pasta ligada na Central e no Finanças do Grupo, chaves no cofre, pastas enviadas aos times). O caminho normal também termina com o checklist do perfil. As marcações ficam só no navegador.
 
@@ -99,7 +102,7 @@ A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados
 | Funcionalidade | Uso | Objetivo |
 |---|---|---|
 | **Cockpit de gestão (2.0)** | Saudação com a frase do dia e o número de pontos de atenção; cards de leitura de todos os módulos com a origem marcada (Central, Férias, Finanças, Quadros, Post-its) | Abrir o dia numa tela só ([ADR-0035](adr/0035-hub-cockpit-de-gestao.md)) |
-| **Marca e nova remessa (2.1)** | Ícone da Remessa (envelope com lacre) no topo e na entrada; na lista **Pede sua atenção**, "Nova remessa" para cada time que publicou backlog, métricas ou plano nas últimas 24 horas | Saber o que chegou na caixa postal sem abrir cada ferramenta ([ADR-0036](adr/0036-nome-remessa.md)) |
+| **Marca e nova remessa (2.1)** | Ícone da Remessa (envelope com lacre azul) no topo e na entrada; na lista **Pede sua atenção**, "Nova remessa" para cada time que publicou backlog, métricas ou plano nas últimas 24 horas | Saber o que chegou na caixa postal sem abrir cada ferramenta ([ADR-0036](adr/0036-nome-remessa.md)) |
 | **Resumo da Central (2.0)** | Lê o arquivo da Central só para leitura, com a senha da sessão: meu dia (atrasadas, hoje, feitas), delegadas no prazo e a cobrar, iniciativas "agora" em dia, atrasadas ou em atenção, fora hoje e próximos 14 dias, 1:1 em atraso | Ver o que pede atenção sem abrir a Central |
 | **Pede sua atenção (2.0)** | Lista única de todos os módulos, atrasado primeiro: suas tarefas atrasadas, delegadas, iniciativas, 1:1, iniciativas e bloqueios dos quadros, time acima do orçado, time sem publicar há 7 dias. Cada item abre a ferramenta certa | Não deixar nada cair entre as ferramentas |
 | **Indicadores do time (2.0)** | No card do time: iniciativas do quadro no prazo, em atenção e atrasadas, bloqueios abertos e as métricas de destaque com a série (lidos de `status.json` e `metricas.json`) | Ver a saúde do time sem abrir o Quadro |

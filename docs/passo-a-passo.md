@@ -1,6 +1,6 @@
 # Passo a passo · como lidar com a solução
 
-*25/11/2026 · Remessa · Central v15.11, Quadro do Time 2.3, Hub 2.1, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.3, assistente 2.6, contratos 1.0 · visual experimental em `experimental/`*
+*25/11/2026 · Remessa · Central v15.11, Quadro do Time 2.3, Hub 2.1, Finanças do Grupo 1.6 e do Time 1.4, Mapa de Férias 1.3, assistente 2.7, contratos 1.0 · visual experimental em `experimental/`*
 
 Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é independente. Antes de começar: use **Edge ou Chrome** no computador, abrindo o arquivo com dois cliques (não pela pré-visualização do Outlook, Teams ou OneDrive, nem de dentro do .zip), e tenha à mão um **cofre de senhas** (o gerenciador de senhas da empresa).
 
@@ -40,10 +40,16 @@ Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é ind
 
 **Atalho: Estou com sorte.** Na primeira tela do assistente, quem lidera times pode clicar **Estou com sorte**:
 1. Preencha o nome do grupo, o seu nome, os times (um por linha, com o prefixo se quiser), o ano e a moeda.
-2. Escolha a pasta pessoal (só sua, de preferência no seu OneDrive), a pasta compartilhada (se já tiver) e crie a senha.
-3. Clique **Gerar tudo** e confirme o aviso de cofre das chaves.
-4. Na tela final, copie a chave de cada time para o cofre, siga o checklist e envie a cada responsável a pasta `para-os-times/<time>/` por mensagem direta ou e-mail (nunca pela pasta compartilhada). Depois clique **Abrir o hub**.
-5. O time abre o `quadro_<time>.html`, o `financas_<time>.html` ou o `ferias.html`, cria a própria senha e guarda a chave quando a ferramenta pedir. As suas férias e as dos times ficam na página **Férias** da Central: não há `ferias.html` na sua pasta.
+2. Escolha a pasta pessoal (só sua, **já dentro do seu OneDrive**, por exemplo `OneDrive - Empresa\GestaoPessoal`) e crie a senha.
+3. Responda **Sua liderança também usa a Remessa?**: *não*; *sim, gere agora a chave do meu grupo*; ou *sim, ela já me mandou a chave* (cole a chave).
+4. Clique **Gerar tudo** e confirme o aviso de cofre das chaves. Todas as chaves de integração ficam prontas e já dentro dos arquivos.
+5. A tela final é um **passo a passo em quatro passos, com um desenho em cada**:
+   - **Sua mesa** (pasta pessoal): o que fica com você e não vai pelo correio (hub, Central, Finanças do Grupo e os seus `.json`, cifrados com a sua senha).
+   - **Remessas para os times**: cada `para-os-times/<time>/` é um envelope já lacrado com a chave do time. A tabela diz quem recebe cada arquivo: `quadro_<time>.html` e `ferias.html` são para todo o time; `financas_<time>.html` só para quem cuida do dinheiro do time. Mande a pasta ao responsável por mensagem direta ou e-mail, nunca pela pasta compartilhada.
+   - **Remessa para a liderança**: com a chave gerada, mande `para-a-lideranca/LEIA-ME.txt` à liderança (traz a chave e onde ela cola); com a chave colada, não há nada para mandar. O que sobe é o consolidado de finanças e as férias do grupo, em `grupos/<grupo>/`.
+   - **Aponte a caixa postal**: a única escolha que falta. Sincronize a pasta do SharePoint, marque **Sempre manter neste dispositivo** e clique **Apontar a pasta sincronizada**. O assistente cria as subpastas, atualiza os envelopes dos times com o nome da pasta e deixa a Central, o hub, as finanças e as férias apontando para ela.
+6. Siga o checklist e clique **Abrir o hub**.
+7. O time abre o `quadro_<time>.html`, o `financas_<time>.html` ou o `ferias.html` e cria a própria senha: a chave já está dentro. As suas férias e as dos times ficam na página **Férias** da Central.
 
 **Gestor: equipar cada time com o assistente.** Se preferir que o time rode o próprio assistente, depois de gerar as chaves dos times (seção 1 ou 2), mande a cada time o `inicio.html` e, por mensagem direta, a chave e o nome da pasta sincronizada. O responsável abre o assistente, escolhe "Sim, lidero 1 time", cola a chave e sai com o Quadro e/ou o Finanças do Time prontos. É o caminho recomendado; gerar o HTML do time pela Central (seção 2) continua valendo.
 

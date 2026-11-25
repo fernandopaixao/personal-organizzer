@@ -1,6 +1,6 @@
 # Visão geral da solução · Central de Gestão, Quadro do Time e integração
 
-*25/11/2026 · estado atual: Remessa · Central v15.11, Quadro do Time 2.3, Hub 2.1, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.3 e contratos 1.0 (detalhes em `docs/plano-v15.md`, `docs/plano-hub.md`, `docs/plano-financas.md` e [`contratos/`](../contratos/LEIA-ME.md))*
+*25/11/2026 · estado atual: Remessa · Central v15.11, Quadro do Time 2.3, Hub 2.1, Finanças do Grupo 1.6 e do Time 1.4, Mapa de Férias 1.3 e contratos 1.0 (detalhes em `docs/plano-v15.md`, `docs/plano-hub.md`, `docs/plano-financas.md` e [`contratos/`](../contratos/LEIA-ME.md))*
 
 > **Por onde começar:** [funcionalidades, usos e objetivos](funcionalidades.md) · [jornada do usuário](jornada-do-usuario.md) · [passo a passo](passo-a-passo.md) · [decisões de arquitetura (ADRs)](adr/README.md)
 

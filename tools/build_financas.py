@@ -48,7 +48,7 @@ def tema(html):
     return visual(sessao(html[:i] + tag + '\n' + html[i:]))
 
 # ---- Marca Remessa (ADR-0036) e visual experimental (ADR-0034) ----
-# O ícone da aba (financas/src/icones/, um por ferramenta, com o lacre da Remessa) entra em todos os HTMLs,
+# O ícone da aba (financas/src/icones/, um por ferramenta, com o lacre azul da Remessa no canto) entra em todos os HTMLs,
 # inclusive nas cópias embutidas. identidade.css só existe na cópia temporária que
 # tools/build_experimental.py monta (vinda de experimental/src/): aí cada HTML ganha também o visual novo.
 ICONES = {'Central de Gestão': 'central', 'Quadro do Time': 'quadro', 'Hub da solução': 'hub',

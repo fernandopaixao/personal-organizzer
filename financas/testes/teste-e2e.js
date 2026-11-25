@@ -14,8 +14,8 @@ const ok = (c, msg) => { console.log((c ? '  ok  ' : '  FALHOU  ') + msg); if (!
 
 // Marca Remessa (ADR-0036): cada HTML montado traz o ícone da aba com o lacre, também nas cópias geradas.
 { const ler = f => fs.readFileSync(path.join(RAIZ, f), 'utf8'), central = fs.readdirSync(RAIZ).filter(n => /^gestao_pessoal_v\d+\.html$/.test(n)).sort((a, b) => parseInt(a.slice(15)) - parseInt(b.slice(15))).pop();
-  const fav = ['hub.html', 'inicio.html', central, 'ferramenta-time/quadro_do_time_v1.html', 'financas/financas_grupo.html', 'financas/financas_time.html', 'ferias/ferias.html'].filter(f => !/<link rel="icon" id="favicon" type="image\/svg\+xml" href="data:image\/svg\+xml,[^"]*%23c8102e/.test(ler(f)));
-  ok(!fav.length, 'ícone da aba da Remessa (com o lacre) em todas as ferramentas' + (fav.length ? ': falta em ' + fav.join(', ') : ''));
+  const fav = ['hub.html', 'inicio.html', central, 'ferramenta-time/quadro_do_time_v1.html', 'financas/financas_grupo.html', 'financas/financas_time.html', 'ferias/ferias.html'].filter(f => !/<link rel="icon" id="favicon" type="image\/svg\+xml" href="data:image\/svg\+xml,[^"]*%230b2155[^"]*%234d86ff/.test(ler(f)));
+  ok(!fav.length, 'ícone da aba da Remessa (lacre azul) em todas as ferramentas' + (fav.length ? ': falta em ' + fav.join(', ') : ''));
   ok(/\['rec','Remessas'\]/.test(ler(central)) && /nova remessa|novas remessas/i.test(ler(central)), 'Central chama de remessa o arquivo de integração recebido'); }
 
 const srv = http.createServer((q, r) => {
@@ -500,9 +500,17 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   const ls = await nova('/inicio.html', { 'fin-local': 'LocalSorte', 'fin-comum': 'CompSorte' });
   ok(await ls.evaluate(() => document.querySelectorAll('.ilu svg').length === 4 && /idioma que só vocês dois falam/.test(document.body.textContent)), 'primeira tela explica a solução em quatro desenhos (HTML e JSON, chave como idioma, níveis, OneDrive)');
   await ls.click('#sorte'); await ls.fill('#sN', 'Tecnologia'); await ls.fill('#sP', 'Fernando'); await ls.fill('#sT', 'Pagamentos PAG\nCartões CAR');
-  await ls.click('#sL'); await ls.waitForSelector('#sL + .chip'); await ls.click('#sC'); await ls.click('#dlg [data-r="ok"]').catch(() => {}); await ls.waitForSelector('#sC + .chip');
+  ok(!(await ls.$('#sC')), 'Estou com sorte: a pasta sincronizada sai do formulário e vira o último passo');
+  await ls.click('#sL'); await ls.waitForSelector('#sL + .chip'); await ls.check('[name="sLid"][value="gerar"]');
   await ls.click('#sS'); await criarSenha(ls, SENHA2); await ls.waitForSelector('#sGo:not([disabled])');
-  await ls.click('#sGo'); await cofre(ls); await ls.waitForSelector('.mapa-svg', { timeout: 30000 });
+  await ls.click('#sGo'); await cofre(ls); await ls.waitForSelector('.passos', { timeout: 30000 });
+  const guia = await ls.textContent('.passos');
+  ok(await ls.$$eval('.passo', x => x.length) === 4 && /Sua mesa/.test(guia) && /Remessas para os times/.test(guia) && /Remessa para a liderança/.test(guia) && /Aponte a caixa postal/.test(guia), 'guia da Remessa em 4 passos: mesa, times, liderança e caixa postal');
+  ok(/todo o time/.test(guia) && /só quem cuida do dinheiro do time/.test(guia) && /grupos\/tecnologia\//.test(guia) && await ls.$$eval('.passo .mapa-svg', x => x.length) === 4, 'guia diz o que vai para cada pessoa e para que serve cada pasta, com um desenho por passo');
+  ok(!(await ls.$('#pCx.feito')) && (await ls.$('#sCx.pri')), 'só falta apontar a caixa postal');
+  await ls.click('#sCx'); await ls.click('#dlg [data-r="ok"]').catch(() => {}); await ls.waitForSelector('#pCx.feito', { timeout: 30000 });
+  const lid = await opfs(ls, async () => ler('LocalSorte/para-a-lideranca', 'LEIA-ME.txt'));
+  ok(/GK1\.tecnologia-fin-\d{4}\./.test(lid || '') && /\+ Grupo de outro gestor/.test(lid || ''), 'envelope para a liderança com a chave do grupo e onde colar');
   const locS = await opfs(ls, async () => [await listar('LocalSorte'), await listar('LocalSorte/para-os-times'), await listar('LocalSorte/para-os-times/pagamentos')]);
   ok(['hub.html', 'gestao_pessoal.html', 'financas_grupo.html', 'onde-fica-cada-coisa.html', 'hub-tecnologia.json', 'gestao-tecnologia.json', 'financas-grupo-tecnologia.json'].every(n => locS[0].includes(n)), 'Estou com sorte: ferramentas do gestor geradas na pasta');
   ok(!locS[0].includes('ferias.html') && !locS[0].includes('ferias-tecnologia.json'), 'Estou com sorte: gestor não recebe Mapa de Férias à parte (férias ficam na Central, ADR-0033)');
