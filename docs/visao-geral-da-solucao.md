@@ -167,7 +167,7 @@ Gestao-Integracao/                      (administrada pelo Fernando)
   times/<slug>/metricas.json            o time escreve: métricas do time
 ```
 
-Cada time edita só a própria pasta `times/<slug>` e lê `central/`. O "barramento" é o cliente de sincronização do OneDrive que já existe nas máquinas.
+Cada time edita só a própria pasta `times/<slug>` e lê `central/`. O "barramento" é o cliente de sincronização do OneDrive que já existe nas máquinas. Em cada computador, a pasta fica marcada como **Sempre manter neste dispositivo**: com os "Arquivos sob demanda", um arquivo que está só na nuvem não chega às ferramentas (o assistente orienta isso desde a versão 2.5).
 
 ### 6.2 Regras da troca
 

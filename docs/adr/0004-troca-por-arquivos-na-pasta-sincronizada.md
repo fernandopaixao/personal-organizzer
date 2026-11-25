@@ -31,11 +31,12 @@ O Fernando administra a pasta. Cada time edita só `times/<time>/`.
 
 ## Consequências
 - **A favor:** usa o que já existe na empresa, permissões por time no SharePoint, histórico de versões, não depende da conta de uma pessoa.
-- **Contra:** o OneDrive não avisa as ferramentas (elas leem a pasta a cada 20 a 60 s e ao voltar para a aba); atrasos de minutos são normais; o OneDrive cria cópias de conflito, tratadas em [ADR-0007](0007-um-escritor-por-arquivo.md); nomes de arquivos e datas ficam visíveis para quem acessa a pasta.
+- **Contra:** o OneDrive não avisa as ferramentas (elas leem a pasta a cada 20 a 60 s e ao voltar para a aba); atrasos de minutos são normais; o OneDrive cria cópias de conflito, tratadas em [ADR-0007](0007-um-escritor-por-arquivo.md); nomes de arquivos e datas ficam visíveis para quem acessa a pasta; com os "Arquivos sob demanda" do OneDrive, um arquivo que está só na nuvem pode não chegar ao navegador, por isso a pasta precisa estar marcada como **Sempre manter neste dispositivo** em cada computador (Windows e Mac: botão direito na pasta).
 
 ## Alternativas consideradas
 - Pasta no OneDrive pessoal do Fernando compartilhada: mais simples, mas presa à conta dele.
 - Endpoints ou API: descartado ([ADR-0001](0001-html-de-arquivo-unico-sem-servidor.md)).
 
 ## Ao evoluir
+- Todo texto que ensina a ligar a pasta (assistente, LEIA-ME, guias) pede **Sempre manter neste dispositivo** (desde 25/11/2026, assistente 2.5).
 - Toda troca nova entre ferramentas é **um arquivo novo** nesta pasta, com contrato próprio ([ADR-0009](0009-contratos-json-versionados.md)) e um único dono ([ADR-0007](0007-um-escritor-por-arquivo.md)).

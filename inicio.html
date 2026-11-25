@@ -1004,7 +1004,7 @@ const pctTxt = (a, b) => b ? Math.round(a / b * 100) + '%' : '—';
    Pergunta o uso esperado, cria o primeiro arquivo (sempre cifrado), gera os HTMLs
    desacoplados de cada uso e o cartão "Onde fica cada coisa".
    ===================================================================== */
-const TOOL_NOME = 'Início da solução', TOOL_VERSION = '2.4.0';
+const TOOL_NOME = 'Início da solução', TOOL_VERSION = '2.5.0';
 $('#ver').textContent = TOOL_VERSION;
 const st = { modo: '', sp: 0, sorteTimes: [], passo: 0, papel: '', usos: [], dados: {}, dirLocal: null, raiz: null, senha: null, criados: [], temChave: null, chaves: [], kErr: '', pastaDoLider: '', cofreChaves: false };
 // Perfil: quem lidera, se quer finanças e tarefas, e se o líder já mandou chaves e a pasta.
@@ -1061,7 +1061,7 @@ const ILU = [
       <rect class="s1" x="10" y="76" width="60" height="22" rx="6"/><text class="tm" x="40" y="91" text-anchor="middle">time A</text>
       <rect class="s1" x="90" y="76" width="60" height="22" rx="6"/><text class="tm" x="120" y="91" text-anchor="middle">time B</text>
       <rect class="s1" x="170" y="76" width="60" height="22" rx="6"/><text class="tm" x="200" y="91" text-anchor="middle">time C</text></svg>` },
-  { h: 'A troca de arquivos é pelo OneDrive', p: 'Uma pasta do SharePoint, sincronizada pelo OneDrive, aparece igual em todos os computadores. Cada pessoa grava só o próprio arquivo e lê o dos outros: ninguém sobrescreve ninguém. O seu arquivo pessoal fica em outra pasta, só sua.',
+  { h: 'A troca de arquivos é pelo OneDrive', p: 'Uma pasta do SharePoint, sincronizada pelo OneDrive, aparece igual em todos os computadores. Cada pessoa grava só o próprio arquivo e lê o dos outros: ninguém sobrescreve ninguém. Marque a pasta como "Sempre manter neste dispositivo" para o navegador enxergar os arquivos. O seu arquivo pessoal fica em outra pasta, só sua.',
     svg: `<svg viewBox="0 -8 240 112" aria-hidden="true"><rect class="s1" x="8" y="44" width="54" height="34" rx="4"/><path class="s1" d="M2 84H68"/><text class="tm" x="35" y="98" text-anchor="middle">ana-notebook</text>
       <path class="s1 f1" d="M92 40a14 14 0 0 1 8-26a20 20 0 0 1 38-2a14 14 0 0 1 12 28z"/><text class="t" x="120" y="32" text-anchor="middle">pasta</text>
       <rect class="sl fw" x="84" y="52" width="72" height="16" rx="4"/><text class="tx" x="120" y="63" text-anchor="middle">ana.json</text><rect class="sl fw" x="84" y="72" width="72" height="16" rx="4"/><text class="tx" x="120" y="83" text-anchor="middle">bruno.json</text>
@@ -1069,6 +1069,9 @@ const ILU = [
       <rect class="s1" x="178" y="44" width="54" height="34" rx="4"/><path class="s1" d="M172 84H238"/><text class="tm" x="205" y="98" text-anchor="middle">bruno-desktop</text></svg>` }
 ];
 const comoFunciona = () => `<div class="ilus">${ILU.map(x => `<div class="ilu">${x.svg}<h4>${x.h}</h4><p>${x.p}</p></div>`).join('')}</div>`;
+// Arquivos sob demanda do OneDrive: sem "Sempre manter neste dispositivo", a pasta pode ficar só na nuvem e o navegador não vê os arquivos novos dos outros.
+const MANTER = 'Sempre manter neste dispositivo';
+const MANTER_COMO = `No Windows, clique com o botão direito na pasta, no Explorador de Arquivos, e escolha "${MANTER}". No Mac, no Finder, botão direito na pasta › "${MANTER}".`;
 const PASSOS = ['Boas-vindas', 'Perfil', 'Chaves', 'Dados', 'Pastas', 'Senha', 'Pronto'];
 function desenhar() {
   const p = st.passo, el = $('#wz');
@@ -1119,6 +1122,7 @@ function desenhar() {
     <div class="row"><button class="btn ${st.dirLocal ? '' : 'pri'}" id="pL">${st.dirLocal ? 'Trocar' : 'Escolher pasta local'}</button>${st.dirLocal ? `<span class="chip ok">${esc(st.dirLocal.name)}</span>` : ''}</div>
     <p class="lbl" style="margin-top:20px">2 · Pasta sincronizada pelo OneDrive ${chavesUteis().length ? '(recomendada agora)' : '(pode ser depois)'}</p>
     <p class="small muted" style="margin-top:0">${chavesUteis().length ? `A pasta que o seu líder compartilhou${st.pastaDoLider ? `: <b class="code">${esc(st.pastaDoLider)}</b>` : ` (normalmente <span class="code">${PASTA_COMUM}</span>)`}. Ela precisa estar sincronizada neste computador (botão "Sincronizar" ou "Adicionar atalho ao Meu OneDrive" no SharePoint).` : `A pasta comum da solução, <span class="code">${PASTA_COMUM}</span>: recomendamos uma biblioteca do SharePoint do grupo, sincronizada pelo OneDrive.`} O assistente cria só a estrutura de pastas e um LEIA-ME; nenhum dado vai para lá agora.</p>
+    <div class="manter small" style="border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin:0 0 10px"><b>Importante: marque a pasta como "${MANTER}".</b> Sem isso, o OneDrive guarda os arquivos só na nuvem (ícone de nuvem) e o navegador não consegue ler o que os outros publicam. ${MANTER_COMO} O ícone vira um círculo verde cheio.</div>
     <div class="row"><button class="btn" id="pC">${st.raiz ? 'Trocar' : 'Escolher pasta sincronizada'}</button>${st.raiz ? `<span class="chip ok">${esc(st.raiz.name)}</span>` : '<span class="small faint">opcional agora</span>'}</div>${nav(!!st.dirLocal)}`;
   if (p === 5) el.innerHTML = `${topo}<h1>Senha</h1><p class="muted">Todos os arquivos de dados são cifrados. Não existe arquivo sem senha. ${plano().length > 1 ? 'Os arquivos criados agora usam a mesma senha; cada ferramenta permite trocar depois.' : ''}</p>
     <div class="cofre">A senha é a única forma de abrir seus dados e <b>não pode ser recuperada</b>. Você vai guardá-la no cofre de senhas no próximo passo.</div>
@@ -1276,7 +1280,7 @@ async function criarTudo() {
     const slugs = g ? d.times.map(t => t.slug) : [d.slug];
     for (const s of slugs) await subpasta(st.raiz, ['times', s, 'financas'], true);
     if (st.usos.includes('ferias')) { if (g) await subpasta(st.raiz, ['grupos', d.slug, 'ferias'], true); for (const s of slugs) await subpasta(st.raiz, ['times', s, 'ferias'], true); }
-    if (!await lerTexto(st.raiz, 'LEIA-ME.md')) await gravarSeguro(st.raiz, 'LEIA-ME.md', `# ${PASTA_COMUM}\n\nPasta compartilhada da solução (sincronizada pelo OneDrive). Tudo aqui é cifrado com a chave de cada time; nunca coloque senhas ou chaves aqui.\n\n- grupo/: só as ferramentas do gestor escrevem.\n- times/<time>/: as ferramentas do time escrevem; o hub escreve só os post-its, em postits/<pessoa>-<computador>.json (um arquivo por autor).\n- Arquivos com nome de computador no final são cópias de conflito do OneDrive: as ferramentas resolvem sozinhas.\n`);
+    if (!await lerTexto(st.raiz, 'LEIA-ME.md')) await gravarSeguro(st.raiz, 'LEIA-ME.md', `# ${PASTA_COMUM}\n\nPasta compartilhada da solução (sincronizada pelo OneDrive). Tudo aqui é cifrado com a chave de cada time; nunca coloque senhas ou chaves aqui.\n\n- grupo/: só as ferramentas do gestor escrevem.\n- times/<time>/: as ferramentas do time escrevem; o hub escreve só os post-its, em postits/<pessoa>-<computador>.json (um arquivo por autor).\n- Arquivos com nome de computador no final são cópias de conflito do OneDrive: as ferramentas resolvem sozinhas.\n- Em cada computador, clique com o botão direito nesta pasta e escolha "${MANTER}" (Windows e Mac): sem isso os arquivos ficam só na nuvem e o navegador não os lê.\n`);
   }
   if (g) await gerarPacotes();
   await lembrarTudo();
@@ -1330,6 +1334,7 @@ function desenharSorte(el) {
       <div class="row"><button class="btn ${st.dirLocal ? '' : 'pri'}" id="sL">${st.dirLocal ? 'Trocar' : 'Escolher pasta'}</button>${st.dirLocal ? `<span class="chip ok">${esc(st.dirLocal.name)}</span>` : ''}</div>
       <p class="lbl" style="margin-top:16px">Pasta sincronizada pelo OneDrive (pode ser depois)</p>
       <div class="row"><button class="btn" id="sC">${st.raiz ? 'Trocar' : 'Escolher pasta sincronizada'}</button>${st.raiz ? `<span class="chip ok">${esc(st.raiz.name)}</span>` : `<span class="small faint">normalmente ${PASTA_COMUM}</span>`}</div>
+      <p class="small muted" style="margin:6px 0 0">Depois de sincronizar, marque a pasta como <b>"${MANTER}"</b> (botão direito na pasta, no Windows ou no Mac): sem isso o navegador não lê os arquivos que ficam só na nuvem.</p>
       <p class="lbl" style="margin-top:16px">Senha (uma só, para todos os seus arquivos)</p>
       <div class="row"><button class="btn ${st.senha ? '' : 'pri'}" id="sS">${st.senha ? 'Criar outra senha' : 'Criar senha'}</button>${st.senha ? '<span class="chip ok">guardada no cofre</span>' : ''}</div>
       <div class="row" style="margin-top:20px"><button class="btn" id="sVol">Voltar</button><span class="grow"></span><button class="btn pri" id="sGo" ${ok ? '' : 'disabled'}>Gerar tudo</button></div>`;
@@ -1411,7 +1416,8 @@ async function gerarPacotes() {
       `1. Copie esta pasta para uma pasta só sua (de preferência no seu OneDrive, como backup; nunca na pasta compartilhada) e abra os HTMLs no Edge ou no Chrome.\r\n` +
       `2. ${itens.join('. ')}.\r\n` +
       `3. Na primeira abertura, crie a sua senha e guarde no cofre de senhas. As chaves do time já estão dentro dos HTMLs: não precisa colar nada.\r\n` +
-      `4. Ligue a pasta sincronizada pelo OneDrive (${pasta}) quando a ferramenta pedir.\r\n\r\nNão coloque estes HTMLs na pasta compartilhada: eles levam a chave do time.\r\n`);
+      `4. Ligue a pasta sincronizada pelo OneDrive (${pasta}) quando a ferramenta pedir.\r\n` +
+      `5. Marque a pasta ${pasta} como "${MANTER}" (Windows: botão direito na pasta no Explorador de Arquivos; Mac: botão direito no Finder). Sem isso os arquivos ficam só na nuvem e o navegador não os lê.\r\n\r\nNão coloque estes HTMLs na pasta compartilhada: eles levam a chave do time.\r\n`);
   }
 }
 // Grava neste navegador onde ficou cada arquivo e a pasta sincronizada: cada ferramenta abre já configurada (ADR-0030).
@@ -1459,8 +1465,9 @@ function itensChecklist() {
   const g = st.papel === 'gestor', n = (st.dados.times || []).length, sorte = st.modo === 'sorte', pasta = st.raiz?.name || st.pastaDoLider || PASTA_COMUM, l = [];
   l.push(['cofre', 'A senha está guardada no cofre de senhas', 'Sem ela não há como abrir os dados: não existe recuperação.']);
   l.push(['local', `A pasta ${st.dirLocal?.name || 'pessoal'} é só minha (não é a pasta compartilhada)`, 'Ela guarda os seus arquivos pessoais, cifrados com a sua senha. A pasta compartilhada é outra.']);
-  l.push(['backup', `A pasta ${st.dirLocal?.name || 'pessoal'} está no meu OneDrive`, 'É o backup: se trocar de computador ou o disco falhar, os arquivos continuam lá. Abra as ferramentas num computador de cada vez.']);
-  l.push(['sync', `A pasta ${pasta} sincroniza neste computador`, 'No SharePoint, botão "Sincronizar" ou "Adicionar atalho ao Meu OneDrive". Ela precisa aparecer no Explorador de Arquivos.']);
+  l.push(['backup', `A pasta ${st.dirLocal?.name || 'pessoal'} está no meu OneDrive`, `É o backup: se trocar de computador ou o disco falhar, os arquivos continuam lá. Marque também esta pasta como "${MANTER}". Abra as ferramentas num computador de cada vez.`]);
+  l.push(['sync', `A pasta ${pasta} sincroniza neste computador`, 'No SharePoint, botão "Sincronizar" ou "Adicionar atalho ao Meu OneDrive". Ela precisa aparecer no Explorador de Arquivos (Windows) ou no Finder (Mac).']);
+  l.push(['manter', `A pasta ${pasta} está como "${MANTER}"`, `${MANTER_COMO} Sem isso os arquivos ficam só na nuvem e as ferramentas não leem o que os outros publicam. O ícone da pasta vira um círculo verde cheio.`]);
   l.push(['hub', `Abri o hub.html e ele mostra ${g ? `os ${n} times` : 'o meu time'}`, 'O hub é a tela inicial: as outras ferramentas abrem a partir dele.']);
   if (g && st.usos.includes('tarefas') && !st.raiz) l.push(['central', 'Na Central, liguei a pasta sincronizada', 'Integração › Pasta e chaves.']);
   if (g && st.usos.includes('financas')) l.push(['fg', 'No Finanças do Grupo, informei o orçamento do ano', 'Ajustes › orçamento aprovado; Times › teto de cada time.']);
