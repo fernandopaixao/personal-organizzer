@@ -13,4 +13,4 @@ Montar: `python3 tools/build_experimental.py` (saída em `dist/experimental/`).
 Montar e testar: `python3 tools/build_experimental.py --testar`.
 O pacote (`python3 tools/empacotar.py`) monta e inclui a pasta `experimental/` sozinho.
 
-O ícone da aba de cada ferramenta (marca Remessa) não fica aqui: vem de `financas/src/icones/` e vale também para o main ([ADR-0036](../docs/adr/0036-nome-remessa.md)).
+O ícone da aba de cada ferramenta (marca Remessa) não fica aqui: vem de `financas/src/icones/` e vale também para o main ([ADR-0037](../docs/adr/0037-nome-remessa.md)).

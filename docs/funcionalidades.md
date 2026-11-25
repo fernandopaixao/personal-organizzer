@@ -1,6 +1,6 @@
 # Funcionalidades, usos e objetivos
 
-*25/11/2026 · Remessa · Central v15.11, Quadro do Time 2.3, Hub 2.1, Finanças do Grupo 1.6 e do Time 1.4, Mapa de Férias 1.3, assistente 2.7, contratos 1.0 · visual experimental em `experimental/`*
+*25/11/2026 · Remessa · Central v15.12, Quadro do Time 2.3, Hub 2.1, Finanças do Grupo 1.6 e do Time 1.4, Mapa de Férias 1.4 (dentro da Central), assistente 2.7, contratos 1.0 · visual experimental em `experimental/`*
 
 Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. Para as regras técnicas por trás, veja as [decisões de arquitetura](adr/README.md). Para o caminho de quem usa, veja a [jornada do usuário](jornada-do-usuario.md) e o [passo a passo](passo-a-passo.md).
 
@@ -8,7 +8,7 @@ Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. 
 
 ## 1. Objetivo da solução
 
-**Nome: Remessa** ([ADR-0036](adr/0036-nome-remessa.md)). A solução funciona como um serviço de envelopes lacrados com uma caixa postal: cada ferramenta põe o que tem para contar num envelope cifrado com a chave do time (o lacre) e deixa na pasta compartilhada (a caixa postal). Só quem tem a chave abre. Um arquivo que chegou de outra pessoa e ainda não foi aplicado é uma **nova remessa**. Cada ferramenta tem o seu ícone na aba do navegador, com o lacre azul da Remessa no canto; o hub usa o envelope lacrado.
+**Nome: Remessa** ([ADR-0037](adr/0037-nome-remessa.md)). A solução funciona como um serviço de envelopes lacrados com uma caixa postal: cada ferramenta põe o que tem para contar num envelope cifrado com a chave do time (o lacre) e deixa na pasta compartilhada (a caixa postal). Só quem tem a chave abre. Um arquivo que chegou de outra pessoa e ainda não foi aplicado é uma **nova remessa**. Cada ferramenta tem o seu ícone na aba do navegador, com o lacre azul da Remessa no canto; o hub usa o envelope lacrado.
 
 Dar a um gestor de vários times, e aos próprios times, **um lugar organizado para tarefas, pessoas, rituais, portfólio de iniciativas, fluxo dos times e finanças**, sem servidor, sem instalação e com tudo cifrado. Os objetivos que guiam cada funcionalidade:
 
@@ -33,7 +33,6 @@ Dar a um gestor de vários times, e aos próprios times, **um lugar organizado p
 | **Quadro do Time** | `quadro_do_time_v1.html` (gerado por time) | Cada time | Kanban, backlog, sprints e métricas de fluxo do time |
 | **Finanças do Grupo** | `financas_grupo.html` | Gestor | Consolidar os planos financeiros dos times contra o orçamento |
 | **Finanças do Time** | `financas_time.html` (gerado por time) | Responsável financeiro do time | Registrar gastos, planejar o ano e publicar o plano |
-| **Mapa de Férias** | `ferias.html` | Cada pessoa do time | Marcar as próprias férias e ver as do time; sobem sozinhas para a página Férias da Central do gestor ([ADR-0033](adr/0033-ferias-dentro-da-central.md)) |
 | **Cartão "Onde fica cada coisa"** | `onde-fica-cada-coisa.html` | Todos | Mapa em claro (sem dados) de arquivos e pastas |
 | **Contratos de integração** | pasta `contratos/` | Quem constrói outra solução (time, gestor par, agente) | Gravar arquivos que o hub, a Central, as Finanças e o Mapa de Férias leem e conciliam, até a visão da liderança ([seção 10](#10-contratos-para-outras-soluções)) |
 | **Visual experimental** | pasta `experimental/` do pacote | Quem quiser experimentar | As mesmas ferramentas, com os mesmos dados, no visual novo ([seção 11](#11-visual-experimental-pasta-experimental)) |
@@ -66,7 +65,6 @@ Todas têm, no topo, **Onde estou?** (qual ferramenta, qual arquivo, o que é lo
 | Responsável + finanças | Finanças do Time |
 | Responsável ou membro + tarefas | Quadro do Time |
 | Gestor + férias | Central com a página Férias já configurada (grupo, times e chaves); sem HTML nem arquivo de férias à parte ([ADR-0033](adr/0033-ferias-dentro-da-central.md)) |
-| Responsável ou membro + férias | Mapa de Férias do time: cada pessoa marca as suas |
 | Vários usos | A soma das linhas, cada HTML separado |
 
 **Quem lidera vários times (2.3):** o caminho normal faz o mesmo que o Estou com sorte nas chaves. O assistente gera a chave de tarefas e, com Finanças, a de finanças de cada time (reaproveita a de tarefas que você colou para um dos times), sugere o prefixo de quem não tem (`PAG`, `CAR`), grava tudo na Central (inclusive a página Férias), no Finanças do Grupo e no hub, e gera `para-os-times/<time>/`. A tela final mostra as chaves com os botões de copiar.
@@ -81,15 +79,17 @@ Onde as chaves coladas vão parar: no hub (tarefas e finanças de cada time), no
 |---|---|---|
 | Chaves de tarefas e de finanças de cada time | Dentro dos arquivos cifrados e dos HTMLs dos times | Aviso de cofre antes; botões para copiar cada chave depois |
 | Hub, Central (com a página Férias), Finanças do Grupo e "Onde fica cada coisa" | Na pasta escolhida | Times, prefixos, pastas e chaves já cadastrados; uma senha para todos |
-| Quadro do Time, Finanças do Time, Mapa de Férias e LEIA-ME de cada time | `para-os-times/<time>/` | A chave do time e a pasta sincronizada já configuradas |
+| Quadro do Time, Finanças do Time e LEIA-ME de cada time | `para-os-times/<time>/` | A chave do time e a pasta sincronizada já configuradas |
 | Chave do grupo para a liderança (2.7, se escolhida) e `para-a-lideranca/LEIA-ME.txt` | Finanças do Grupo (Nível acima), Férias da Central e o envelope para a liderança | Ou a chave que a liderança mandou, colada no formulário |
-| Estrutura da pasta sincronizada | `times/<time>/…`, `grupos/<grupo>/` | Só pastas vazias, criadas quando você aponta a pasta no último passo |
+| Estrutura da pasta sincronizada | `times/<time>/quadro`, `postits`, `financas`…, `grupos/<grupo>/` | Só pastas vazias, criadas quando você aponta a pasta no último passo |
 
 **Passo a passo da Remessa (2.7).** A tela final organiza tudo em quatro passos numerados, cada um com um desenho e um exemplo: **Sua mesa** (o que fica na pasta pessoal), **Remessas para os times** (um envelope por time, com a tabela de quem recebe cada arquivo), **Remessa para a liderança** (o que sobe e como a chave chega) e **Aponte a caixa postal** (para que serve cada pasta da pasta sincronizada). A pasta sincronizada saiu do formulário: é o último passo, a única escolha que resta, e configura todas as ferramentas de uma vez. No Finanças do Grupo da liderança (1.6), **+ Grupo de outro gestor** aceita colar a chave que o gestor mandou.
 
 A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados), um desenho do que ficou em cada pasta, as chaves por time e um **checklist** (senha no cofre, pasta pessoal só sua e no seu OneDrive, pasta compartilhada sincronizando, pasta compartilhada marcada como **"Sempre manter neste dispositivo"**, hub mostrando os times, pasta ligada na Central e no Finanças do Grupo, chaves no cofre, pastas enviadas aos times). O caminho normal também termina com o checklist do perfil. As marcações ficam só no navegador.
 
 **Sempre manter neste dispositivo (2.5).** Com os "Arquivos sob demanda" do OneDrive, a pasta compartilhada pode ficar só na nuvem, e o navegador não lê os arquivos que os outros publicam. O assistente orienta marcar a pasta como **"Sempre manter neste dispositivo"** (botão direito na pasta, no Explorador de Arquivos do Windows ou no Finder do Mac) em quatro lugares: no desenho de como funciona, na etapa Pastas (e na tela do Estou com sorte), no checklist final e nos LEIA-ME que ele grava na pasta compartilhada e em `para-os-times/<time>/`. O item da pasta pessoal sugere o mesmo ([ADR-0004](adr/0004-troca-por-arquivos-na-pasta-sincronizada.md)).
+
+**Sem ferramenta de férias para os times (2.6, [ADR-0036](adr/0036-ferias-so-o-gestor-cadastra.md)).** Quem marca Férias é só o gestor: ele recebe a Central com a página Férias pronta. O assistente não gera mais `ferias.html`, nem para o gestor nem em `para-os-times/<time>/`, e não cria `times/<time>/ferias/`.
 
 **Quando usar:** uma vez, ou ao trocar de computador. O gestor manda a cada time a pasta `para-os-times/<time>/` (ou o mesmo `inicio.html`, com a chave por mensagem direta), e o time monta tudo sozinho.
 
@@ -102,7 +102,7 @@ A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados
 | Funcionalidade | Uso | Objetivo |
 |---|---|---|
 | **Cockpit de gestão (2.0)** | Saudação com a frase do dia e o número de pontos de atenção; cards de leitura de todos os módulos com a origem marcada (Central, Férias, Finanças, Quadros, Post-its) | Abrir o dia numa tela só ([ADR-0035](adr/0035-hub-cockpit-de-gestao.md)) |
-| **Marca e nova remessa (2.1)** | Ícone da Remessa (envelope com lacre azul) no topo e na entrada; na lista **Pede sua atenção**, "Nova remessa" para cada time que publicou backlog, métricas ou plano nas últimas 24 horas | Saber o que chegou na caixa postal sem abrir cada ferramenta ([ADR-0036](adr/0036-nome-remessa.md)) |
+| **Marca e nova remessa (2.1)** | Ícone da Remessa (envelope com lacre azul) no topo e na entrada; na lista **Pede sua atenção**, "Nova remessa" para cada time que publicou backlog, métricas ou plano nas últimas 24 horas | Saber o que chegou na caixa postal sem abrir cada ferramenta ([ADR-0037](adr/0037-nome-remessa.md)) |
 | **Resumo da Central (2.0)** | Lê o arquivo da Central só para leitura, com a senha da sessão: meu dia (atrasadas, hoje, feitas), delegadas no prazo e a cobrar, iniciativas "agora" em dia, atrasadas ou em atenção, fora hoje e próximos 14 dias, 1:1 em atraso | Ver o que pede atenção sem abrir a Central |
 | **Pede sua atenção (2.0)** | Lista única de todos os módulos, atrasado primeiro: suas tarefas atrasadas, delegadas, iniciativas, 1:1, iniciativas e bloqueios dos quadros, time acima do orçado, time sem publicar há 7 dias. Cada item abre a ferramenta certa | Não deixar nada cair entre as ferramentas |
 | **Indicadores do time (2.0)** | No card do time: iniciativas do quadro no prazo, em atenção e atrasadas, bloqueios abertos e as métricas de destaque com a série (lidos de `status.json` e `metricas.json`) | Ver a saúde do time sem abrir o Quadro |
@@ -119,9 +119,11 @@ A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados
 
 ---
 
-## 5. Central de Gestão (v15.10)
+## 5. Central de Gestão (v15.12)
 
 **Férias dentro da Central (15.9, [ADR-0033](adr/0033-ferias-dentro-da-central.md)).** O Mapa de Férias do gestor e da liderança deixou de ser uma ferramenta à parte: é a página **Férias** (menu Pessoas), no mesmo arquivo e com a mesma senha da Central. Os times com pasta e as chaves de tarefas da Integração entram sozinhos; a pasta compartilhada é a da Integração. A página **Hoje** mostra quem está **fora hoje**.
+
+**Só o gestor cadastra as férias (15.11, [ADR-0036](adr/0036-ferias-so-o-gestor-cadastra.md)).** Os times não recebem ferramenta de férias: o `ferias.html` saiu do pacote, do assistente e de `para-os-times/`. Na aba **Pessoas** da página Férias, o gestor cadastra as próprias férias, as dos diretos e as das pessoas de cada time; **Trazer pessoas da Central** traz as pessoas cadastradas, cada uma com o seu time. Todos os times da Central viram unidades, com ou sem pasta.
 
 **Chave de integração dentro do time (15.8).** Na visão do time, a aba **Integração** mostra a chave em destaque: **Gerar chave de integração** (um clique; se faltar, a Central sugere a pasta e o prefixo), **HTML do time (com a chave)**, **Copiar chave**, **Mensagem para o time**, **Chave de finanças** e **Vazou: trocar chave**, mais o que chega do time (backlog, métricas, plano). Time sem chave mostra o aviso com o botão também na **Visão do time** e no card da página Times.
 
@@ -154,8 +156,8 @@ Navegação em 9 páginas (teclas 1 a 9) e o botão **Importar e agentes** no to
 - **Objetivo:** ter evidências acumuladas quando o ciclo chegar.
 
 ### 5.5 Férias (5)
-- **Uso:** o Mapa de Férias do grupo, dentro da Central: **Mapa** (mapa de calor dos dias com mais e menos gente fora, semanas mais cheias e mais tranquilas, por unidade), **Calendário**, **Diretos** (as suas férias e as de quem responde direto a você), **Unidades** (os times da Central entram sozinhos; a liderança adiciona os grupos dos gestores) e **Ajustes** (chave do nível acima, publicar para a liderança, limite, dias úteis, feriados). Detalhes na [seção 9](#9-mapa-de-férias-feriashtml-13).
-- **Sem módulo à parte:** sem `ferias.html`, sem `ferias-<grupo>.json` e sem outra senha para o gestor. Quem usava o Mapa separado clica **Trazer do Mapa de Férias separado** (Ajustes ou primeira tela) e digita a senha do arquivo antigo, que só é lido.
+- **Uso:** o Mapa de Férias do grupo, dentro da Central: **Mapa** (mapa de calor dos dias com mais e menos gente fora, semanas mais cheias e mais tranquilas, por unidade), **Calendário**, **Pessoas** (as suas férias, as dos diretos e as das pessoas de cada time, agrupadas por time; **Trazer pessoas da Central** traz todo mundo com o time), **Unidades** (todos os times da Central entram sozinhos; a liderança adiciona os grupos dos gestores) e **Ajustes** (chave do nível acima, publicar para a liderança, limite, dias úteis, feriados). Detalhes na [seção 9](#9-mapa-de-férias-dentro-da-central-14).
+- **Sem módulo à parte:** sem `ferias.html`, sem `ferias-<grupo>.json`, sem outra senha e sem ferramenta de férias para os times (15.11). Quem usava o Mapa separado clica **Trazer do Mapa de Férias separado** (Ajustes ou primeira tela) e digita a senha do arquivo antigo, que só é lido.
 - **Objetivo:** planejar as ausências junto com o resto da gestão, sem mais um arquivo para abrir e guardar.
 
 ### 5.6 Iniciativas (6)
@@ -175,7 +177,7 @@ Navegação em 9 páginas (teclas 1 a 9) e o botão **Importar e agentes** no to
 - **Objetivo:** acompanhar cada time e entregar a ferramenta pronta.
 
 ### 5.9 Integração (9)
-- **Uso:** pasta e chaves (gerar, copiar, revogar; **chave de finanças** por time, colada ou importada com **Chaves do Finanças do Grupo**), **Remessas** (15.10: os arquivos que chegaram dos times, com prévia; cada um ainda não aplicado é uma "nova remessa" e aparece no cartão Dos times), **Conciliação** (unir épicos, trazer para a Central, ligar itens a features, códigos das finanças dos times sem iniciativa na Central) e **Compartilhar** (tela que mostra o que vai para cada time).
+- **Uso:** pasta e chaves (gerar, copiar, revogar; **chave de finanças** por time, colada ou importada com **Chaves do Finanças do Grupo**), **Remessas** (15.12: os arquivos que chegaram dos times, com prévia; cada um ainda não aplicado é uma "nova remessa" e aparece no cartão Dos times), **Conciliação** (unir épicos, trazer para a Central, ligar itens a features, códigos das finanças dos times sem iniciativa na Central) e **Compartilhar** (tela que mostra o que vai para cada time).
 - **Abrir o Finanças do Grupo (15.7):** botão em Integração e na aba Finanças da iniciativa; a senha da sessão vai junto.
 - **Objetivo:** manter a Central e os times falando a mesma língua, sem sobrescrever nada.
 
@@ -273,33 +275,33 @@ O grupo enxerga os anos do próprio horizonte **mais os anos publicados pelos ti
 | **Senha obrigatória e aviso de cofre** | Todas | Ninguém abre o arquivo sem a senha; a pessoa guarda a senha antes de seguir |
 | **Lembrete de teste da senha** | Todas | Descobrir cedo que a senha se perdeu (30 dias, depois a cada 90) |
 | **Onde estou?** | Todas | Mostrar ferramenta, versão, arquivo, pasta local, pasta comum e o que vai para cada uma |
-| **← Hub** | Central, Quadro, Finanças, Mapa de Férias | Voltar à tela inicial sem recarregar |
+| **← Hub** | Central, Quadro, Finanças | Voltar à tela inicial sem recarregar |
 | **Backup cifrado rotativo** | Ferramentas com arquivo local | 5 últimas versões em `backup/` e lembrete semanal de exportar |
 | **Detecção de cópias de conflito** | Todas que leem a pasta comum | Não perder dado escondido em `arquivo (1).json` |
 | **Reconhecer arquivo errado** | Todas | Dizer qual HTML abre aquele arquivo |
 | **Uma senha por sessão** | Hub, Central e assistente passam a senha; Finanças, Férias e Central recebem | Abrir pelo hub ou pela Central sem redigitar a senha. Só em memória, uma vez, para a janela recém-aberta ([ADR-0029](adr/0029-uma-senha-por-sessao.md)) |
 | **Tema claro, escuro ou automático** | Todas | Botão redondo no canto inferior direito; Automático segue o sistema. A escolha fica só neste computador e vale para todas as ferramentas abertas ([ADR-0027](adr/0027-tema-claro-escuro-compartilhado.md)) |
-| **Aviso quando não dá para abrir pastas** | Hub, Finanças, Mapa de Férias e assistente | No Safari, no Firefox, no celular, numa pré-visualização (Outlook, Teams, OneDrive) ou aberto de dentro do .zip, o aviso no topo diz o motivo e o que fazer, e todo botão responde ao clique ([ADR-0030](adr/0030-aviso-quando-nao-da-para-abrir-pastas.md)) |
+| **Aviso quando não dá para abrir pastas** | Hub, Finanças, Central (página Férias) e assistente | No Safari, no Firefox, no celular, numa pré-visualização (Outlook, Teams, OneDrive) ou aberto de dentro do .zip, o aviso no topo diz o motivo e o que fazer, e todo botão responde ao clique ([ADR-0030](adr/0030-aviso-quando-nao-da-para-abrir-pastas.md)) |
 | **Migração automática** | Central (e demais quando o formato muda) | Abrir arquivo antigo na versão nova, com backup |
 | **Pacote .zip** | `python3 tools/empacotar.py` (e a CI do repositório pessoal) | Levar a solução para a empresa num único arquivo: HTMLs lado a lado, contratos, documentação, LEIA-ME e a pasta `experimental/` com o visual novo. Não passa pelo repositório da empresa |
 
 ---
 
-## 9. Mapa de Férias (`ferias.html`, 1.3)
+## 9. Mapa de Férias (dentro da Central, 1.4)
 
-Apoio para **enxergar e planejar as ausências** do time e do grupo. Não substitui a ferramenta oficial de férias da empresa: não aprova, não controla saldo. **Onde fica (1.3, [ADR-0033](adr/0033-ferias-dentro-da-central.md)):** o gestor e a liderança usam a página **Férias da Central** (mesmo código, aberto dentro dela, com os dados no arquivo da Central); o `ferias.html` à parte fica para as pessoas do time, que marcam as próprias férias. Plano e decisões: [`plano-ferias.md`](plano-ferias.md).
+Apoio para **enxergar e planejar as ausências** do time e do grupo. Não substitui a ferramenta oficial de férias da empresa: não aprova, não controla saldo. **Onde fica (1.4, [ADR-0033](adr/0033-ferias-dentro-da-central.md) e [ADR-0036](adr/0036-ferias-so-o-gestor-cadastra.md)):** na página **Férias da Central** (mesmo código, aberto dentro dela, com os dados no arquivo da Central). Só o gestor cadastra: as pessoas dos times não usam ferramenta de férias e o `ferias.html` não vai mais no pacote. Plano e decisões: [`plano-ferias.md`](plano-ferias.md).
 
 | Tela | O que faz | Para quê |
 |---|---|---|
 | **Mapa** | Cards (fora hoje, pico do período, dias acima do limite, dias úteis sem ninguém fora), mapa de calor por dia, semanas mais cheias e mais tranquilas, barras por unidade; filtros por unidade e período | Ver de relance onde há mais e menos gente fora |
 | **Calendário** | Mês a mês, uma linha por pessoa agrupada por unidade, com a contagem do dia no topo | Planejar e ajustar períodos, clicando na célula |
-| **Pessoas / Diretos** | Cadastro de pessoas e ausências (férias, folga, treinamento, outra), barra rápida, nota só local | Registrar o que você sabe |
+| **Pessoas** | Cadastro de pessoas (você, diretos e as pessoas de cada time, com o time de cada uma) e ausências (férias, folga, treinamento, outra), barra rápida, **Trazer pessoas da Central**, nota só local | Registrar as férias de todo mundo num lugar só |
 | **Unidades** (gestor) | Times e grupos de outros gestores, chaves, o que foi lido. Na Central, os times vêm sozinhos da Integração; grupos importados das Finanças do Grupo | Somar os níveis de baixo |
 | **Ajustes** | Pasta, chave do time ou do nível acima, publicar, limite de pessoas fora, dias úteis, feriados, nomes para cima, senha (na Central: trazer do Mapa separado) | Configurar |
 
 **Planejar:** ao marcar uma ausência, o formulário mostra quantas outras pessoas já estão fora e se algum dia passa do limite, e sugere os três períodos com menos gente fora nos próximos seis meses.
 
-**Níveis:** cada membro do time publica o que cadastrou em `times/<time>/ferias/` (sozinho, a cada mudança, com a chave do time); o gestor soma os times, cadastra as próprias férias e as dos diretos e publica o consolidado em `grupos/<grupo>/ferias/` depois de conferir; a liderança cadastra o grupo do gestor como unidade e soma do mesmo jeito ([ADR-0025](adr/0025-consolidacao-em-niveis.md) e [ADR-0026](adr/0026-ferias-em-niveis.md)).
+**Níveis:** o gestor cadastra as férias de todo mundo do grupo (as dele, as dos diretos e as das pessoas de cada time) e publica o consolidado em `grupos/<grupo>/ferias/` depois de conferir; a liderança cadastra o grupo do gestor como unidade e soma do mesmo jeito ([ADR-0025](adr/0025-consolidacao-em-niveis.md) e [ADR-0026](adr/0026-ferias-em-niveis.md)).
 
 ---
 

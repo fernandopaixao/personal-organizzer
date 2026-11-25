@@ -1,6 +1,6 @@
 # Visão geral da solução · Central de Gestão, Quadro do Time e integração
 
-*25/11/2026 · estado atual: Remessa · Central v15.11, Quadro do Time 2.3, Hub 2.1, Finanças do Grupo 1.6 e do Time 1.4, Mapa de Férias 1.3 e contratos 1.0 (detalhes em `docs/plano-v15.md`, `docs/plano-hub.md`, `docs/plano-financas.md` e [`contratos/`](../contratos/LEIA-ME.md))*
+*25/11/2026 · estado atual: Remessa · Central v15.12, Quadro do Time 2.3, Hub 2.1, Finanças do Grupo 1.6 e do Time 1.4, Mapa de Férias 1.4 (dentro da Central) e contratos 1.0 (detalhes em `docs/plano-v15.md`, `docs/plano-hub.md`, `docs/plano-financas.md` e [`contratos/`](../contratos/LEIA-ME.md))*
 
 > **Por onde começar:** [funcionalidades, usos e objetivos](funcionalidades.md) · [jornada do usuário](jornada-do-usuario.md) · [passo a passo](passo-a-passo.md) · [decisões de arquitetura (ADRs)](adr/README.md)
 
@@ -10,7 +10,7 @@ Este documento explica a solução como um todo: quais ferramentas existem, para
 
 ## 1. Em uma página
 
-A solução se chama **Remessa** ([ADR-0036](adr/0036-nome-remessa.md)): envelopes lacrados (arquivos cifrados com a chave de cada time) numa caixa postal (a pasta compartilhada). Só quem tem a chave abre; o que chega de outra pessoa é uma **nova remessa**.
+A solução se chama **Remessa** ([ADR-0037](adr/0037-nome-remessa.md)): envelopes lacrados (arquivos cifrados com a chave de cada time) numa caixa postal (a pasta compartilhada). Só quem tem a chave abre; o que chega de outra pessoa é uma **nova remessa**.
 
 A solução é um pequeno ecossistema de **ferramentas HTML de arquivo único**, sem servidor, sem instalação e sem chamadas de rede. Cada ferramenta guarda os dados num arquivo separado do HTML, e as ferramentas conversam apenas por **arquivos JSON cifrados numa pasta do SharePoint sincronizada** no computador de cada um.
 
@@ -45,7 +45,7 @@ A solução é um pequeno ecossistema de **ferramentas HTML de arquivo único**,
 | **Central de Gestão v15** | Gestão pessoal e de portfólio do gestor: tarefas, delegação, iniciativas e features, rituais, pessoas, métricas e integração com os times | Fernando | Repositório: `gestao_pessoal_v15.html`, plano em `docs/plano-v15.md`. Projeto: `gestao-v15/` |
 | **Quadro do Time 2.2** | Quadro de cards, backlog, sprints, iniciativas ligadas à Central e métricas de fluxo do time | Cada time | Repositório e projeto: `ferramenta-time/` (HTML, guia, telas) |
 | **Finanças do Grupo e do Time** | Plano financeiro multianual de cada time (lançamentos locais, plano agregado publicado) e consolidado do grupo ano a ano contra o orçamento, com cards de leitura e gráficos | Fernando (grupo) e responsável financeiro de cada time | Repositório: `financas/`, plano em `docs/plano-financas.md` |
-| **Férias (página da Central e Mapa do time)** | Férias e ausências em níveis (time → gestor → liderança): mapa de calor dos dias com mais e menos gente fora, calendário e sugestão de períodos. O gestor e a liderança usam a página **Férias da Central** (mesmo arquivo e senha, [ADR-0033](adr/0033-ferias-dentro-da-central.md)); cada pessoa do time usa o `ferias.html`. Apoio, não substitui a ferramenta oficial | Times, gestores e liderança | Repositório: página Férias em `gestao_pessoal_v15.html` e `ferias/ferias.html` (mesmo código), plano em `docs/plano-ferias.md` |
+| **Férias (página da Central)** | Férias e ausências em níveis (gestor → liderança): mapa de calor dos dias com mais e menos gente fora, calendário e sugestão de períodos. Fica na página **Férias da Central** (mesmo arquivo e senha, [ADR-0033](adr/0033-ferias-dentro-da-central.md)) e só o gestor cadastra, inclusive as pessoas dos times ([ADR-0036](adr/0036-ferias-so-o-gestor-cadastra.md)). Apoio, não substitui a ferramenta oficial | Gestores e liderança | Repositório: página Férias em `gestao_pessoal_v15.html`, montada a partir de `financas/src/ferias.html`; plano em `docs/plano-ferias.md` |
 | **Assistente inicial** | Monta a solução para o papel da pessoa e cria os primeiros arquivos cifrados | Quem está começando | Repositório: `inicio.html` |
 | **Visual experimental** | As mesmas ferramentas no visual novo (trilho marinho, DM Sans, ícone por aba), com os mesmos dados, para experimentar ao lado das atuais | Quem quiser | Pacote: pasta `experimental/`, montada do main por `tools/build_experimental.py` a partir de `experimental/src/` ([ADR-0034](adr/0034-visual-experimental.md)) |
 | **Integração** | Pasta SharePoint, contratos JSON versionados, envelope cifrado, chaves por time | Central e ferramentas dos times | Projeto: `integracao-time/` (documentos 00 a 06, `contrato/`, `exemplos/`) |
@@ -83,7 +83,7 @@ A ferramenta do Fernando. Abre com dois cliques em `gestao_pessoal_v15.html`, pe
 | 2 | **Tarefas** | Vistas Minhas, Delegadas (o que está com quem, prazos, cobranças e aderência) e Todas; tarefas ligadas a uma feature, a uma iniciativa ou a nada |
 | 3 | **1:1** | Pessoa 360: indicadores, pauta (minha, dos agentes, combinados e sugestões), trabalho, iniciativas, feedback, histórico e perfil; modo Em conversa com resumo para copiar |
 | 4 | **Feedback** | Ciclos de feedback e evidências por pessoa |
-| 5 | **Férias** | Mapa de Férias do grupo dentro da Central: mapa de calor, calendário, você e diretos, times (vindos da Integração) e grupos de outros gestores, publicar para a liderança |
+| 5 | **Férias** | Mapa de Férias do grupo dentro da Central: mapa de calor, calendário, pessoas (você, diretos e as pessoas de cada time, cadastradas por você), times da Central e grupos de outros gestores, publicar para a liderança |
 | 6 | **Iniciativas** | Lista (feito × prazo, fases, próxima feature, painel com abas), Semana, Horizonte, Linha do tempo com fases sobrepostas e Dependências |
 | 7 | **Fóruns** | Pautas por data (o que não foi discutido rola para a próxima), Acordos (decisões e compromissos) e Staff (semana dos times) |
 | 8 | **Times** | Cadastro dos times (prefixo de código e pasta de integração), Métricas dos times (fluxo publicado por eles) e visão de cada time com reunião de status guiada e folha para o Teams |
@@ -102,6 +102,7 @@ Teclas 1 a 9 trocam de página. O botão do topo **Importar e agentes** reúne a
 | v15 | Navegação em 8 páginas sem telas duplicadas, Pessoa 360 no 1:1 com modo Em conversa e sessões registradas, formulários num padrão único |
 | v15.9 | Página **Férias**: o Mapa de Férias do gestor e da liderança entra na Central (mesmo arquivo e senha, times e chaves da Integração) e a Hoje mostra quem está fora |
 | v15.10 | Aberta pelo hub, entra direto com a senha da sessão quando o navegador já liberou o arquivo; o Hub 2.0 vira o cockpit de gestão e lê o resumo dela sem gravar ([ADR-0035](adr/0035-hub-cockpit-de-gestao.md)) |
+| v15.11 | Só o gestor cadastra as férias: aba **Pessoas** com as pessoas de cada time e **Trazer pessoas da Central**; todos os times viram unidades; o `ferias.html` sai do pacote e do assistente ([ADR-0036](adr/0036-ferias-so-o-gestor-cadastra.md)) |
 
 Detalhes da v15: `docs/plano-v15.md` (e da v14 em `docs/plano-v14.md`).
 
@@ -161,7 +162,7 @@ Como funciona por dentro:
 
 ### 6.1 A pasta
 
-Desde 23/11/2026 o nome recomendado é `Gestao-Compartilhado` (biblioteca SharePoint sincronizada pelo cliente do OneDrive); `Gestao-Integracao` continua aceito. A pasta também recebe finanças (`grupo/financas/`, `times/<time>/financas/`), o Quadro por pessoa (`times/<time>/quadro/`), os post-its (`times/<time>/postits/`), as férias (`times/<time>/ferias/<pessoa>-<computador>.json`) e os consolidados de cada grupo para a liderança (`grupos/<grupo>/financas/` e `grupos/<grupo>/ferias/`, [ADR-0025](adr/0025-consolidacao-em-niveis.md) e [ADR-0026](adr/0026-ferias-em-niveis.md)); a árvore completa está na [ADR-0004](adr/0004-troca-por-arquivos-na-pasta-sincronizada.md).
+Desde 23/11/2026 o nome recomendado é `Gestao-Compartilhado` (biblioteca SharePoint sincronizada pelo cliente do OneDrive); `Gestao-Integracao` continua aceito. A pasta também recebe finanças (`grupo/financas/`, `times/<time>/financas/`), o Quadro por pessoa (`times/<time>/quadro/`), os post-its (`times/<time>/postits/`), as férias publicadas por outra solução (`times/<time>/ferias/<pessoa>-<computador>.json`; a solução não grava ali desde a 15.11) e os consolidados de cada grupo para a liderança (`grupos/<grupo>/financas/` e `grupos/<grupo>/ferias/`, [ADR-0025](adr/0025-consolidacao-em-niveis.md) e [ADR-0026](adr/0026-ferias-em-niveis.md)); a árvore completa está na [ADR-0004](adr/0004-troca-por-arquivos-na-pasta-sincronizada.md).
 
 ```
 Gestao-Integracao/                      (administrada pelo Fernando)
@@ -296,7 +297,7 @@ Faz parte do ecossistema uma **ferramenta de feedbacks**, usada para registrar e
 | Fernando | Reunião de status | A atualização do time vem pré-preenchida; o downstream aparece abaixo de cada feature |
 | Fernando | Quando muda o portfólio | Revisar a tela de compartilhamento e clicar **Compartilhar** |
 | Fernando | Todo dia | Abrir o `hub.html`, ir para a ferramenta do momento e deixar post-its para os times quando precisar |
-| Fernando | Ao planejar ausências | Central › **Férias**: ver os dias com mais gente fora, marcar as próprias férias e as dos diretos e, quando mudar, publicar para a liderança |
+| Fernando | Ao planejar ausências | Central › **Férias**: ver os dias com mais gente fora, marcar as férias dele, dos diretos e das pessoas dos times e, quando mudar, publicar para a liderança |
 | Time | Ao abrir o Quadro | Ler os post-its no topo do quadro e clicar **Vi** |
 | Fernando | Depois de reuniões | Copiar o prompt certo, rodar no agente e importar o JSON com prévia |
 

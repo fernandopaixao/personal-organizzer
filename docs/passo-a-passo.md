@@ -1,6 +1,6 @@
 # Passo a passo · como lidar com a solução
 
-*25/11/2026 · Remessa · Central v15.11, Quadro do Time 2.3, Hub 2.1, Finanças do Grupo 1.6 e do Time 1.4, Mapa de Férias 1.3, assistente 2.7, contratos 1.0 · visual experimental em `experimental/`*
+*25/11/2026 · Remessa · Central v15.12, Quadro do Time 2.3, Hub 2.1, Finanças do Grupo 1.6 e do Time 1.4, Mapa de Férias 1.4 (dentro da Central), assistente 2.7, contratos 1.0 · visual experimental em `experimental/`*
 
 Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é independente. Antes de começar: use **Edge ou Chrome** no computador, abrindo o arquivo com dois cliques (não pela pré-visualização do Outlook, Teams ou OneDrive, nem de dentro do .zip), e tenha à mão um **cofre de senhas** (o gerenciador de senhas da empresa).
 
@@ -17,7 +17,7 @@ Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é ind
 10. [Trocar de computador](#10-trocar-de-computador)
 11. [Uma chave vazou](#11-uma-chave-vazou)
 12. [Problemas comuns](#12-problemas-comuns)
-13. [Férias: do time à liderança](#13-férias-do-time-à-liderança)
+13. [Férias: do gestor à liderança](#13-férias-do-gestor-à-liderança)
 14. [Integrar outra solução pelos contratos](#14-integrar-outra-solução-pelos-contratos)
 15. [Experimentar o visual novo](#15-experimentar-o-visual-novo)
 
@@ -45,11 +45,11 @@ Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é ind
 4. Clique **Gerar tudo** e confirme o aviso de cofre das chaves. Todas as chaves de integração ficam prontas e já dentro dos arquivos.
 5. A tela final é um **passo a passo em quatro passos, com um desenho em cada**:
    - **Sua mesa** (pasta pessoal): o que fica com você e não vai pelo correio (hub, Central, Finanças do Grupo e os seus `.json`, cifrados com a sua senha).
-   - **Remessas para os times**: cada `para-os-times/<time>/` é um envelope já lacrado com a chave do time. A tabela diz quem recebe cada arquivo: `quadro_<time>.html` e `ferias.html` são para todo o time; `financas_<time>.html` só para quem cuida do dinheiro do time. Mande a pasta ao responsável por mensagem direta ou e-mail, nunca pela pasta compartilhada.
+   - **Remessas para os times**: cada `para-os-times/<time>/` é um envelope já lacrado com a chave do time. A tabela diz quem recebe cada arquivo: `quadro_<time>.html` é para todo o time; `financas_<time>.html` só para quem cuida do dinheiro do time. Mande a pasta ao responsável por mensagem direta ou e-mail, nunca pela pasta compartilhada.
    - **Remessa para a liderança**: com a chave gerada, mande `para-a-lideranca/LEIA-ME.txt` à liderança (traz a chave e onde ela cola); com a chave colada, não há nada para mandar. O que sobe é o consolidado de finanças e as férias do grupo, em `grupos/<grupo>/`.
    - **Aponte a caixa postal**: a única escolha que falta. Sincronize a pasta do SharePoint, marque **Sempre manter neste dispositivo** e clique **Apontar a pasta sincronizada**. O assistente cria as subpastas, atualiza os envelopes dos times com o nome da pasta e deixa a Central, o hub, as finanças e as férias apontando para ela.
 6. Siga o checklist e clique **Abrir o hub**.
-7. O time abre o `quadro_<time>.html`, o `financas_<time>.html` ou o `ferias.html` e cria a própria senha: a chave já está dentro. As suas férias e as dos times ficam na página **Férias** da Central.
+7. O time abre o `quadro_<time>.html` ou o `financas_<time>.html` e cria a própria senha: a chave já está dentro. As férias de todos ficam na página **Férias** da Central, cadastradas por você: o time não recebe ferramenta de férias.
 
 **Gestor: equipar cada time com o assistente.** Se preferir que o time rode o próprio assistente, depois de gerar as chaves dos times (seção 1 ou 2), mande a cada time o `inicio.html` e, por mensagem direta, a chave e o nome da pasta sincronizada. O responsável abre o assistente, escolhe "Sim, lidero 1 time", cola a chave e sai com o Quadro e/ou o Finanças do Time prontos. É o caminho recomendado; gerar o HTML do time pela Central (seção 2) continua valendo.
 
@@ -89,7 +89,7 @@ Times criados pelo assistente já têm prefixo, pasta e chave: pule para o passo
 6. Registre e delegue em **Tarefas** (tecla 2). A barra rápida aceita texto livre.
 7. Para mandar um recado a um time, volte ao hub (**← Hub**), clique **Novo post-it**, escolha o(s) time(s) e, se quiser, a pessoa e o "mostrar até". Depois acompanhe o **Visto por…**.
 
-**Uma senha por dia.** Abra o hub com a senha do cofre e abra as outras ferramentas pelos links dele. O Finanças do Grupo, o Finanças do Time e o Mapa de Férias abrem sem pedir a senha de novo; a Central (15.10) entra direto quando o navegador já liberou o arquivo, e senão fica com a senha preenchida e pede um clique em **Continuar com …**. A senha fica só na memória das janelas abertas e some ao fechar ([ADR-0029](adr/0029-uma-senha-por-sessao.md), [ADR-0035](adr/0035-hub-cockpit-de-gestao.md)).
+**Uma senha por dia.** Abra o hub com a senha do cofre e abra as outras ferramentas pelos links dele. O Finanças do Grupo e o Finanças do Time abrem sem pedir a senha de novo; a Central (15.10) entra direto quando o navegador já liberou o arquivo, e senão fica com a senha preenchida e pede um clique em **Continuar com …**. A senha fica só na memória das janelas abertas e some ao fechar ([ADR-0029](adr/0029-uma-senha-por-sessao.md), [ADR-0035](adr/0035-hub-cockpit-de-gestao.md)).
 
 **Se a Central tem outra senha.** O cockpit mostra "A Central usa outra senha". Clique **Digitar a senha da Central** uma vez: o hub passa a mostrar o resumo dela e os links do hub para a Central levam essa senha até você encerrar a sessão. Se o hub não achar o arquivo da Central, clique **Escolher o arquivo da Central**.
 
@@ -222,25 +222,19 @@ Os outros times não são afetados.
 
 ---
 
-## 13. Férias: do time à liderança
+## 13. Férias: do gestor à liderança
 
-O **Mapa de Férias** é apoio para enxergar e planejar ausências; o pedido oficial continua na ferramenta da empresa. O time usa o `ferias.html`; o gestor e a liderança usam a página **Férias da Central** (Central 15.9, [ADR-0033](adr/0033-ferias-dentro-da-central.md)), sem outro arquivo nem outra senha.
-
-**No time (cada pessoa, ou o responsável por todos)**
-1. Abra `ferias.html`, escolha **Sou de um time**, informe o nome e o identificador do time (o mesmo do Quadro, ex.: `pagamentos`) e o seu nome. Escolha a pasta local (só sua, de preferência no seu OneDrive) e crie a senha.
-2. **Ajustes:** ligue a pasta sincronizada e cole a **chave do time** (a mesma do Quadro).
-3. **Pessoas:** marque as suas férias pela barra rápida ("05/01 a 23/01 férias") ou por **+ Ausência**. Se for o responsável, cadastre também os colegas que não usam a ferramenta, com o mesmo nome que eles usariam.
-4. Pronto: a ferramenta publica sozinha a cada mudança. As notas ficam só no seu computador.
+O **Mapa de Férias** é apoio para enxergar e planejar ausências; o pedido oficial continua na ferramenta da empresa. Fica na página **Férias da Central** ([ADR-0033](adr/0033-ferias-dentro-da-central.md)), sem outro arquivo nem outra senha, e **só o gestor cadastra** (Central 15.11, [ADR-0036](adr/0036-ferias-so-o-gestor-cadastra.md)): as pessoas dos times não usam ferramenta de férias.
 
 **No gestor (Central › Férias)**
-1. Na Central, abra **Férias** (menu Pessoas, tecla 5). Na primeira vez, informe o nome do grupo e o identificador, o mesmo das Finanças do Grupo (ex.: `tecnologia`), e clique **Começar**. Se você já usava o Mapa de Férias separado, clique **Trazer do Mapa de Férias separado**, escolha o `ferias-<grupo>.json` e digite a senha dele: tudo vem para a Central.
-2. **Unidades:** os times da Central que têm pasta e chave de tarefas (aba Integração do time) já aparecem, lidos da pasta da Integração. Para gestores abaixo de você, **+ Grupo de outro gestor** (ou importe das Finanças do Grupo).
-3. **Diretos:** marque as suas férias e as de quem responde direto a você. A página **Hoje** da Central passa a mostrar quem está fora hoje.
+1. Na Central, abra **Férias** (menu Pessoas, tecla 5). Na primeira vez, informe o nome do grupo e o identificador, o mesmo das Finanças do Grupo (ex.: `tecnologia`), e clique **Começar**. As pessoas cadastradas na Central entram sozinhas, cada uma com o seu time. Se você já usava o Mapa de Férias separado, clique **Trazer do Mapa de Férias separado**, escolha o `ferias-<grupo>.json` e digite a senha dele: tudo vem para a Central.
+2. **Pessoas:** a aba mostra **Você e diretos** e um grupo por time. Marque as férias de cada pessoa pela barra rápida ("Ana 05/01 a 23/01 férias") ou por **+ Ausência**. Para alguém novo, **+ Pessoa** e escolha o time; se cadastrou gente nova na Central, clique **Trazer pessoas da Central**. A página **Hoje** da Central passa a mostrar quem está fora hoje.
+3. **Unidades:** todos os times da Central já aparecem. Os que têm pasta e chave de tarefas na Integração também somam o que outra solução publicar em `times/<time>/ferias/`. Para gestores abaixo de você, **+ Grupo de outro gestor** (ou importe das Finanças do Grupo).
 4. **Mapa:** leia os cards, o mapa de calor (vermelho = acima do limite) e as semanas mais tranquilas; clique num dia para ver quem está fora. Ajuste o limite em **Ajustes**.
 5. **Nível acima:** em **Ajustes**, cole a chave que a sua liderança gerou para o seu grupo (ou **Trazer das Finanças do Grupo**: a mesma chave `GK1.<grupo>-fin-…` serve) e **Publicar consolidado para a liderança**, depois de conferir o que sobe. Quando o consolidado muda, o Mapa avisa para publicar de novo.
 
 **Na liderança**
-1. Use a página **Férias** da sua Central, com o seu identificador (ou o `ferias.html` à parte, escolhendo **Sou gestor ou liderança**, se você não usa a Central).
+1. Use a página **Férias** da sua Central, com o seu identificador.
 2. **Unidades › + Grupo de outro gestor**, com o identificador do grupo dele. Se você já gerou a chave dele nas Finanças do Grupo, cole a mesma; senão, **Gerar chave para o gestor** e envie por mensagem direta.
 3. O consolidado do gestor entra como uma unidade, com a unidade de origem de cada pessoa.
 

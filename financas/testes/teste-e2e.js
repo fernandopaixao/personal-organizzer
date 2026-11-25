@@ -12,7 +12,7 @@ const SENHA = 'senha-de-teste-123', SENHA2 = 'outra-senha-456!';
 let falhas = 0;
 const ok = (c, msg) => { console.log((c ? '  ok  ' : '  FALHOU  ') + msg); if (!c) falhas++; };
 
-// Marca Remessa (ADR-0036): cada HTML montado traz o ícone da aba com o lacre, também nas cópias geradas.
+// Marca Remessa (ADR-0037): cada HTML montado traz o ícone da aba com o lacre, também nas cópias geradas.
 { const ler = f => fs.readFileSync(path.join(RAIZ, f), 'utf8'), central = fs.readdirSync(RAIZ).filter(n => /^gestao_pessoal_v\d+\.html$/.test(n)).sort((a, b) => parseInt(a.slice(15)) - parseInt(b.slice(15))).pop();
   const fav = ['hub.html', 'inicio.html', central, 'ferramenta-time/quadro_do_time_v1.html', 'financas/financas_grupo.html', 'financas/financas_time.html', 'ferias/ferias.html'].filter(f => !/<link rel="icon" id="favicon" type="image\/svg\+xml" href="data:image\/svg\+xml,[^"]*%230b2155[^"]*%234d86ff/.test(ler(f)));
   ok(!fav.length, 'ícone da aba da Remessa (lacre azul) em todas as ferramentas' + (fav.length ? ': falta em ' + fav.join(', ') : ''));
@@ -514,8 +514,8 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   const locS = await opfs(ls, async () => [await listar('LocalSorte'), await listar('LocalSorte/para-os-times'), await listar('LocalSorte/para-os-times/pagamentos')]);
   ok(['hub.html', 'gestao_pessoal.html', 'financas_grupo.html', 'onde-fica-cada-coisa.html', 'hub-tecnologia.json', 'gestao-tecnologia.json', 'financas-grupo-tecnologia.json'].every(n => locS[0].includes(n)), 'Estou com sorte: ferramentas do gestor geradas na pasta');
   ok(!locS[0].includes('ferias.html') && !locS[0].includes('ferias-tecnologia.json'), 'Estou com sorte: gestor não recebe Mapa de Férias à parte (férias ficam na Central, ADR-0033)');
-  ok(locS[1].join() === 'cartoes,pagamentos' && ['quadro_pagamentos.html', 'financas_pagamentos.html', 'ferias.html', 'LEIA-ME.txt'].every(n => locS[2].includes(n)), 'Estou com sorte: Quadro, Finanças e Férias de cada time em para-os-times/<time>/');
-  ok(/"chave":"GK1\.pagamentos-\d{4}\./.test(await opfs(ls, async () => ler('LocalSorte/para-os-times/pagamentos', 'ferias.html'))), 'Mapa de Férias do time leva a chave de tarefas do time');
+  ok(locS[1].join() === 'cartoes,pagamentos' && ['quadro_pagamentos.html', 'financas_pagamentos.html', 'LEIA-ME.txt'].every(n => locS[2].includes(n)), 'Estou com sorte: Quadro e Finanças de cada time em para-os-times/<time>/');
+  ok(!locS[2].includes('ferias.html'), 'Estou com sorte: times não recebem ferramenta de férias (só o gestor cadastra, ADR-0036)');
   const qS = await opfs(ls, async () => ler('LocalSorte/para-os-times/pagamentos', 'quadro_pagamentos.html')), fS = await opfs(ls, async () => ler('LocalSorte/para-os-times/pagamentos', 'financas_pagamentos.html'));
   ok(/"key":"GK1\.pagamentos-\d{4}\./.test(qS) && /"chave":"GK1\.pagamentos-fin-\d{4}\./.test(fS) && /"pasta":"CompSorte"/.test(fS), 'HTMLs dos times já levam a chave certa e a pasta sincronizada');
   ok(await ls.evaluate(() => document.querySelectorAll('.tk').length === 2 && document.querySelectorAll('[data-ck]').length >= 8 && document.querySelectorAll('.inss .ins').length === 4), 'tela final com cards, desenho, chaves por time e checklist');
@@ -650,7 +650,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   await ap.click('#prox'); await ap.click('#sC'); await criarSenha(ap, SENHA2); await ap.click('#prox');
   await ap.waitForSelector('#mapa2', { timeout: 30000 });
   const paraTimes = await opfs(ap, async () => [await listar('LocalPronto/para-os-times'), await listar('LocalPronto/para-os-times/pagamentos')]);
-  ok(paraTimes[0].join() === 'cartoes,pagamentos' && ['quadro_pagamentos.html', 'financas_pagamentos.html', 'ferias.html', 'LEIA-ME.txt'].every(n => paraTimes[1].includes(n)), 'caminho normal do gestor também gera as chaves e para-os-times/<time>/');
+  ok(paraTimes[0].join() === 'cartoes,pagamentos' && ['quadro_pagamentos.html', 'financas_pagamentos.html', 'LEIA-ME.txt'].every(n => paraTimes[1].includes(n)) && !paraTimes[1].includes('ferias.html'), 'caminho normal do gestor também gera as chaves e para-os-times/<time>/');
   ok(await ap.evaluate(() => document.querySelectorAll('.tk').length === 2 && !/gere a chave/i.test(document.getElementById('wz').textContent)), 'tela final mostra as chaves de cada time e não pede para gerar chave à mão');
   const salvarP = async (arq, nome) => fs.writeFileSync(path.join(SAIDA, nome), await opfs(ap, async n => ler('LocalPronto', n), arq));
   await salvarP('hub.html', 'pronto_hub.html'); await salvarP('financas_grupo.html', 'pronto_grupo.html'); await salvarP('gestao_pessoal.html', 'pronto_central.html');

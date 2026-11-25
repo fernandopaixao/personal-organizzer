@@ -76,7 +76,9 @@ O `cifrar` não lê a pasta nem calcula a revisão: quem chama garante a revisã
 - **Férias:** publique `grupos/<grupo>/ferias/<pessoa>-<computador>.json` com a **chave do grupo**, `source.level = "group"` ([exemplo](exemplos/conteudo/grupos/canais/ferias/marina-p8x2c.json)): `units[0]` é o próprio grupo (`parent: null`), as unidades de baixo apontam para ela; `people[].id` é `<unidade>.<id>`; sem notas; nomes podem ir como "Pessoa N".
 - **Se a sua ferramenta é a da liderança** (lê os grupos): leia `grupos/<grupo>/financas/plano.json` e `grupos/<grupo>/ferias/*.json` de cada gestor com a chave que você gerou para ele, siga as regras de leitura de [01, seção 4](01-arquitetura.md#4-como-cada-ferramenta-lê-o-que-o-seu-arquivo-precisa-satisfazer) e publique `grupos/<grupo>/financas/diretriz.json`.
 
-### D. Férias de um time sem o Mapa de Férias
+### D. Férias de um time com ferramenta própria
+
+Opcional: desde a Central 15.11 o gestor cadastra as férias do time na própria Central ([ADR-0036](../docs/adr/0036-ferias-so-o-gestor-cadastra.md)). Use este caminho só se o time já tem um sistema com as férias e quer que elas apareçam sozinhas; a Central soma esse arquivo às pessoas que o gestor cadastrou.
 
 - Cada pessoa (ou o sistema, em nome dela) publica `times/<time>/ferias/<pessoa>-<computador>.json` com a **chave de tarefas do time** ([exemplo](exemplos/conteudo/times/pagamentos/ferias/ana-k3f9a.json)).
 - `people[].id` é o slug do nome (`ana-souza`): o mesmo nome em dois arquivos é a mesma pessoa. Publique `hlc`.
@@ -97,7 +99,7 @@ O `cifrar` não lê a pasta nem calcula a revisão: quem chama garante a revisã
 - [ ] Retrato completo; nada pessoal além do necessário; dinheiro em centavos; totais = soma dos meses.
 - [ ] `node contratos/validar.js vetores` passa com a sua implementação de cripto (ou você usa a referência).
 - [ ] `node contratos/validar.js pasta <pasta> --chave …` sem erros na pasta real (ou numa cópia).
-- [ ] O dono do nível de cima viu o seu arquivo aparecer na ferramenta dele (hub, Finanças do Grupo, Mapa de Férias ou Central).
+- [ ] O dono do nível de cima viu o seu arquivo aparecer na ferramenta dele (hub, Finanças do Grupo ou Central, inclusive a página Férias).
 
 ## 5. Quando algo não aparece
 

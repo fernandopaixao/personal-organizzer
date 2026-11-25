@@ -148,7 +148,7 @@ details.pis>summary:before{content:"▸";transition:transform .15s}details.pis[o
       módulos numa tela. Os dados lidos ficam só em memória, resumidos; o hub nunca grava no arquivo de outra ferramenta.
    ===================================================================== */
 const TOOL = 'hub', TOOL_NOME = 'Hub da solução', TOOL_VERSION = '2.1.0';
-// Marca da solução (ADR-0036): envelope com lacre azul. Arquivo que um time publicou há pouco = "nova remessa".
+// Marca da solução (ADR-0037): envelope com lacre azul. Arquivo que um time publicou há pouco = "nova remessa".
 const MARCA = 'Remessa', MARCA_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#0b2155"/><rect x="5" y="9" width="22" height="15" rx="2" fill="#fff"/><path d="M5.8 10l10.2 7.6L26.2 10" fill="none" stroke="#0b2155" stroke-width="1.6" stroke-linejoin="round"/><circle cx="16" cy="17.6" r="3.2" fill="#4d86ff" stroke="#fff" stroke-width="1.1"/></svg>`;
 try { window.name = 'gestao-hub'; } catch {}   // o botão "← Hub" das ferramentas volta para esta aba sem recarregar
 const LOCAL_SCHEMA = 'gestao-hub-local/1', POSTITS = 'gestao-postits/1', VISTOS = 'gestao-postits-vistos/1', PLANO = 'gestao-financas-plano/1', STATUS = 'gestao-status/1', METRICAS = 'gestao-metricas/1';
@@ -453,7 +453,7 @@ function resumoCentral(o, T = hoje()) {
   if (F) {
     const add = (lista, nome, un, a) => { const k = un + '|' + nome + '|' + a.inicio; if (!ja.has(k)) { ja.add(k); lista.push({ nome: clamp(nome, 60), un: clamp(un, 60), inicio: a.inicio, fim: a.fim }); } };
     const ver = (nome, un, a) => { if (a.inicio <= T && T <= a.fim) add(fora, nome, un, a); else if (a.inicio > T && a.inicio <= mais(14)) add(proximas, nome, un, a); };
-    for (const a of arr(F.ausencias)) { const p = arr(F.pessoas).find(x => x.id === a.pessoa); if (p && p.ativo !== false) ver(p.nome, '', a); }
+    for (const a of arr(F.ausencias)) { const p = arr(F.pessoas).find(x => x.id === a.pessoa); if (p && p.ativo !== false) ver(p.nome, p.un ? (arr(F.unidades).find(u => u.slug === p.un)?.nome || p.un) : '', a); }
     for (const u of arr(F.unidades)) { const r = F.retratos?.[u.slug]; if (!r) continue; for (const a of arr(r.ausencias)) { const p = arr(r.pessoas).find(x => x.id === a.person); ver(p?.name || a.person, u.nome || u.slug, { inicio: a.start, fim: a.end }); } }
     proximas.sort((a, b) => a.inicio.localeCompare(b.inicio));
   }

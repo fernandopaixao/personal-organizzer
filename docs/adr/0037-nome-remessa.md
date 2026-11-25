@@ -1,4 +1,4 @@
-# ADR-0036 · A solução se chama Remessa: envelopes lacrados numa caixa postal
+# ADR-0037 · A solução se chama Remessa: envelopes lacrados numa caixa postal
 
 **Status:** aceita · **Data:** 25/11/2026 · **Origem:** pedido do Fernando ("toda a comunicação se baseia em um paralelo de serviço de envelope e caixa postal... Vamos de Remessa. Altera o favicon, alguns termos na config e nos módulos. O texto quando chegar arquivo de integração (pode chamar de nova remessa); no onboard adicione um parágrafo explicando o porquê")
 

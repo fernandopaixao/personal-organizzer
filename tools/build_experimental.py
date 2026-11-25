@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Monta a versão experimental (visual novo) das ferramentas a partir das fontes do main (ADR-0034).
 
-    python3 tools/build_experimental.py                  → dist/experimental/ (7 HTMLs)
+    python3 tools/build_experimental.py                  → dist/experimental/ (6 HTMLs)
     python3 tools/build_experimental.py --testar         → monta e roda os testes do repositório nela
     python3 tools/build_experimental.py --saida PASTA    → monta em outra pasta
 
 Como funciona (nada é editado no repositório):
 1. copia o repositório para uma pasta temporária;
 2. aplica experimental/src/trocas.json (cores e fontes antigas → novas) na Central, no Quadro e em financas/src/;
-3. copia experimental/src/identidade.css e fontes/ para financas/src/ da cópia (os ícones da aba já vêm do main, ADR-0036);
+3. copia experimental/src/identidade.css e fontes/ para financas/src/ da cópia (os ícones da aba já vêm do main, ADR-0037);
 4. roda o build de sempre (tools/injetar_seguranca.py) na cópia: a função visual() de build_financas.py
    injeta a identidade e o ícone da aba em cada HTML, inclusive nas cópias embutidas;
 5. copia os HTMLs montados para a saída.
@@ -17,7 +17,7 @@ Assim a versão experimental tem sempre as mesmas funcionalidades do main: só o
 Com --testar, os testes de ponta a ponta, do Mapa de Férias e do aviso sem pastas rodam na cópia
 (com os fundos esperados do visual novo, trocas "teste" de trocas.json).
 """
-import json, pathlib, re, shutil, subprocess, sys, tempfile
+import json, os, pathlib, re, shutil, subprocess, sys, tempfile
 
 RAIZ = pathlib.Path(__file__).resolve().parent.parent
 EXP = RAIZ / 'experimental' / 'src'
@@ -40,7 +40,6 @@ def saidas(raiz):
         'quadro_do_time_v1.html': raiz / 'ferramenta-time' / 'quadro_do_time_v1.html',
         'financas_grupo.html': raiz / 'financas' / 'financas_grupo.html',
         'financas_time.html': raiz / 'financas' / 'financas_time.html',
-        'ferias.html': raiz / 'ferias' / 'ferias.html',
     }
 
 
@@ -87,7 +86,10 @@ def montar(saida, testar=False, manter=False):
             t.write_text(txt, encoding='utf-8')
             for teste in TESTES:
                 print(f'== {teste} (experimental)', flush=True)
-                r = subprocess.run(['node', str(copia / teste)], cwd=copia)
+                # A cópia fica fora do repositório e sem node_modules: o Playwright instalado no repositório
+                # (como na CI, com npm install --no-save) só é achado pelo NODE_PATH.
+                env = dict(os.environ, NODE_PATH=os.pathsep.join(filter(None, [str(RAIZ / 'node_modules'), os.environ.get('NODE_PATH', '')])))
+                r = subprocess.run(['node', str(copia / teste)], cwd=copia, env=env)
                 if r.returncode:
                     falhas.append(teste)
         if manter:
