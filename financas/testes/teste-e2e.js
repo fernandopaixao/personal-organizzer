@@ -12,6 +12,12 @@ const SENHA = 'senha-de-teste-123', SENHA2 = 'outra-senha-456!';
 let falhas = 0;
 const ok = (c, msg) => { console.log((c ? '  ok  ' : '  FALHOU  ') + msg); if (!c) falhas++; };
 
+// Marca Remessa (ADR-0036): cada HTML montado traz o ícone da aba com o lacre, também nas cópias geradas.
+{ const ler = f => fs.readFileSync(path.join(RAIZ, f), 'utf8'), central = fs.readdirSync(RAIZ).filter(n => /^gestao_pessoal_v\d+\.html$/.test(n)).sort((a, b) => parseInt(a.slice(15)) - parseInt(b.slice(15))).pop();
+  const fav = ['hub.html', 'inicio.html', central, 'ferramenta-time/quadro_do_time_v1.html', 'financas/financas_grupo.html', 'financas/financas_time.html', 'ferias/ferias.html'].filter(f => !/<link rel="icon" id="favicon" type="image\/svg\+xml" href="data:image\/svg\+xml,[^"]*%23c8102e/.test(ler(f)));
+  ok(!fav.length, 'ícone da aba da Remessa (com o lacre) em todas as ferramentas' + (fav.length ? ': falta em ' + fav.join(', ') : ''));
+  ok(/\['rec','Remessas'\]/.test(ler(central)) && /nova remessa|novas remessas/i.test(ler(central)), 'Central chama de remessa o arquivo de integração recebido'); }
+
 const srv = http.createServer((q, r) => {
   const f = path.join(RAIZ, decodeURIComponent(q.url.split('?')[0]));
   if (!f.startsWith(RAIZ) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { r.writeHead(404); return r.end(); }
@@ -159,6 +165,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
 
   console.log('6. Assistente inicial: responsável por um time, finanças + tarefas');
   const a = await nova('/inicio.html', { 'fin-local': 'LocalInicio', 'fin-comum': 'Gestao-Compartilhado' });
+  ok(/Vamos montar sua Remessa/.test(await a.textContent('#wz')) && /Por que Remessa\?.*caixa postal.*nova remessa/s.test(await a.textContent('.porque')), 'boas-vindas explicam o nome Remessa');
   await a.click('#prox'); await a.click('[data-p="responsavel"]');
   await a.click('[data-u="financas"]'); await a.click('[data-u="tarefas"]');
   ok((await a.textContent('#wz')).includes('Finanças do Time') && (await a.textContent('#wz')).includes('Quadro do Time'), 'perfil: lidera 1 time, finanças e tarefas; mostra os HTMLs que serão gerados');
@@ -507,6 +514,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   await ls.click('[data-ck="cofre"]'); ok(/1/.test(await ls.textContent('#ckV')), 'checklist marca item e conta o progresso');
   ok(await ls.evaluate(() => { const m = document.querySelector('[data-ck="manter"]'); return !!m && /Sempre manter neste dispositivo/.test(m.closest('.ck').textContent) && /Windows/.test(m.closest('.ck').textContent) && /Mac/.test(m.closest('.ck').textContent); }), 'checklist pede "Sempre manter neste dispositivo" na pasta de troca, com o caminho no Windows e no Mac');
   ok(/Sempre manter neste dispositivo/.test(await opfs(ls, async () => ler('LocalSorte/para-os-times/pagamentos', 'LEIA-ME.txt'))) && /Sempre manter neste dispositivo/.test(await opfs(ls, async () => ler('CompSorte', 'LEIA-ME.md'))), 'LEIA-ME dos times e da pasta compartilhada orientam "Sempre manter neste dispositivo"');
+  ok(/Por que Remessa\?.*nova remessa/s.test(await opfs(ls, async () => ler('LocalSorte/para-os-times/pagamentos', 'LEIA-ME.txt'))) && /Por que Remessa\?/.test(await opfs(ls, async () => ler('CompSorte', 'LEIA-ME.md'))), 'LEIA-ME dos times e da caixa postal explicam o nome Remessa');
   ok((await opfs(ls, async () => listar('CompSorte/times'))).join() === 'cartoes,pagamentos', 'pasta sincronizada recebe a estrutura dos times');
   await ls.setViewportSize({ width: 900, height: 900 }); await ls.screenshot({ path: path.join(SAIDA, 'inicio-sorte.png'), fullPage: true });
   fs.writeFileSync(path.join(SAIDA, 'gestao_sorte.html'), await opfs(ls, async () => ler('LocalSorte', 'gestao_pessoal.html')));

@@ -8,7 +8,7 @@
 Como funciona (nada é editado no repositório):
 1. copia o repositório para uma pasta temporária;
 2. aplica experimental/src/trocas.json (cores e fontes antigas → novas) na Central, no Quadro e em financas/src/;
-3. copia experimental/src/identidade.css, fontes/ e icones/ para financas/src/ da cópia;
+3. copia experimental/src/identidade.css e fontes/ para financas/src/ da cópia (os ícones da aba já vêm do main, ADR-0036);
 4. roda o build de sempre (tools/injetar_seguranca.py) na cópia: a função visual() de build_financas.py
    injeta a identidade e o ícone da aba em cada HTML, inclusive nas cópias embutidas;
 5. copia os HTMLs montados para a saída.
@@ -72,7 +72,6 @@ def montar(saida, testar=False, manter=False):
             p.write_text(aplicar(p.read_text(encoding='utf-8')), encoding='utf-8')
         shutil.copy2(EXP / 'identidade.css', src / 'identidade.css')
         shutil.copytree(EXP / 'fontes', src / 'fontes')
-        shutil.copytree(EXP / 'icones', src / 'icones')
         subprocess.run([sys.executable, str(copia / 'tools' / 'injetar_seguranca.py')], check=True, stdout=subprocess.DEVNULL)
         saida = pathlib.Path(saida); saida.mkdir(parents=True, exist_ok=True)
         for nome, p in saidas(copia).items():

@@ -21,6 +21,7 @@
 .dois .g2s{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;font-size:12.5px}@media(max-width:640px){.dois .g2s{grid-template-columns:1fr}}
 .ilu .f1,.mapa-svg .f1{fill:var(--bv-soft)}.ilu .f2,.mapa-svg .f2{fill:var(--bv)}.ilu .fw,.mapa-svg .fw{fill:#fff}
 .ilu .t,.mapa-svg .t{fill:var(--ink);font-size:11px;font-weight:600}.ilu .tm,.mapa-svg .tm{fill:var(--muted);font-size:10px}.ilu .tb{fill:var(--bv);font-size:15px;font-weight:700}.ilu .tx,.mapa-svg .tx{fill:#9aa1b4;font-size:10px;font-family:ui-monospace,Consolas,monospace}
+.porque{display:flex;gap:14px;align-items:flex-start;margin:12px 0 4px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;font-size:13px;color:var(--muted);line-height:1.55}.porque svg{width:40px;height:40px;flex:none}.porque b{color:var(--ink)}
 .sorte{margin:4px 0 6px;border:1px solid var(--bv-line);background:linear-gradient(160deg,#fff 0%,var(--bv-soft) 100%);border-radius:14px;padding:14px 16px;display:flex;gap:14px;align-items:center}
 .sorte .grow{font-size:12.5px;color:var(--muted)}.sorte b{display:block;color:var(--ink);font-size:14px;margin-bottom:2px}
 .ck{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px;cursor:pointer}.ck:last-child{border-bottom:0}
@@ -42,7 +43,11 @@
    Pergunta o uso esperado, cria o primeiro arquivo (sempre cifrado), gera os HTMLs
    desacoplados de cada uso e o cartão "Onde fica cada coisa".
    ===================================================================== */
-const TOOL_NOME = 'Início da solução', TOOL_VERSION = '2.5.0';
+const TOOL_NOME = 'Início da solução', TOOL_VERSION = '2.6.0';
+// Nome da solução (ADR-0036): envelopes lacrados numa caixa postal. Arquivo novo de outra pessoa = "nova remessa".
+const MARCA = 'Remessa';
+const MARCA_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#0b2155"/><rect x="5" y="9" width="22" height="15" rx="2" fill="#fff"/><path d="M5.8 10l10.2 7.6L26.2 10" fill="none" stroke="#0b2155" stroke-width="1.6" stroke-linejoin="round"/><circle cx="16" cy="18.2" r="5" fill="#c8102e" stroke="#fff" stroke-width="1.2"/><path d="M14.6 21v-5.6h1.9a1.65 1.65 0 0 1 0 3.3h-1.9M16.4 18.7l1.6 2.3" fill="none" stroke="#fff" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const POR_QUE_REMESSA = 'Por que Remessa? A solução funciona como um serviço de envelopes lacrados com uma caixa postal. Cada ferramenta põe o que tem para contar (o backlog do time, um plano financeiro, as férias, um post-it) num envelope cifrado com a chave do time, que é o lacre, e deixa esse envelope na pasta compartilhada, que é a caixa postal. Só quem tem a chave rompe o lacre e lê; quem não tem vê só envelopes fechados. Quando chega um envelope novo de um time ou do gestor, a ferramenta avisa: nova remessa.';
 $('#ver').textContent = TOOL_VERSION;
 const st = { modo: '', sp: 0, sorteTimes: [], passo: 0, papel: '', usos: [], dados: {}, dirLocal: null, raiz: null, senha: null, criados: [], temChave: null, chaves: [], kErr: '', pastaDoLider: '', cofreChaves: false };
 // Perfil: quem lidera, se quer finanças e tarefas, e se o líder já mandou chaves e a pasta.
@@ -106,6 +111,7 @@ const ILU = [
       <path class="sl" d="M62 56L82 48"/><path class="sl" d="M158 48L178 56"/>
       <rect class="s1" x="178" y="44" width="54" height="34" rx="4"/><path class="s1" d="M172 84H238"/><text class="tm" x="205" y="98" text-anchor="middle">bruno-desktop</text></svg>` }
 ];
+const porQue = () => `<div class="porque">${MARCA_SVG}<div><b>Por que ${MARCA}?</b> ${esc(POR_QUE_REMESSA.replace(/^Por que Remessa\? /, ''))}</div></div>`;
 const comoFunciona = () => `<div class="ilus">${ILU.map(x => `<div class="ilu">${x.svg}<h4>${x.h}</h4><p>${x.p}</p></div>`).join('')}</div>`;
 // Arquivos sob demanda do OneDrive: sem "Sempre manter neste dispositivo", a pasta pode ficar só na nuvem e o navegador não vê os arquivos novos dos outros.
 const MANTER = 'Sempre manter neste dispositivo';
@@ -116,10 +122,10 @@ function desenhar() {
   const topo = `<div class="steps">${PASSOS.map((_, i) => `<i class="${i <= p ? 'on' : ''}"></i>`).join('')}</div>`;
   const nav = (proxOk = true, proxTxt = 'Continuar') => `<div class="row" style="margin-top:18px">${p > 0 && p < 6 ? '<button class="btn" id="vol">Voltar</button>' : ''}<span class="grow"></span>${p < 6 ? `<button class="btn pri" id="prox" ${proxOk ? '' : 'disabled'}>${proxTxt}</button>` : ''}</div>`;
   if (st.modo === 'sorte') return desenharSorte(el);
-  if (p === 0) el.innerHTML = `${topo}<h1>Vamos montar sua solução</h1><p class="muted">Primeiro, como ela funciona em quatro desenhos. Depois, três perguntas sobre o seu perfil e, se o seu líder já mandou, a chave e a pasta.</p>
+  if (p === 0) el.innerHTML = `${topo}<h1>Vamos montar sua ${MARCA}</h1>${porQue()}<p class="muted">Primeiro, como ela funciona em quatro desenhos. Depois, três perguntas sobre o seu perfil e, se o seu líder já mandou, a chave e a pasta.</p>
     ${comoFunciona()}
     ${temFS() ? `<div class="sorte"><div class="grow"><b>Estou com sorte</b>Lidero times e quero tudo pronto de uma vez: Central, Finanças do Grupo, Mapa de Férias, hub e, para cada time, o Quadro, o Finanças do Time e o Mapa de Férias, já com as chaves e a pasta.</div><button class="btn pri" id="sorte">Estou com sorte</button></div>` : avisoFS()}
-    <button class="btn ghost" id="mapa">Ver todas as ferramentas da solução</button>${nav(true, 'Começar')}`;
+    <button class="btn ghost" id="mapa">Ver todas as ferramentas da Remessa</button>${nav(true, 'Começar')}`;
   if (p === 1) el.innerHTML = `${topo}<h1>Seu perfil</h1>
     <p class="lbl">1 · Você lidera times?</p>
     ${PAPEIS.map(([k, n, d]) => `<button class="opt ${st.papel === k ? 'on' : ''}" data-p="${k}"><b>${n}</b><span>${d}</span></button>`).join('')}
@@ -170,7 +176,7 @@ function desenhar() {
     ${doisArquivos()}${blocoChaves()}
     <p class="lbl" style="margin-top:18px">Próximos passos</p>${proximos()}
     <p class="lbl" style="margin-top:18px">Checklist para deixar tudo funcionando</p>${checklist(itensChecklist())}
-    <div class="row" style="margin-top:16px;flex-wrap:wrap">${botaoHub()}<button class="btn" id="mapa2">Abrir "Onde fica cada coisa"</button><button class="btn" id="mapa">Ferramentas da solução</button></div>`;
+    <div class="row" style="margin-top:16px;flex-wrap:wrap">${botaoHub()}<button class="btn" id="mapa2">Abrir "Onde fica cada coisa"</button><button class="btn" id="mapa">Ferramentas da Remessa</button></div>`;
   ligar();
 }
 function proximos() {
@@ -318,7 +324,7 @@ async function criarTudo() {
     const slugs = g ? d.times.map(t => t.slug) : [d.slug];
     for (const s of slugs) await subpasta(st.raiz, ['times', s, 'financas'], true);
     if (st.usos.includes('ferias')) { if (g) await subpasta(st.raiz, ['grupos', d.slug, 'ferias'], true); for (const s of slugs) await subpasta(st.raiz, ['times', s, 'ferias'], true); }
-    if (!await lerTexto(st.raiz, 'LEIA-ME.md')) await gravarSeguro(st.raiz, 'LEIA-ME.md', `# ${PASTA_COMUM}\n\nPasta compartilhada da solução (sincronizada pelo OneDrive). Tudo aqui é cifrado com a chave de cada time; nunca coloque senhas ou chaves aqui.\n\n- grupo/: só as ferramentas do gestor escrevem.\n- times/<time>/: as ferramentas do time escrevem; o hub escreve só os post-its, em postits/<pessoa>-<computador>.json (um arquivo por autor).\n- Arquivos com nome de computador no final são cópias de conflito do OneDrive: as ferramentas resolvem sozinhas.\n- Em cada computador, clique com o botão direito nesta pasta e escolha "${MANTER}" (Windows e Mac): sem isso os arquivos ficam só na nuvem e o navegador não os lê.\n`);
+    if (!await lerTexto(st.raiz, 'LEIA-ME.md')) await gravarSeguro(st.raiz, 'LEIA-ME.md', `# ${PASTA_COMUM}\n\nPasta compartilhada da ${MARCA} (sincronizada pelo OneDrive): a caixa postal onde cada ferramenta deixa os seus envelopes. Tudo aqui é cifrado com a chave de cada time; nunca coloque senhas ou chaves aqui.\n\n${POR_QUE_REMESSA}\n\n- grupo/: só as ferramentas do gestor escrevem.\n- times/<time>/: as ferramentas do time escrevem; o hub escreve só os post-its, em postits/<pessoa>-<computador>.json (um arquivo por autor).\n- Arquivos com nome de computador no final são cópias de conflito do OneDrive: as ferramentas resolvem sozinhas.\n- Em cada computador, clique com o botão direito nesta pasta e escolha "${MANTER}" (Windows e Mac): sem isso os arquivos ficam só na nuvem e o navegador não os lê.\n`);
   }
   if (g) await gerarPacotes();
   await lembrarTudo();
@@ -341,7 +347,7 @@ function cartao() {
   const d = st.dados, linhas = st.criados.map(c => `<tr><td><code>${esc(c.nome)}</code></td><td>${esc(c.desc)}</td></tr>`).join('');
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Onde fica cada coisa</title>
 <style>body{font-family:Inter,"Segoe UI",system-ui,sans-serif;max-width:760px;margin:40px auto;padding:0 20px;color:#161a23;background:#fafafc;line-height:1.5}h1{font-size:22px}h2{font-size:15px;margin-top:28px}table{border-collapse:collapse;width:100%;font-size:14px}td{border-bottom:1px solid #eceef4;padding:8px 6px;vertical-align:top}code{font-size:13px}.box{border:1.5px solid #c4574f;background:#fbefee;border-radius:12px;padding:12px 14px;color:#6d2620}.g{display:grid;grid-template-columns:1fr 1fr;gap:12px}.g div{border:1px solid #eceef4;background:#fff;border-radius:12px;padding:10px 12px}</style></head><body>
-<h1>Onde fica cada coisa</h1><p>${esc(st.papel === 'gestor' ? 'Grupo' : 'Time')} <b>${esc(d.nome)}</b> · criado em ${esc(new Date().toLocaleDateString('pt-BR'))} pelo assistente Início da solução. Este cartão não tem dados nem senhas.</p>
+<h1>Onde fica cada coisa</h1><p>${esc(st.papel === 'gestor' ? 'Grupo' : 'Time')} <b>${esc(d.nome)}</b> · criado em ${esc(new Date().toLocaleDateString('pt-BR'))} pelo assistente Início da ${MARCA}. Este cartão não tem dados nem senhas.</p><p style="color:#4a5266">${esc(POR_QUE_REMESSA)}</p>
 <div class="box"><b>A senha dos arquivos está no seu cofre de senhas.</b> Sem ela não há como abrir os dados. As chaves dos times também ficam no cofre e só são enviadas por mensagem direta ou e-mail.</div>
 <h2>Pasta pessoal (${esc(st.dirLocal.name)}) · só sua, de preferência no seu OneDrive (backup)</h2><table>${linhas}<tr><td><code>backup/</code></td><td>As 5 últimas versões de cada arquivo de dados (cifradas).</td></tr></table>
 <h2>Pasta sincronizada (${esc(st.raiz?.name || PASTA_COMUM)}) · OneDrive / SharePoint</h2><table>
@@ -406,7 +412,7 @@ function desenharSorte(el) {
     ${doisArquivos()}
     ${blocoChaves()}
     <p class="lbl" style="margin-top:18px">Checklist para deixar tudo funcionando</p>${checklist(itensChecklist())}
-    <div class="row" style="margin-top:16px;flex-wrap:wrap">${botaoHub()}<button class="btn" id="mapa2">Abrir "Onde fica cada coisa"</button><button class="btn" id="mapa">Ferramentas da solução</button></div>`;
+    <div class="row" style="margin-top:16px;flex-wrap:wrap">${botaoHub()}<button class="btn" id="mapa2">Abrir "Onde fica cada coisa"</button><button class="btn" id="mapa">Ferramentas da Remessa</button></div>`;
   ligarCopiar();
   $('#mapa2').onclick = abrirCartao;
   $('#mapa').onclick = () => ondeEstou({ ferramenta: TOOL_NOME, versao: TOOL_VERSION, arquivo: '', pastaLocal: st.dirLocal?.name, pastaComum: st.raiz?.name, writer: '', local: ['Os HTMLs das ferramentas', 'Arquivos de dados cifrados com a sua senha', 'para-os-times/: as ferramentas de cada time'], comum: ['Planos, diretrizes, catálogos e status cifrados com a chave de cada time'] });
@@ -450,12 +456,12 @@ async function gerarPacotes() {
       itens.push(`financas_${t.slug}.html: finanças do time (só para quem cuida do dinheiro do time)`); st.criados.push({ nome: `para-os-times/${t.slug}/financas_${t.slug}.html`, tipo: 'FT', desc: `Finanças do Time ${t.nome}, com a chave de finanças.` }); }
     if (fer) { await gravarLocal(dirT, 'ferias.html', aplicarPreset(fer, 'FERIAS-PRESET', { unidade: { nome: t.nome, slug: t.slug }, chave: t.kTar }));
       itens.push('ferias.html: Mapa de Férias (cada pessoa marca as suas; escolha "Sou de um time")'); st.criados.push({ nome: `para-os-times/${t.slug}/ferias.html`, tipo: 'FE', desc: `Mapa de Férias do time ${t.nome}, com a chave do time.` }); }
-    await gravarLocal(dirT, 'LEIA-ME.txt', `Ferramentas do time ${t.nome}, geradas por ${d.pessoa} em ${agora.toLocaleDateString('pt-BR')}.\r\n\r\n` +
+    await gravarLocal(dirT, 'LEIA-ME.txt', `Ferramentas da ${MARCA} para o time ${t.nome}, geradas por ${d.pessoa} em ${agora.toLocaleDateString('pt-BR')}.\r\n\r\n` +
       `1. Copie esta pasta para uma pasta só sua (de preferência no seu OneDrive, como backup; nunca na pasta compartilhada) e abra os HTMLs no Edge ou no Chrome.\r\n` +
       `2. ${itens.join('. ')}.\r\n` +
       `3. Na primeira abertura, crie a sua senha e guarde no cofre de senhas. As chaves do time já estão dentro dos HTMLs: não precisa colar nada.\r\n` +
       `4. Ligue a pasta sincronizada pelo OneDrive (${pasta}) quando a ferramenta pedir.\r\n` +
-      `5. Marque a pasta ${pasta} como "${MANTER}" (Windows: botão direito na pasta no Explorador de Arquivos; Mac: botão direito no Finder). Sem isso os arquivos ficam só na nuvem e o navegador não os lê.\r\n\r\nNão coloque estes HTMLs na pasta compartilhada: eles levam a chave do time.\r\n`);
+      `5. Marque a pasta ${pasta} como "${MANTER}" (Windows: botão direito na pasta no Explorador de Arquivos; Mac: botão direito no Finder). Sem isso os arquivos ficam só na nuvem e o navegador não os lê.\r\n\r\nNão coloque estes HTMLs na pasta compartilhada: eles levam a chave do time.\r\n\r\n${POR_QUE_REMESSA}\r\n`);
   }
 }
 // Grava neste navegador onde ficou cada arquivo e a pasta sincronizada: cada ferramenta abre já configurada (ADR-0030).

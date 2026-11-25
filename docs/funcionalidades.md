@@ -8,6 +8,8 @@ Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. 
 
 ## 1. Objetivo da solução
 
+**Nome: Remessa** ([ADR-0036](adr/0036-nome-remessa.md)). A solução funciona como um serviço de envelopes lacrados com uma caixa postal: cada ferramenta põe o que tem para contar num envelope cifrado com a chave do time (o lacre) e deixa na pasta compartilhada (a caixa postal). Só quem tem a chave abre. Um arquivo que chegou de outra pessoa e ainda não foi aplicado é uma **nova remessa**. Cada ferramenta tem o seu ícone na aba do navegador, com o lacre vermelho "R" da Remessa no canto; o hub usa o envelope inteiro.
+
 Dar a um gestor de vários times, e aos próprios times, **um lugar organizado para tarefas, pessoas, rituais, portfólio de iniciativas, fluxo dos times e finanças**, sem servidor, sem instalação e com tudo cifrado. Os objetivos que guiam cada funcionalidade:
 
 | Objetivo | Como aparece na solução |
@@ -162,7 +164,7 @@ Navegação em 9 páginas (teclas 1 a 9) e o botão **Importar e agentes** no to
 - **Objetivo:** acompanhar cada time e entregar a ferramenta pronta.
 
 ### 5.9 Integração (9)
-- **Uso:** pasta e chaves (gerar, copiar, revogar; **chave de finanças** por time, colada ou importada com **Chaves do Finanças do Grupo**), arquivos recebidos (com prévia), **Conciliação** (unir épicos, trazer para a Central, ligar itens a features, códigos das finanças dos times sem iniciativa na Central) e **Compartilhar** (tela que mostra o que vai para cada time).
+- **Uso:** pasta e chaves (gerar, copiar, revogar; **chave de finanças** por time, colada ou importada com **Chaves do Finanças do Grupo**), **Remessas** (15.10: os arquivos que chegaram dos times, com prévia; cada um ainda não aplicado é uma "nova remessa" e aparece no cartão Dos times), **Conciliação** (unir épicos, trazer para a Central, ligar itens a features, códigos das finanças dos times sem iniciativa na Central) e **Compartilhar** (tela que mostra o que vai para cada time).
 - **Abrir o Finanças do Grupo (15.7):** botão em Integração e na aba Finanças da iniciativa; a senha da sessão vai junto.
 - **Objetivo:** manter a Central e os times falando a mesma língua, sem sobrescrever nada.
 

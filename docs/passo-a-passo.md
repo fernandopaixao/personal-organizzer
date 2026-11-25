@@ -28,7 +28,7 @@ Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é ind
 0. Descompacte o **.zip da solução** (`gestao-solucao-AAAA-MM-DD.zip`) numa pasta qualquer; ele traz o `inicio.html`, as ferramentas, a documentação e um LEIA-ME.
 1. Crie uma **pasta pessoal**, só sua, de preferência dentro do **seu OneDrive** (por exemplo `OneDrive - Empresa\GestaoPessoal`). Ela é o seu backup se trocar de computador. Não use a pasta compartilhada com os times.
 2. Garanta que a **biblioteca do SharePoint** do grupo (`Gestao-Compartilhado`) está sincronizada no seu computador pelo OneDrive. Depois, clique com o botão direito na pasta e escolha **Sempre manter neste dispositivo** (Windows: no Explorador de Arquivos; Mac: no Finder). O ícone vira um círculo verde cheio. Sem isso, os arquivos ficam só na nuvem e as ferramentas não leem o que os outros publicam. Vale fazer o mesmo na sua pasta pessoal.
-3. Copie `inicio.html` para a pasta pessoal e abra com dois cliques.
+3. Copie `inicio.html` para a pasta pessoal e abra com dois cliques. As boas-vindas (**Vamos montar sua Remessa**) explicam o nome da solução: envelopes lacrados numa caixa postal.
 4. **Perfil:** responda **Você lidera times?** (2 ou mais, 1, ou não) e **O que você quer organizar?** (tarefas, finanças ou os dois).
 5. **Chaves:** se o seu líder mandou chaves (`GK1.…`), escolha **Sim, recebi**, cole uma por linha, clique **Conferir chaves** e informe o nome da pasta sincronizada que ele indicou. O assistente mostra o que cada chave é. Sem chave, escolha **Não, ainda não**: dá para colar depois dentro de cada ferramenta.
 6. **Dados:** nome, prefixo de código, ano fiscal e moeda. Com chave, o identificador já vem dela e fica travado. O gestor lista os times que lidera.
@@ -78,7 +78,7 @@ Times criados pelo assistente já têm prefixo, pasta e chave: pule para o passo
 1. Abra o `hub.html` e digite a senha.
 2. Veja na lista de times **quem publicou** (Quadro, status, métricas, plano).
 3. Abra a **Central** pelo hub. A página **Hoje** mostra atrasos, 1:1 da semana, fóruns dos próximos 7 dias, iniciativas pedindo atenção e o cartão **Dos times**.
-4. Se o cartão **Dos times** mostrar arquivos novos, vá em **Integração**, revise a prévia e aplique.
+4. Se o cartão **Dos times** mostrar uma **nova remessa**, vá em **Integração › Remessas**, revise a prévia e aplique.
 5. Registre e delegue em **Tarefas** (tecla 2). A barra rápida aceita texto livre.
 6. Para mandar um recado a um time, volte ao hub (**← Hub**), clique **Novo post-it**, escolha o(s) time(s) e, se quiser, a pessoa e o "mostrar até". Depois acompanhe o **Visto por…**.
 

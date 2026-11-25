@@ -15,6 +15,8 @@ A solução tem quatro papéis. A mesma pessoa pode ter mais de um (o gestor cos
 
 ## 1. Visão geral da jornada
 
+A solução se chama **Remessa**: as ferramentas trocam envelopes lacrados (cifrados com a chave do time) numa caixa postal (a pasta compartilhada). O Início explica o nome nas boas-vindas; no dia a dia, o que chega de outra pessoa aparece como **nova remessa** ([ADR-0036](adr/0036-nome-remessa.md)).
+
 ```
  Montar          Configurar        Dia a dia              Rituais                  Fechamentos           Manter
  ─────────       ───────────       ─────────              ───────                  ───────────           ──────

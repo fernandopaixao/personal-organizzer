@@ -42,6 +42,7 @@ Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequê
 | [0032](0032-pasta-de-contratos.md) | Pasta de contratos | `contratos/` é a fonte única do que outras soluções gravam: especificação, schemas, cripto com vetores, exemplos e validador |
 | [0033](0033-ferias-dentro-da-central.md) | Férias dentro da Central | O gestor usa a página Férias da Central: mesmo arquivo e senha, times e chaves da Integração, mesmos arquivos na pasta; revê o item 1 da 0026 |
 | [0034](0034-visual-experimental.md) | Visual novo como versão experimental | `experimental/` no pacote: as mesmas ferramentas do main com o visual novo (trilho marinho, DM Sans, ícone por aba), montadas por `tools/build_experimental.py` e testadas na CI; os mesmos dados |
+| [0036](0036-nome-remessa.md) | Nome Remessa | A solução se chama Remessa (envelopes lacrados numa caixa postal); ícone da aba com o lacre em todas as ferramentas; arquivo de integração que chegou é "nova remessa" |
 
 ## Checklist para uma funcionalidade nova
 

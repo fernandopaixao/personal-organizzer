@@ -21,7 +21,7 @@
    compara com o orçamento do grupo e publica diretrizes grupo/financas/diretriz-<time>.json.
    Orçamento aprovado, itens do grupo, chaves e versões ficam no arquivo local cifrado.
    ===================================================================== */
-const TOOL = 'financas-grupo', TOOL_NOME = 'Finanças do Grupo', TOOL_VERSION = '1.5.0';
+const TOOL = 'financas-grupo', TOOL_NOME = 'Finanças do Grupo', TOOL_VERSION = '1.5.1';
 const LOCAL_SCHEMA = 'gestao-financas-local/1', PLANO_SCHEMA = 'gestao-financas-plano/1', DIRETRIZ_SCHEMA = 'gestao-financas-diretriz/1';
 const PRESET = /*FING-PRESET*/null/*FIM-FING-PRESET*/;
 // Onde o arquivo desta ferramenta ficou neste navegador (gravado pelo assistente ou na última abertura).
@@ -159,7 +159,7 @@ async function lerPasta(silencioso = false) {
     if (fora) s.avisos.push(`${fora} linha(s) com categoria fora da lista do grupo (somadas em "Outras")`);
   }
   await lerAcima();
-  if (!silencioso) toast(pendentes.length ? `${pendentes.length} plano(s) novo(s) para revisar.` : 'Pasta lida. Nada novo.');
+  if (!silencioso) toast(pendentes.length ? (pendentes.length > 1 ? `${pendentes.length} novas remessas: planos para revisar.` : 'Nova remessa: 1 plano para revisar.') : 'Pasta lida. Nenhuma remessa nova.');
   render();
 }
 function diffPlano(antes, depois) {
@@ -367,7 +367,7 @@ function vCons(el) {
   const desv = c.porTime.filter(x => x.ok && x.tot.orcado).map(x => ({ ...x, d: x.tot.previsto - x.tot.orcado })).sort((p, q) => q.d - p.d)[0];
   const idx = ms.indexOf(m), passado = idx < 0 ? (ms[0] < m ? ms.length - 1 : -1) : idx;
   const serie = k => ms.map(x => consolidado([x]).total[k]);
-  el.innerHTML = `${pendentes.length ? `<div class="banner">${pendentes.length} plano(s) novo(s) na pasta. <button class="btn sm pri" id="cRev">Revisar</button></div>` : ''}
+  el.innerHTML = `${pendentes.length ? `<div class="banner">${pendentes.length > 1 ? pendentes.length + ' novas remessas' : 'Nova remessa'} na caixa postal: ${pendentes.length} plano(s) novo(s) dos times. <button class="btn sm pri" id="cRev">Revisar</button></div>` : ''}
     ${acimaPendente() ? `<div class="banner">O consolidado mudou desde a última publicação para a liderança. <button class="btn sm pri" id="cAcima">Publicar para a liderança</button></div>` : ''}
     <div class="inss">
       ${cardLeitura({ hi: true, k: `Previsto em ${a}`, v: fm(c.total.previsto), pct: orc ? c.total.previsto / orc : null, s: orc ? (orc >= c.total.previsto ? `Saldo de <b>${fm(orc - c.total.previsto)}</b> no orçamento aprovado` : `<b>${fm(c.total.previsto - orc)}</b> acima do orçamento aprovado`) : `Orçamento aprovado de ${a}: <b>definir em Ajustes</b>` })}
@@ -466,7 +466,7 @@ function vRevisar(el) {
     ${pendentes.length ? pendentes.map(x => { const d = diffPlano(db.retratos[x.t.slug]?.payload, x.p), ok = somavel(x.p); return `<div class="al"><span class="dot ${ok ? '' : 'late'}"></span><div class="grow"><b>${esc(x.t.nome)}</b> · revisão ${x.p.revision} · ${esc(x.p.planVersion || '')} · ${fmtDataHora(x.p.generatedAt)} <span class="faint small">${esc(x.de)}</span><br>
       ${anosPlano(x.p).length > 1 ? `Anos ${anosPlano(x.p).join(', ')} · ` : ''}Previsto em ${anoV()} ${fm(d.a.previsto)} → <b>${fm(d.b.previsto)}</b> (${d.b.previsto - d.a.previsto >= 0 ? '+' : ''}${fm(d.b.previsto - d.a.previsto)}) · orçado ${fm(d.b.orcado)} · realizado ${fm(d.b.realizado)}
       ${d.linhas.length ? `<div class="small muted">${d.linhas.slice(0, 8).map(esc).join(' · ')}${d.linhas.length > 8 ? ` · e mais ${d.linhas.length - 8}` : ''}</div>` : ''}${ok ? '' : '<div class="small latec">Moeda diferente: fica guardado, mas não entra na soma.</div>'}</div>
-      <button class="btn sm" data-ap="${x.t.slug}">Aplicar</button></div>`; }).join('') : '<div class="empty">Nenhum plano novo. A ferramenta confere a pasta a cada minuto e quando você volta para a aba.</div>'}</div>
+      <button class="btn sm" data-ap="${x.t.slug}">Aplicar</button></div>`; }).join('') : '<div class="empty">Nenhuma remessa nova. A ferramenta confere a pasta a cada minuto e quando você volta para a aba.</div>'}</div>
     <div class="card"><p class="lbl">Saúde da soma</p>${db.times.length ? db.times.map(t => { const p = db.retratos[t.slug]?.payload, s = [...(saude[t.slug]?.avisos || []), ...(p && !anosPlano(p).includes(anoV()) ? [`o plano publicado não cobre ${anoV()} (cobre ${anosPlano(p).join(', ') || '—'})`] : [])]; return `<div class="al"><span class="dot ${s.length ? 'late' : ''}"></span><div class="grow"><b>${esc(t.nome)}</b> ${s.length ? '<br><span class="small">' + s.map(esc).join('<br>') + '</span>' : '<span class="small okc">ok</span>'}</div></div>`; }).join('') : '<div class="empty">Cadastre os times na aba Times.</div>'}</div>`;
   if ($('#rTodos')) $('#rTodos').onclick = () => aplicar();
   $$('[data-ap]', el).forEach(b => b.onclick = () => aplicar(b.dataset.ap));

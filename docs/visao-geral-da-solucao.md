@@ -10,6 +10,8 @@ Este documento explica a solução como um todo: quais ferramentas existem, para
 
 ## 1. Em uma página
 
+A solução se chama **Remessa** ([ADR-0036](adr/0036-nome-remessa.md)): envelopes lacrados (arquivos cifrados com a chave de cada time) numa caixa postal (a pasta compartilhada). Só quem tem a chave abre; o que chega de outra pessoa é uma **nova remessa**.
+
 A solução é um pequeno ecossistema de **ferramentas HTML de arquivo único**, sem servidor, sem instalação e sem chamadas de rede. Cada ferramenta guarda os dados num arquivo separado do HTML, e as ferramentas conversam apenas por **arquivos JSON cifrados numa pasta do SharePoint sincronizada** no computador de cada um.
 
 ```
