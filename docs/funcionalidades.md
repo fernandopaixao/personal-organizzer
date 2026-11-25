@@ -1,6 +1,6 @@
 # Funcionalidades, usos e objetivos
 
-*25/11/2026 · Remessa · Central v15.13, Quadro do Time 2.3, Hub 2.2, Finanças do Grupo 1.6 e do Time 1.4, Mapa de Férias 1.4 (dentro da Central), assistente 2.8, contratos 1.0 · visual experimental em `experimental/`*
+*25/11/2026 · Remessa · Central v15.14, Quadro do Time 2.3.2, Hub 2.3, Finanças do Grupo 1.7 e do Time 1.5, Mapa de Férias 1.5 (dentro da Central), assistente 2.8, contratos 1.0 · visual experimental em `experimental/`*
 
 Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. Para as regras técnicas por trás, veja as [decisões de arquitetura](adr/README.md). Para o caminho de quem usa, veja a [jornada do usuário](jornada-do-usuario.md) e o [passo a passo](passo-a-passo.md).
 
@@ -10,7 +10,7 @@ Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. 
 
 **Nome: Remessa** ([ADR-0037](adr/0037-nome-remessa.md)). A solução funciona como um serviço de envelopes lacrados com uma caixa postal: cada ferramenta põe o que tem para contar num envelope cifrado com a chave do time (o lacre) e deixa na pasta compartilhada (a caixa postal). Só quem tem a chave abre. Um arquivo que chegou de outra pessoa e ainda não foi aplicado é uma **nova remessa**. Cada ferramenta tem o seu ícone na aba do navegador, com o lacre azul da Remessa no canto; o hub usa o envelope lacrado.
 
-**Tela de entrada e apresentação (Central 15.13, Hub 2.2, assistente 2.8).** Todas as ferramentas abrem com a mesma tela de entrada: fundo marinho com envelopes em marca-d'água, o painel da Remessa à esquerda (nome da ferramenta, versão e o link **Conheça a Remessa**) e a caixa de senha ou de abertura à direita. O link leva à `apresentacao.html`, uma página que apresenta a solução: a analogia em desenho, as ferramentas com as versões, quem usa, a segurança e como começar. Ela vai no .zip e o assistente grava uma cópia na pasta do gestor e na de cada time.
+**Tela de entrada e apresentação (Central 15.14, Hub 2.3, assistente 2.8).** Todas as ferramentas abrem com a mesma tela de entrada: fundo marinho com envelopes em marca-d'água, o painel da Remessa à esquerda (com o link **Conheça a Remessa**), a caixa de abertura à direita e a versão da ferramenta uma vez só, no rodapé. A caixa tem dois passos: **1 · Arquivo** (o último usado neste computador já vem escolhido; **Escolher outro arquivo** abre na pasta dele) e **2 · Senha**, que só libera depois de haver arquivo e mostra o erro embaixo do campo, sem janela por cima. O link leva à `apresentacao.html`, uma página que apresenta a solução: a analogia em desenho, as ferramentas com as versões, quem usa, a segurança e como começar. Ela vai no .zip e o assistente grava uma cópia na pasta do gestor e na de cada time.
 
 Dar a um gestor de vários times, e aos próprios times, **um lugar organizado para tarefas, pessoas, rituais, portfólio de iniciativas, fluxo dos times e finanças**, sem servidor, sem instalação e com tudo cifrado. Os objetivos que guiam cada funcionalidade:
 
@@ -71,7 +71,7 @@ Todas têm, no topo, **Onde estou?** (qual ferramenta, qual arquivo, o que é lo
 
 **Quem lidera vários times (2.3):** o caminho normal faz o mesmo que o Estou com sorte nas chaves. O assistente gera a chave de tarefas e, com Finanças, a de finanças de cada time (reaproveita a de tarefas que você colou para um dos times), sugere o prefixo de quem não tem (`PAG`, `CAR`), grava tudo na Central (inclusive a página Férias), no Finanças do Grupo e no hub, e gera `para-os-times/<time>/`. A tela final mostra as chaves com os botões de copiar.
 
-**Tudo abre pronto (2.3, [ADR-0031](adr/0031-ferramentas-abrem-prontas.md)):** o assistente grava neste navegador onde ficou o arquivo de cada ferramenta e a pasta sincronizada. Ao abrir pelo hub, cada ferramenta abre sozinha o seu arquivo, com a senha da sessão e a pasta já ligada; a Central mostra **Continuar com gestao-….json** e já tem a pasta de integração. Ninguém escolhe pasta nem cola chave de novo neste computador.
+**Tudo abre pronto (2.3, [ADR-0031](adr/0031-ferramentas-abrem-prontas.md)):** o assistente grava neste navegador onde ficou o arquivo de cada ferramenta e a pasta sincronizada. Ao abrir pelo hub, cada ferramenta abre sozinha o seu arquivo, com a senha da sessão e a pasta já ligada; a Central já vem com **gestao-….json** escolhido no passo 1 e a pasta de integração ligada. Ninguém escolhe pasta nem cola chave de novo neste computador.
 
 Onde as chaves coladas vão parar: no hub (tarefas e finanças de cada time), no Quadro (chave de tarefas), no Finanças do Time (chave de finanças) e no Finanças do Grupo (`acima`, a chave da liderança). Nenhuma chave vai para a pasta compartilhada.
 
@@ -121,7 +121,7 @@ A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados
 
 ---
 
-## 5. Central de Gestão (v15.13)
+## 5. Central de Gestão (v15.14)
 
 **Férias dentro da Central (15.9, [ADR-0033](adr/0033-ferias-dentro-da-central.md)).** O Mapa de Férias do gestor e da liderança deixou de ser uma ferramenta à parte: é a página **Férias** (menu Pessoas), no mesmo arquivo e com a mesma senha da Central. Os times com pasta e as chaves de tarefas da Integração entram sozinhos; a pasta compartilhada é a da Integração. A página **Hoje** mostra quem está **fora hoje**.
 

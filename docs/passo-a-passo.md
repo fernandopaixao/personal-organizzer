@@ -1,6 +1,6 @@
 # Passo a passo · como lidar com a solução
 
-*25/11/2026 · Remessa · Central v15.13, Quadro do Time 2.3, Hub 2.2, Finanças do Grupo 1.6 e do Time 1.4, Mapa de Férias 1.4 (dentro da Central), assistente 2.8, contratos 1.0 · visual experimental em `experimental/`*
+*25/11/2026 · Remessa · Central v15.14, Quadro do Time 2.3.2, Hub 2.3, Finanças do Grupo 1.7 e do Time 1.5, Mapa de Férias 1.5 (dentro da Central), assistente 2.8, contratos 1.0 · visual experimental em `experimental/`*
 
 Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é independente. Antes de começar: use **Edge ou Chrome** no computador, abrindo o arquivo com dois cliques (não pela pré-visualização do Outlook, Teams ou OneDrive, nem de dentro do .zip), e tenha à mão um **cofre de senhas** (o gerenciador de senhas da empresa).
 
@@ -81,7 +81,7 @@ Times criados pelo assistente já têm prefixo, pasta e chave: pule para o passo
 
 ## 4. Rotina diária do gestor
 
-1. Abra o `hub.html` e digite a senha. É a única vez no dia.
+1. Abra o `hub.html`. O seu arquivo do hub já vem escolhido no passo **1 · Arquivo** (se não vier, clique **Escolher o arquivo** e aponte a sua pasta pessoal); digite a senha no passo **2 · Senha**. É a única vez no dia.
 2. Leia o **cockpit**: a frase do dia no topo, os cards da **Visão geral** (meu dia, delegadas, iniciativas, fora hoje, finanças, quadros) e a lista **Pede sua atenção**. Clique num item para abrir a ferramenta certa.
 3. Desça até **Times e post-its** para ver, por time, iniciativas no prazo, bloqueios, métricas do quadro, finanças e **quem publicou**.
 4. Abra a **Central** pelo hub (menu do topo ou o módulo). A página **Hoje** mostra atrasos, 1:1 da semana, fóruns dos próximos 7 dias, iniciativas pedindo atenção e o cartão **Dos times**.
@@ -89,7 +89,7 @@ Times criados pelo assistente já têm prefixo, pasta e chave: pule para o passo
 6. Registre e delegue em **Tarefas** (tecla 2). A barra rápida aceita texto livre.
 7. Para mandar um recado a um time, volte ao hub (**← Hub**), clique **Novo post-it**, escolha o(s) time(s) e, se quiser, a pessoa e o "mostrar até". Depois acompanhe o **Visto por…**.
 
-**Uma senha por dia.** Abra o hub com a senha do cofre e abra as outras ferramentas pelos links dele. O Finanças do Grupo e o Finanças do Time abrem sem pedir a senha de novo; a Central (15.10) entra direto quando o navegador já liberou o arquivo, e senão fica com a senha preenchida e pede um clique em **Continuar com …**. A senha fica só na memória das janelas abertas e some ao fechar ([ADR-0029](adr/0029-uma-senha-por-sessao.md), [ADR-0035](adr/0035-hub-cockpit-de-gestao.md)).
+**Uma senha por dia.** Abra o hub com a senha do cofre e abra as outras ferramentas pelos links dele. O Finanças do Grupo e o Finanças do Time abrem sem pedir a senha de novo; a Central (15.10) entra direto quando o navegador já liberou o arquivo, e senão fica com o arquivo escolhido e a senha preenchida e pede um clique em **Abrir**. A senha fica só na memória das janelas abertas e some ao fechar ([ADR-0029](adr/0029-uma-senha-por-sessao.md), [ADR-0035](adr/0035-hub-cockpit-de-gestao.md)).
 
 **Se a Central tem outra senha.** O cockpit mostra "A Central usa outra senha". Clique **Digitar a senha da Central** uma vez: o hub passa a mostrar o resumo dela e os links do hub para a Central levam essa senha até você encerrar a sessão. Se o hub não achar o arquivo da Central, clique **Escolher o arquivo da Central**.
 

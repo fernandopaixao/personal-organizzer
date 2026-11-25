@@ -147,7 +147,7 @@ details.pis>summary:before{content:"▸";transition:transform .15s}details.pis[o
       (tarefas, iniciativas, 1:1 e férias) e o status e as métricas que cada Quadro publica, e mostra cards de todos os
       módulos numa tela. Os dados lidos ficam só em memória, resumidos; o hub nunca grava no arquivo de outra ferramenta.
    ===================================================================== */
-const TOOL = 'hub', TOOL_NOME = 'Hub da solução', TOOL_VERSION = '2.2.0';
+const TOOL = 'hub', TOOL_NOME = 'Hub da solução', TOOL_VERSION = '2.3.0';
 // Marca da solução (ADR-0037): envelope com lacre azul. Arquivo que um time publicou há pouco = "nova remessa".
 const MARCA = 'Remessa', MARCA_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#0b2155"/><rect x="5" y="9" width="22" height="15" rx="2" fill="#fff"/><path d="M5.8 10l10.2 7.6L26.2 10" fill="none" stroke="#0b2155" stroke-width="1.6" stroke-linejoin="round"/><circle cx="16" cy="17.6" r="3.2" fill="#4d86ff" stroke="#fff" stroke-width="1.1"/></svg>`;
 try { window.name = 'gestao-hub'; } catch {}   // o botão "← Hub" das ferramentas volta para esta aba sem recarregar
@@ -976,38 +976,20 @@ async function telaInicial(msg = '') {
     <div class="acoes"><h2 style="margin:0 0 2px;font-family:var(--title);font-weight:600">${TOOL_NOME}</h2><div class="small muted">Entre com a senha do hub (a mesma das outras ferramentas, se você usou o assistente).</div>
     ${msg ? `<div class="banner warn" style="margin-top:12px">${esc(msg)}</div>` : ''}
     ${avisoFS()}
-    ${ult ? `<button class="opt" id="iUlt" style="margin-top:18px"><b>Entrar com ${esc(ult.arquivo)}</b><span>Pasta local <span class="code">${esc(ult.dir.name)}</span>, usada por último neste computador.</span></button>` : ''}
-    <p class="lbl" style="margin-top:20px">Já tenho o hub</p>
-    <button class="opt" id="iAbrir"><b>Abrir a pasta local</b><span>A pasta deste computador (só sua; de preferência no seu OneDrive) com as ferramentas e o arquivo <span class="code">hub-&lt;nome&gt;.json</span>.</span></button>
-    <p class="lbl" style="margin-top:16px">É a primeira vez?</p>
+    <div id="passoArquivo"></div>
+    <p class="lbl" style="margin-top:22px">É a primeira vez?</p>
     <button class="opt" id="iNovo"><b>Criar o hub</b><span>Seu nome, a pasta local e a senha. Depois você liga a pasta sincronizada e cola as chaves dos times (ou importa da Central).</span></button>
     <p class="small muted" style="margin-top:16px">O hub só lê os outros módulos, nunca grava neles. Seus post-its vão cifrados com a chave de cada time para a pasta sincronizada pelo OneDrive.</p>
   </div></div>`;
   $('#iNovo').onclick = criarDlg;
-  $('#iAbrir').onclick = abrirPasta;
-  if (ult) $('#iUlt').onclick = async () => { if (!await permissao(ult.dir)) return telaInicial('Sem permissão na pasta.'); await abrirArquivo(ult.dir, ult.arquivo); };
+  ligarEntrada(ENTRADA_CFG, ult);
 }
-async function abrirPasta() {
-  let h; try { h = await escolherPasta('fin-local'); } catch (e) { if (e.name !== 'AbortError') toast(e.message); return; }
-  if (!await permissao(h)) return;
-  const cand = [];
-  for await (const [n, f] of h.entries()) if (f.kind === 'file' && /^hub-.*\.json$/.test(n)) { try { const o = JSON.parse(await (await f.getFile()).text()); if (o.schema === LOCAL_ENC && o.app === TOOL) cand.push(n); } catch {} }
-  if (!cand.length) return telaInicial('Não encontrei um arquivo do hub nesta pasta. Se é a primeira vez, use "Criar o hub".');
-  let nome = cand[0];
-  if (cand.length > 1) { const r = await perguntar('Qual arquivo?', cand.map((n, i) => `<button class="opt" data-r="${i}"><b class="code">${esc(n)}</b></button>`).join(''), [['no', 'Cancelar']]); if (r == null || r === 'no') return; nome = cand[+r]; }
-  await abrirArquivo(h, nome);
-}
-async function abrirArquivo(h, nome) {
-  const texto = await lerTexto(h, nome);
-  if (!texto) return telaInicial('Arquivo não encontrado.');
-  for (let i = 0; i < 3; i++) {
-    const s = await pedirSenhaDlg('Senha do hub', i > 0, { sessao: true }); if (s == null) return;
-    try { const r = await decifrarLocal(texto, s); db = normalizar(r.dados); ctx = r.ctx; dirLocal = h; arquivo = nome; senhaSessao = s; window.gestaoSessao?.definir(s); break; }
-    catch (e) { if (e.code !== 'SENHA') return telaInicial(e.message); }
-  }
-  if (!db) return telaInicial('Senha incorreta três vezes.');
-  await aposAbrir();
-}
+const ENTRADA_CFG = {
+  pastaId: 'fin-local', padrao: /^hub-.*\.json$/, exemplo: '<span class="code">hub-&lt;nome&gt;.json</span>',
+  nada: 'Não encontrei um arquivo do hub nesta pasta. Se é a primeira vez, use "Criar o hub"',
+  usar: async (h, nome, r, s) => { db = normalizar(r.dados); ctx = r.ctx; dirLocal = h; arquivo = nome; senhaSessao = s; window.gestaoSessao?.definir(s); await aposAbrir(); }
+};
+async function abrirArquivo(h, nome) { escolherNaEntrada(h, nome); await telaInicial(); }
 async function aposAbrir() {
   if (lembrarAtivo()) kv.set('hub-local', { dir: dirLocal, arquivo });
   await carregarChaves();

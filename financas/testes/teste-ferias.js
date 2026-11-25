@@ -122,7 +122,7 @@ const dia = n => { const d = new Date(seg); d.setDate(d.getDate() + n); return d
 
   console.log('5. Reabrir com a senha e migração');
   const ana2 = await nova('LocalAna');
-  await ana2.click('#iAbrir'); await ana2.waitForSelector('#pw'); await ana2.fill('#pw', SENHA); await btn(ana2, 'ok');
+  await ana2.click('#iAbrir'); await ana2.waitForSelector('#pw:not([disabled])'); await ana2.fill('#pw', SENHA); await ana2.click('#entOk');
   await ana2.waitForSelector('#tNova'); await ana2.click('[data-v="pessoas"]');
   ok((await ana2.textContent('#pg')).includes('Férias'), 'reabre o arquivo e mantém as férias');
 

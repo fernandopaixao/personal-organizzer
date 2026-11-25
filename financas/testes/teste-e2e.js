@@ -48,7 +48,8 @@ async function criarSenha(page, senha = SENHA) {
   await page.check('#cofreOk'); await page.click('#cofreBtn');
 }
 async function cofre(page) { await page.waitForSelector('#cofreOk'); await page.check('#cofreOk'); await page.click('#cofreBtn'); }
-async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw'); await page.fill('#pw', senha); await btn(page, 'ok'); }
+// Entrada em dois passos (ADR-0037, item 8): a senha fica no passo 2 da tela inicial (#entOk); os outros pedidos de senha seguem no diálogo.
+async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw:not([disabled])'); await page.fill('#pw', senha); await page.click('#entOk:not([disabled]), #dlg[open] [data-r="ok"]'); }
 
 (async () => {
   await new Promise(r => srv.listen(0, r));
@@ -155,9 +156,12 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
 
   console.log('5. Senha: reabrir, senha errada, lembrete de teste');
   const t2 = await nova(SAIDA_URL + 'financas_pagamentos.html', { 'fin-local': 'LocalAna', 'fin-comum': 'Gestao-Compartilhado' });
-  await t2.click('#iAbrir'); await senhaAbrir(t2, 'errada-errada-1'); await t2.waitForSelector('#dlg .latec');
-  ok(/Senha incorreta/.test(await t2.textContent('#dlg')), 'senha errada é recusada');
-  await t2.fill('#pw', SENHA); await btn(t2, 'ok'); await t2.waitForSelector('#topo');
+  ok(await t2.evaluate(() => !!document.querySelector('#passoArquivo .ent-passo.off #pw[disabled]')), 'entrada em dois passos: sem arquivo escolhido, a senha fica desligada');
+  await t2.click('#iAbrir'); await t2.waitForSelector('#passoArquivo .ent-arq');
+  ok(/financas-pagamentos\.json/.test(await t2.textContent('#passoArquivo .ent-arq')) && await t2.evaluate(() => !document.querySelector('#passoArquivo .ent-passo.off')), 'escolher o arquivo mostra o nome e só então libera a senha');
+  await senhaAbrir(t2, 'errada-errada-1'); await t2.waitForFunction(() => /Senha incorreta/.test(document.getElementById('entMsg')?.textContent || ''));
+  ok(true, 'senha errada é recusada no próprio passo 2');
+  await t2.fill('#pw', SENHA); await t2.click('#entOk'); await t2.waitForSelector('#topo');
   ok(await t2.evaluate(() => db.lancamentos.length) === 1, 'reabre com a senha certa e mantém os dados');
   await t2.evaluate(() => { db.seg = { cofreConfirmadoEm: new Date(Date.now() - 40 * 864e5).toISOString() }; setTimeout(() => lembreteTesteSenha(db.seg, ctx), 0); });
   await senhaAbrir(t2); await t2.waitForTimeout(800);
@@ -227,8 +231,11 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   fs.writeFileSync(path.join(SAIDA, 'gestao_gerada.html'), await opfs(a2, async () => ler('LocalGestor2', 'gestao_pessoal.html')));
   const c = await nova(SAIDA_URL + 'gestao_gerada.html', {});
   await c.evaluate(() => { window.__abrir = { dir: 'LocalGestor2', arq: 'gestao-tecnologia.json' }; });
-  ok(await c.evaluate(() => { const l = document.querySelector('#lock.rm-tela > .rm-lado'); return !!l && /Remessa/.test(l.textContent) && /v15\.\d+/.test(l.textContent) && getComputedStyle(document.getElementById('lock')).backgroundImage.includes('gradient'); }), 'tela de entrada da Central: fundo da Remessa, painel com a versão e a caixa à direita');
-  await c.fill('#lockPass', SENHA2); await c.click('#btnOpen'); await c.waitForTimeout(1500);
+  ok(await c.evaluate(() => { const l = document.querySelector('#lock.rm-tela > .rm-lado'), r = document.querySelector('#lock.rm-tela > .rm-rodape'); const vis = [...document.querySelectorAll('#lock *')].filter(e => e.offsetParent && !e.children.length && /15\.\d+/.test(e.textContent)); return !!l && /Remessa/.test(l.textContent) && !!r && /versão 15\.\d+/.test(r.textContent) && vis.length === 1 && getComputedStyle(document.getElementById('lock')).backgroundImage.includes('gradient'); }), 'tela de entrada da Central: fundo da Remessa, painel à esquerda e a versão uma vez só, no rodapé');
+  ok(await c.evaluate(() => document.getElementById('lockPass').disabled && document.getElementById('entSenha').classList.contains('off')), 'Central: a senha só aparece depois de escolher o arquivo');
+  await c.click('#btnOpen'); await c.waitForFunction(() => !document.getElementById('lockPass').disabled);
+  ok(/gestao-tecnologia\.json/.test(await c.textContent('#arqSel')), 'Central mostra o arquivo escolhido no passo 1');
+  await c.fill('#lockPass', SENHA2); await c.click('#btnEnter'); await c.waitForTimeout(1500);
   ok(await c.evaluate(() => !document.querySelector('#app').classList.contains('hidden')), 'Central abre o arquivo cifrado criado pelo assistente');
   ok(await c.evaluate(() => document.querySelectorAll('#home .inss .ins').length === 4 && /Delegadas no prazo/.test(document.querySelector('#home .inss').textContent)), 'Hoje da Central abre com quatro cards de leitura');
   // Formulários no lugar no padrão único (v15.4): acordo com pílulas, validação no campo e Enter; atualização de iniciativa; prévia da importação
@@ -531,7 +538,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   fs.writeFileSync(path.join(SAIDA, 'gestao_sorte.html'), await opfs(ls, async () => ler('LocalSorte', 'gestao_pessoal.html')));
   const cS = await nova('/financas/testes/saida/gestao_sorte.html', {});
   await cS.evaluate(() => { window.__abrir = { dir: 'LocalSorte', arq: 'gestao-tecnologia.json' }; });
-  await cS.fill('#lockPass', SENHA2); await cS.click('#btnOpen'); await cS.waitForTimeout(1500);
+  await cS.click('#btnOpen'); await cS.waitForFunction(() => !document.getElementById('lockPass').disabled); await cS.fill('#lockPass', SENHA2); await cS.click('#btnEnter'); await cS.waitForTimeout(1500);
   ok(await cS.evaluate(() => db.teams.map(t => t.prefix + ':' + t.slug).join() === 'PAG:pagamentos,CAR:cartoes' && db.teams.every(t => /^GK1\./.test(igActiveKey(t.id)?.key || '')) && db.settings.selfName === 'Fernando'), 'Central abre com os times, prefixos, pastas e chaves de tarefas');
   ok(await cS.evaluate(() => db.ferias?.nivel === 'grupo' && db.ferias.unidade.slug === 'tecnologia' && db.ferias.unidades.map(u => u.slug + ':' + u.chaves.length).join() === 'pagamentos:1,cartoes:1'), 'Central já vem com as férias do grupo configuradas (times e chaves)');
   fs.writeFileSync(path.join(SAIDA, 'grupo_sorte.html'), await opfs(ls, async () => ler('LocalSorte', 'financas_grupo.html')));
@@ -668,9 +675,9 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   ok(await gP.evaluate(() => db.times.map(t => t.prefixo + ':' + t.chaves.length).join() === 'PAG:1,CAR:1' && raiz?.name === 'CompPronto'), 'Finanças do Grupo abre sozinho, com prefixos sugeridos, chaves de finanças e pasta ligada');
   // Central: "Continuar com" o arquivo do assistente, pasta de integração já conectada, chaves de tarefas e de finanças
   const cP = await novaP(SAIDA_URL + 'pronto_central.html', {});
-  await cP.waitForSelector('#btnLast:not(.hidden)', { timeout: 5000 });
-  ok(/gestao-tecnologia\.json/.test(await cP.textContent('#btnLast')), 'Central oferece "Continuar com gestao-tecnologia.json" sem escolher arquivo');
-  await cP.fill('#lockPass', SENHA2); await cP.click('#btnLast'); await cP.waitForFunction(() => !document.querySelector('#app').classList.contains('hidden'), null, { timeout: 8000 });
+  await cP.waitForSelector('#arqSel .ent-arq', { timeout: 5000 });
+  ok(/gestao-tecnologia\.json/.test(await cP.textContent('#arqSel')) && /Usado por último/.test(await cP.textContent('#arqSel')) && !(await cP.evaluate(() => document.getElementById('lockPass').disabled)), 'Central já vem com gestao-tecnologia.json escolhido (último usado) e a senha liberada');
+  await cP.fill('#lockPass', SENHA2); await cP.click('#btnEnter'); await cP.waitForFunction(() => !document.querySelector('#app').classList.contains('hidden'), null, { timeout: 8000 });
   ok(await cP.evaluate(async () => (await igLoadDir())?.name === 'CompPronto' && db.teams.map(t => t.prefix).join() === 'PAG,CAR' && db.teams.every(t => igActiveKey(t.id) && finKeyActive(t.id))), 'Central abre com a pasta de integração conectada, prefixos e as duas chaves de cada time');
   await cP.click('[data-go="ferias"]'); await cP.waitForSelector('#ferias iframe'); const feP = await (await cP.$('#ferias iframe')).contentFrame(); await feP.waitForSelector('#tNova', { timeout: 8000 }); await cP.waitForTimeout(600);
   ok(await feP.evaluate(() => db.unidade.slug === 'tecnologia' && db.unidades.every(u => u.chaves.length === 1 && u.origem === 'central') && raiz?.name === 'CompPronto'), 'página Férias da Central abre pronta: grupo, times com chave e a pasta da Integração, sem outra senha');
