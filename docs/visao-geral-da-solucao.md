@@ -1,6 +1,6 @@
 # Visão geral da solução · Central de Gestão, Quadro do Time e integração
 
-*24/11/2026 · estado atual: Central v15.9, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.3 e contratos 1.0 (detalhes em `docs/plano-v15.md`, `docs/plano-hub.md`, `docs/plano-financas.md` e [`contratos/`](../contratos/LEIA-ME.md))*
+*25/11/2026 · estado atual: Central v15.9, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.3 e contratos 1.0 (detalhes em `docs/plano-v15.md`, `docs/plano-hub.md`, `docs/plano-financas.md` e [`contratos/`](../contratos/LEIA-ME.md))*
 
 > **Por onde começar:** [funcionalidades, usos e objetivos](funcionalidades.md) · [jornada do usuário](jornada-do-usuario.md) · [passo a passo](passo-a-passo.md) · [decisões de arquitetura (ADRs)](adr/README.md)
 
@@ -45,6 +45,7 @@ A solução é um pequeno ecossistema de **ferramentas HTML de arquivo único**,
 | **Finanças do Grupo e do Time** | Plano financeiro multianual de cada time (lançamentos locais, plano agregado publicado) e consolidado do grupo ano a ano contra o orçamento, com cards de leitura e gráficos | Fernando (grupo) e responsável financeiro de cada time | Repositório: `financas/`, plano em `docs/plano-financas.md` |
 | **Férias (página da Central e Mapa do time)** | Férias e ausências em níveis (time → gestor → liderança): mapa de calor dos dias com mais e menos gente fora, calendário e sugestão de períodos. O gestor e a liderança usam a página **Férias da Central** (mesmo arquivo e senha, [ADR-0033](adr/0033-ferias-dentro-da-central.md)); cada pessoa do time usa o `ferias.html`. Apoio, não substitui a ferramenta oficial | Times, gestores e liderança | Repositório: página Férias em `gestao_pessoal_v15.html` e `ferias/ferias.html` (mesmo código), plano em `docs/plano-ferias.md` |
 | **Assistente inicial** | Monta a solução para o papel da pessoa e cria os primeiros arquivos cifrados | Quem está começando | Repositório: `inicio.html` |
+| **Visual experimental** | As mesmas ferramentas no visual novo (trilho marinho, DM Sans, ícone por aba), com os mesmos dados, para experimentar ao lado das atuais | Quem quiser | Pacote: pasta `experimental/`, montada do main por `tools/build_experimental.py` a partir de `experimental/src/` ([ADR-0034](adr/0034-visual-experimental.md)) |
 | **Integração** | Pasta SharePoint, contratos JSON versionados, envelope cifrado, chaves por time | Central e ferramentas dos times | Projeto: `integracao-time/` (documentos 00 a 06, `contrato/`, `exemplos/`) |
 | **Agentes do Fernando** | Agentes com acesso a reuniões, chats e e-mails que geram arquivos de importação para a Central | Fernando | Projeto: `integracao-time/06-prompts-para-agentes.md` |
 | **Ferramenta de feedbacks** | Ferramenta separada para registrar feedbacks | Fernando | Fora deste repositório. Sem integração (seção 10) |
@@ -167,7 +168,7 @@ Gestao-Integracao/                      (administrada pelo Fernando)
   times/<slug>/metricas.json            o time escreve: métricas do time
 ```
 
-Cada time edita só a própria pasta `times/<slug>` e lê `central/`. O "barramento" é o cliente de sincronização do OneDrive que já existe nas máquinas.
+Cada time edita só a própria pasta `times/<slug>` e lê `central/`. O "barramento" é o cliente de sincronização do OneDrive que já existe nas máquinas. Em cada computador, a pasta fica marcada como **Sempre manter neste dispositivo**: com os "Arquivos sob demanda", um arquivo que está só na nuvem não chega às ferramentas (o assistente orienta isso desde a versão 2.5).
 
 ### 6.2 Regras da troca
 

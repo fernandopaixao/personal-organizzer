@@ -1,6 +1,6 @@
 # Jornada do usuário
 
-*24/11/2026 · como cada papel conhece, monta, usa e mantém a solução*
+*25/11/2026 · como cada papel conhece, monta, usa e mantém a solução*
 
 A solução tem quatro papéis. A mesma pessoa pode ter mais de um (o gestor costuma ser também o dono das finanças do grupo; o líder do time costuma ser também o responsável financeiro). Quem integra uma **outra solução** pelos contratos tem a jornada própria na [seção 9](#9-jornada-de-quem-integra-outra-solução).
 
@@ -29,7 +29,7 @@ A solução tem quatro papéis. A mesma pessoa pode ter mais de um (o gestor cos
 
 | Etapa | O que ele faz | Ferramenta | O que a solução garante | Ponto de atenção |
 |---|---|---|---|---|
-| **1. Montar** | Descompacta o .zip numa pasta pessoal no seu OneDrive, abre `inicio.html`, lê os quatro desenhos de como funciona e usa **Estou com sorte** (tudo de uma vez, já com as chaves dos times) ou responde "lidero 2 ou mais times" e os usos, cola a chave da liderança se recebeu, informa o grupo e os times, escolhe as pastas, cria a senha | Assistente | Primeiro arquivo já cifrado, HTMLs do perfil, chaves dos times geradas nos dois caminhos e já nos arquivos, `para-os-times/<time>/`, cada ferramenta abrindo sozinha com arquivo e pasta lembrados | Guardar a senha no cofre antes de seguir; pasta pessoal só sua (no seu OneDrive), separada da compartilhada; no fim, **Abrir o hub** |
+| **1. Montar** | Descompacta o .zip numa pasta pessoal no seu OneDrive, abre `inicio.html`, lê os quatro desenhos de como funciona e usa **Estou com sorte** (tudo de uma vez, já com as chaves dos times) ou responde "lidero 2 ou mais times" e os usos, cola a chave da liderança se recebeu, informa o grupo e os times, escolhe as pastas, cria a senha | Assistente | Primeiro arquivo já cifrado, HTMLs do perfil, chaves dos times geradas nos dois caminhos e já nos arquivos, `para-os-times/<time>/`, cada ferramenta abrindo sozinha com arquivo e pasta lembrados | Guardar a senha no cofre antes de seguir; pasta pessoal só sua (no seu OneDrive), separada da compartilhada; pasta compartilhada marcada como **Sempre manter neste dispositivo** (o checklist pede); no fim, **Abrir o hub** |
 | **2. Cadastrar times** | Times do assistente já chegam prontos. Time novo: cria com o nome e clica **Gerar chave de integração** no próprio time (prefixo e pasta sugeridos); a de finanças, no Finanças do Grupo | Central (Times › time › Integração) e Finanças do Grupo (Times) | Uma chave por time, aviso de cofre, prefixo travado após o primeiro código | Enviar a chave **por mensagem direta**, nunca na pasta |
 | **3. Equipar os times** | Manda o `inicio.html` e, à parte, a chave e o nome da pasta (ou gera o **HTML do time** e o **HTML de finanças do time**) | Assistente, Central, Finanças do Grupo | O time monta tudo sozinho a partir da chave | O HTML não leva dados; a chave vai por mensagem direta |
 | **4. Montar o portfólio** | Cadastra iniciativas, features e fases; clica **Compartilhar**; acompanha o custo de cada iniciativa na aba Finanças | Central (Iniciativas, Integração) | Só sai o que ele revisou na tela de compartilhamento; o custo soma todos os times que marcaram linhas com o código | Marcar o que não deve ir para o time |
@@ -87,6 +87,7 @@ A solução tem quatro papéis. A mesma pessoa pode ter mais de um (o gestor cos
 | **Chave vazou** | Gestor revoga e gera outra; envia ao responsável; o time cola a nova | [Passo a passo §11](passo-a-passo.md#11-uma-chave-vazou) |
 | **Cópia de conflito encontrada** | Aceitar a resolução proposta pela ferramenta | [ADR-0007](adr/0007-um-escritor-por-arquivo.md) |
 | **Prefere a tela escura** | Botão redondo no canto inferior direito de qualquer ferramenta: Claro, Escuro ou Automático (segue o sistema). Vale para todas as ferramentas neste computador | [Passo a passo §12](passo-a-passo.md#12-problemas-comuns) |
+| **Quer experimentar o visual novo** | Abrir `experimental/hub.html` do pacote com o mesmo arquivo e a mesma senha; voltar pelo `hub.html` da pasta principal quando quiser | [Passo a passo §15](passo-a-passo.md#15-experimentar-o-visual-novo), [ADR-0034](adr/0034-visual-experimental.md) |
 | **Pessoa saiu do time** | Desativar a pessoa nos Ajustes do Quadro; o arquivo dela continua lido | |
 
 ---

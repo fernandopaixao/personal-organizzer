@@ -4,7 +4,7 @@ Ferramenta de gestão pessoal em um único arquivo HTML, sem servidor e sem inst
 
 - **Abrir:** dê dois cliques em `gestao_pessoal_v15.html` (Chrome ou Edge recomendados, para salvar direto no arquivo e usar a pasta de integração).
 - **Dados:** ficam num arquivo JSON separado, criptografado com AES-GCM 256 e senha. O HTML não guarda nenhum dado, então pode ser atualizado à vontade.
-- **Versão atual:** Central 15.9, Hub 1.4, assistente 2.4 e Mapa de Férias 1.3. As férias do gestor e da liderança são uma página da Central, não mais uma ferramenta à parte ([ADR-0033](docs/adr/0033-ferias-dentro-da-central.md)). Se uma ferramenta disser "Daqui não dá para abrir pastas", ela foi aberta no Safari, no Firefox, no celular ou numa pré-visualização: o aviso diz o que fazer ([ADR-0030](docs/adr/0030-aviso-quando-nao-da-para-abrir-pastas.md)). A Central lê as finanças dos times e o custo de cada iniciativa, só para leitura ([ADR-0028](docs/adr/0028-financas-na-central-so-leitura.md)); o hub e a Central passam a senha da sessão para as ferramentas que abrem ([ADR-0029](docs/adr/0029-uma-senha-por-sessao.md)); o arquivo pessoal fica numa pasta só sua, de preferência no seu OneDrive ([ADR-0008](docs/adr/0008-local-individual-comum-sincronizado.md)).
+- **Versão atual:** Central 15.9, Hub 1.4, assistente 2.5 e Mapa de Férias 1.3. As férias do gestor e da liderança são uma página da Central, não mais uma ferramenta à parte ([ADR-0033](docs/adr/0033-ferias-dentro-da-central.md)). Se uma ferramenta disser "Daqui não dá para abrir pastas", ela foi aberta no Safari, no Firefox, no celular ou numa pré-visualização: o aviso diz o que fazer ([ADR-0030](docs/adr/0030-aviso-quando-nao-da-para-abrir-pastas.md)). A Central lê as finanças dos times e o custo de cada iniciativa, só para leitura ([ADR-0028](docs/adr/0028-financas-na-central-so-leitura.md)); o hub e a Central passam a senha da sessão para as ferramentas que abrem ([ADR-0029](docs/adr/0029-uma-senha-por-sessao.md)); o arquivo pessoal fica numa pasta só sua, de preferência no seu OneDrive ([ADR-0008](docs/adr/0008-local-individual-comum-sincronizado.md)); a pasta compartilhada fica marcada como **Sempre manter neste dispositivo** em cada computador, para o navegador ler os arquivos dos outros ([ADR-0004](docs/adr/0004-troca-por-arquivos-na-pasta-sincronizada.md)).
 - **Atualizar de versão:** abra o arquivo de dados atual na versão nova. A migração é automática e um backup do arquivo anterior é baixado.
 
 ## Telas
@@ -27,7 +27,7 @@ Ferramenta de gestão pessoal em um único arquivo HTML, sem servidor e sem inst
 
 **Integrar outra solução:** a pasta [`contratos/`](contratos/LEIA-ME.md) tem tudo o que uma ferramenta de outro time, de um gestor par ou um agente precisa para gravar arquivos que o hub, a Central, as Finanças e o Mapa de Férias leem, até a visão da liderança: arquitetura e níveis, criptografia com vetores de teste, regras anti-conflito, códigos, schemas, exemplos cifrados e o validador `node contratos/validar.js` ([ADR-0032](docs/adr/0032-pasta-de-contratos.md)).
 
-**Levar para a empresa:** `python3 tools/empacotar.py` gera `dist/gestao-solucao-AAAA-MM-DD.zip` com tudo lado a lado, a documentação e um LEIA-ME. A CI do repositório pessoal gera o mesmo .zip como artefato de cada PR e da `main` ([ADR-0024](docs/adr/0024-distribuicao-por-zip.md)).
+**Levar para a empresa:** `python3 tools/empacotar.py` gera `dist/gestao-solucao-AAAA-MM-DD.zip` com tudo lado a lado, a documentação, um LEIA-ME e a pasta `experimental/`. A CI do repositório pessoal gera o mesmo .zip como artefato de cada PR e da `main` ([ADR-0024](docs/adr/0024-distribuicao-por-zip.md)).
 
 A visão geral da solução (Central, Quadro do Time, integração, métricas e agentes) está em [`docs/visao-geral-da-solucao.md`](docs/visao-geral-da-solucao.md). O plano da versão atual está em [`docs/plano-v15.md`](docs/plano-v15.md). As versões anteriores ficam em `legacy/` como referência.
 
@@ -67,3 +67,6 @@ Apoio para **enxergar e planejar as ausências** do time e do grupo (não substi
 - o gestor publica o consolidado para a liderança em `grupos/<grupo>/ferias/`, com a mesma chave do grupo das Finanças do Grupo, e a liderança soma os gestores do mesmo jeito, em quantos níveis forem precisos.
 
 Plano e decisões em [`docs/plano-ferias.md`](docs/plano-ferias.md); teste com `node financas/testes/teste-ferias.js`.
+
+**Visual experimental:** a pasta `experimental/` do pacote traz as mesmas ferramentas, com os mesmos dados, num visual novo (trilho marinho, fontes DM Sans e Plus Jakarta Sans embutidas, ícone próprio em cada aba). Ela é montada do main a cada pacote por `python3 tools/build_experimental.py` (a partir de `experimental/src/`), e a CI roda nela os mesmos testes; as versões atuais não mudam ([ADR-0034](docs/adr/0034-visual-experimental.md)).
+

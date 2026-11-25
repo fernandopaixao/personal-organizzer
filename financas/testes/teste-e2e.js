@@ -505,6 +505,8 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   ok(/"key":"GK1\.pagamentos-\d{4}\./.test(qS) && /"chave":"GK1\.pagamentos-fin-\d{4}\./.test(fS) && /"pasta":"CompSorte"/.test(fS), 'HTMLs dos times já levam a chave certa e a pasta sincronizada');
   ok(await ls.evaluate(() => document.querySelectorAll('.tk').length === 2 && document.querySelectorAll('[data-ck]').length >= 8 && document.querySelectorAll('.inss .ins').length === 4), 'tela final com cards, desenho, chaves por time e checklist');
   await ls.click('[data-ck="cofre"]'); ok(/1/.test(await ls.textContent('#ckV')), 'checklist marca item e conta o progresso');
+  ok(await ls.evaluate(() => { const m = document.querySelector('[data-ck="manter"]'); return !!m && /Sempre manter neste dispositivo/.test(m.closest('.ck').textContent) && /Windows/.test(m.closest('.ck').textContent) && /Mac/.test(m.closest('.ck').textContent); }), 'checklist pede "Sempre manter neste dispositivo" na pasta de troca, com o caminho no Windows e no Mac');
+  ok(/Sempre manter neste dispositivo/.test(await opfs(ls, async () => ler('LocalSorte/para-os-times/pagamentos', 'LEIA-ME.txt'))) && /Sempre manter neste dispositivo/.test(await opfs(ls, async () => ler('CompSorte', 'LEIA-ME.md'))), 'LEIA-ME dos times e da pasta compartilhada orientam "Sempre manter neste dispositivo"');
   ok((await opfs(ls, async () => listar('CompSorte/times'))).join() === 'cartoes,pagamentos', 'pasta sincronizada recebe a estrutura dos times');
   await ls.setViewportSize({ width: 900, height: 900 }); await ls.screenshot({ path: path.join(SAIDA, 'inicio-sorte.png'), fullPage: true });
   fs.writeFileSync(path.join(SAIDA, 'gestao_sorte.html'), await opfs(ls, async () => ler('LocalSorte', 'gestao_pessoal.html')));
