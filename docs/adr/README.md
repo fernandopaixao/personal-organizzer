@@ -1,6 +1,6 @@
 # Decisões de arquitetura (ADRs)
 
-*24/11/2026 · estado: Central v15.8, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.2, assistente 2.3, contratos 1.0*
+*24/11/2026 · estado: Central v15.9, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.3, assistente 2.4, contratos 1.0*
 
 Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequências e o que observar ao evoluir. Elas existem para que uma funcionalidade nova comece pelas regras certas, sem precisar reler todos os planos.
 
@@ -33,17 +33,18 @@ Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequê
 | [0023](0023-onboarding-por-perfil-e-chave.md) | Onboarding por perfil e chave | O assistente pergunta o perfil e lê as chaves do líder; o identificador vem da chave |
 | [0024](0024-distribuicao-por-zip.md) | Distribuição por .zip | A empresa recebe um .zip autossuficiente; a CI roda só no repositório pessoal |
 | [0025](0025-consolidacao-em-niveis.md) | Consolidação em níveis | Gestor publica o consolidado para a liderança como uma unidade |
-| [0026](0026-ferias-em-niveis.md) | Férias em níveis | Mapa de Férias: chave do time no time, chave do grupo entre níveis, um arquivo por pessoa |
+| [0026](0026-ferias-em-niveis.md) | Férias em níveis | Mapa de Férias: chave do time no time, chave do grupo entre níveis, um arquivo por pessoa (item 1 revisto pela [0033](0033-ferias-dentro-da-central.md)) |
 | [0027](0027-tema-claro-escuro-compartilhado.md) | Tema claro/escuro | Uma camada `tema.js` injetada em todos os HTMLs; escolha salva só no computador |
 | [0028](0028-financas-na-central-so-leitura.md) | Finanças na Central | A Central lê o plano e o teto dos times com a chave de finanças; não escreve em finanças |
 | [0029](0029-uma-senha-por-sessao.md) | Uma senha por sessão | O hub e a Central passam a senha, só em memória, para a janela que acabaram de abrir |
 | [0031](0031-ferramentas-abrem-prontas.md) | Ferramentas abrem prontas depois do assistente | O assistente lembra arquivo e pastas de cada ferramenta neste navegador; o gestor recebe as chaves dos times também no caminho normal; prefixo sugerido; aba Integração no time da Central |
 | [0030](0030-aviso-quando-nao-da-para-abrir-pastas.md) | Aviso quando não dá para abrir pastas | O aviso diz o motivo (Safari, pré-visualização, zip...) e o que fazer; todo botão responde ao clique |
 | [0032](0032-pasta-de-contratos.md) | Pasta de contratos | `contratos/` é a fonte única do que outras soluções gravam: especificação, schemas, cripto com vetores, exemplos e validador |
+| [0033](0033-ferias-dentro-da-central.md) | Férias dentro da Central | O gestor usa a página Férias da Central: mesmo arquivo e senha, times e chaves da Integração, mesmos arquivos na pasta; revê o item 1 da 0026 |
 
 ## Checklist para uma funcionalidade nova
 
-1. **Onde mora o dado?** No arquivo da ferramenta dona ([0002](0002-dados-fora-do-html.md), [0010](0010-htmls-desacoplados.md)). Se outra ferramenta precisa dele, é um contrato novo na pasta comum, não uma leitura do arquivo.
+1. **Onde mora o dado?** No arquivo da ferramenta dona ([0002](0002-dados-fora-do-html.md), [0010](0010-htmls-desacoplados.md)). Antes de criar um módulo novo para o gestor, veja se ele cabe como página da Central ([0033](0033-ferias-dentro-da-central.md)). Se outra ferramenta precisa dele, é um contrato novo na pasta comum, não uma leitura do arquivo.
 2. **Local ou comum?** Só vai para a pasta o que o outro lado precisa, de preferência agregado ([0008](0008-local-individual-comum-sincronizado.md)).
 3. **Quem escreve?** Um dono por arquivo, `<pessoa>-<computador>` se várias pessoas contribuem, publicação por `publicarUnico` ([0007](0007-um-escritor-por-arquivo.md)).
 4. **Qual chave?** Senha local, chave de tarefas ou chave de finanças do time ([0003](0003-criptografia-sempre.md), [0005](0005-chave-aleatoria-por-time.md), [0006](0006-chave-de-financas-separada.md)).

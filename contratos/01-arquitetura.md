@@ -10,12 +10,12 @@ As ferramentas não conversam por rede: cada uma grava **arquivos JSON cifrados*
 
 ```
   LIDERANÇA (líder de líderes)
-  Hub da liderança · Finanças do Grupo da liderança · Mapa de Férias (nível liderança)
+  Hub da liderança · Finanças do Grupo da liderança · Central (página Férias, nível liderança)
         ▲  lê grupos/<grupo>/financas/plano.json e grupos/<grupo>/ferias/*.json
         │  grava grupos/<grupo>/financas/diretriz.json (teto por ano)
         │                                  chave do GRUPO: GK1.<grupo>-fin-AAMM (ou -fer-)
   GESTOR (dono de um grupo de times)
-  Hub · Central de Gestão · Finanças do Grupo · Mapa de Férias (nível gestor)
+  Hub · Central de Gestão (com a página Férias) · Finanças do Grupo
         ▲  lê times/<time>/status.json, metricas.json, financas/plano.json, ferias/*.json
         │  grava central/catalogo-<time>.json, grupo/financas/diretriz-<time>.json,
         │        times/<time>/postits/<gestor>-<computador>.json
@@ -32,7 +32,7 @@ O que a liderança enxerga de cada gestor:
 |---|---|---|---|
 | Finanças | `grupos/<grupo>/financas/plano.json` | Hub da liderança (totais por ano) e Finanças do Grupo da liderança (soma mês a mês, por categoria) | Orçado, previsto e realizado por ano, por unidade e categoria; versão do plano; data |
 | Teto | `grupos/<grupo>/financas/diretriz.json` (a liderança escreve) | Finanças do Grupo do gestor | Teto por ano e prazo de publicação |
-| Férias | `grupos/<grupo>/ferias/<gestor>-<computador>.json` | Mapa de Férias da liderança | Ausências de todas as pessoas do grupo (nomes opcionais), feriados, árvore de unidades |
+| Férias | `grupos/<grupo>/ferias/<gestor>-<computador>.json` | Página Férias da Central da liderança (ou Mapa de Férias) | Ausências de todas as pessoas do grupo (nomes opcionais), feriados, árvore de unidades |
 
 O detalhe dos times (linhas do plano, cards, notas) **não sobe**: o consolidado leva uma linha por unidade × categoria ([ADR-0008](../docs/adr/0008-local-individual-comum-sincronizado.md)).
 
@@ -50,8 +50,8 @@ A raiz é a pasta sincronizada (`Gestao-Compartilhado`; o nome antigo `Gestao-In
 | `grupo/financas/diretriz-<time>.json` | [`gestao-financas-diretriz/1`](schemas/gestao-financas-diretriz-1.schema.json) | finanças do time | Finanças do Grupo do gestor | Finanças do Time | Pelo botão do gestor |
 | `grupos/<grupo>/financas/plano.json` | `gestao-financas-plano/1` com `source.level = "group"` | do grupo | Gestor do grupo (consolidado) | Hub e Finanças do Grupo da liderança | Pelo botão, depois da prévia "o que sobe" |
 | `grupos/<grupo>/financas/diretriz.json` | `gestao-financas-diretriz/1` | do grupo | Liderança | Finanças do Grupo do gestor | Pelo botão da liderança |
-| `times/<time>/ferias/<w>.json` | [`gestao-ferias/1`](schemas/gestao-ferias-1.schema.json) (`level` `team`) | tarefas do time | Cada pessoa que cadastra férias | Mapa de Férias do time e do gestor | Automático a cada mudança |
-| `grupos/<grupo>/ferias/<w>.json` | `gestao-ferias/1` (`level` `group`) | do grupo | Gestor do grupo (consolidado) | Mapa de Férias da liderança | Pelo botão, depois da prévia |
+| `times/<time>/ferias/<w>.json` | [`gestao-ferias/1`](schemas/gestao-ferias-1.schema.json) (`level` `team`) | tarefas do time | Cada pessoa que cadastra férias | Mapa de Férias do time e página Férias da Central do gestor | Automático a cada mudança |
+| `grupos/<grupo>/ferias/<w>.json` | `gestao-ferias/1` (`level` `group`) | do grupo | Gestor do grupo (consolidado, pela página Férias da Central) | Página Férias da liderança | Pelo botão, depois da prévia |
 | `times/<time>/postits/<w>.json` | [`gestao-postits/1`](schemas/gestao-postits-1.schema.json) | tarefas do time | Cada autor (Hub) | Quadro do Time, Hub | Automático a cada mudança |
 | `times/<time>/postits/vistos/<w>.json` | [`gestao-postits-vistos/1`](schemas/gestao-postits-vistos-1.schema.json) | tarefas do time | Cada pessoa do time (Quadro) | Hub | Ao clicar em "Vi" |
 | `<qualquer pasta>/.aberto-<w>.json` | aviso de presença, em claro | nenhuma | Quem está com a ferramenta aberta | As ferramentas (só aviso) | A cada minuto, vale 3 min |

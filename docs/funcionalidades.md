@@ -1,6 +1,6 @@
 # Funcionalidades, usos e objetivos
 
-*24/11/2026 · Central v15.8, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.2, assistente 2.3, contratos 1.0*
+*24/11/2026 · Central v15.9, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.3, assistente 2.4, contratos 1.0*
 
 Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. Para as regras técnicas por trás, veja as [decisões de arquitetura](adr/README.md). Para o caminho de quem usa, veja a [jornada do usuário](jornada-do-usuario.md) e o [passo a passo](passo-a-passo.md).
 
@@ -27,11 +27,11 @@ Dar a um gestor de vários times, e aos próprios times, **um lugar organizado p
 |---|---|---|---|
 | **Assistente** | `inicio.html` | Quem está começando ou trocando de computador | Montar a solução certa para o seu papel, já cifrada |
 | **Hub** | `hub.html` | Gestor (e quem quiser) | Tela inicial: abrir ferramentas, ver o que os times publicaram, deixar post-its |
-| **Central de Gestão** | `gestao_pessoal_v15.html` | Gestor | Gestão pessoal, de pessoas, rituais e portfólio |
+| **Central de Gestão** | `gestao_pessoal_v15.html` | Gestor e liderança | Gestão pessoal, de pessoas, rituais e portfólio, com a página **Férias** (o Mapa de Férias do grupo, dentro da Central) |
 | **Quadro do Time** | `quadro_do_time_v1.html` (gerado por time) | Cada time | Kanban, backlog, sprints e métricas de fluxo do time |
 | **Finanças do Grupo** | `financas_grupo.html` | Gestor | Consolidar os planos financeiros dos times contra o orçamento |
 | **Finanças do Time** | `financas_time.html` (gerado por time) | Responsável financeiro do time | Registrar gastos, planejar o ano e publicar o plano |
-| **Mapa de Férias** | `ferias.html` | Time, gestor e liderança | Enxergar e planejar as ausências: que dias têm mais e menos gente fora, somando em níveis |
+| **Mapa de Férias** | `ferias.html` | Cada pessoa do time | Marcar as próprias férias e ver as do time; sobem sozinhas para a página Férias da Central do gestor ([ADR-0033](adr/0033-ferias-dentro-da-central.md)) |
 | **Cartão "Onde fica cada coisa"** | `onde-fica-cada-coisa.html` | Todos | Mapa em claro (sem dados) de arquivos e pastas |
 | **Contratos de integração** | pasta `contratos/` | Quem constrói outra solução (time, gestor par, agente) | Gravar arquivos que o hub, a Central, as Finanças e o Mapa de Férias leem e conciliam, até a visão da liderança ([seção 10](#10-contratos-para-outras-soluções)) |
 
@@ -60,10 +60,11 @@ Todas têm, no topo, **Onde estou?** (qual ferramenta, qual arquivo, o que é lo
 | Gestor + tarefas | Central (que gera o Quadro de cada time) |
 | Responsável + finanças | Finanças do Time |
 | Responsável ou membro + tarefas | Quadro do Time |
-| Qualquer papel + férias | Mapa de Férias: no time, cada pessoa marca as suas; no gestor, os times entram como unidades |
+| Gestor + férias | Central com a página Férias já configurada (grupo, times e chaves); sem HTML nem arquivo de férias à parte ([ADR-0033](adr/0033-ferias-dentro-da-central.md)) |
+| Responsável ou membro + férias | Mapa de Férias do time: cada pessoa marca as suas |
 | Vários usos | A soma das linhas, cada HTML separado |
 
-**Quem lidera vários times (2.3):** o caminho normal faz o mesmo que o Estou com sorte nas chaves. O assistente gera a chave de tarefas e, com Finanças, a de finanças de cada time (reaproveita a de tarefas que você colou para um dos times), sugere o prefixo de quem não tem (`PAG`, `CAR`), grava tudo na Central, no Finanças do Grupo, no Mapa de Férias e no hub, e gera `para-os-times/<time>/`. A tela final mostra as chaves com os botões de copiar.
+**Quem lidera vários times (2.3):** o caminho normal faz o mesmo que o Estou com sorte nas chaves. O assistente gera a chave de tarefas e, com Finanças, a de finanças de cada time (reaproveita a de tarefas que você colou para um dos times), sugere o prefixo de quem não tem (`PAG`, `CAR`), grava tudo na Central (inclusive a página Férias), no Finanças do Grupo e no hub, e gera `para-os-times/<time>/`. A tela final mostra as chaves com os botões de copiar.
 
 **Tudo abre pronto (2.3, [ADR-0031](adr/0031-ferramentas-abrem-prontas.md)):** o assistente grava neste navegador onde ficou o arquivo de cada ferramenta e a pasta sincronizada. Ao abrir pelo hub, cada ferramenta abre sozinha o seu arquivo, com a senha da sessão e a pasta já ligada; a Central mostra **Continuar com gestao-….json** e já tem a pasta de integração. Ninguém escolhe pasta nem cola chave de novo neste computador.
 
@@ -74,7 +75,7 @@ Onde as chaves coladas vão parar: no hub (tarefas e finanças de cada time), no
 | Gera | Onde | Com o quê |
 |---|---|---|
 | Chaves de tarefas e de finanças de cada time | Dentro dos arquivos cifrados e dos HTMLs dos times | Aviso de cofre antes; botões para copiar cada chave depois |
-| Hub, Central, Finanças do Grupo, Mapa de Férias e "Onde fica cada coisa" | Na pasta escolhida | Times, prefixos, pastas e chaves já cadastrados; uma senha para todos |
+| Hub, Central (com a página Férias), Finanças do Grupo e "Onde fica cada coisa" | Na pasta escolhida | Times, prefixos, pastas e chaves já cadastrados; uma senha para todos |
 | Quadro do Time, Finanças do Time, Mapa de Férias e LEIA-ME de cada time | `para-os-times/<time>/` | A chave do time e a pasta sincronizada já configuradas |
 | Estrutura da pasta sincronizada | `times/<time>/…`, `grupos/<grupo>/ferias/` | Só pastas vazias |
 
@@ -102,18 +103,20 @@ A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados
 
 ---
 
-## 5. Central de Gestão (v15.8)
+## 5. Central de Gestão (v15.9)
+
+**Férias dentro da Central (15.9, [ADR-0033](adr/0033-ferias-dentro-da-central.md)).** O Mapa de Férias do gestor e da liderança deixou de ser uma ferramenta à parte: é a página **Férias** (menu Pessoas), no mesmo arquivo e com a mesma senha da Central. Os times com pasta e as chaves de tarefas da Integração entram sozinhos; a pasta compartilhada é a da Integração. A página **Hoje** mostra quem está **fora hoje**.
 
 **Chave de integração dentro do time (15.8).** Na visão do time, a aba **Integração** mostra a chave em destaque: **Gerar chave de integração** (um clique; se faltar, a Central sugere a pasta e o prefixo), **HTML do time (com a chave)**, **Copiar chave**, **Mensagem para o time**, **Chave de finanças** e **Vazou: trocar chave**, mais o que chega do time (backlog, métricas, plano). Time sem chave mostra o aviso com o botão também na **Visão do time** e no card da página Times.
 
 
 **Objetivo:** concentrar o trabalho do gestor: o que ele faz, o que delegou, com quem conversa, em quais fóruns decide e como anda o portfólio.
 
-Navegação em 8 páginas (teclas 1 a 8) e o botão **Importar e agentes** no topo.
+Navegação em 9 páginas (teclas 1 a 9) e o botão **Importar e agentes** no topo.
 
 ### 5.1 Hoje (1)
 - **Cards de leitura no topo:** o dia (feitas de quantas, atrasadas), delegadas no prazo, iniciativas em andamento em dia e rituais dos próximos 7 dias. Com a chave de finanças dos times (15.5), entra o card **Finanças dos times**: previsto do ano contra o teto ou o orçado, times acima do teto e planos sem publicar há mais de 35 dias. Cada card abre a página dona do dado.
-- **Uso:** abrir o dia. Tarefas do dia e atrasadas, 1:1 da semana, fóruns dos próximos 7 dias, iniciativas pedindo atenção e o cartão **Dos times** (arquivos novos, alertas, épicos sem vínculo, times sem chave).
+- **Uso:** abrir o dia. Tarefas do dia e atrasadas, 1:1 da semana, fóruns dos próximos 7 dias, iniciativas pedindo atenção e o cartão **Dos times** (arquivos novos, alertas, épicos sem vínculo, times sem chave), e o cartão **Fora hoje** (15.9): quem está de férias ou ausente hoje, você, diretos e os times, lido da página Férias.
 - **Objetivo:** responder "o que pede atenção agora" sem navegar.
 
 ### 5.2 Tarefas (2)
@@ -134,28 +137,33 @@ Navegação em 8 páginas (teclas 1 a 8) e o botão **Importar e agentes** no to
 - **Uso:** ciclos de feedback e evidências por pessoa (a anotação é feita na Pessoa 360).
 - **Objetivo:** ter evidências acumuladas quando o ciclo chegar.
 
-### 5.5 Iniciativas (5)
+### 5.5 Férias (5)
+- **Uso:** o Mapa de Férias do grupo, dentro da Central: **Mapa** (mapa de calor dos dias com mais e menos gente fora, semanas mais cheias e mais tranquilas, por unidade), **Calendário**, **Diretos** (as suas férias e as de quem responde direto a você), **Unidades** (os times da Central entram sozinhos; a liderança adiciona os grupos dos gestores) e **Ajustes** (chave do nível acima, publicar para a liderança, limite, dias úteis, feriados). Detalhes na [seção 9](#9-mapa-de-férias-feriashtml-13).
+- **Sem módulo à parte:** sem `ferias.html`, sem `ferias-<grupo>.json` e sem outra senha para o gestor. Quem usava o Mapa separado clica **Trazer do Mapa de Férias separado** (Ajustes ou primeira tela) e digita a senha do arquivo antigo, que só é lido.
+- **Objetivo:** planejar as ausências junto com o resto da gestão, sem mais um arquivo para abrir e guardar.
+
+### 5.6 Iniciativas (6)
 - **Vistas:** Lista (feito × prazo, fases, próxima feature, painel com abas), Semana (features e backlog da semana), Horizonte, Linha do tempo (fases sobrepostas) e Dependências.
 - **Uso:** cadastrar iniciativas e features com código (`PAG-042`, `PAG-042.F2`), agrupar features em fases, registrar a atualização de uma linha (diário de bordo, num formulário no lugar que mostra a última atualização e só habilita **Registrar atualização** com texto), ver o **downstream** dos times abaixo de cada feature.
 - **Finanças por iniciativa (15.6, só leitura):** com as chaves de finanças dos times, a lista mostra o previsto do ano ao lado do código. O painel da iniciativa ganha a aba **Finanças** (orçado, previsto, realizado, folga e uma barra por time). A conta soma, em todos os times, as linhas do plano marcadas com o código da iniciativa ou de uma feature dela ([ADR-0028](adr/0028-financas-na-central-so-leitura.md)).
 - **Objetivo:** ver o portfólio e o que está atrasando, com o dado do time chegando sozinho.
 
-### 5.6 Fóruns (6)
+### 5.7 Fóruns (7)
 - **Abas:** Pautas, Acordos e Staff. Lista lateral para escolher o fórum, com busca.
 - **Uso:** fóruns recorrentes com pauta por data (o que não foi discutido passa para a próxima), decisões e compromissos (que viram tarefas) num único formulário com pílulas **Compromisso / Decisão**, validação no campo e Enter para registrar (o mesmo na reunião de status do time), folha de acordos para copiar, imprimir ou baixar; Staff mostra a semana dos times.
 - **Objetivo:** reuniões com pauta pronta e acordos que não se perdem.
 
-### 5.7 Times (7)
+### 5.8 Times (8)
 - **Uso:** cadastro dos times (prefixo e pasta), **Métricas dos times** (fluxo publicado por eles), visão de cada time (backlog, features, reunião de status guiada, folha para o Teams) e **HTML do time** (gera o Quadro já configurado, com aviso de cofre).
 - **Finanças (15.5, só leitura):** com a chave de finanças do time, o card do time mostra o previsto do ano contra o teto ou o orçado. A reunião de status ganha o bloco **Finanças** quando o time passou do teto ou não publica há mais de 35 dias ([ADR-0028](adr/0028-financas-na-central-so-leitura.md)).
 - **Objetivo:** acompanhar cada time e entregar a ferramenta pronta.
 
-### 5.8 Integração (8)
+### 5.9 Integração (9)
 - **Uso:** pasta e chaves (gerar, copiar, revogar; **chave de finanças** por time, colada ou importada com **Chaves do Finanças do Grupo**), arquivos recebidos (com prévia), **Conciliação** (unir épicos, trazer para a Central, ligar itens a features, códigos das finanças dos times sem iniciativa na Central) e **Compartilhar** (tela que mostra o que vai para cada time).
 - **Abrir o Finanças do Grupo (15.7):** botão em Integração e na aba Finanças da iniciativa; a senha da sessão vai junto.
 - **Objetivo:** manter a Central e os times falando a mesma língua, sem sobrescrever nada.
 
-### 5.9 Importar e agentes
+### 5.10 Importar e agentes
 - **Uso:** copiar um prompt pronto (com o contexto atual) para o agente de reuniões, chats e e-mails; colar o JSON `gestao-import/3` que ele devolve; revisar a prévia (contadores de novos, atualizados, iguais e ignorados que filtram a lista, itens agrupados por tipo, avisos destacados, erro explicado no lugar); aplicar com **Importar N itens**. Também lê `.ics` do Outlook para séries de reuniões.
 - **Prompts:** demandas, delegação, iniciativas e fases, features de uma iniciativa, status, ata (decisões e compromissos), staff, pautas, preparar 1:1, pessoas e times, conciliação, métricas de time sem ferramenta.
 - **Objetivo:** transformar o que foi dito em reuniões e mensagens em tarefas e pautas sem digitar.
@@ -255,17 +263,17 @@ O grupo enxerga os anos do próprio horizonte **mais os anos publicados pelos ti
 
 ---
 
-## 9. Mapa de Férias (`ferias.html`, 1.0)
+## 9. Mapa de Férias (`ferias.html`, 1.3)
 
-Apoio para **enxergar e planejar as ausências** do time e do grupo. Não substitui a ferramenta oficial de férias da empresa: não aprova, não controla saldo. O mesmo HTML serve ao time e ao gestor; o papel é escolhido ao criar o arquivo. Plano e decisões: [`plano-ferias.md`](plano-ferias.md).
+Apoio para **enxergar e planejar as ausências** do time e do grupo. Não substitui a ferramenta oficial de férias da empresa: não aprova, não controla saldo. **Onde fica (1.3, [ADR-0033](adr/0033-ferias-dentro-da-central.md)):** o gestor e a liderança usam a página **Férias da Central** (mesmo código, aberto dentro dela, com os dados no arquivo da Central); o `ferias.html` à parte fica para as pessoas do time, que marcam as próprias férias. Plano e decisões: [`plano-ferias.md`](plano-ferias.md).
 
 | Tela | O que faz | Para quê |
 |---|---|---|
 | **Mapa** | Cards (fora hoje, pico do período, dias acima do limite, dias úteis sem ninguém fora), mapa de calor por dia, semanas mais cheias e mais tranquilas, barras por unidade; filtros por unidade e período | Ver de relance onde há mais e menos gente fora |
 | **Calendário** | Mês a mês, uma linha por pessoa agrupada por unidade, com a contagem do dia no topo | Planejar e ajustar períodos, clicando na célula |
 | **Pessoas / Diretos** | Cadastro de pessoas e ausências (férias, folga, treinamento, outra), barra rápida, nota só local | Registrar o que você sabe |
-| **Unidades** (gestor) | Times e grupos de outros gestores, chaves, o que foi lido; importar do Hub e das Finanças do Grupo | Somar os níveis de baixo |
-| **Ajustes** | Pasta, chave do time ou do nível acima, publicar, limite de pessoas fora, dias úteis, feriados, nomes para cima, senha | Configurar |
+| **Unidades** (gestor) | Times e grupos de outros gestores, chaves, o que foi lido. Na Central, os times vêm sozinhos da Integração; grupos importados das Finanças do Grupo | Somar os níveis de baixo |
+| **Ajustes** | Pasta, chave do time ou do nível acima, publicar, limite de pessoas fora, dias úteis, feriados, nomes para cima, senha (na Central: trazer do Mapa separado) | Configurar |
 
 **Planejar:** ao marcar uma ausência, o formulário mostra quantas outras pessoas já estão fora e se algum dia passa do limite, e sugere os três períodos com menos gente fora nos próximos seis meses.
 

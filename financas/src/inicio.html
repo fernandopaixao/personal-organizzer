@@ -42,7 +42,7 @@
    Pergunta o uso esperado, cria o primeiro arquivo (sempre cifrado), gera os HTMLs
    desacoplados de cada uso e o cartão "Onde fica cada coisa".
    ===================================================================== */
-const TOOL_NOME = 'Início da solução', TOOL_VERSION = '2.3.0';
+const TOOL_NOME = 'Início da solução', TOOL_VERSION = '2.4.0';
 $('#ver').textContent = TOOL_VERSION;
 const st = { modo: '', sp: 0, sorteTimes: [], passo: 0, papel: '', usos: [], dados: {}, dirLocal: null, raiz: null, senha: null, criados: [], temChave: null, chaves: [], kErr: '', pastaDoLider: '', cofreChaves: false };
 // Perfil: quem lidera, se quer finanças e tarefas, e se o líder já mandou chaves e a pasta.
@@ -57,9 +57,10 @@ function plano() {
   const g = st.papel === 'gestor', out = [{ id: 'hb', nome: 'Hub da solução', desc: 'Tela inicial do dia a dia: abre as outras ferramentas, mostra os times e deixa post-its.', html: 'hub.html' }];
   if (st.usos.includes('financas')) out.push(g ? { id: 'fg', nome: 'Finanças do Grupo', desc: 'Consolidado: soma os planos publicados pelos times.', html: 'financas_grupo.html' }
                                              : { id: 'ft', nome: 'Finanças do Time', desc: 'Dia a dia e futuro das finanças do time.', html: `financas_${st.dados.slug || '<time>'}.html` });
-  if (st.usos.includes('tarefas')) out.push(g ? { id: 'ct', nome: 'Central de Gestão', desc: 'Tarefas consolidado: iniciativas, times, rituais e pessoas.', html: 'gestao_pessoal.html' }
+  // Férias do gestor ficam dentro da Central (ADR-0033): marcar Férias já basta para gerar a Central.
+  if (g ? st.usos.includes('tarefas') || st.usos.includes('ferias') : st.usos.includes('tarefas')) out.push(g ? { id: 'ct', nome: 'Central de Gestão', desc: st.usos.includes('ferias') ? 'Tarefas consolidado: iniciativas, times, rituais e pessoas, com a página Férias (onde há mais e menos gente fora).' : 'Tarefas consolidado: iniciativas, times, rituais e pessoas.', html: 'gestao_pessoal.html' }
                                             : { id: 'qt', nome: 'Quadro do Time', desc: 'Tarefas de um time: quadro, backlog, sprints e métricas.', html: `quadro_${st.dados.slug || '<time>'}.html` });
-  if (st.usos.includes('ferias')) out.push({ id: 'fe', nome: 'Mapa de Férias', desc: g ? 'Soma as férias dos seus times e mostra onde há mais e menos gente fora.' : 'Férias do time: cada pessoa marca as suas e o time vê os picos.', html: 'ferias.html' });
+  if (st.usos.includes('ferias') && !g) out.push({ id: 'fe', nome: 'Mapa de Férias', desc: 'Férias do time: cada pessoa marca as suas e o time vê os picos.', html: 'ferias.html' });
   return out;
 }
 // Chaves coladas: o kid diz o que cada uma é. "<time>-AAMM" é de tarefas; "<time>-fin-AAMM" é de finanças.
@@ -282,7 +283,12 @@ async function criarTudo() {
       const teams = d.times.map((t, i) => ({ id: 'tm' + (i + 1), name: t.nome, prefix: t.prefixo || '', slug: t.slug, createdAt: Date.now() })), keys = {};
       teams.forEach(t => { const k = chTar.filter(c => c.slug === t.slug).map(c => ({ key: c.texto, createdAt: agora.slice(0, 10) })); if (k.length) keys[t.id] = k; });
       const finKeys = {}; teams.forEach(t => { const k = chFin.filter(c => c.slug === t.slug).map(c => ({ key: c.texto, createdAt: agora.slice(0, 10), origin: 'onboarding' })); if (k.length) finKeys[t.id] = k; });
-      await salvarNovo(`gestao-${d.slug}.json`, await cifrarCentral({ teams, settings: { selfName: d.pessoa }, integ: { keys, finKeys } }, st.senha), 'DB', 'Dados da Central (times, chaves de tarefas e de finanças), cifrados com a sua senha.');
+      // Férias dentro da Central (ADR-0033): o grupo já vem configurado; os times entram pelas chaves da Integração.
+      const eu = { id: 'p' + Math.random().toString(36).slice(2, 9), nome: d.pessoa, ativo: true };
+      const ferias = st.usos.includes('ferias') ? { schema: 'gestao-ferias-local/1', version: 1, tool: 'ferias', criadoEm: agora, nivel: 'grupo', unidade: { nome: d.nome, slug: d.slug }, pessoa: { nome: d.pessoa, slug: slugify(d.pessoa).split('-')[0] || 'eu' }, eu: eu.id,
+        pessoas: [eu], ausencias: [], feriados: [], config: { limite: 30, diasUteis: [1, 2, 3, 4, 5], nomesAcima: true }, chaves: chAcima.map(reg),
+        unidades: d.times.map(t => ({ nome: t.nome, slug: t.slug, tipo: 'time', origem: 'central', chaves: chTar.filter(c => c.slug === t.slug).map(reg) })), retratos: {}, publicacao: { revision: 0 }, seg: {} } : undefined;
+      await salvarNovo(`gestao-${d.slug}.json`, await cifrarCentral({ teams, settings: { selfName: d.pessoa }, integ: { keys, finKeys }, ...(ferias ? { ferias } : {}) }, st.senha), 'DB', `Dados da Central (times, chaves de tarefas e de finanças${ferias ? ', férias' : ''}), cifrados com a sua senha.`);
     }
     if (x.id === 'qt') {
       const html = aplicarPreset(await lerEmbutido('quadroEmb'), 'QUADRO-PRESET', { schema: 'quadro-preset/1', generatedAt: isoComFuso(), team: { name: d.nome, slug: d.slug, ...(d.prefixo ? { prefix: d.prefixo } : {}) }, people: [{ name: d.pessoa }], ...(chTar[0] ? { key: chTar[0].texto } : {}) });
@@ -472,11 +478,11 @@ function blocoChaves() {
 function ligarCopiar() { $$('[data-cp]').forEach(b => b.onclick = async () => { const [i, k] = b.dataset.cp.split(':'), t = st.sorteTimes[+i]; try { await navigator.clipboard.writeText(k === 'fin' ? t.kFin : t.kTar); toast('Chave copiada. Cole no cofre ou na mensagem direta.'); } catch { toast('Não consegui copiar.'); } }); }
 // Desenho do que foi gerado: a sua pasta (ferramentas do gestor e para-os-times) e a pasta sincronizada.
 function mapaSorte() {
-  const ts = st.sorteTimes, linha = 30, y0 = 54, sua = ['hub.html', 'gestao_pessoal.html', 'financas_grupo.html', 'ferias.html', 'onde-fica-cada-coisa.html'];
+  const ts = st.sorteTimes, linha = 30, y0 = 54, sua = ['hub.html', 'gestao_pessoal.html', 'financas_grupo.html', 'onde-fica-cada-coisa.html'];
   const yT = y0 + sua.length * linha + 30, H = Math.max(yT + ts.length * linha, y0 + (ts.length + 1) * linha) + 16;
   const item = (x, y, w, txt, sub, forte) => `<rect class="${forte ? 's1 f1' : 'sl fw'}" x="${x}" y="${y}" width="${w}" height="24" rx="6"/><text class="t" x="${x + 10}" y="${y + 16}">${esc(txt)}</text>${sub ? `<text class="tm" x="${x + w - 8}" y="${y + 16}" text-anchor="end">${esc(sub)}</text>` : ''}`;
   let g = `<text class="t" x="10" y="20" style="font-size:12.5px">Sua pasta · ${esc(st.dirLocal.name)}</text><text class="tm" x="10" y="36">só sua, no seu OneDrive (backup)</text>`;
-  g += sua.map((n, i) => item(10, y0 + i * linha, 300, n, ['tela inicial', 'tarefas', 'finanças', 'férias', 'mapa'][i], i < 4)).join('');
+  g += sua.map((n, i) => item(10, y0 + i * linha, 300, n, ['tela inicial', 'tarefas e férias', 'finanças', 'mapa'][i], i < 3)).join('');
   g += `<text class="t" x="10" y="${yT - 8}">para-os-times/ · enviar a cada time</text>`;
   g += ts.map((t, i) => item(10, yT + i * linha, 300, `${t.slug}/`, 'quadro, finanças, férias + chave', false)).join('');
   const xr = 380;

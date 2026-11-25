@@ -1,6 +1,6 @@
 # Visão geral da solução · Central de Gestão, Quadro do Time e integração
 
-*24/11/2026 · estado atual: Central v15.8, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.2 e contratos 1.0 (detalhes em `docs/plano-v15.md`, `docs/plano-hub.md`, `docs/plano-financas.md` e [`contratos/`](../contratos/LEIA-ME.md))*
+*24/11/2026 · estado atual: Central v15.9, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.3 e contratos 1.0 (detalhes em `docs/plano-v15.md`, `docs/plano-hub.md`, `docs/plano-financas.md` e [`contratos/`](../contratos/LEIA-ME.md))*
 
 > **Por onde começar:** [funcionalidades, usos e objetivos](funcionalidades.md) · [jornada do usuário](jornada-do-usuario.md) · [passo a passo](passo-a-passo.md) · [decisões de arquitetura (ADRs)](adr/README.md)
 
@@ -43,7 +43,7 @@ A solução é um pequeno ecossistema de **ferramentas HTML de arquivo único**,
 | **Central de Gestão v15** | Gestão pessoal e de portfólio do gestor: tarefas, delegação, iniciativas e features, rituais, pessoas, métricas e integração com os times | Fernando | Repositório: `gestao_pessoal_v15.html`, plano em `docs/plano-v15.md`. Projeto: `gestao-v15/` |
 | **Quadro do Time 2.2** | Quadro de cards, backlog, sprints, iniciativas ligadas à Central e métricas de fluxo do time | Cada time | Repositório e projeto: `ferramenta-time/` (HTML, guia, telas) |
 | **Finanças do Grupo e do Time** | Plano financeiro multianual de cada time (lançamentos locais, plano agregado publicado) e consolidado do grupo ano a ano contra o orçamento, com cards de leitura e gráficos | Fernando (grupo) e responsável financeiro de cada time | Repositório: `financas/`, plano em `docs/plano-financas.md` |
-| **Mapa de Férias** | Férias e ausências do time e do grupo em níveis (time → gestor → liderança): mapa de calor dos dias com mais e menos gente fora, calendário e sugestão de períodos. Apoio, não substitui a ferramenta oficial | Times, gestores e liderança | Repositório: `ferias/ferias.html`, plano em `docs/plano-ferias.md` |
+| **Férias (página da Central e Mapa do time)** | Férias e ausências em níveis (time → gestor → liderança): mapa de calor dos dias com mais e menos gente fora, calendário e sugestão de períodos. O gestor e a liderança usam a página **Férias da Central** (mesmo arquivo e senha, [ADR-0033](adr/0033-ferias-dentro-da-central.md)); cada pessoa do time usa o `ferias.html`. Apoio, não substitui a ferramenta oficial | Times, gestores e liderança | Repositório: página Férias em `gestao_pessoal_v15.html` e `ferias/ferias.html` (mesmo código), plano em `docs/plano-ferias.md` |
 | **Assistente inicial** | Monta a solução para o papel da pessoa e cria os primeiros arquivos cifrados | Quem está começando | Repositório: `inicio.html` |
 | **Integração** | Pasta SharePoint, contratos JSON versionados, envelope cifrado, chaves por time | Central e ferramentas dos times | Projeto: `integracao-time/` (documentos 00 a 06, `contrato/`, `exemplos/`) |
 | **Agentes do Fernando** | Agentes com acesso a reuniões, chats e e-mails que geram arquivos de importação para a Central | Fernando | Projeto: `integracao-time/06-prompts-para-agentes.md` |
@@ -76,16 +76,17 @@ A ferramenta do Fernando. Abre com dois cliques em `gestao_pessoal_v15.html`, pe
 
 | Tecla | Página | Para quê |
 |---|---|---|
-| 1 | **Hoje** | Tarefas do dia, atrasos, 1:1 da semana, fóruns dos próximos 7 dias, iniciativas pedindo atenção e o cartão **Dos times** (arquivos novos, alertas, épicos sem vínculo, times sem chave) |
+| 1 | **Hoje** | Tarefas do dia, atrasos, 1:1 da semana, fóruns dos próximos 7 dias, iniciativas pedindo atenção, o cartão **Dos times** (arquivos novos, alertas, épicos sem vínculo, times sem chave) e **Fora hoje** (férias e ausências) |
 | 2 | **Tarefas** | Vistas Minhas, Delegadas (o que está com quem, prazos, cobranças e aderência) e Todas; tarefas ligadas a uma feature, a uma iniciativa ou a nada |
 | 3 | **1:1** | Pessoa 360: indicadores, pauta (minha, dos agentes, combinados e sugestões), trabalho, iniciativas, feedback, histórico e perfil; modo Em conversa com resumo para copiar |
 | 4 | **Feedback** | Ciclos de feedback e evidências por pessoa |
-| 5 | **Iniciativas** | Lista (feito × prazo, fases, próxima feature, painel com abas), Semana, Horizonte, Linha do tempo com fases sobrepostas e Dependências |
-| 6 | **Fóruns** | Pautas por data (o que não foi discutido rola para a próxima), Acordos (decisões e compromissos) e Staff (semana dos times) |
-| 7 | **Times** | Cadastro dos times (prefixo de código e pasta de integração), Métricas dos times (fluxo publicado por eles) e visão de cada time com reunião de status guiada e folha para o Teams |
-| 8 | **Integração** | Pasta e chaves, arquivos recebidos, conciliação e compartilhamento com os times |
+| 5 | **Férias** | Mapa de Férias do grupo dentro da Central: mapa de calor, calendário, você e diretos, times (vindos da Integração) e grupos de outros gestores, publicar para a liderança |
+| 6 | **Iniciativas** | Lista (feito × prazo, fases, próxima feature, painel com abas), Semana, Horizonte, Linha do tempo com fases sobrepostas e Dependências |
+| 7 | **Fóruns** | Pautas por data (o que não foi discutido rola para a próxima), Acordos (decisões e compromissos) e Staff (semana dos times) |
+| 8 | **Times** | Cadastro dos times (prefixo de código e pasta de integração), Métricas dos times (fluxo publicado por eles) e visão de cada time com reunião de status guiada e folha para o Teams |
+| 9 | **Integração** | Pasta e chaves, arquivos recebidos, conciliação e compartilhamento com os times |
 
-Teclas 1 a 8 trocam de página. O botão do topo **Importar e agentes** reúne a importação de JSON e os prompts para os agentes.
+Teclas 1 a 9 trocam de página. O botão do topo **Importar e agentes** reúne a importação de JSON e os prompts para os agentes.
 
 ### 3.2 Histórico das versões
 
@@ -96,6 +97,7 @@ Teclas 1 a 8 trocam de página. O botão do topo **Importar e agentes** reúne a
 | v13 | Visão do time, reunião de status guiada pelo fórum do time, folha para colar no Teams |
 | v14 | Modelo Iniciativa › Feature, integração com os times, métricas dos times, importação `gestao-import/3` com 12 prompts para agentes, menu agrupado, painel da iniciativa redesenhado |
 | v15 | Navegação em 8 páginas sem telas duplicadas, Pessoa 360 no 1:1 com modo Em conversa e sessões registradas, formulários num padrão único |
+| v15.9 | Página **Férias**: o Mapa de Férias do gestor e da liderança entra na Central (mesmo arquivo e senha, times e chaves da Integração) e a Hoje mostra quem está fora |
 
 Detalhes da v15: `docs/plano-v15.md` (e da v14 em `docs/plano-v14.md`).
 
@@ -290,6 +292,7 @@ Faz parte do ecossistema uma **ferramenta de feedbacks**, usada para registrar e
 | Fernando | Reunião de status | A atualização do time vem pré-preenchida; o downstream aparece abaixo de cada feature |
 | Fernando | Quando muda o portfólio | Revisar a tela de compartilhamento e clicar **Compartilhar** |
 | Fernando | Todo dia | Abrir o `hub.html`, ir para a ferramenta do momento e deixar post-its para os times quando precisar |
+| Fernando | Ao planejar ausências | Central › **Férias**: ver os dias com mais gente fora, marcar as próprias férias e as dos diretos e, quando mudar, publicar para a liderança |
 | Time | Ao abrir o Quadro | Ler os post-its no topo do quadro e clicar **Vi** |
 | Fernando | Depois de reuniões | Copiar o prompt certo, rodar no agente e importar o JSON com prévia |
 

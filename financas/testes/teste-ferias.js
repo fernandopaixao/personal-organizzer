@@ -126,6 +126,46 @@ const dia = n => { const d = new Date(seg); d.setDate(d.getDate() + n); return d
   await ana2.waitForSelector('#tNova'); await ana2.click('[data-v="pessoas"]');
   ok((await ana2.textContent('#pg')).includes('Férias'), 'reabre o arquivo e mantém as férias');
 
+  console.log('6. Central 15.9: férias dentro da Central (ADR-0033), sem arquivo nem senha próprios');
+  const kProd = chave('produto-fin-2611');
+  const novaC = async () => { const p = await ctxB.newPage(); p.on('pageerror', e => erros.push('central: ' + e.message)); await p.goto(base + '/gestao_pessoal_v15.html');
+    await p.evaluate(async k => { db = normalizeDb(Object.assign(emptyDb(), { settings: { selfName: 'Paula' }, teams: [{ id: 't1', name: 'Pagamentos', prefix: 'PAG', slug: 'pagamentos', createdAt: Date.now() }, { id: 't2', name: 'Sem pasta', createdAt: Date.now() }] }));
+      igFinalize(db); db.integ.keys.t1 = [{ key: k, createdAt: '2026-11-01' }]; password = 'senha-da-central'; enter();
+      let d = await navigator.storage.getDirectory(); IG.dir = await d.getDirectoryHandle('Gestao-Compartilhado'); IG.dirName = IG.dir.name; }, kTime);
+    return p; };
+  const quadroF = async p => { await p.waitForSelector('#ferias iframe'); const f = await (await p.$('#ferias iframe')).contentFrame(); await f.waitForSelector('#app > *'); return f; };
+  const cen = await novaC();
+  ok(await cen.evaluate(() => NAV.some(n => n.k === 'ferias') && !!document.querySelector('[data-go="ferias"]')), 'Central tem a página Férias no menu');
+  await cen.click('[data-go="ferias"]'); let fc = await quadroF(cen);
+  ok(await fc.evaluate(() => !!HOST && document.documentElement.classList.contains('embutido') && !document.getElementById('iAbrir')), 'abre dentro da Central, sem tela de arquivo nem de senha');
+  ok(await fc.inputValue('#eP') === 'Paula', 'seu nome vem da Central');
+  await fc.fill('#eN', 'Produto'); await fc.fill('#eP', 'Paula'); await fc.click('#eOk'); await fc.waitForSelector('#tNova'); await fc.waitForTimeout(800);
+  ok(await cen.evaluate(() => db.ferias?.nivel === 'grupo' && db.ferias.unidade.slug === 'produto' && db.ferias.unidades.length === 1 && db.ferias.unidades[0].origem === 'central' && db.ferias.unidades[0].chaves.length === 1), 'dados guardados no arquivo da Central; só o time com pasta entra, com a chave da Integração');
+  ok(/2 pessoas · 2 ausências/.test(await fc.textContent('#pg')), 'lê o time pela pasta da Integração: 2 pessoas e 2 ausências');
+  ok(!(await fc.$('#tHub')) && !(await fc.$('#uNovo')) && !(await fc.$('#uHub')), 'sem "← Hub" e sem cadastro manual de times: a Central já cuida');
+  const hoje = iso(new Date());
+  await fc.click('#tNova'); await fc.fill('#aI', hoje); await fc.dispatchEvent('#aI', 'change'); await fc.fill('#aF', hoje); await fc.dispatchEvent('#aF', 'change'); await fc.selectOption('#aT', 'folga'); await fc.fill('#aN', 'consulta particular'); await fc.click('#aOk'); await fc.waitForTimeout(1300);
+  ok(await cen.evaluate(() => db.ferias.ausencias.length === 1 && db.ferias.ausencias[0].nota === 'consulta particular'), 'ausência com nota guardada na Central');
+  await colarMinha(fc, kProd);
+  await fc.click('#jPub'); await btn(fc, 'ok'); await fc.waitForTimeout(600);
+  const arqsP = await opfs(cen, async () => listar('Gestao-Compartilhado/grupos/produto/ferias'));
+  ok(arqsP.some(n => n.startsWith('paula-')), 'publica o consolidado em grupos/produto/ferias/ como antes (mesmo contrato)');
+  const envP = await opfs(cen, async n => ler('Gestao-Compartilhado/grupos/produto/ferias', n), arqsP.find(n => n.startsWith('paula-')));
+  ok(envP && !envP.includes('consulta'), 'a nota não sai da Central');
+  // Times da Central mudam: a página Férias acompanha ao voltar para ela
+  await cen.evaluate(k => { db.teams.push({ id: 't3', name: 'Cartões', prefix: 'CAR', slug: 'cartoes', createdAt: Date.now() }); db.integ.keys.t3 = [{ key: k, createdAt: '2026-11-01' }]; go('home'); }, chave('cartoes-2611'));
+  ok(/Fora hoje/.test(await cen.textContent('#home')) && /Paula/.test(await cen.textContent('#home')), 'página Hoje da Central mostra quem está fora hoje');
+  await cen.click('[data-go="ferias"]'); await cen.waitForTimeout(800);
+  ok(await cen.evaluate(() => db.ferias.unidades.map(u => u.slug).sort().join() === 'cartoes,pagamentos'), 'time novo na Central entra sozinho nas férias');
+  await cen.setViewportSize({ width: 1280, height: 860 }); await fc.click('[data-v="painel"]'); await cen.waitForTimeout(300);
+  if (process.env.TELAS) await cen.screenshot({ path: process.env.TELAS });
+  // Migração: quem usava o Mapa de Férias separado traz o arquivo para a Central
+  const cen2 = await novaC(); await cen2.click('[data-go="ferias"]'); const fc2 = await quadroF(cen2);
+  await fc2.evaluate(() => { window.showOpenFilePicker = async () => { const d = await (await navigator.storage.getDirectory()).getDirectoryHandle('LocalFernando'); return [await d.getFileHandle('ferias-tecnologia.json')]; }; });
+  await fc2.click('#eAntigo'); await fc2.waitForSelector('#pw'); await fc2.fill('#pw', SENHA); await btn(fc2, 'ok'); await fc2.waitForSelector('#tNova'); await fc2.waitForTimeout(600);
+  ok(await cen2.evaluate(() => db.ferias.unidade.slug === 'tecnologia' && db.ferias.pessoas.some(p => p.nome === 'Fernando') && db.ferias.ausencias.length === 1 && db.ferias.chaves.length === 1), 'traz pessoas, ausências e a chave do nível acima do Mapa de Férias separado');
+  ok(await cen2.evaluate(() => db.ferias.unidades.filter(u => u.slug === 'pagamentos').length === 1 && db.ferias.unidades.find(u => u.slug === 'pagamentos').origem === 'central'), 'o time que já estava no arquivo antigo vira o time da Central, sem duplicar');
+
   ok(!erros.length, 'sem erros de JavaScript' + (erros.length ? ': ' + erros.join(' | ') : ''));
   await browser.close(); srv.close();
   console.log(falhas ? `\n${falhas} falha(s).` : '\nTudo certo.');

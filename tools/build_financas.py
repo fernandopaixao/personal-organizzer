@@ -8,12 +8,13 @@
 - financas/financas_time.html   ← src/time.html
 - financas/financas_grupo.html  ← src/grupo.html (+ Finanças do Time embutido, para gerar o HTML de cada time)
 - hub.html                      ← src/hub.html (tela inicial do dia a dia, sem nada embutido)
-- ferias/ferias.html            ← src/ferias.html (Mapa de Férias: time, gestor e liderança no mesmo HTML)
+- ferias/ferias.html            ← src/ferias.html (Mapa de Férias no papel de time; o gestor usa a cópia dentro da Central)
+- Central (gestao_pessoal_v*.html, a mais nova) ← cópia do Mapa de Férias embutida em #feriasEmb: a página Férias (ADR-0033)
 - inicio.html                   ← src/inicio.html (+ Finanças do Time, Finanças do Grupo, Central, Quadro e Hub embutidos)
 
 Os HTMLs embutidos vão em gzip + base64 dentro de <script type="text/plain" id="...">.
 Rode de novo sempre que a Central (gestao_pessoal_v*.html, a mais nova) ou o Quadro mudarem.
-Este script só lê a Central e o Quadro; não altera esses arquivos.
+Na Central, este script só troca o bloco #feriasEmb; no Quadro, nada.
 """
 import base64, gzip, hashlib, pathlib, re
 
@@ -72,6 +73,17 @@ def versao(txt):
     m = re.search(r"TOOL_VERSION = '([^']+)'", txt)
     return m.group(1) if m else ''
 
+def embutir_ferias_na_central(fer):
+    """Põe (ou troca) a cópia do Mapa de Férias dentro da Central, antes do </body> (ADR-0033)."""
+    c = central(); txt = c.read_text(encoding='utf-8'); dados = fer.encode('utf-8')
+    b64 = base64.b64encode(gzip_estavel(dados)).decode('ascii'); sha = hashlib.sha256(dados).hexdigest()[:16]
+    bloco = f'<script type="text/plain" id="feriasEmb" data-version="{versao(fer)}" data-sha256="{sha}">{b64}</script>'
+    if 'id="feriasEmb"' in txt:
+        txt = re.sub(r'<script type="text/plain" id="feriasEmb"[^>]*>[^<]*</script>', lambda m: bloco, txt, count=1)
+    else:
+        i = txt.rindex('</body>'); txt = txt[:i] + bloco + '\n' + txt[i:]
+    c.write_text(txt, encoding='utf-8')
+
 def main():
     tempo = nucleo((SRC / 'time.html').read_text(encoding='utf-8'))
     (RAIZ / 'financas' / 'financas_time.html').write_text(tempo, encoding='utf-8')
@@ -83,6 +95,7 @@ def main():
     fer = nucleo((SRC / 'ferias.html').read_text(encoding='utf-8'))
     (RAIZ / 'ferias').mkdir(exist_ok=True)
     (RAIZ / 'ferias' / 'ferias.html').write_text(fer, encoding='utf-8')
+    embutir_ferias_na_central(fer)
     ini = nucleo((SRC / 'inicio.html').read_text(encoding='utf-8'))
     c = central(); q = RAIZ / 'ferramenta-time' / 'quadro_do_time_v1.html'
     ini, _ = embutir(ini, 'finTimeEmb', tempo.encode('utf-8'), versao(tempo))
