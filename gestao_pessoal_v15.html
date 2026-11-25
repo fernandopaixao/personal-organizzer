@@ -401,7 +401,7 @@ dialog.wide{width:min(780px,calc(100% - 24px))}dialog.xl{width:min(880px,calc(10
 textarea.paste{width:100%;min-height:150px;border:1px solid #e1e4ec;border-radius:12px;padding:10px;font-family:ui-monospace,Consolas,monospace;font-size:12px;outline:none;resize:vertical}
 textarea.paste:focus{border-color:var(--bv)}
 .prev{margin-top:12px;max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:12px}
-.prev .it{display:grid;grid-template-columns:70px 90px 1fr;gap:8px;padding:6px 12px;border-bottom:1px solid var(--line);font-size:12.5px}.prev .it:last-child{border-bottom:0}
+.prev .it{display:grid;grid-template-columns:18px 70px 90px 1fr;align-items:start;gap:8px;padding:6px 12px;border-bottom:1px solid var(--line);font-size:12.5px}.prev .it:last-child{border-bottom:0}
 .k-new{color:var(--bv);font-weight:650}.k-update{color:#6b7389;font-weight:650}.k-same,.k-skip{color:var(--faint)}
 /* v15.4: formulário no lugar (atualização de iniciativa e acordos), mesmo padrão dos diálogos */
 .fxi{border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-top:10px;background:#fff;display:grid;gap:8px}
@@ -415,13 +415,16 @@ textarea.paste:focus{border-color:var(--bv)}
 .fxi[data-kind=decision] [data-only=commitment]{display:none}
 .fxi-ctx{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fxi-ctx b{color:var(--ink);font-weight:600}
 .fxi button[data-pri]:disabled{opacity:.45;cursor:not-allowed}
-.ipv{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+.ipv{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:14px}
 .ipv button{border:1px solid var(--line);border-radius:12px;background:#fff;padding:8px 10px;text-align:left;display:grid;gap:2px;font:inherit;color:inherit;cursor:pointer}
 .ipv button b{font-family:var(--title);font-size:20px;font-weight:600;line-height:1.1}.ipv button span{font-size:11.5px;color:var(--muted)}
 .ipv button.on{border-color:var(--bv);background:var(--bv-soft)}.ipv button.k0{opacity:.55}
 .ipv button.new b{color:var(--bv)}.ipv button.skip b{color:var(--faint)}
 .prev .grp{padding:6px 12px;background:var(--bg,#f6f7fb);font-size:11.5px;font-weight:650;color:var(--muted);border-bottom:1px solid var(--line);position:sticky;top:0}
 .prev .it.w{background:#fffaf0}
+/* v15.17: descartar linhas na prévia da importação */
+.prev .it input[type=checkbox]{margin:2px 0 0;accent-color:var(--bv);cursor:pointer}.prev .it.d>span:not(.k-drop){opacity:.55;text-decoration:line-through}.k-drop{color:var(--faint);font-weight:650}
+.prev .grp{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0}.prev .grp .lnk{border:0;background:none;padding:0;font:inherit;font-weight:600;color:var(--bv);cursor:pointer}
 .ipe{margin-top:12px;border:1px solid #f1d2d2;background:#fdf5f5;border-radius:12px;padding:10px 12px;font-size:13px;color:var(--late)}.ipe div{color:var(--muted);font-size:12px;margin-top:4px}
 .warn{color:#9a6a1c;font-size:11.5px}.err{color:var(--late);font-size:13px;margin-top:10px}
 .pr-list{display:grid;gap:8px}.pr{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center}
@@ -1055,7 +1058,7 @@ textarea.paste:focus{border-color:var(--bv)}
 <div class="lock" id="lock">
   <div class="lockcard">
     <div class="logo" style="margin:0">CG</div>
-    <h1>Central de Gestão <span class="appver" title="Versão desta Central">v15.16</span></h1>
+    <h1>Central de Gestão <span class="appver" title="Versão desta Central">v15.17</span></h1>
     <div class="muted small">Seus dados ficam em um arquivo JSON criptografado (AES-GCM 256, chave derivada da senha), separado deste HTML. Este arquivo não guarda nenhum dado.</div>
     <div class="ent-passo" id="entArq"><span class="ent-n">1</span><div class="ent-c"><span class="ent-t">Arquivo</span><div id="arqSel"></div>
       <div class="ent-acoes"><button class="btn" id="btnOpen">Escolher o arquivo</button><button class="btn" id="btnCreate">Criar novo arquivo</button></div></div></div>
@@ -1068,7 +1071,7 @@ textarea.paste:focus{border-color:var(--bv)}
   </div>
 </div>
 <div class="hidden" id="app">
-  <nav class="rail"><div class="logo">CG</div><div id="nav" style="display:contents"></div><div class="railver" title="Versão desta Central">v15.16</div></nav>
+  <nav class="rail"><div class="logo">CG</div><div id="nav" style="display:contents"></div><div class="railver" title="Versão desta Central">v15.17</div></nav>
   <main class="main"><div class="wrap">
     <div class="top">
       <h1 id="pageTitle"></h1>
@@ -1277,7 +1280,7 @@ const horizon=d=>{const n=dayDiff(today(),d);if(n<0)return'atrasada';if(n===0)re
 const KINDS={geral:'Geral',forte:'Ponto forte',desenv:'Desenvolvimento'};
 /* ============ Estado e migração (dados desacoplados, versionados e aditivos) ============ */
 const ME='me';
-const DB_VERSION=15,APP_VERSION='15.16'; /* versão exibida na página (rail e tela de senha); DB_VERSION é a do arquivo de dados */
+const DB_VERSION=15,APP_VERSION='15.17'; /* versão exibida na página (rail e tela de senha); DB_VERSION é a do arquivo de dados */
 const emptyDb=()=>({version:DB_VERSION,settings:{selfName:'Eu',hideFeedback:false,staffForumId:''},people:[],teams:[],initiatives:[],tasks:[],notes:[],cycles:[],staffs:[],weeklyReports:[],dateLog:[],forums:[],agendaItems:[],agreements:[],meetings:[],ooSessions:[]});
 let db=emptyDb();
 let password='',handle=null,dirty=false,saveTimer=null,pendingMigration=false;
@@ -3197,23 +3200,26 @@ function parseImport(text){
 }
 function runImport(parsed){
   const real=db,draft=normalizeDb(JSON.parse(JSON.stringify(db))),log=[],calRes=[];db=draft;
-  const L=(kind,res,label,note,warn)=>log.push({kind,res,label,note:note||'',warn:warn||[]});
+  /* v15.17: cada linha sabe de que item do arquivo veio (lista:índice); itens em parsed.drop são descartados na prévia */
+  const drop=parsed.drop||new Set();let cur='',ord=0;
+  const L=(kind,res,label,note,warn)=>{const e={kind,res,label,note:note||'',warn:warn||[],src:cur,ord};log.push(e);return e};
+  const each=(k,fn)=>{parsed[k].forEach((r,idx)=>{cur=k+':'+idx;ord++;if(!drop.has(cur))fn(r,idx)});cur=''};
   try{
     const dateOr=(v,w,l)=>{if(v==null||v==='')return'';if(okDate(v))return v;w.push(l+' inválida ignorada');return''};
     const bucketOf=v=>{const x=plain(v);return['now','agora'].includes(x)?'now':['next','proximas','proxima'].includes(x)?'next':['later','depois'].includes(x)?'later':['discovery','descoberta'].includes(x)?'discovery':''};
     const rp=(n,create)=>{n=String(n||'').trim();if(!n||plain(n)==='eu'||plain(n)===plain(db.settings.selfName))return ME;
       let p=db.people.find(x=>plain(x.name)===plain(n));if(!p){const f=db.people.filter(x=>firstN(x.name)===plain(n));if(f.length===1)p=f[0]}
-      if(!p&&create){p={id:uid(),name:n,role:'',teamIds:[],cadence:14,createdAt:Date.now()};db.people.push(p);L('new','Pessoa',n,'criada pela importação')}
+      if(!p&&create){p={id:uid(),name:n,role:'',teamIds:[],cadence:14,createdAt:Date.now()};db.people.push(p);L('new','Pessoa',n,'criada pela importação').auto=true}
       return p?p.id:''};
-    parsed.teams.forEach(r=>{const n=typeof r==='string'?r:r?.name;if(!String(n||'').trim())return;const had=db.teams.some(t=>plain(t.name)===plain(n));ensureTeam(n);L(had?'same':'new','Time',String(n))});
-    parsed.people.forEach(r=>{const n=String(r?.name||'').trim();if(!n){L('skip','Pessoa','(sem nome)');return}
+    each('teams',r=>{const n=typeof r==='string'?r:r?.name;if(!String(n||'').trim())return;const had=db.teams.some(t=>plain(t.name)===plain(n));ensureTeam(n);L(had?'same':'new','Time',String(n))});
+    each('people',r=>{const n=String(r?.name||'').trim();if(!n){L('skip','Pessoa','(sem nome)');return}
       let p=db.people.find(x=>plain(x.name)===plain(n)),kind='same';if(!p){p={id:uid(),name:n,role:'',teamIds:[],cadence:14,createdAt:Date.now()};db.people.push(p);kind='new'}
       const set=[];if(r.role&&r.role!==p.role){p.role=String(r.role);set.push('papel')}if(+r.cadence>0&&+r.cadence!==p.cadence){p.cadence=+r.cadence;set.push('cadência')}
       [].concat(r.teams||r.team||[]).filter(Boolean).forEach(x=>{const id=ensureTeam(x);if(!p.teamIds.includes(id)){p.teamIds.push(id);set.push('time')}});
       if(kind==='same'&&set.length)kind='update';L(kind,'Pessoa',n,set.join(', '))});
     const depQ=[];
     const findIni=v=>{v=String(v||'').trim();if(!v)return null;return igIniByRef(v)||db.initiatives.find(i=>plain(i.name)===plain(v))||null};
-    parsed.initiatives.forEach(r=>{const name=String(r?.name||'').trim()||(r?.ref&&igIniByRef(String(r.ref))?.name)||'';if(!name){L('skip','Iniciativa','(sem nome)');return}
+    each('initiatives',r=>{const name=String(r?.name||'').trim()||(r?.ref&&igIniByRef(String(r.ref))?.name)||'';if(!name){L('skip','Iniciativa','(sem nome)');return}
       const w=[],src=String(r.source||parsed.source),ext=r.externalId!=null?String(r.externalId).trim():'';
       let i=r.ref?igIniByRef(String(r.ref)):null;if(!i&&ext)i=db.initiatives.find(x=>x.externalId===ext&&(x.source||'')===src)||null;if(!i)i=db.initiatives.find(x=>plain(x.name)===plain(name));
       const isNew=!i;if(isNew){i={id:uid(),name,teamId:'',ownerId:'',bucket:'now',start:today(),end:'',progress:0,autoProgress:true,phases:[],dependsOn:[],createdAt:Date.now()};db.initiatives.push(i)}
@@ -3228,7 +3234,7 @@ function runImport(parsed){
     depQ.forEach(([i,names,w])=>names.forEach(n=>{const o=findIni(n);if(o&&o.id!==i.id){if(!i.dependsOn.includes(o.id)&&!initCycle(i.id,o.id))i.dependsOn.push(o.id)}else w.push(`dependência "${n}" não encontrada`)}));
     igFinalize(db);
     const fKey=new Map(db.tasks.filter(t=>t.type==='feature'&&t.externalId).map(t=>[(t.source||'')+'|'+t.externalId,t])),fDep=[];
-    parsed.features.forEach((r,idx)=>{const w=[],title=String(r?.title||r?.name||'').trim().slice(0,200),src=String(r?.source||parsed.source),ext=r?.externalId!=null?String(r.externalId).trim():'';
+    each('features',(r,idx)=>{const w=[],title=String(r?.title||r?.name||'').trim().slice(0,200),src=String(r?.source||parsed.source),ext=r?.externalId!=null?String(r.externalId).trim():'';
       let ex=r?.ref?igFeatByRef(String(r.ref)):null;if(!ex&&ext)ex=fKey.get(src+'|'+ext)||null;
       const ini=findIni(r?.initiative);if(!ex&&ini&&title)ex=db.tasks.find(t=>t.type==='feature'&&t.initiativeId===ini.id&&plain(t.title)===plain(title))||null;
       if(!ex&&!title){L('skip','Feature',r?.ref||'Item '+(idx+1),'sem nome');return}
@@ -3247,7 +3253,7 @@ function runImport(parsed){
       if(r.dependsOn)fDep.push([ex,String([].concat(r.dependsOn)[0]),w])});
     fDep.forEach(([t,d,w])=>{const o=igFeatByRef(d)||db.tasks.find(x=>x.type==='feature'&&x.id!==t.id&&(x.externalId===d||plain(x.title)===plain(d)));if(o&&o.id!==t.id&&!wouldCycle(t.id,o.id))t.dependsOn=o.id;else w.push(`dependência "${d}" não encontrada`)});
     const byKey=new Map(db.tasks.filter(t=>t.externalId).map(t=>[(t.source||'')+'|'+t.externalId,t])),seen=new Set(),idMap=new Map(),depQ2=[];
-    parsed.tasks.forEach((r,idx)=>{
+    each('tasks',(r,idx)=>{
       const w=[],title=String(r?.title||'').trim().slice(0,200);if(!title){L('skip','Tarefa','Item '+(idx+1),'sem título');return}
       const src=String(r.source||parsed.source),ext=r.externalId!=null?String(r.externalId).trim():'',key=src+'|'+ext;
       if(ext&&seen.has(key)){L('skip','Tarefa',title,'duplicado no arquivo');return}seen.add(key);
@@ -3271,10 +3277,10 @@ function runImport(parsed){
         if(done){t.done=true;t.doneAt=okDate(r.completedAt)?r.completedAt:today()}else autoFollow(t);db.tasks.push(t);if(ext){idMap.set(ext,t.id);byKey.set(key,t)}
         if(r.dependsOnExternalId)depQ2.push([t,String(r.dependsOnExternalId)]);L('new','Tarefa',title,`${nameOf(t.assigneeId)}${t.end?' · '+fmtShort(t.end):''}`,w)}});
     depQ2.forEach(([t,e])=>{const id=idMap.get(e)||db.tasks.find(x=>x.externalId===e)?.id;if(id&&id!==t.id&&!wouldCycle(t.id,id))t.dependsOn=id});
-    parsed.updates.forEach((r,idx)=>{const text=String(r?.text||'').trim().slice(0,2000),i=findIni(r?.initiative);if(!text||!i){L('skip','Atualização',cut(text||'Item '+(idx+1),48),!i?`iniciativa "${r?.initiative||'(vazia)'}" não encontrada`:'sem texto');return}
+    each('updates',(r,idx)=>{const text=String(r?.text||'').trim().slice(0,2000),i=findIni(r?.initiative);if(!text||!i){L('skip','Atualização',cut(text||'Item '+(idx+1),48),!i?`iniciativa "${r?.initiative||'(vazia)'}" não encontrada`:'sem texto');return}
       const date=okDate(r.date)?r.date:today();i.updates=i.updates||[];if(i.updates.some(u=>u.date===date&&plain(u.text)===plain(text))){L('same','Atualização',cut(text,52),i.ref||i.name);return}
       i.updates.push({id:uid(),date,text,createdAt:Date.now()});L('new','Atualização',cut(text,52),`${i.ref||i.name} · ${fmtShort(date)}`)});
-    parsed.teamLinks.forEach((r,idx)=>{const tm=db.teams.find(t=>plain(t.name)===plain(r?.team)||(t.slug&&t.slug===r?.team)),i=findIni(r?.initiative),lid=igStr(r?.localId,60),tn=igStr(r?.teamName||r?.teamInitiative,200);
+    each('teamLinks',(r,idx)=>{const tm=db.teams.find(t=>plain(t.name)===plain(r?.team)||(t.slug&&t.slug===r?.team)),i=findIni(r?.initiative),lid=igStr(r?.localId,60),tn=igStr(r?.teamName||r?.teamInitiative,200);
       if(!tm||!i||!(lid||tn)){L('skip','Vínculo sugerido',tn||lid||'Item '+(idx+1),!tm?`time "${r?.team||'(vazio)'}" não encontrado`:!i?`iniciativa "${r?.initiative||'(vazia)'}" não encontrada`:'sem identificação do épico');return}
       if(db.integ.suggest.some(g=>g.teamId===tm.id&&(lid?g.localId===lid:plain(g.teamName)===plain(tn)))){L('same','Vínculo sugerido',`${tn||lid} → ${i.ref||i.name}`,tm.name);return}
       db.integ.suggest.push({teamId:tm.id,localId:lid,teamName:tn,initiative:i.ref||i.name,evidence:igStr(r.evidence,300),at:today()});L('new','Vínculo sugerido',`${tn||lid} → ${i.ref||i.name}`,`${tm.name} · confirme em Integração › Conciliação`)});
@@ -3283,22 +3289,22 @@ function runImport(parsed){
       else{const v=kind==='status'?igCheckStatus(x):igCheckMetrics(x);v.payload.source.team=tm.slug;const rr=db.integ.received[tm.slug]=db.integ.received[tm.slug]||{},cur=rr[kind];
         rr[kind]={rev:+x.revision||0,at:igStr(x.generatedAt,40)||igNowIso(),receivedAt:igNowIso(),plain:true,payload:v.payload};
         L(cur?'update':'new',lb,tm.name,kind==='status'?`${v.payload.initiatives.length} iniciativas`:`${v.payload.metrics.length} métricas${v.payload.sprint?' · '+v.payload.sprint.name:''}`,v.warn)}}
-    parsed.notes.forEach((r,idx)=>{const text=String(r?.text||'').trim();if(!text){L('skip','Nota','Item '+(idx+1),'sem texto');return}
+    each('notes',(r,idx)=>{const text=String(r?.text||'').trim();if(!text){L('skip','Nota','Item '+(idx+1),'sem texto');return}
       const pid=rp(r.person,false);if(!pid||pid===ME){L('skip','Nota',cut(text,48),'pessoa não encontrada: '+(r.person||'(vazio)'));return}
       const date=okDate(r.date)?r.date:today(),kind=['forte','desenv','geral'].includes(plain(r.kind))?plain(r.kind):'geral';
       if(db.notes.some(n=>n.personId===pid&&n.date===date&&plain(n.text)===plain(text))){L('same','Nota',cut(text,48),nameOf(pid));return}
       db.notes.push({id:uid(),personId:pid,date,kind,text,eligible:!!r.eligible,createdAt:Date.now()});L('new','Nota',cut(text,48),nameOf(pid)+' · '+fmtShort(date))});
-    parsed.cycles.forEach(r=>{const n=String(r?.name||'').trim();if(!n||!okDate(r.start)||!okDate(r.end)){L('skip','Ciclo',n||'(sem nome)','nome ou datas inválidos');return}
+    each('cycles',r=>{const n=String(r?.name||'').trim();if(!n||!okDate(r.start)||!okDate(r.end)){L('skip','Ciclo',n||'(sem nome)','nome ou datas inválidos');return}
       const c=db.cycles.find(x=>plain(x.name)===plain(n));if(c){if(c.start!==r.start||c.end!==r.end){c.start=r.start;c.end=r.end;L('update','Ciclo',n)}else L('same','Ciclo',n)}else{db.cycles.push({id:uid(),name:n,start:r.start,end:r.end});L('new','Ciclo',n)}});
     const cadOf=v=>{const x=plain(v);return['weekly','semanal'].includes(x)?'weekly':['biweekly','quinzenal'].includes(x)?'biweekly':['monthly','mensal'].includes(x)?'monthly':''};
-    parsed.forums.forEach(r=>{const n=String(r?.name||'').trim();if(!n){L('skip','Fórum','(sem nome)');return}const w=[];
+    each('forums',r=>{const n=String(r?.name||'').trim();if(!n){L('skip','Fórum','(sem nome)');return}const w=[];
       let f=db.forums.find(x=>plain(x.name)===plain(n)),isNew=!f;if(!f){f=mkForum({name:n});db.forums.push(f)}const before=JSON.stringify(f);
       const c=cadOf(r.cadence);if(c)f.cadence=c;else if(r.cadence)w.push('cadência inválida ignorada');const a=dateOr(r.next||r.anchor,w,'próxima reunião');if(a)f.anchor=a;
       if(/^\d{2}:\d{2}$/.test(r.time||''))f.time=r.time;if(+r.duration>0)f.duration=Math.min(480,+r.duration);if(r.team)f.teamId=ensureTeam(r.team);if(r.purpose)f.purpose=String(r.purpose).slice(0,200);
       if(r.participants)[].concat(r.participants).forEach(x=>{const id=rp(x,false);if(id&&!f.participants.includes(id))f.participants.push(id);else if(!id)w.push(`participante "${x}" não encontrado`)});
       if(/staff/i.test(n)&&!forumById(db.settings.staffForumId))db.settings.staffForumId=f.id;
       L(isNew?'new':JSON.stringify(f)!==before?'update':'same','Fórum',n,isNew?CAD[f.cadence]+' · próxima '+fmtShort(occFrom(f,today())):'',w)});
-    parsed.calendarSeries.forEach((r,idx)=>{const w=[],title=String(r?.title||'').trim().slice(0,120);if(!title){L('skip','Reunião recorrente','Item '+(idx+1),'sem título');return}
+    each('calendarSeries',(r,idx)=>{const w=[],title=String(r?.title||'').trim().slice(0,120);if(!title){L('skip','Reunião recorrente','Item '+(idx+1),'sem título');return}
       const sid=String(r.seriesId||'').trim().slice(0,300),freq=['weekly','biweekly','monthly','daily','other'].includes(r.frequency)?r.frequency:'other',names=[].concat(r.attendees||[],r.organizer||[]).map(x=>String(x||'').trim()).filter(Boolean);
       const ppl=[...new Set(names.map(x=>rp(x,false)).filter(id=>id&&id!==ME))],nAtt=new Set(names.map(plain)).size;
       let prop=null;const byF=sid&&db.forums.find(f=>f.calSeries?.id===sid),byP=sid&&db.people.find(x=>x.calSeries?.id===sid);
@@ -3324,9 +3330,9 @@ function runImport(parsed){
       if(db.agendaItems.some(a=>a.forumId===f.id&&a.status==='open'&&plain(a.text)===plain(text))){L('same','Pauta',cut(text,52),f.name);return}
       const a=addAgenda({forumId:f.id,text,teamId:r&&r.team?ensureTeam(r.team):'',ownerId:r&&r.owner?rp(r.owner,false)||ME:ME,minutes:r&&r.minutes,date:r&&okDate(r.date)?r.date:''});
       if(r&&r.discussed){a.status='done';a.doneAt=today()}L('new','Pauta',cut(text,52),f.name+' · '+fmtShort(a.date))};
-    if(parsed.staffTopics.length){const f=staffForum(true);parsed.staffTopics.forEach((r,idx)=>agendaIn(r,idx,f))}
-    parsed.agenda.forEach((r,idx)=>agendaIn(r,idx,null));
-    parsed.agreements.forEach((r,idx)=>{const text=String(r?.text||'').trim().slice(0,500);if(!text){L('skip','Acordo','Item '+(idx+1),'sem texto');return}const w=[];
+    if(parsed.staffTopics.some((r,i)=>!drop.has('staffTopics:'+i))){const f=staffForum(true);each('staffTopics',(r,idx)=>agendaIn(r,idx,f))}
+    each('agenda',(r,idx)=>agendaIn(r,idx,null));
+    each('agreements',(r,idx)=>{const text=String(r?.text||'').trim().slice(0,500);if(!text){L('skip','Acordo','Item '+(idx+1),'sem texto');return}const w=[];
       const q=plain(r.forum||''),fo=q?db.forums.find(x=>plain(x.name)===q)||db.forums.find(x=>plain(x.name).startsWith(q)):null;if(!fo){L('skip','Acordo',cut(text,52),`fórum "${r.forum||'(vazio)'}" não encontrado`);return}
       const date=okDate(r.date)?r.date:today(),kind=['commitment','compromisso'].includes(plain(r.kind))?'commitment':'decision',i=findIni(r.initiative);if(r.initiative&&!i)w.push(`iniciativa "${r.initiative}" não encontrada`);
       if(db.agreements.some(g=>g.forumId===fo.id&&g.date===date&&plain(g.text)===plain(text))){L('same',kind==='decision'?'Decisão':'Compromisso',cut(text,52),fo.name);return}
@@ -3336,26 +3342,33 @@ function runImport(parsed){
   }finally{db=real}
   return{draft,log,cal:calRes};
 }
-let impPlan=null,impFilter='';
+let impPlan=null,impFilter='',impDrop=new Set();
 function analyzeImport(){
   const txt=$('#impText').value,box=$('#impPrev'),go_=$('#impGo');impPlan=null;go_.disabled=true;if(!txt.trim()){box.innerHTML='';go_.textContent='Importar';return}
-  try{const parsed=parseImport(txt);parsed.calChoice=impCalChoice;const plan=runImport(parsed),c=k=>plan.log.filter(p=>p.kind===k).length;impPlan=plan;go_.disabled=!(c('new')+c('update'));
-    const L={new:'Nova',update:'Atualiza',same:'Igual',skip:'Ignorada'};
+  try{const parsed=parseImport(txt);parsed.calChoice=impCalChoice;const full=runImport(parsed);parsed.drop=impDrop;const plan=impDrop.size?runImport(parsed):full;impPlan=plan;
+    /* v15.17: linhas descartadas continuam na prévia (desmarcadas) para voltar atrás; o que vai para o arquivo é o plano sem elas */
+    const dropped=full.log.filter(p=>p.src&&impDrop.has(p.src)).map(p=>Object.assign({},p,{kind:'drop',warn:[]})),all=plan.log.concat(dropped).sort((x,y)=>x.ord-y.ord);
+    const c=k=>all.filter(p=>p.kind===k&&!(k==='drop'&&p.auto)).length;plan.dropped=c('drop');go_.disabled=!(c('new')+c('update'));
+    const pick=p=>p.src&&!p.auto&&['new','update','drop'].includes(p.kind),st=box.querySelector('.prev')?.scrollTop||0;
+    const L={new:'Nova',update:'Atualiza',same:'Igual',skip:'Ignorada',drop:'Descartada'};
     const calOpts=ch=>[['new','Criar fórum novo'],...db.forums.filter(f=>!f.archived).map(f=>['f:'+f.id,'Fórum: '+f.name]),...db.people.map(p=>['p:'+p.id,'1:1 com '+p.name]),['skip','Ignorar']].map(([v,l])=>`<option value="${esc(v)}" ${v===ch?'selected':''}>${esc(l)}</option>`).join('');
     const cal=(plan.cal||[]).length?`<div class="calbox"><div class="lbl" style="margin:0 0 6px">Reuniões recorrentes do calendário<span class="n">${plan.cal.length}</span></div><div class="muted small" style="margin-bottom:6px">Confira a associação sugerida de cada série: um fórum (ritual) existente, um 1:1 com uma pessoa, um fórum novo, ou ignorar.</div>${plan.cal.map(x=>`<div class="calr"><div><b>${esc(x.title)}</b> <span class="muted small">${esc(CAL_FREQ[x.freq]||'')}${x.start||x.time?' · '+esc(calWhen({anchor:x.start,time:x.time})):''}</span></div><select class="sel" data-calch="${x.idx}">${calOpts(x.ch)}</select></div>`).join('')}</div>`:'';
-    const nAct=c('new')+c('update'),fk=impFilter&&c(impFilter)?impFilter:'',rows=plan.log.filter(p=>!fk||p.kind===fk),grp={};rows.forEach(p=>(grp[p.res]||=[]).push(p));
+    const nAct=c('new')+c('update'),fk=impFilter&&c(impFilter)?impFilter:'',rows=all.filter(p=>!fk||p.kind===fk),grp={};rows.forEach(p=>(grp[p.res]||=[]).push(p));
     const nW=plan.log.filter(p=>p.warn.length).length;
     const chip=(k,l)=>`<button type="button" class="${k} ${fk===k?'on':''} ${c(k)?'':'k0'}" data-act="imp-filter" data-v="${k}"><b>${c(k)}</b><span>${l}</span></button>`;
     go_.textContent=nAct?`Importar ${nAct} ${nAct===1?'item':'itens'}`:'Nada para importar';
-    box.innerHTML=cal+`<div class="ipv">${chip('new','novos')}${chip('update','atualizados')}${chip('same','iguais')}${chip('skip','ignorados')}</div>
+    box.innerHTML=cal+`<div class="ipv">${chip('new','novos')}${chip('update','atualizados')}${chip('same','iguais')}${chip('skip','ignorados')}${chip('drop','descartados')}</div>
+      ${all.some(pick)?`<div class="muted small" style="margin-top:8px">Desmarque as linhas que não quer trazer: elas ficam de fora da importação.</div>`:''}
       ${nW?`<div class="warn" style="margin-top:8px">${nW} ${nW===1?'item tem aviso':'itens têm aviso'}: confira as linhas destacadas.</div>`:''}
-      <div class="prev">${Object.keys(grp).map(r=>`<div class="grp">${esc(r)} · ${grp[r].length}</div>`+grp[r].map(p=>`<div class="it ${p.warn.length?'w':''}"><span class="k-${p.kind}">${L[p.kind]}</span><span class="muted">${p.res}</span><span>${esc(p.label)}${p.note?` <span class="muted">· ${esc(p.note)}</span>`:''}${p.warn.map(w=>`<div class="warn">${esc(w)}</div>`).join('')}</span></div>`).join('')).join('')||'<div class="it"><span></span><span></span><span class="muted">Nada neste filtro.</span></div>'}</div>`}
+      <div class="prev">${Object.keys(grp).map(r=>{const ss=[...new Set(grp[r].filter(pick).map(p=>p.src))],allOff=ss.length&&ss.every(x=>impDrop.has(x));
+        return `<div class="grp"><span>${esc(r)} · ${grp[r].length}</span>${ss.length>1?`<button type="button" class="lnk" data-act="imp-dropgrp" data-v="${esc(ss.join('|'))}">${allOff?'Trazer todos':'Descartar todos'}</button>`:''}</div>`+grp[r].map(p=>`<div class="it ${p.warn.length?'w':''} ${p.kind==='drop'?'d':''}">${pick(p)?`<input type="checkbox" data-impdrop="${esc(p.src)}" ${p.kind==='drop'?'':'checked'} aria-label="${p.kind==='drop'?'Trazer':'Descartar'}: ${esc(p.label)}">`:'<span></span>'}<span class="k-${p.kind}">${L[p.kind]}</span><span class="muted">${p.res}</span><span>${esc(p.label)}${p.note?` <span class="muted">· ${esc(p.note)}</span>`:''}${p.warn.map(w=>`<div class="warn">${esc(w)}</div>`).join('')}</span></div>`).join('')}).join('')||'<div class="it"><span></span><span></span><span></span><span class="muted">Nada neste filtro.</span></div>'}</div>`;
+    const pv=box.querySelector('.prev');if(pv)pv.scrollTop=st}
   catch(e){go_.textContent='Importar';box.innerHTML=`<div class="ipe">Não consegui ler o conteúdo: ${esc(e.message)}<div>Cole o JSON que o agente devolveu (pode vir em bloco de código), um arquivo gestao-metricas/1 ou um .ics do Outlook. "Baixar modelo" mostra o formato.</div></div>`}
 }
 function applyImport(){impCalChoice={};
-  if(!impPlan)return;const snap=JSON.stringify(db),n=impPlan.log.filter(p=>p.kind==='new').length,u=impPlan.log.filter(p=>p.kind==='update').length;
+  if(!impPlan)return;const snap=JSON.stringify(db),n=impPlan.log.filter(p=>p.kind==='new').length,u=impPlan.log.filter(p=>p.kind==='update').length,d=impPlan.dropped||0;impDrop=new Set();
   db=impPlan.draft;closePastWeeks();$('#importDialog').close();$('#impText').value='';$('#impPrev').innerHTML='';impPlan=null;changed();
-  toast(`Importação concluída: ${n} novos, ${u} atualizados`,()=>restore(snap));
+  toast(`Importação concluída: ${n} novos, ${u} atualizados${d?`, ${d} descartados`:''}`,()=>restore(snap));
 }
 const RULES=`Responda SOMENTE com um bloco JSON (pode estar em bloco de código), sem texto antes ou depois. Se for salvar em arquivo, use UTF-8 e extensão .json.
 Regras: aspas duplas; datas em AAAA-MM-DD; omita campos sem informação (nunca use null nem "N/A"); não invente nada: só inclua o que tiver evidência na fonte (reunião, chat ou e-mail) e indique a fonte em "origin"; use os CÓDIGOS (ex.: PAG-042, PAG-042.F2) e os nomes EXATOS de pessoas, times, iniciativas, features, fases e fóruns listados abaixo; "Eu" é o dono da ferramenta; externalId estável e único por item (ex.: "email:<id>", "chat:<id>-<aaaa-mm-dd>", "meeting:<aaaa-mm-dd>-<titulo-em-slug>"), nunca sequencial nem baseado na data de execução; no máximo 60 itens por lista, priorizando atrasos, alta prioridade e prazos próximos.`;
@@ -3428,8 +3441,8 @@ const IMPORT_TEMPLATE=()=>JSON.stringify({schema:'gestao-import/3',source:'model
   agenda:[{forum:'Comitê de produto',text:'Priorização do backlog do 1º trimestre',owner:'Nome da pessoa',minutes:20}],
   staffTopics:[{text:'Alinhar prioridades entre People Analytics e HR Tech',team:'People Analytics'}]},null,2);
 function renderPrompts(){$('#promptList').innerHTML=PROMPTS.map(p=>`<div class="pr"><b>${esc(p.label)}</b><span>${esc(p.area)} · ${esc(p.desc)}${p.ph?` Troque ${esc(p.ph)} no texto.`:''}</span><button class="btn sm" data-act="copy-prompt" data-id="${p.id}">${ic('copy','sm')} Copiar</button></div>`).join('')}
-let impTimer;$('#impText').addEventListener('input',()=>{impCalChoice={};impFilter='';clearTimeout(impTimer);impTimer=setTimeout(analyzeImport,250)});
-$('#impFile').onchange=async ev=>{const f=ev.target.files[0];if(f){impCalChoice={};$('#impText').value=await f.text();analyzeImport()}ev.target.value=''};
+let impTimer;$('#impText').addEventListener('input',()=>{impCalChoice={};impDrop=new Set();impFilter='';clearTimeout(impTimer);impTimer=setTimeout(analyzeImport,250)});
+$('#impFile').onchange=async ev=>{const f=ev.target.files[0];if(f){impCalChoice={};impDrop=new Set();$('#impText').value=await f.text();analyzeImport()}ev.target.value=''};
 /* ============ v14: integração com as ferramentas dos times (pasta SharePoint, arquivos cifrados) ============ */
 /* Contratos: gestao-catalogo/1 (Central → time), gestao-status/1 e gestao-metricas/1 (time → Central), todos em gestao-envelope/1 (AES-256-GCM). */
 const IG_ENV='gestao-envelope/1',IG_LIM={series:8,points:120,cats:30,bins:40,metrics:80};
@@ -4058,7 +4071,7 @@ function icsToSeries(txt){
     const s=dt(e.DTSTART?.v),en=dt(e.DTEND?.v);let dur=s&&en?Math.round((en.ms-s.ms)/60000):0;if(!dur&&e.DURATION){const d=/PT(?:(\d+)H)?(?:(\d+)M)?/.exec(e.DURATION.v);if(d)dur=(+d[1]||0)*60+(+d[2]||0)}
     out.push({seriesId:id?'ics:'+id:'',title:un(e.SUMMARY?.v)||'(sem título)',organizer:un(e.org),attendees:e.att.map(un).filter(Boolean).slice(0,60),frequency:freq,start:s?.date||'',time:s?.time||'',duration:dur>0?dur:'',source:'ics'})});
   return out.slice(0,200)}
-document.addEventListener('change',e=>{const el=e.target;if(el.dataset?.calch!=null){impCalChoice[el.dataset.calch]=el.value;analyzeImport()}});
+document.addEventListener('change',e=>{const el=e.target;if(el.dataset?.calch!=null){impCalChoice[el.dataset.calch]=el.value;analyzeImport()}if(el.dataset?.impdrop!=null){el.checked?impDrop.delete(el.dataset.impdrop):impDrop.add(el.dataset.impdrop);analyzeImport()}});
 /* ============ Eventos ============ */
 document.addEventListener('input',e=>{
   const el=e.target,m=(el.id||'').match(/^(cp|cf)-(text|date|person)$/);if(m)comp[m[1]][m[2]]=el.value;
@@ -4256,6 +4269,7 @@ document.addEventListener('click',async e=>{
     case 'imp-guide':download('gestao-import-guia.md',AGENT_GUIDE(),'text/markdown');break;
     case 'imp-template':download('gestao-import-modelo.json',IMPORT_TEMPLATE(),'application/json');break;
     case 'imp-go':applyImport();break;
+    case 'imp-dropgrp':{const ss=b.dataset.v.split('|'),off=ss.every(x=>impDrop.has(x));ss.forEach(x=>off?impDrop.delete(x):impDrop.add(x));analyzeImport();break}
     case 'imp-filter':impFilter=impFilter===b.dataset.v?'':b.dataset.v;analyzeImport();break;
   }
 });

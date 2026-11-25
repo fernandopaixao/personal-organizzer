@@ -1,6 +1,6 @@
 # Passo a passo · como lidar com a solução
 
-*25/11/2026 · Remessa · Central v15.16, Quadro do Time 2.3.3, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.1, contratos 1.0 · visual experimental em `experimental/`*
+*25/11/2026 · Remessa · Central v15.17, Quadro do Time 2.3.3, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.1, contratos 1.0 · visual experimental em `experimental/`*
 
 Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é independente. Antes de começar: use **Edge ou Chrome** no computador, abrindo o arquivo com dois cliques (não pela pré-visualização do Outlook, Teams ou OneDrive, nem de dentro do .zip), e tenha à mão um **cofre de senhas** (o gerenciador de senhas da empresa).
 
@@ -131,8 +131,9 @@ Times criados pelo assistente já têm prefixo, pasta e chave: pule para o passo
 2. Cole o prompt no agente, junto com a reunião, o chat ou o e-mail.
 3. Copie o **JSON** que o agente devolver.
 4. Em **Importar JSON**, cole ou escolha o arquivo e revise a **prévia**.
-5. Aplique. Reimportar o mesmo conteúdo não duplica nada.
-6. Para séries de reuniões do Outlook, importe o `.ics` e associe cada série a um fórum ou 1:1 na prévia.
+5. Desmarque as linhas que não quer trazer (por exemplo, uma tarefa que o agente entendeu errado). Elas ficam riscadas na prévia e não entram; marque de novo para trazer. Em listas grandes, use **Descartar todos** no grupo e marque só o que quer.
+6. Aplique. Reimportar o mesmo conteúdo não duplica nada.
+7. Para séries de reuniões do Outlook, importe o `.ics` e associe cada série a um fórum ou 1:1 na prévia.
 
 ## 8. Finanças: do lançamento ao consolidado
 

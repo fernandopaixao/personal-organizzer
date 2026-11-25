@@ -1,6 +1,6 @@
 # Funcionalidades, usos e objetivos
 
-*25/11/2026 · Remessa · Central v15.16, Quadro do Time 2.3.3, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.1, contratos 1.0 · visual experimental em `experimental/`*
+*25/11/2026 · Remessa · Central v15.17, Quadro do Time 2.3.3, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.1, contratos 1.0 · visual experimental em `experimental/`*
 
 Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. Para as regras técnicas por trás, veja as [decisões de arquitetura](adr/README.md). Para o caminho de quem usa, veja a [jornada do usuário](jornada-do-usuario.md) e o [passo a passo](passo-a-passo.md).
 
@@ -121,7 +121,7 @@ A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados
 
 ---
 
-## 5. Central de Gestão (v15.16)
+## 5. Central de Gestão (v15.17)
 
 **Férias dentro da Central (15.9, [ADR-0033](adr/0033-ferias-dentro-da-central.md)).** O Mapa de Férias do gestor e da liderança deixou de ser uma ferramenta à parte: é a página **Férias** (menu Pessoas), no mesmo arquivo e com a mesma senha da Central. Os times com pasta e as chaves de tarefas da Integração entram sozinhos; a pasta compartilhada é a da Integração. A página **Hoje** mostra quem está **fora hoje**.
 
@@ -184,7 +184,7 @@ Navegação em 9 páginas (teclas 1 a 9) e o botão **Importar e agentes** no to
 - **Objetivo:** manter a Central e os times falando a mesma língua, sem sobrescrever nada.
 
 ### 5.10 Importar e agentes
-- **Uso:** copiar um prompt pronto (com o contexto atual) para o agente de reuniões, chats e e-mails; colar o JSON `gestao-import/3` que ele devolve; revisar a prévia (contadores de novos, atualizados, iguais e ignorados que filtram a lista, itens agrupados por tipo, avisos destacados, erro explicado no lugar); aplicar com **Importar N itens**. Também lê `.ics` do Outlook para séries de reuniões.
+- **Uso:** copiar um prompt pronto (com o contexto atual) para o agente de reuniões, chats e e-mails; colar o JSON `gestao-import/3` que ele devolve; revisar a prévia (contadores de novos, atualizados, iguais, ignorados e descartados que filtram a lista, itens agrupados por tipo, avisos destacados, erro explicado no lugar); **descartar linhas** antes de confirmar (15.17: cada linha nova ou atualizada tem uma caixa marcada; desmarcada, ela fica de fora, continua riscada na prévia para voltar atrás, e cada grupo tem **Descartar todos** / **Trazer todos**; descartar uma tarefa também tira a pessoa que ela criaria, e o que dependia da linha descartada aparece como aviso ou ignorado); aplicar com **Importar N itens**. Também lê `.ics` do Outlook para séries de reuniões.
 - **Prompts:** demandas, delegação, iniciativas e fases, features de uma iniciativa, status, ata (decisões e compromissos), staff, pautas, preparar 1:1, pessoas e times, conciliação, métricas de time sem ferramenta.
 - **Objetivo:** transformar o que foi dito em reuniões e mensagens em tarefas e pautas sem digitar.
 

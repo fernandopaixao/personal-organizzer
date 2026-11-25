@@ -11,3 +11,4 @@
 
 ## Ao evoluir
 - Dado vindo de fora nunca altera dado da Central sem aceite explícito.
+- **O aceite é por linha, não só do lote** (Central 15.17, pedido do Fernando em 25/11/2026): na prévia da importação dos agentes, cada linha nova ou atualizada pode ser descartada antes de confirmar. A linha descartada continua visível (riscada) para voltar atrás; o plano aplicado é recalculado sem ela, então o que dependia dela aparece como aviso ou ignorado na mesma prévia.
