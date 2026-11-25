@@ -1,6 +1,6 @@
 # Decisões de arquitetura (ADRs)
 
-*25/11/2026 · estado: Central v15.10, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.4 (dentro da Central), assistente 2.6, contratos 1.0*
+*25/11/2026 · estado: Central v15.10, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.4 (dentro da Central), assistente 2.6, contratos 1.0, visual experimental*
 
 Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequências e o que observar ao evoluir. Elas existem para que uma funcionalidade nova comece pelas regras certas, sem precisar reler todos os planos.
 
@@ -40,8 +40,9 @@ Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequê
 | [0031](0031-ferramentas-abrem-prontas.md) | Ferramentas abrem prontas depois do assistente | O assistente lembra arquivo e pastas de cada ferramenta neste navegador; o gestor recebe as chaves dos times também no caminho normal; prefixo sugerido; aba Integração no time da Central |
 | [0030](0030-aviso-quando-nao-da-para-abrir-pastas.md) | Aviso quando não dá para abrir pastas | O aviso diz o motivo (Safari, pré-visualização, zip...) e o que fazer; todo botão responde ao clique |
 | [0032](0032-pasta-de-contratos.md) | Pasta de contratos | `contratos/` é a fonte única do que outras soluções gravam: especificação, schemas, cripto com vetores, exemplos e validador |
-| [0035](0035-ferias-so-o-gestor-cadastra.md) | Férias: só o gestor cadastra | Times não usam ferramenta de férias; o gestor marca as de todos na Central, pessoa com time; `ferias.html` sai do pacote |
 | [0033](0033-ferias-dentro-da-central.md) | Férias dentro da Central | O gestor usa a página Férias da Central: mesmo arquivo e senha, times e chaves da Integração, mesmos arquivos na pasta; revê o item 1 da 0026 |
+| [0034](0034-visual-experimental.md) | Visual novo como versão experimental | `experimental/` no pacote: as mesmas ferramentas do main com o visual novo (trilho marinho, DM Sans, ícone por aba), montadas por `tools/build_experimental.py` e testadas na CI; os mesmos dados |
+| [0035](0035-ferias-so-o-gestor-cadastra.md) | Férias: só o gestor cadastra | Times não usam ferramenta de férias; o gestor marca as de todos na Central, pessoa com time; `ferias.html` sai do pacote |
 
 ## Checklist para uma funcionalidade nova
 
@@ -52,8 +53,8 @@ Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequê
 5. **Contrato:** `schema` versionado, JSON Schema e exemplo em [`contratos/`](../../contratos/LEIA-ME.md), regra no `validar.js` e linha no histórico ([0009](0009-contratos-json-versionados.md), [0032](0032-pasta-de-contratos.md)).
 6. **Migração:** campo novo com padrão em `normalizeDb`; abrir um arquivo da versão anterior ([0011](0011-migracao-aditiva-versionada.md)).
 7. **Entrada externa:** escapar, validar, prévia antes de aplicar ([0013](0013-downstream-previa-e-conciliacao.md), [0015](0015-agentes-por-arquivo.md)).
-8. **Interface:** um destaque, gráfico antes de texto, criar em modal, ver em painel, sem página nova se uma existente é a dona do dado ([0020](0020-principios-de-interface.md)). Cores por variável (`var(--card)`, `var(--ink)`...) para o modo escuro funcionar ([0027](0027-tema-claro-escuro-compartilhado.md)).
-9. **Build e teste:** editar a fonte, rodar `python3 tools/injetar_seguranca.py` (Central/Quadro) ou `python3 tools/build_financas.py`, e `node financas/testes/teste-e2e.js` (mais `teste-navegador.js` se mexeu em pastas, [0030](0030-aviso-quando-nao-da-para-abrir-pastas.md)) ([0017](0017-build-embutir-e-injetar.md)).
+8. **Interface:** um destaque, gráfico antes de texto, criar em modal, ver em painel, sem página nova se uma existente é a dona do dado ([0020](0020-principios-de-interface.md)). Cores por variável (`var(--card)`, `var(--ink)`...) para o modo escuro funcionar ([0027](0027-tema-claro-escuro-compartilhado.md)). Cor fixa nova que deve mudar no visual experimental: par em `experimental/src/trocas.json`; ferramenta nova: ícone em `experimental/src/icones/` ([0034](0034-visual-experimental.md)).
+9. **Build e teste:** editar a fonte, rodar `python3 tools/injetar_seguranca.py` (Central/Quadro) ou `python3 tools/build_financas.py`, e `node financas/testes/teste-e2e.js` (mais `teste-navegador.js` se mexeu em pastas, [0030](0030-aviso-quando-nao-da-para-abrir-pastas.md)) ([0017](0017-build-embutir-e-injetar.md)). A CI também monta e testa a versão experimental (`python3 tools/build_experimental.py --testar`, [0034](0034-visual-experimental.md)).
 10. **Documentar no mesmo PR** ([0022](0022-documentacao-no-mesmo-pr.md)): atualizar [funcionalidades](../funcionalidades.md), o [passo a passo](../passo-a-passo.md) e a [jornada](../jornada-do-usuario.md) quando o caminho do usuário muda; plano do recurso em `docs/`; ADR nova se a decisão vale para mais de uma ferramenta; versões no cabeçalho dos documentos. A CI recusa PR que muda ferramenta sem mudar documentação.
 
 ## Como escrever uma ADR nova

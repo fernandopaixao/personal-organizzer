@@ -1,6 +1,6 @@
 # Passo a passo · como lidar com a solução
 
-*25/11/2026 · Central v15.10, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.4 (dentro da Central), assistente 2.6, contratos 1.0*
+*25/11/2026 · Central v15.10, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.4 (dentro da Central), assistente 2.6, contratos 1.0 · visual experimental em `experimental/`*
 
 Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é independente. Antes de começar: use **Edge ou Chrome** no computador, abrindo o arquivo com dois cliques (não pela pré-visualização do Outlook, Teams ou OneDrive, nem de dentro do .zip), e tenha à mão um **cofre de senhas** (o gerenciador de senhas da empresa).
 
@@ -19,6 +19,7 @@ Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é ind
 12. [Problemas comuns](#12-problemas-comuns)
 13. [Férias: do gestor à liderança](#13-férias-do-gestor-à-liderança)
 14. [Integrar outra solução pelos contratos](#14-integrar-outra-solução-pelos-contratos)
+15. [Experimentar o visual novo](#15-experimentar-o-visual-novo)
 
 ---
 
@@ -243,4 +244,16 @@ Quando um time ou um gestor par usa uma ferramenta própria e quer aparecer no s
 3. Publique seguindo as regras de escrita (um dono, revisão maior, gravação atômica) e confira a pasta real com `node contratos/validar.js pasta <pasta> --chave GK1.…`.
 
 **Conferir do seu lado:** o arquivo aparece na ferramenta que lê (hub, Central e a página Férias dela, ou Finanças do Grupo). Finanças e consolidados entram pela prévia, como os de qualquer time. Se não aparecer, a tabela "Quando algo não aparece" do guia diz a causa provável.
+
+## 15. Experimentar o visual novo
+
+O .zip traz a pasta **`experimental/`** com as mesmas ferramentas num visual novo (trilho marinho, fontes novas, ícone próprio em cada aba). Elas fazem tudo o que as atuais fazem e usam **os mesmos arquivos de dados**.
+
+1. Copie a pasta `experimental/` do .zip para dentro da sua pasta local (ao lado dos HTMLs atuais).
+2. Abra `experimental/hub.html` com dois cliques e escolha o mesmo arquivo de sempre, com a mesma senha. As ferramentas que o hub abre daí também são as experimentais.
+3. Quer gerar as ferramentas dos times já no visual novo? Use a Central ou o `experimental/inicio.html`: tudo o que eles geram sai no visual novo.
+4. Para voltar, abra o `hub.html` da pasta principal. Nada precisa ser convertido.
+5. O selo "Visual experimental", no canto inferior direito, mostra em qual versão você está.
+
+Achou algo estranho só na versão experimental (uma cor fora do lugar, um texto difícil de ler)? Anote a tela e a ferramenta: o ajuste vai em `experimental/src/` ([ADR-0034](adr/0034-visual-experimental.md)).
 

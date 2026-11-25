@@ -1073,7 +1073,7 @@ const pastaUnidade = u => [u.tipo === 'grupo' ? 'grupos' : 'times', u.slug, 'fer
 const unPorSlug = s => db.unidades.find(u => u.slug === s);
 const pessoaPorId = id => db.pessoas.find(p => p.id === id);
 // Pessoa cadastrada por você pode pertencer a um dos seus times (p.un = identificador do time). Sem time: você e diretos.
-// 1.4 (ADR-0034): o gestor cadastra as férias das pessoas dos times; elas somam no time certo.
+// 1.4 (ADR-0035): o gestor cadastra as férias das pessoas dos times; elas somam no time certo.
 const unDaPessoa = p => p?.un && ehGrupo() && db.unidades.some(u => u.slug === p.un && u.tipo === 'time') ? p.un : '';
 const chavePessoa = p => unDaPessoa(p) ? `${p.un}:${slugify(p.nome)}` : `${db.unidade.slug}/${slugify(p?.nome || '')}`;
 

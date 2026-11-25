@@ -5,6 +5,7 @@
 
 - injeta o núcleo comum (financas/src/nucleo.css e nucleo.js) em cada HTML;
 - injeta o tema claro/escuro/automático (financas/src/tema.js) e a senha por sessão (financas/src/sessao.js) no <head> de cada HTML;
+- só na versão experimental (tools/build_experimental.py): identidade visual e ícone da aba (função visual, ADR-0034);
 - financas/financas_time.html   ← src/time.html
 - financas/financas_grupo.html  ← src/grupo.html (+ Finanças do Time embutido, para gerar o HTML de cada time)
 - hub.html                      ← src/hub.html (tela inicial do dia a dia, sem nada embutido)
@@ -41,9 +42,40 @@ def tema(html):
     assert '</script' not in js.lower()
     tag = f'<script id="tema">\n{js}</script>'
     if '<script id="tema">' in html:
-        return sessao(re.sub(r'<script id="tema">.*?</script>', lambda m: tag, html, count=1, flags=re.S))
+        return visual(sessao(re.sub(r'<script id="tema">.*?</script>', lambda m: tag, html, count=1, flags=re.S)))
     i = html.index('</head>')
-    return sessao(html[:i] + tag + '\n' + html[i:])
+    return visual(sessao(html[:i] + tag + '\n' + html[i:]))
+
+# ---- Visual experimental (ADR-0034) ----
+# No repositório, financas/src/ não tem identidade.css nem icones/: visual() não muda nada.
+# tools/build_experimental.py monta uma cópia temporária do repositório com esses arquivos
+# (vindos de experimental/src/) e roda este mesmo build: aí cada HTML ganha a identidade e o ícone da aba.
+ICONES = {'Central de Gestão': 'central', 'Quadro do Time': 'quadro', 'Hub da solução': 'hub',
+          'Início da solução': 'inicio', 'Finanças do Time': 'financas-time',
+          'Finanças do Grupo': 'financas-grupo', 'Mapa de Férias': 'ferias'}
+
+def visual(html):
+    if (SRC / 'identidade.css').exists():
+        css = (SRC / 'identidade.css').read_text(encoding='utf-8')
+        for nome in re.findall(r'/\*FONTE:([\w.-]+)\*/', css):
+            b64 = base64.b64encode((SRC / 'fontes' / nome).read_bytes()).decode('ascii')
+            css = css.replace(f'/*FONTE:{nome}*/', f'url(data:font/woff2;base64,{b64}) format("woff2")')
+        assert '</style' not in css.lower()
+        html = re.sub(r'<style id="identidade">.*?</style>\n?', '', html, count=1, flags=re.S)
+        i = html.index('<script id="tema">')
+        html = html[:i] + f'<style id="identidade">\n{css}</style>\n' + html[i:]
+    if (SRC / 'icones').is_dir():
+        from urllib.parse import quote
+        i = html.index('</head>')
+        t = re.search(r'<title>([^<]*)</title>', html[:i])
+        nome = next((v for k, v in ICONES.items() if t and t.group(1).strip().startswith(k)), None)
+        assert nome, f'sem ícone para o título {t.group(1) if t else None!r}: inclua em ICONES'
+        svg = (SRC / 'icones' / f'{nome}.svg').read_text(encoding='utf-8').strip()
+        href = 'data:image/svg+xml,' + quote(svg, safe=" =:/'")  # aspas duplas viram %22: o href fica entre aspas duplas
+        html = re.sub(r'<link rel="icon" id="favicon"[^>]*>\n?', '', html, count=1)
+        i = html.index('</head>')
+        html = html[:i] + f'<link rel="icon" id="favicon" type="image/svg+xml" href="{href}">\n' + html[i:]
+    return html
 
 def sessao(html):
     """Põe (ou troca) <script id="sessao"> com financas/src/sessao.js logo depois do tema: uma senha por sessão (ADR-0029)."""
