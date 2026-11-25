@@ -138,7 +138,7 @@
         },
         "highlight": {
           "type": "boolean",
-          "description": "true = candidata a aparecer na Visão do time e na reunião de status"
+          "description": "true = candidata a aparecer na Visão do time, na reunião de status e no cockpit do hub (até 3 métricas, as marcadas primeiro)"
         },
         "scope": {
           "type": "object",

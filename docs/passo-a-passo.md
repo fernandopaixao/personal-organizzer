@@ -184,6 +184,7 @@ Times criados pelo assistente já têm prefixo, pasta e chave: pule para o passo
 2. Abra e escolha **o mesmo arquivo de dados** de sempre.
 3. Se o formato mudou, a ferramenta migra sozinha e **baixa um backup** do arquivo anterior. Guarde o backup até confirmar que está tudo certo.
 4. Confira a versão em **Onde estou?** (a Central também mostra na barra lateral).
+5. Tinha o `ferias.html` (Mapa de Férias separado)? Ele não vem mais no pacote desde a Central 15.11: o gestor traz o arquivo antigo em **Central › Férias › Trazer do Mapa de Férias separado** e depois pode apagar o HTML. As pessoas dos times não precisam fazer nada ([ADR-0036](adr/0036-ferias-so-o-gestor-cadastra.md)).
 
 ## 10. Trocar de computador
 
@@ -258,7 +259,7 @@ Quando um time ou um gestor par usa uma ferramenta própria e quer aparecer no s
 
 ## 15. Experimentar o visual novo
 
-O .zip traz a pasta **`experimental/`** com as mesmas ferramentas num visual novo (trilho marinho, fontes novas, ícone próprio em cada aba). Elas fazem tudo o que as atuais fazem e usam **os mesmos arquivos de dados**.
+O .zip traz a pasta **`experimental/`** com as mesmas ferramentas num visual novo (trilho marinho, fontes novas). O ícone da aba é o mesmo das atuais. Elas fazem tudo o que as atuais fazem e usam **os mesmos arquivos de dados**.
 
 1. Copie a pasta `experimental/` do .zip para dentro da sua pasta local (ao lado dos HTMLs atuais).
 2. Abra `experimental/hub.html` com dois cliques e escolha o mesmo arquivo de sempre, com a mesma senha. As ferramentas que o hub abre daí também são as experimentais.

@@ -1,6 +1,6 @@
 # 05 · Como integrar
 
-*Contratos 1.0 · 24/11/2026*
+*Contratos 1.0 · 25/11/2026 (revisto para o Hub 2.0, as férias só do gestor e a Remessa)*
 
 Guia prático para quem constrói outra solução (uma ferramenta do time, uma planilha com macro, um script, um agente) que precisa aparecer no hub do gestor e na visão da liderança. Antes, leia [01](01-arquitetura.md) para achar o seu arquivo na tabela do layout.
 
@@ -11,6 +11,7 @@ Guia prático para quem constrói outra solução (uma ferramenta do time, uma p
 3. **Peça a chave** a quem administra o nível de cima: a chave de tarefas e a de finanças do time vêm do gestor; a chave do grupo vem da liderança. Guarde no cofre. A chave nunca entra no código nem no repositório: leia de uma variável de ambiente, de um cofre ou peça à pessoa a cada sessão.
 4. **Combine o slug** (e o prefixo, se for time) com quem cadastrou você. O slug é o nome da pasta e o `team` de todos os seus arquivos.
 5. **Garanta um dono:** decida qual pessoa e qual computador publicam (o `writer`). Se várias pessoas vão publicar férias ou post-its, cada uma tem o próprio arquivo.
+6. **Saiba quem vai ler.** Para o seu time aparecer no **hub** do gestor (cockpit), o hub também precisa da chave de tarefas do time: o gestor faz **Importar da Central** no hub depois de cadastrar você. Para as finanças, o hub precisa da chave de finanças (**Importar do Finanças do Grupo**).
 
 ## 2. O ciclo de publicação
 
@@ -45,6 +46,8 @@ node contratos/validar.js pasta "$PASTA" --chave "$CHAVE_FIN"                   
 
 O `cifrar` não lê a pasta nem calcula a revisão: quem chama garante a revisão maior e a gravação atômica.
 
+**Publique só quando o conteúdo mudou.** Cada gravação vira uma **nova remessa** do outro lado: o hub do gestor marca "Nova remessa" no time quando a data do arquivo é das últimas 24 horas, e a Central e o Finanças do Grupo mostram a revisão nova para conferir e aplicar. Um script que regrava o mesmo conteúdo de hora em hora, com a revisão subindo, deixa o gestor com uma remessa nova o tempo todo. Compare o retrato com o último publicado e só grave se for diferente.
+
 ## 3. Receitas por cenário
 
 ### A. Time com ferramenta própria de tarefas → Central do gestor
@@ -53,6 +56,7 @@ O `cifrar` não lê a pasta nem calcula a revisão: quem chama garante a revisã
 - Lê `central/catalogo-<time>.json` para saber os códigos (`PAG-042`, `PAG-042.F2`) e referencia só esses.
 - Status automático (~10 s depois de cada mudança); métricas ao fechar a sprint. Um contador de revisão para os dois.
 - Métricas só do time; use `standard` do [dicionário](schemas/dicionario-metricas.json) quando a definição for a padrão; métrica própria leva `definition`.
+- **O que o hub do gestor mostra** (Hub 2.0, [ADR-0035](../docs/adr/0035-hub-cockpit-de-gestao.md)): do `status.json`, as iniciativas que não estão `done` contadas por `status` (`ok`, `attn`, `late`; `paused` só entra no total) e os `blockers` com `text` e `since`; do `metricas.json`, até 3 métricas, as com `highlight: true` primeiro e depois por `order`, com o último ponto, a série e a cor do primeiro item de `thresholds` que o valor satisfaz. Marque `highlight` em até 3 métricas e dê a elas uma série em `data.series[0].points` (uma métrica só com `data.value` não aparece no hub) e `thresholds` para o hub pintar a situação. Iniciativa em `late` ou `attn` e bloqueio aberto entram na lista **Pede sua atenção** do gestor.
 - Mais detalhes para adaptar uma ferramenta existente: `guia-adaptacao-times.md` (no pacote .zip, em `docs/`; no repositório, em `ferramenta-time/`).
 
 ### B. Time com planilha ou sistema financeiro próprio → Finanças do Grupo do gestor
@@ -82,6 +86,7 @@ Opcional: desde a Central 15.11 o gestor cadastra as férias do time na própria
 
 - Cada pessoa (ou o sistema, em nome dela) publica `times/<time>/ferias/<pessoa>-<computador>.json` com a **chave de tarefas do time** ([exemplo](exemplos/conteudo/times/pagamentos/ferias/ana-k3f9a.json)).
 - `people[].id` é o slug do nome (`ana-souza`): o mesmo nome em dois arquivos é a mesma pessoa. Publique `hlc`.
+- **Use o nome completo que o gestor cadastrou na Central.** Desde a 15.11 o gestor cadastra as pessoas do time na página Férias; a Central junta a pessoa dele com a do seu arquivo quando o slug do nome é igual (sem acento, minúsculas, espaços viram `-`: `Ana Souza` → `ana-souza`). Com nomes diferentes (`Ana` e `Ana Souza`), a mesma pessoa aparece duas vezes. Uma ausência com o mesmo início e fim nos dois lados conta uma vez só.
 - Tipos: `ferias`, `folga`, `treinamento`, `outro`. Sem tipos de saúde, sem notas.
 
 ### E. Recados para o time (post-its)
@@ -110,5 +115,8 @@ Opcional: desde a Central 15.11 o gestor cadastra as férias do time na própria
 | "arquivo na pasta é mais antigo que o já lido" | `revision` não cresceu |
 | Mesma pessoa contada duas vezes nas férias | `id` da pessoa diferente entre arquivos (use o slug do nome) |
 | Totais do hub diferentes da soma no grupo | `totals`/`totalsByYear` não batem com os meses |
+| Aparece na Central, mas não no hub | O hub não tem a chave do time: no hub, **Importar da Central** (tarefas) ou **Importar do Finanças do Grupo** (finanças) |
+| Hub sem métricas do time | Nenhuma métrica com série em `data.series[0].points`, ou todas com `scope.level` `person` |
+| "Nova remessa" o tempo todo | A solução regrava o arquivo sem mudança; publique só quando o conteúdo mudar |
 | Valores em "Outras" | `category` fora dos ids da diretriz |
 | Cópias `-NOTEBOOK` acumulando | Duas máquinas publicando com o mesmo `writer`, ou sem limpar as próprias cópias |

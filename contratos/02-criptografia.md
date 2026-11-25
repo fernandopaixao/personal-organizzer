@@ -1,6 +1,6 @@
 # 02 · Criptografia, chaves e vetores de teste
 
-*Contratos 1.0 · 24/11/2026 · decisões em [ADR-0003](../docs/adr/0003-criptografia-sempre.md), [ADR-0005](../docs/adr/0005-chave-aleatoria-por-time.md) e [ADR-0006](../docs/adr/0006-chave-de-financas-separada.md)*
+*Contratos 1.0 · 25/11/2026 · decisões em [ADR-0003](../docs/adr/0003-criptografia-sempre.md), [ADR-0005](../docs/adr/0005-chave-aleatoria-por-time.md) e [ADR-0006](../docs/adr/0006-chave-de-financas-separada.md)*
 
 Implementação de referência: [`referencia/cripto.js`](referencia/cripto.js) (Web Crypto; navegador e Node 20+, sem dependências). É o mesmo algoritmo de `financas/src/nucleo.js` e do Quadro do Time. Se puder, copie em vez de reescrever.
 
@@ -50,6 +50,8 @@ Regex: `^GK1\.([a-z0-9]+(?:-[a-z0-9]+)*)\.([A-Za-z0-9_-]{43})$`. Depois de decod
 ## 3. Envelope `gestao-envelope/1`
 
 Schema: [`schemas/gestao-envelope-1.schema.json`](schemas/gestao-envelope-1.schema.json).
+
+> **Revisto em 25/11/2026:** o envelope não mudou desde 23/11/2026 (quando ganhou o `writer` em claro). O nome Remessa, o Hub 2.0 e as férias só do gestor não pedem campo novo, outro AAD nem outra chave: o hub decifra status e métricas com a mesma chave de tarefas e as mesmas conferências da seção "Decifrar". Conferido contra o código da Central, do Quadro, do hub, das Finanças e da página Férias.
 
 ```json
 {

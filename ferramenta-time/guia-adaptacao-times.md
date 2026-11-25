@@ -1,21 +1,26 @@
 # Guia para os times · Quadro do Time e adaptação das ferramentas atuais
 
-*15/11/2026 · para os times e para os agentes de desenvolvimento deles*
+*15/11/2026, revisto em 25/11/2026 (Quadro do Time 2.3.2, Remessa) · para os times e para os agentes de desenvolvimento deles*
 
 > **Para quem é:** cada time que acompanha iniciativas em nível de card e precisa enviar backlog e métricas para a Central de Gestão do gestor.
 > **O que este guia resolve:** escolher entre (A) **usar o Quadro do Time** (`quadro_do_time_v1.html`, pronto) ou (B) **adaptar a ferramenta HTML que o time já tem**, seguindo a mesma arquitetura.
-> **Referência formal:** a pasta [`contratos/`](../contratos/LEIA-ME.md) (schemas, criptografia com vetores de teste, exemplos cifrados e o validador `node contratos/validar.js`) e `integracao-time/03-pacote-para-agentes-do-time.md`. Este guia não muda nenhum contrato; quando houver dúvida, o pacote 03 e os schemas valem.
+> **Referência formal:** a pasta [`contratos/`](../contratos/LEIA-ME.md) (schemas, criptografia com vetores de teste, exemplos cifrados e o validador `node contratos/validar.js`) e o guia [`contratos/05-como-integrar.md`](../contratos/05-como-integrar.md), com o checklist de conformidade. Este guia não muda nenhum contrato; quando houver dúvida, os schemas e a pasta `contratos/` valem. (O antigo "pacote 03", `integracao-time/03-pacote-para-agentes-do-time.md`, ficou como histórico na pasta do projeto do gestor; tudo o que ele trazia está em `contratos/`.)
+> **Remessa:** a solução se chama Remessa. Cada arquivo que o time grava é um envelope lacrado com a chave do time, deixado na caixa postal (a pasta compartilhada); o que chega de outra pessoa aparece como **nova remessa**.
 
 ---
 
 ## 1. A arquitetura em uma página
 
 ```
-Gestao-Integracao/                         (pasta do SharePoint, sincronizada pelo OneDrive; administrada pelo gestor)
+Gestao-Compartilhado/                      (pasta do SharePoint, sincronizada pelo OneDrive; administrada pelo gestor)
   central/catalogo-<slug>.json             ← a Central escreve; o time só LÊ   (cifrado com a chave do time)
-  times/<slug>/status.json                 ← o time escreve: backlog            (cifrado)
-  times/<slug>/metricas.json               ← o time escreve: métricas do time   (cifrado)
+  times/<slug>/status.json                 ← o time escreve: backlog            (cifrado; a Central e o hub leem)
+  times/<slug>/metricas.json               ← o time escreve: métricas do time   (cifrado; a Central e o hub leem)
+  times/<slug>/quadro/<pessoa>-<pc>.json   ← cada pessoa do Quadro grava o seu  (só o Quadro lê)
+  times/<slug>/postits/…                   ← post-its do gestor e recibos "Vi"  (seção 3.3)
 ```
+
+O nome antigo `Gestao-Integracao` continua aceito. Em cada computador, marque a pasta como **Sempre manter neste dispositivo** (botão direito na pasta, no Explorador de Arquivos ou no Finder): sem isso, os arquivos dos outros ficam só na nuvem e a ferramenta não os lê. O layout completo está em [`contratos/01-arquitetura.md`](../contratos/01-arquitetura.md).
 
 | Regra | O que significa na prática |
 |---|---|
@@ -25,7 +30,7 @@ Gestao-Integracao/                         (pasta do SharePoint, sincronizada pe
 | Retrato completo | Cada publicação reescreve o arquivo inteiro, com `revision` sempre maior |
 | Hierarquia da Central | **Iniciativa › Feature** (`PAG-042`, `PAG-042.F2`). O épico do time liga a uma iniciativa; o card liga a uma feature. Fases (`PAG-042.P1`) são só contexto |
 | Iniciativas laterais | Épico criado pelo time, sem código da Central, vai com `ref: null`. O gestor concilia depois; quando decidir, o catálogo traz `links[]` e a ferramenta grava o código sozinha |
-| Backlog | Publicado **automaticamente** a cada movimentação de card (espera de ~10 s para agrupar mudanças) |
+| Backlog | Publicado **automaticamente** a cada movimentação de card (espera de ~10 s para agrupar mudanças). Publique só quando algo mudou: cada gravação vira uma "nova remessa" para o gestor |
 | Métricas | Publicadas **ao fechar a sprint, com confirmação** (e por um botão "Publicar métricas agora"), com o campo `sprint` |
 | Escopo das métricas | Só do **time**, calculadas a partir da movimentação de cards, sobre o **backlog inteiro** (com e sem vínculo, com e sem épico). **Nada por pessoa**: o formato individual existe reservado, mas está desligado |
 | Nomes de métricas | Use `standard` quando seguir a definição padrão (dicionário em `contratos/schemas/dicionario-metricas.json`). Métricas próprias são aceitas, desde que tragam `definition` |
@@ -59,26 +64,28 @@ Cada feature do catálogo pode trazer dois campos opcionais:
 | **Sprints** | Planejar, iniciar (o compromisso é registrado no início) e fechar. Ao fechar, os cards abertos vão para a próxima sprint ou para o backlog, e a ferramenta pergunta se publica as métricas |
 | **Iniciativas** | Lista à esquerda (ligadas à Central, do time sem vínculo, da Central ainda sem épico aqui com botão Trazer, concluídas) e o detalhe da iniciativa escolhida: progresso, cards em andamento, bloqueios, previsão do time comparada ao prazo da Central, distribuição dos cards por coluna, atualização de status de uma linha registrada ali mesmo, linha do tempo com fases, prazos das features, hoje, prazo e previsão, um cartão por feature (fase, dependências, progresso e cards abertos, com "+ Card nesta feature") e os cards sem feature, com seletor para ligar a uma feature |
 | **Métricas** | Vazão, lead time, cycle time, WIP, idade do WIP, fluxo cumulativo, demanda que chega, cards fechados por sprint, compromisso cumprido, % bloqueado, itens no prazo, bloqueios por motivo e distribuição do lead time. "Ver JSON" mostra exatamente o que vai para a Central |
-| **Central** | Slug do time, chave, pasta, catálogo, situação das publicações, prévia do `status.json` e do `metricas.json`, plano B |
+| **Central** | Slug do time, chave, pasta, catálogo, situação das publicações, prévia do `status.json` e do `metricas.json`, plano B. Quando chega um catálogo novo, o Quadro avisa **Nova remessa da Central** |
+| **Post-its** | Faixa no topo com os recados que o gestor deixou pelo hub; **Vi** grava o recibo e o gestor vê quem leu |
 | **Detalhes do card** | Título editável, coluna em trilha clicável, lead time, cycle time e tempo bloqueado do card, feature da Central com fase e dependências, notas, linha do tempo de movimentos e bloqueios; ao lado, responsável por avatar, tipo, prazo (com "vence em"), sprint, iniciativa, feature, pontos e link |
-| **Ajustes** | Nome do time, pessoas do time, colunas (qual é o compromisso e qual é o início), senha do arquivo, cópia de segurança |
+| **Ajustes** | Nome do time, pessoas do time, colunas (qual é o compromisso e qual é o início), senha do arquivo (obrigatória), cópia de segurança |
 
 ### 2.2 Primeiro uso (uma pessoa do time, uns 10 minutos)
 
-> **Jeito mais rápido (desde 24/11/2026): o assistente.** O gestor manda o `inicio.html` (está no pacote .zip da solução) e, por mensagem direta, a chave do time e o nome da pasta sincronizada. Cada pessoa abre o `inicio.html`, responde "Você lidera times?", marca Tarefas (e Finanças, se cuida do dinheiro do time), cola a chave em "Seu líder compartilhou chaves?" e escolhe a pasta local e a sincronizada. O assistente reconhece o time pela chave, cria o Quadro já configurado com ela, o arquivo cifrado com a senha da pessoa e o hub. Na primeira abertura do Quadro, só falta dizer quem é você. Os passos abaixo continuam valendo para quem recebe o HTML do time direto da Central.
+> **Jeito mais rápido (desde 24/11/2026): o assistente.** O gestor manda o `inicio.html` (está no pacote .zip da solução) e, por mensagem direta, a chave do time e o nome da pasta sincronizada. Cada pessoa abre o `inicio.html`, responde "Você lidera times?", marca Tarefas (e Finanças, se cuida do dinheiro do time), cola a chave em "Seu líder compartilhou chaves?" e escolhe a pasta pessoal (só sua, de preferência no seu OneDrive) e a sincronizada. O assistente reconhece o time pela chave, cria o Quadro já configurado com ela, o arquivo cifrado com a senha da pessoa e o hub. Na primeira abertura do Quadro, só falta dizer quem é você. Os passos abaixo continuam valendo para quem recebe o HTML do time direto da Central.
 
-> **HTML já configurado pelo gestor.** Na Central (Pessoas › Times, visão do time ou Integração), o botão **HTML do time** gera uma cópia do Quadro (versão 1.1 ou mais nova) com o nome do time, o identificador (pasta), o prefixo dos códigos, as pessoas e o contato já preenchidos. Ao abrir, o aviso no topo confirma para qual time ele foi preparado, e "Criar quadro novo" vem preenchido, com o identificador travado. Se o gestor marcou "incluir a chave", ela é cadastrada sozinha na primeira abertura (só uma vez: se for removida, não volta). Nesse caso, guarde o HTML só com o time e nunca na pasta `Gestao-Integracao`. Sem a chave embutida, cole a que chegar por Teams ou e-mail (passo 3).
+> **HTML já configurado pelo gestor.** Na Central (página Times, aba **Integração** do time), o botão **HTML do time** gera uma cópia do Quadro (versão 1.1 ou mais nova) com o nome do time, o identificador (pasta), o prefixo dos códigos, as pessoas e o contato já preenchidos. Ao abrir, o aviso no topo confirma para qual time ele foi preparado, e "Criar quadro novo" vem preenchido, com o identificador travado. Se o gestor marcou "incluir a chave", ela é cadastrada sozinha na primeira abertura (só uma vez: se for removida, não volta). Nesse caso, guarde o HTML só com o time e nunca na pasta compartilhada (`Gestao-Compartilhado`). Sem a chave embutida, cole a que chegar por Teams ou e-mail (passo 3).
 
-1. **Criar quadro novo**: nome do time, o identificador (slug) combinado com o gestor (ex.: `pagamentos`) e, se quiser, as pessoas do time (uma por linha, com o papel depois de `;`). Escolha onde salvar o arquivo `quadro-<slug>.json`: **numa pasta do time** (por exemplo, a biblioteca do time no SharePoint, sincronizada), **nunca** dentro de `Gestao-Integracao`. Se quiser, proteja com senha (não há como recuperar).
+1. **Criar quadro novo**: nome do time, o identificador (slug) combinado com o gestor (ex.: `pagamentos`) e, se quiser, as pessoas do time (uma por linha, com o papel depois de `;`). Escolha onde salvar o arquivo `quadro-<slug>.json`: **numa pasta só sua** (de preferência no seu OneDrive), **nunca** dentro da pasta compartilhada. Crie a senha (obrigatória, 12 caracteres ou mais, sem recuperação) e guarde no cofre de senhas. Cada pessoa do time tem o próprio arquivo e a própria senha.
 2. **Ajustes › Colunas**: deixe as colunas iguais às do time e marque a coluna de **compromisso** (onde o card entra no fluxo) e a de **início** (onde o trabalho começa). A última coluna é sempre a **entrega**. Defina limites de WIP.
-3. **Central**: cole a chave recebida do gestor (`GK1.<id>.<…>`), clique em **Conectar pasta** e escolha a raiz `Gestao-Integracao`. O catálogo é lido e as iniciativas da Central aparecem para vínculo.
+3. **··· › Central**: cole a chave recebida do gestor (`GK1.<id>.<…>`), clique em **Conectar pasta** e escolha a raiz da pasta compartilhada (`Gestao-Compartilhado`, marcada como **Sempre manter neste dispositivo**). O catálogo é lido e as iniciativas da Central aparecem para vínculo. Responda **Quem é você neste quadro?** (nome e este computador).
 4. **Iniciativas**: para cada iniciativa da Central que o time trabalha, crie o épico (o aviso "A Central tem N iniciativas sem épico aqui" faz isso num clique) ou ligue um épico existente. Épicos que são só do time ficam sem vínculo.
 5. Nos cards, escolha a **Feature na Central** quando fizer sentido. Cards sem feature continuam valendo nas métricas.
 
 **Pessoas do time** (Ajustes): adicione uma a uma (nome e papel; Enter já prepara a próxima) ou várias de uma vez, colando uma lista ou uma coluna do Excel. Nomes repetidos (inclusive com acento ou caixa diferentes) não são duplicados. Renomear uma pessoa atualiza os cards dela. Quem sai do time é **desativado**: continua nos cards antigos e sai das listas; remover só é possível para quem não tem cards. No card, dá para criar uma pessoa nova direto no campo Responsável. As pessoas servem só para atribuir cards: nenhuma métrica é calculada por pessoa.
 
 ### 2.3 Uso diário
-- Cada pessoa abre o mesmo `quadro-<slug>.json`. A ferramenta salva sozinha, confere o arquivo a cada 20 s e **une** as mudanças de pessoas diferentes (vence a alteração mais recente de cada card; códigos criados ao mesmo tempo são renumerados).
+- Cada pessoa abre o **próprio** `quadro-<slug>.json`, cifrado com a própria senha. As alterações dela vão, cifradas com a chave do time, para `times/<slug>/quadro/<pessoa>-<computador>.json` na pasta compartilhada; a ferramenta lê os arquivos de todos a cada 20 s e **une** as mudanças (vence a alteração mais recente de cada card; códigos criados ao mesmo tempo são renumerados). Ninguém grava o arquivo de outra pessoa, então o OneDrive não cria cópias de conflito. Um `quadro-<slug>.json` antigo, compartilhado, continua abrindo e é migrado.
+- Os **post-its** do gestor aparecem no topo do quadro; clique **Vi** depois de ler.
 - Quem quiser publicar precisa colar a chave **uma vez no próprio navegador**. A chave fica guardada como `CryptoKey` não exportável no IndexedDB; ela não vai para o arquivo do quadro.
 - Depois de recarregar a página, o navegador pede de novo a permissão da pasta: a publicação fica "pendente" e sai no próximo clique, ou em **Central › Reconectar pasta**.
 - **Sem a API** (navegador antigo ou bloqueado): **Central › Plano B** baixa `status.json` e `metricas.json` já cifrados para salvar em `times/<slug>/`, e lê o catálogo de um arquivo escolhido.
@@ -117,7 +124,7 @@ O arquivo do quadro é JSON aberto (`quadro-time/1`), então um agente pode escr
 
 ## 3. Caminho B · adaptar a ferramenta que o time já tem
 
-O pacote 03 descreve **o que** implementar. O Quadro do Time é uma **implementação de referência funcionando**: copie as funções dele em vez de reescrever. Todas estão no bloco `<script>` do `quadro_do_time_v1.html`:
+A pasta `contratos/` descreve **o que** implementar (receita A de [`05-como-integrar.md`](../contratos/05-como-integrar.md)). O Quadro do Time é uma **implementação de referência funcionando**: copie as funções dele em vez de reescrever. Todas estão no bloco `<script>` do `quadro_do_time_v1.html`:
 
 | Necessidade | Função no Quadro do Time | Observação |
 |---|---|---|
@@ -126,12 +133,12 @@ O pacote 03 descreve **o que** implementar. O Quadro do Time é uma **implementa
 | Pasta | `conectarPasta`, `obterPasta` | Permissão pedida só dentro de um clique |
 | Catálogo | `lerCatalogo`, `lerCatalogoEnvelope`, `applyCatalogLinks` | Guarda o catálogo **ainda cifrado** no IndexedDB para abrir sem a pasta; aplica `links[]` e `aliases[]`; recusa catálogo de outro time |
 | Fase e dependências | `featPhase`, `featDeps`, `openDeps` | Leem `phase` e `dependsOn`, com o recuo para `phases[].features` |
-| Montar `status.json` | `buildStatus`, `derivedStatus`, `epicStatus` | Regras da seção 7.5 do pacote 03 |
+| Montar `status.json` | `buildStatus`, `derivedStatus`, `epicStatus` | Regras do schema [`gestao-status-1`](../contratos/schemas/gestao-status-1.schema.json) |
 | Montar `metricas.json` | `buildMetrics` e as funções `commitAt`, `startAt`, `doneAt`, `colAt`, `blockedMs` | Marcos compromisso, início e entrega a partir do histórico de colunas |
 | Validar antes de gravar | `validar` | Checagem mínima das regras obrigatórias; o teste completo é contra os schemas |
 | Publicar | `publicar`, `gravarCifrado`, `lerRevisaoExistente`, `agendarStatus` | Revisão = maior entre o contador da ferramenta e a revisão já gravada na pasta, mais 1 (evita voltar a revisão quando duas pessoas publicam) |
 | Plano B | `baixarCifrados` | Arquivos baixados já cifrados |
-| Várias pessoas no mesmo arquivo | `mergeDb`, `salvar`, `verificarRemoto` | Só se a ferramenta do time também é um arquivo compartilhado |
+| Várias pessoas no mesmo quadro | `mergeDb`, `f4publicar`, `f4ler` | Cada pessoa publica o próprio arquivo em `times/<slug>/quadro/` e o Quadro une; só se a ferramenta do time também junta várias pessoas |
 
 ### 3.1 Passo a passo para o agente
 1. **Entender a ferramenta atual.** Como guarda épicos, cards, colunas, bloqueios, sprints e se registra **quando** cada card mudou de coluna.
@@ -155,7 +162,8 @@ O pacote 03 descreve **o que** implementar. O Quadro do Time é uma **implementa
 6. **Testar** (seção 4).
 
 ### 3.2 Erros comuns
-- Gravar o arquivo do próprio time (dados do quadro) dentro de `Gestao-Integracao`. Ele fica numa pasta do time; na pasta da Central só existem `status.json` e `metricas.json`, cifrados.
+- Gravar o arquivo de dados da ferramenta (o quadro inteiro, em claro ou com a senha local) dentro da pasta compartilhada. Ele fica numa pasta só de quem usa; na pasta compartilhada só vão os arquivos dos contratos, sempre cifrados com a chave do time.
+- Regravar `status.json` sem nada novo, com a revisão subindo: o gestor vê uma "nova remessa" a cada gravação.
 - Calcular métricas só dos cards vinculados à Central. As métricas consideram o **quadro inteiro**.
 - Métrica por pessoa, ranking ou "vazão por responsável". Não é aceito na v1. O nome do responsável pode ir em `items[].owner` e `blockers[].owner`, mas nenhuma métrica é quebrada por pessoa.
 - Reaproveitar IV, guardar o texto da chave em `localStorage` ou no arquivo de dados, ou logar a chave no console.
@@ -190,7 +198,7 @@ async function lerPostits(root, slug, chaves /* Map kid -> CryptoKey */) {
     if (h.kind !== 'file' || !nome.endsWith('.json') || nome.startsWith('.')) continue;
     try {
       const env = JSON.parse(await (await h.getFile()).text());
-      const p = await decifrar(env, chaves);                              // função da seção 7.2 do pacote 03
+      const p = await decifrar(env, chaves);                              // decifrarEnv de contratos/referencia/cripto.js
       if (p.schema !== 'gestao-postits/1' || env.team !== slug || p.source?.team !== slug) continue;
       if (env.writer && env.writer !== p.source.writer) continue;          // dono não confere: ignore
       const w = p.source.writer, ant = porAutor.get(w);                    // cópias de conflito do OneDrive:
@@ -234,7 +242,7 @@ async function publicarVistos(root, slug, chave /* { kid, key } */, eu /* { pess
    node contratos/validar.js pasta <pasta de teste> --chave GK1.<slug>-AAMM.…
    ```
    No Quadro do Time, **Central › Ver status.json / Ver metricas.json** mostra o conteúdo que vai cifrado e o resultado da validação mínima.
-5. **Checklist de aceite** da seção 8 do pacote 03.
+5. **Checklist de conformidade** da seção 4 de [`contratos/05-como-integrar.md`](../contratos/05-como-integrar.md).
 6. **Ponta a ponta:** publique na pasta real e confira no SharePoint que surge uma nova versão do arquivo, não uma cópia de conflito.
 
 O Quadro do Time v1 passou por estes testes: os três exemplos cifrados decifram idênticos ao conteúdo, a chave errada é recusada, e o `status.json` e o `metricas.json` publicados validam contra `gestao-envelope/1`, `gestao-status/1` e `gestao-metricas/1` (validação com formatos). Também foram testados: vínculos e apelidos vindos do catálogo, recusa de catálogo de outro time, IV novo a cada gravação, arquivo do quadro com senha (sem texto em claro) e união de mudanças de duas pessoas.
@@ -245,9 +253,10 @@ O Quadro do Time v1 passou por estes testes: os três exemplos cifrados decifram
 
 ```
 Vamos ligar a nossa ferramenta HTML de acompanhamento à Central de Gestão do gestor.
-Anexos: "guia-adaptacao-times.md", "03-pacote-para-agentes-do-time.md", a pasta contratos/
-(schemas, dicionario-metricas.json, cripto-referencia.js), a pasta exemplos/ e
-quadro_do_time_v1.html (implementação de referência).
+Anexos: "guia-adaptacao-times.md", a pasta contratos/ inteira (comece por
+contratos/LEIA-ME.md e contratos/05-como-integrar.md, receita A; schemas,
+referencia/cripto.js, exemplos/ e validar.js) e quadro_do_time_v1.html
+(implementação de referência).
 
 1. Leia o código da nossa ferramenta e descreva como ela guarda épicos, cards, colunas,
    bloqueios, sprints e o histórico de movimentação.
@@ -261,7 +270,8 @@ quadro_do_time_v1.html (implementação de referência).
    confirmação, contador de revisão e, se faltar, registro de histórico com migração.
 4. Métricas só do time, sobre o quadro inteiro, nunca por pessoa. Use "standard" quando
    seguir a definição padrão; métricas próprias com "definition".
-5. Rode os testes da seção 4 do guia e o checklist da seção 8 do pacote 03.
+5. Rode os testes da seção 4 do guia (inclusive node contratos/validar.js) e o checklist
+   da seção 4 de contratos/05-como-integrar.md.
 Não mude o visual nem o comportamento existentes além do necessário.
 ```
 
@@ -273,5 +283,5 @@ Se o time preferir trocar de ferramenta, a alternativa é o caminho A com o conv
 
 - O Quadro do Time não substitui ferramentas com integração a repositórios ou a sistemas de tickets; ele é um quadro manual.
 - A união de mudanças entre pessoas é por card (vence a mais recente). Duas pessoas editando o mesmo card ao mesmo tempo: fica a última gravação.
-- A sincronização depende do OneDrive; se ele criar uma cópia de conflito do arquivo do quadro, abra o arquivo principal e apague a cópia depois de conferir.
+- A sincronização depende do OneDrive (atrasos de minutos são normais). Como cada pessoa grava só o próprio arquivo, cópias de conflito são raras; se aparecer uma do seu arquivo local, abra o principal e apague a cópia depois de conferir.
 - Sem a File System Access API, o quadro não abre arquivos (o plano B cobre só a troca com a Central). Use Edge ou Chrome.

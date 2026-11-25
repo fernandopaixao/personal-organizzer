@@ -52,9 +52,10 @@ def main():
     faltam = [k for k, p in arquivos.items() if not p.exists()]
     if faltam:
         sys.exit('Faltam arquivos: ' + ', '.join(faltam))
-    leia = f"""Solução de gestão · pacote de {hoje}
+    leia = f"""Remessa · pacote de {hoje}
 
-1. Copie esta pasta para uma pasta LOCAL, fora do OneDrive (ex.: C:\\Users\\voce\\GestaoLocal).
+1. Extraia o .zip e copie esta pasta para uma pasta só sua, de preferência no seu OneDrive
+   (ex.: OneDrive - Empresa\\GestaoPessoal). Nunca na pasta compartilhada com os times.
 2. Primeira vez: abra inicio.html no Edge ou Chrome e siga o assistente.
    Já usa a solução: substitua os HTMLs antigos por estes e abra os mesmos arquivos de dados
    (a migração é automática e baixa um backup).

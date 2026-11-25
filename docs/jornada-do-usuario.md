@@ -84,7 +84,7 @@ A solução se chama **Remessa**: as ferramentas trocam envelopes lacrados (cifr
 | Momento | O que fazer | Referência |
 |---|---|---|
 | **Versão nova de uma ferramenta** | Trocar o HTML e abrir o mesmo arquivo de dados; a migração é automática e baixa um backup | [Passo a passo §9](passo-a-passo.md#9-atualizar-para-uma-versão-nova) |
-| **Trocar de computador** | Copiar a pasta local inteira (ou a cópia cifrada) e abrir com a senha do cofre | [Passo a passo §10](passo-a-passo.md#10-trocar-de-computador) |
+| **Trocar de computador** | Se a pasta pessoal está no seu OneDrive, só esperar sincronizar; senão, copiar a pasta inteira (ou a cópia cifrada). Marcar a pasta compartilhada como **Sempre manter neste dispositivo** e abrir com a senha do cofre | [Passo a passo §10](passo-a-passo.md#10-trocar-de-computador) |
 | **Lembrete de teste da senha** | Digitar a senha do cofre; se falhar, trocar a senha enquanto o arquivo está aberto | [ADR-0003](adr/0003-criptografia-sempre.md) |
 | **Chave vazou** | Gestor revoga e gera outra; envia ao responsável; o time cola a nova | [Passo a passo §11](passo-a-passo.md#11-uma-chave-vazou) |
 | **Cópia de conflito encontrada** | Aceitar a resolução proposta pela ferramenta | [ADR-0007](adr/0007-um-escritor-por-arquivo.md) |
@@ -106,7 +106,7 @@ Esta revisão olhou a solução como um todo em 24/11/2026. Os pontos abaixo nã
 | 4 | ~~Primeiro uso do time exige várias ações~~ | Quadro, Finanças do Time | **Resolvido no assistente 2.0 e 2.1:** "Estou com sorte" gera as ferramentas de cada time já com a chave, e um checklist acompanha o que falta; onboarding por perfil (lidera times? finanças? chaves e pasta do líder), com as chaves já gravadas nos arquivos |
 | 5 | **Hub depende de estar na mesma pasta** dos HTMLs | Hub | Já avisa; o assistente já grava tudo junto. Manter a orientação no cartão "Onde fica cada coisa" |
 | 6 | ~~Times com ferramenta própria não veem post-its~~ | Caminho B | **Resolvido:** post-its no pacote para agentes dos times (`integracao-time/03`, seção 7.6) e no guia de adaptação (seção 3.3) |
-| 7 | **Documentação espalhada** entre repositório e pasta do projeto | Docs | Este conjunto (ADRs, funcionalidades, jornada, passo a passo) vira a porta de entrada; a visão geral aponta para ele |
+| 7 | **Documentação espalhada** entre repositório e pasta do projeto | Docs | Este conjunto (ADRs, funcionalidades, jornada, passo a passo) vira a porta de entrada; a visão geral aponta para ele. **Melhorou com a pasta `contratos/`** (no repositório e no .zip), que substitui os schemas e exemplos de `integracao-time/`; os documentos 00 a 06 de `integracao-time/` continuam só na pasta do projeto, como histórico ([ADR-0032](adr/0032-pasta-de-contratos.md)) |
 | 8 | ~~Hub com botões mudos fora do Edge/Chrome~~ | Hub, Finanças, Férias, assistente | **Resolvido no Hub 1.3.1:** o aviso no topo diz o motivo (Safari, pré-visualização, celular, zip) e o que fazer, e todo botão responde ([ADR-0030](adr/0030-aviso-quando-nao-da-para-abrir-pastas.md)) |
 | 9 | ~~Ferramentas geradas pediam pasta, arquivo e chaves de novo~~ | Assistente, todas | **Resolvido no assistente 2.3:** arquivo e pasta lembrados, chaves dos times também no caminho normal, prefixo sugerido e botão de chave em destaque no time da Central ([ADR-0031](adr/0031-ferramentas-abrem-prontas.md)) |
 
