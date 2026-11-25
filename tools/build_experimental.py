@@ -17,7 +17,7 @@ Assim a versão experimental tem sempre as mesmas funcionalidades do main: só o
 Com --testar, os testes de ponta a ponta, do Mapa de Férias e do aviso sem pastas rodam na cópia
 (com os fundos esperados do visual novo, trocas "teste" de trocas.json).
 """
-import json, pathlib, re, shutil, subprocess, sys, tempfile
+import json, os, pathlib, re, shutil, subprocess, sys, tempfile
 
 RAIZ = pathlib.Path(__file__).resolve().parent.parent
 EXP = RAIZ / 'experimental' / 'src'
@@ -87,7 +87,10 @@ def montar(saida, testar=False, manter=False):
             t.write_text(txt, encoding='utf-8')
             for teste in TESTES:
                 print(f'== {teste} (experimental)', flush=True)
-                r = subprocess.run(['node', str(copia / teste)], cwd=copia)
+                # A cópia fica fora do repositório e sem node_modules: o Playwright instalado no repositório
+                # (como na CI, com npm install --no-save) só é achado pelo NODE_PATH.
+                env = dict(os.environ, NODE_PATH=os.pathsep.join(filter(None, [str(RAIZ / 'node_modules'), os.environ.get('NODE_PATH', '')])))
+                r = subprocess.run(['node', str(copia / teste)], cwd=copia, env=env)
                 if r.returncode:
                     falhas.append(teste)
         if manter:
