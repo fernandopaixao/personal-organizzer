@@ -1,6 +1,6 @@
 # ADR-0002 · Dados sempre fora do HTML, um arquivo de dados por ferramenta
 
-**Status:** aceita · **Data:** v11, reforçada na v12 (06/11/2026) · **Origem:** Central v11/v12
+**Status:** aceita; exceção consciente na [ADR-0033](0033-ferias-dentro-da-central.md) (as férias do gestor ficam no arquivo da Central, sem arquivo próprio) · **Data:** v11, reforçada na v12 (06/11/2026) · **Origem:** Central v11/v12
 
 ## Contexto
 Se os dados ficassem dentro do HTML, cada versão nova da ferramenta exigiria copiar os dados de um arquivo para o outro, e qualquer cópia do HTML levaria os dados junto.

@@ -1,6 +1,6 @@
 # 03 · Regras de escrita (anti-conflito)
 
-*Contratos 1.0 · 24/11/2026 · decisões em [ADR-0007](../docs/adr/0007-um-escritor-por-arquivo.md) e [ADR-0016](../docs/adr/0016-cadencia-de-publicacao.md)*
+*Contratos 1.0 · 25/11/2026 · decisões em [ADR-0007](../docs/adr/0007-um-escritor-por-arquivo.md) e [ADR-0016](../docs/adr/0016-cadencia-de-publicacao.md)*
 
 O OneDrive não tem trava. Quando dois computadores gravam o mesmo arquivo antes de sincronizar, ele guarda os dois e renomeia um (`plano-NOTEBOOK01.json`, `plano (1).json`), e os atrasos de minutos são normais. As regras abaixo fazem esse caso virar raro e, quando acontece, ser resolvido sem perder dados. A implementação de referência é `publicarUnico` em `financas/src/nucleo.js`; [`referencia/cripto.js`](referencia/cripto.js) tem as peças (`reCopia`, `maisNovo`, `proximaRevisao`, `hlcAgora`).
 
@@ -44,6 +44,8 @@ Status e métricas do mesmo time usam **um contador só**: o Quadro calcula `max
 | Time (métricas) | Ao fechar a sprint, depois de a pessoa confirmar. |
 | Gestor e liderança (catálogo, diretriz, consolidado) | **Só por botão**, depois de uma prévia que mostra o que sobe e o que fica de fora ([ADR-0016](../docs/adr/0016-cadencia-de-publicacao.md), [ADR-0025](../docs/adr/0025-consolidacao-em-niveis.md)). |
 | Quem lê | A cada 20 a 60 s e ao voltar para a aba. Nunca em laço apertado: cada leitura baixa arquivos do OneDrive. |
+
+**Só grave quando o conteúdo mudou.** Para quem lê, cada gravação é uma **nova remessa**: o hub usa a data do arquivo (últimas 24 horas) e a Central e o Finanças do Grupo mostram a revisão nova para aplicar. Regravar o mesmo retrato com a revisão subindo gera avisos sem motivo ([ADR-0037](../docs/adr/0037-nome-remessa.md)).
 
 ## 6. Limites
 

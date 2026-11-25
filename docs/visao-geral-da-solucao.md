@@ -23,7 +23,7 @@ A solução é um pequeno ecossistema de **ferramentas HTML de arquivo único**,
                                          │ catálogo      │ status e métricas
                                          ▼ (Compartilhar)│ (lidos com prévia)
                  ┌────────────────────────────────────────────────────────┐
-                 │  Pasta SharePoint "Gestao-Integracao" (tudo cifrado)    │
+                 │  Pasta SharePoint "Gestao-Compartilhado" (tudo cifrado) │
                  │   central/catalogo-<time>.json   ← só a Central escreve │
                  │   times/<time>/status.json       ← só o time escreve    │
                  │   times/<time>/metricas.json     ← só o time escreve    │
@@ -31,7 +31,7 @@ A solução é um pequeno ecossistema de **ferramentas HTML de arquivo único**,
                                  ▼ lê catálogo   │ publica backlog e métricas
                  ┌────────────────────────────────────────────────────────┐
                  │  Ferramenta de cada time                                │
-                 │  Quadro do Time 2.2 (pronto) ou ferramenta própria      │
+                 │  Quadro do Time 2.3 (pronto) ou ferramenta própria      │
                  │  adaptada ao contrato                                   │
                  └────────────────────────────────────────────────────────┘
 
@@ -39,16 +39,18 @@ A solução é um pequeno ecossistema de **ferramentas HTML de arquivo único**,
   e não troca dados com nenhuma das ferramentas acima.
 ```
 
+O desenho mostra só a troca de tarefas. Pela mesma pasta passam as finanças, os post-its do hub e os consolidados de finanças e férias para a liderança; o layout completo está em [`contratos/01-arquitetura.md`](../contratos/01-arquitetura.md).
+
 | Peça | O que é | Quem usa | Onde está |
 |---|---|---|---|
-| **Hub da solução** | Cockpit de gestão (2.0): login único, cards e lista de atenção de todos os módulos (lidos sem gravar), abre as outras ferramentas e deixa post-its cifrados para os times, que aparecem no Quadro | Fernando (e quem quiser) | Repositório: `hub.html`, plano em `docs/plano-hub.md` |
+| **Hub da solução** | Cockpit de gestão (2.1): login único, cards e lista de atenção de todos os módulos (lidos sem gravar), abre as outras ferramentas e deixa post-its cifrados para os times, que aparecem no Quadro | Fernando (e quem quiser) | Repositório: `hub.html`, plano em `docs/plano-hub.md` |
 | **Central de Gestão v15** | Gestão pessoal e de portfólio do gestor: tarefas, delegação, iniciativas e features, rituais, pessoas, métricas e integração com os times | Fernando | Repositório: `gestao_pessoal_v15.html`, plano em `docs/plano-v15.md`. Projeto: `gestao-v15/` |
-| **Quadro do Time 2.2** | Quadro de cards, backlog, sprints, iniciativas ligadas à Central e métricas de fluxo do time | Cada time | Repositório e projeto: `ferramenta-time/` (HTML, guia, telas) |
+| **Quadro do Time 2.3** | Quadro de cards, backlog, sprints, iniciativas ligadas à Central e métricas de fluxo do time | Cada time | Repositório e projeto: `ferramenta-time/` (HTML, guia, telas) |
 | **Finanças do Grupo e do Time** | Plano financeiro multianual de cada time (lançamentos locais, plano agregado publicado) e consolidado do grupo ano a ano contra o orçamento, com cards de leitura e gráficos | Fernando (grupo) e responsável financeiro de cada time | Repositório: `financas/`, plano em `docs/plano-financas.md` |
 | **Férias (página da Central)** | Férias e ausências em níveis (gestor → liderança): mapa de calor dos dias com mais e menos gente fora, calendário e sugestão de períodos. Fica na página **Férias da Central** (mesmo arquivo e senha, [ADR-0033](adr/0033-ferias-dentro-da-central.md)) e só o gestor cadastra, inclusive as pessoas dos times ([ADR-0036](adr/0036-ferias-so-o-gestor-cadastra.md)). Apoio, não substitui a ferramenta oficial | Gestores e liderança | Repositório: página Férias em `gestao_pessoal_v15.html`, montada a partir de `financas/src/ferias.html`; plano em `docs/plano-ferias.md` |
 | **Assistente inicial** | Monta a solução para o papel da pessoa e cria os primeiros arquivos cifrados | Quem está começando | Repositório: `inicio.html` |
-| **Visual experimental** | As mesmas ferramentas no visual novo (trilho marinho, DM Sans, ícone por aba), com os mesmos dados, para experimentar ao lado das atuais | Quem quiser | Pacote: pasta `experimental/`, montada do main por `tools/build_experimental.py` a partir de `experimental/src/` ([ADR-0034](adr/0034-visual-experimental.md)) |
-| **Integração** | Pasta SharePoint, contratos JSON versionados, envelope cifrado, chaves por time | Central e ferramentas dos times | Projeto: `integracao-time/` (documentos 00 a 06, `contrato/`, `exemplos/`) |
+| **Visual experimental** | As mesmas ferramentas no visual novo (trilho marinho, DM Sans), com os mesmos dados, para experimentar ao lado das atuais | Quem quiser | Pacote: pasta `experimental/`, montada do main por `tools/build_experimental.py` a partir de `experimental/src/` ([ADR-0034](adr/0034-visual-experimental.md)) |
+| **Integração** | Pasta SharePoint, contratos JSON versionados, envelope cifrado, chaves por time | Central, hub, finanças e ferramentas dos times ou de outras soluções | Repositório e .zip: [`contratos/`](../contratos/LEIA-ME.md) (fonte única, [ADR-0032](adr/0032-pasta-de-contratos.md)). Histórico do desenho: projeto, `integracao-time/` (documentos 00 a 06) |
 | **Agentes do Fernando** | Agentes com acesso a reuniões, chats e e-mails que geram arquivos de importação para a Central | Fernando | Projeto: `integracao-time/06-prompts-para-agentes.md` |
 | **Ferramenta de feedbacks** | Ferramenta separada para registrar feedbacks | Fernando | Fora deste repositório. Sem integração (seção 10) |
 
@@ -64,7 +66,7 @@ A solução é um pequeno ecossistema de **ferramentas HTML de arquivo único**,
 6. **Nada muda sem o gestor ver.** Importações e arquivos dos times passam por uma prévia antes de serem aplicados.
 7. **Dado individual local, pedaço comum sincronizado.** Cada ferramenta guarda o detalhe numa pasta pessoal só sua (de preferência no seu OneDrive); na pasta sincronizada vai só o que o outro lado precisa, de preferência agregado (desde 23/11/2026).
 8. **Um escritor por arquivo.** Cada arquivo comum tem um único dono (pessoa + computador), é um retrato completo com revisão sempre maior, e cópias de conflito do OneDrive são detectadas e resolvidas.
-9. **HTMLs desacoplados.** Nenhuma ferramenta lê o arquivo de dados de outra; elas só se encontram pela pasta comum.
+9. **HTMLs desacoplados.** As ferramentas se encontram pela pasta comum. Ler o arquivo de outra é exceção, só de leitura e com a senha dela: o hub resume a Central no cockpit e importa times e chaves; a Central importa as chaves de finanças do Finanças do Grupo ([ADR-0010](adr/0010-htmls-desacoplados.md), [ADR-0035](adr/0035-hub-cockpit-de-gestao.md)).
 10. **Mesma identidade no claro e no escuro.** Um seletor comum (Claro, Escuro, Automático) em todas as ferramentas; a escolha fica só no computador e o escuro é aplicado por uma camada única, `financas/src/tema.js`, injetada no build (desde 24/11/2026).
 
 Cada princípio tem uma decisão registrada em [`docs/adr/`](adr/README.md).
@@ -87,7 +89,7 @@ A ferramenta do Fernando. Abre com dois cliques em `gestao_pessoal_v15.html`, pe
 | 6 | **Iniciativas** | Lista (feito × prazo, fases, próxima feature, painel com abas), Semana, Horizonte, Linha do tempo com fases sobrepostas e Dependências |
 | 7 | **Fóruns** | Pautas por data (o que não foi discutido rola para a próxima), Acordos (decisões e compromissos) e Staff (semana dos times) |
 | 8 | **Times** | Cadastro dos times (prefixo de código e pasta de integração), Métricas dos times (fluxo publicado por eles) e visão de cada time com reunião de status guiada e folha para o Teams |
-| 9 | **Integração** | Pasta e chaves, arquivos recebidos, conciliação e compartilhamento com os times |
+| 9 | **Integração** | Pasta e chaves, **Remessas** (arquivos que chegaram dos times; cada um ainda não aplicado é uma "nova remessa"), conciliação e compartilhamento com os times |
 
 Teclas 1 a 9 trocam de página. O botão do topo **Importar e agentes** reúne a importação de JSON e os prompts para os agentes.
 
@@ -103,6 +105,7 @@ Teclas 1 a 9 trocam de página. O botão do topo **Importar e agentes** reúne a
 | v15.9 | Página **Férias**: o Mapa de Férias do gestor e da liderança entra na Central (mesmo arquivo e senha, times e chaves da Integração) e a Hoje mostra quem está fora |
 | v15.10 | Aberta pelo hub, entra direto com a senha da sessão quando o navegador já liberou o arquivo; o Hub 2.0 vira o cockpit de gestão e lê o resumo dela sem gravar ([ADR-0035](adr/0035-hub-cockpit-de-gestao.md)) |
 | v15.11 | Só o gestor cadastra as férias: aba **Pessoas** com as pessoas de cada time e **Trazer pessoas da Central**; todos os times viram unidades; o `ferias.html` sai do pacote e do assistente ([ADR-0036](adr/0036-ferias-so-o-gestor-cadastra.md)) |
+| v15.12 | Remessa: o nome da solução, o ícone da aba com o lacre azul e a aba **Remessas** na Integração; arquivo que chegou dos times é uma "nova remessa" ([ADR-0037](adr/0037-nome-remessa.md)) |
 
 Detalhes da v15: `docs/plano-v15.md` (e da v14 em `docs/plano-v14.md`).
 
@@ -133,7 +136,7 @@ Documento detalhado: `integracao-time/04-modelo-iniciativa-feature.md`.
 
 ---
 
-## 5. Quadro do Time (2.2)
+## 5. Quadro do Time (2.3)
 
 A ferramenta pronta para os times. Também é um HTML único (`ferramenta-time/quadro_do_time_v1.html`), aberto no Edge ou Chrome.
 
@@ -152,7 +155,7 @@ Como funciona por dentro:
 - Cada pessoa tem o próprio arquivo local, **sempre cifrado com senha** (obrigatória desde o Quadro 2.1), e publica as próprias alterações em `times/<time>/quadro/<pessoa>-<computador>.json`, cifrado com a chave do time.
 - Quem abre o Quadro lê os arquivos de todos a cada 20 s e une as mudanças card a card (vence a alteração mais recente). Ninguém grava o arquivo de outra pessoa, então o OneDrive não gera cópias de conflito. O antigo `quadro-<slug>.json` compartilhado continua sendo aberto e migrado.
 - No topo do quadro aparecem os **post-its** deixados pelo hub; **Vi** grava o recibo de leitura.
-- O catálogo da Central fica guardado cifrado no navegador.
+- O catálogo da Central fica guardado cifrado no navegador. Quando chega um catálogo novo, o Quadro avisa **Nova remessa da Central** (2.3.1).
 
 **Times com ferramenta própria** não precisam trocar: o guia `ferramenta-time/guia-adaptacao-times.md` explica o caminho B (adaptar a ferramenta atual copiando as funções do Quadro), e o pacote `integracao-time/03-pacote-para-agentes-do-time.md` traz o contrato completo, código de referência, checklist e um prompt pronto para o agente de desenvolvimento do time.
 
@@ -165,11 +168,16 @@ Como funciona por dentro:
 Desde 23/11/2026 o nome recomendado é `Gestao-Compartilhado` (biblioteca SharePoint sincronizada pelo cliente do OneDrive); `Gestao-Integracao` continua aceito. A pasta também recebe finanças (`grupo/financas/`, `times/<time>/financas/`), o Quadro por pessoa (`times/<time>/quadro/`), os post-its (`times/<time>/postits/`), as férias publicadas por outra solução (`times/<time>/ferias/<pessoa>-<computador>.json`; a solução não grava ali desde a 15.11) e os consolidados de cada grupo para a liderança (`grupos/<grupo>/financas/` e `grupos/<grupo>/ferias/`, [ADR-0025](adr/0025-consolidacao-em-niveis.md) e [ADR-0026](adr/0026-ferias-em-niveis.md)); a árvore completa está na [ADR-0004](adr/0004-troca-por-arquivos-na-pasta-sincronizada.md).
 
 ```
-Gestao-Integracao/                      (administrada pelo Fernando)
-  contrato/                             cópia de contratos/ (schemas, referência de cripto, validador), em claro
+Gestao-Compartilhado/                   (administrada pelo Fernando)
+  contrato/                             opcional: cópia de contratos/ para quem integra, em claro e sem dados
   central/catalogo-<slug>.json          a Central escreve; o time só lê
-  times/<slug>/status.json              o time escreve: backlog
-  times/<slug>/metricas.json            o time escreve: métricas do time
+  times/<slug>/status.json              o time escreve: backlog (a Central e o hub leem)
+  times/<slug>/metricas.json            o time escreve: métricas do time (a Central e o hub leem)
+  times/<slug>/quadro/<w>.json          cada pessoa do Quadro escreve o seu
+  times/<slug>/financas/plano.json      o responsável financeiro do time escreve
+  times/<slug>/postits/…                post-its do hub e recibos "Vi"
+  grupo/financas/diretriz-<slug>.json   o Finanças do Grupo escreve
+  grupos/<grupo>/financas/ e ferias/    consolidados do gestor para a liderança
 ```
 
 Cada time edita só a própria pasta `times/<slug>` e lê `central/`. O "barramento" é o cliente de sincronização do OneDrive que já existe nas máquinas. Em cada computador, a pasta fica marcada como **Sempre manter neste dispositivo**: com os "Arquivos sob demanda", um arquivo que está só na nuvem não chega às ferramentas (o assistente orienta isso desde a versão 2.5).
@@ -213,7 +221,7 @@ Implementação de referência, sem dependências: [`contratos/referencia/cripto
 
 Somente código, nome, responsável, horizonte, datas, features e fases das iniciativas daquele time. **Nunca** tarefas pessoais, notas de 1:1, fóruns, avaliações ou métricas por pessoa. Cada iniciativa pode ser marcada para não ser compartilhada.
 
-Documentos detalhados: `integracao-time/01-arquitetura-troca-de-arquivos.md` (arquitetura, conflitos, criptografia) e `integracao-time/05-conciliacao-publicacao-e-dicionario.md` (cadência e tela de compartilhamento).
+Documentos detalhados: [`contratos/01-arquitetura.md`](../contratos/01-arquitetura.md), [`02-criptografia.md`](../contratos/02-criptografia.md) e [`03-regras-de-escrita.md`](../contratos/03-regras-de-escrita.md). O desenho original (15/11/2026, com a tela de compartilhamento e a cadência) está em `integracao-time/01` e `05`, na pasta do projeto.
 
 ---
 
@@ -244,10 +252,10 @@ Cada métrica traz os dados **e** a descrição de como desenhá-los (tipo de va
 Visualizações suportadas: KPI, linha, barras, empilhado, área, histograma, medidor e tabela.
 
 ### 8.3 Métricas padrão
-`throughput` (vazão), `sprint_closed`, `lead_time`, `cycle_time`, `wip`, `wip_age`, `cfd` (fluxo cumulativo), `blocked_pct`, `predictability` (compromisso cumprido), `items_on_time` e `arrival_rate` (demanda que chega). Definições em `integracao-time/02-esquema-de-metricas.md`, seção 6.
+`throughput` (vazão), `sprint_closed`, `lead_time`, `cycle_time`, `wip`, `wip_age`, `cfd` (fluxo cumulativo), `blocked_pct`, `predictability` (compromisso cumprido), `items_on_time` e `arrival_rate` (demanda que chega). Definições no dicionário [`contratos/schemas/dicionario-metricas.json`](../contratos/schemas/dicionario-metricas.json) e no schema [`gestao-metricas-1`](../contratos/schemas/gestao-metricas-1.schema.json); o texto original está em `integracao-time/02-esquema-de-metricas.md`, seção 6 (pasta do projeto).
 
 ### 8.4 Dicionário e tolerância a erro
-- O dicionário `contrato/dicionario-metricas.json` casa as métricas recebidas pelo campo `standard`, por apelido ou por mapeamento manual feito na Central. Métricas casadas podem ser **comparadas entre times**.
+- O dicionário `contratos/schemas/dicionario-metricas.json` casa as métricas recebidas pelo campo `standard`, por apelido ou por mapeamento manual feito na Central. Métricas casadas podem ser **comparadas entre times**.
 - Métricas não mapeadas são aceitas e desenhadas no grupo "Outras métricas do time".
 - Cada métrica é tratada isoladamente: dado inválido vira lacuna, e o que não dá para desenhar vira um cartão "não foi possível exibir", sem quebrar a tela.
 
@@ -312,10 +320,11 @@ Faz parte do ecossistema uma **ferramenta de feedbacks**, usada para registrar e
 | `docs/passo-a-passo.md` (repositório) | Procedimentos: montar, cadastrar time, rotina, rituais, finanças, atualizar, trocar de computador, chave vazada |
 | `docs/adr/` (repositório) | Decisões de arquitetura (ADRs) e checklist para funcionalidades novas |
 | `docs/plano-financas.md` (repositório) | Finanças do grupo e do time, assistente, regras de sincronização |
-| `README.md` (repositório) | Como abrir a Central e lista de telas |
+| `README.md` (repositório) | A Remessa em uma página: como abrir, versões, telas da Central e onde está cada ferramenta |
+| `experimental/LEIA-ME.md` (repositório) | Fonte do visual experimental e como montar |
 | `docs/plano-ferias.md` (repositório) | Mapa de Férias: níveis, telas, decisões e contrato `gestao-ferias/1` |
 | `docs/plano-hub.md` (repositório) | Hub da solução e post-its para os times (contratos `gestao-postits/1` e `gestao-postits-vistos/1`) |
-| `docs/plano-v15.md` (repositório) | O que mudou na v15 e no Quadro 2.0 |
+| `docs/plano-v15.md` (repositório) | O que mudou na v15 e no Quadro 2.0 (plano; o estado atual está em `funcionalidades.md`) |
 | `docs/plano-v14.md` (repositório) | O que mudou na v14 |
 | `ferramenta-time/guia-adaptacao-times.md` | Quadro do Time (caminho A) e adaptação de ferramentas próprias (caminho B) |
 | `integracao-time/00-LEIA-ME.md` | Índice da integração e todas as decisões tomadas |
@@ -329,4 +338,4 @@ Faz parte do ecossistema uma **ferramenta de feedbacks**, usada para registrar e
 | `integracao-time/contrato/` | Versão de 15/11/2026 dos schemas de integração (histórico; vale `contratos/`) |
 | `integracao-time/exemplos/` | Exemplos em claro e cifrados (com chave de exemplo pública) |
 
-Os documentos de `integracao-time/` ficam na pasta do projeto. Para entregar a um time ou a outra solução: a pasta `contratos/` (e, para times de tarefas, o pacote 03), com a chave real enviada à parte.
+Os documentos de `integracao-time/` ficam só na pasta do projeto, como histórico: não estão no repositório nem no .zip. Para entregar a um time ou a outra solução: a pasta `contratos/` e o guia dos times (`docs/guia-adaptacao-times.md` no .zip), com a chave real enviada à parte.

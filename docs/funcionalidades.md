@@ -28,7 +28,7 @@ Dar a um gestor de vários times, e aos próprios times, **um lugar organizado p
 | Ferramenta | Arquivo | Para quem | Objetivo em uma frase |
 |---|---|---|---|
 | **Assistente** | `inicio.html` | Quem está começando ou trocando de computador | Montar a solução certa para o seu papel, já cifrada |
-| **Hub** | `hub.html` | Gestor (e quem quiser) | Tela inicial: abrir ferramentas, ver o que os times publicaram, deixar post-its |
+| **Hub** | `hub.html` | Gestor (e quem quiser) | Cockpit de gestão e tela inicial: uma senha para todas as ferramentas, o que pede atenção em todos os módulos, o que os times publicaram, post-its |
 | **Central de Gestão** | `gestao_pessoal_v15.html` | Gestor e liderança | Gestão pessoal, de pessoas, rituais e portfólio, com a página **Férias** (o Mapa de Férias do grupo, dentro da Central) |
 | **Quadro do Time** | `quadro_do_time_v1.html` (gerado por time) | Cada time | Kanban, backlog, sprints e métricas de fluxo do time |
 | **Finanças do Grupo** | `financas_grupo.html` | Gestor | Consolidar os planos financeiros dos times contra o orçamento |
@@ -188,7 +188,7 @@ Navegação em 9 páginas (teclas 1 a 9) e o botão **Importar e agentes** no to
 
 ---
 
-## 6. Quadro do Time (2.2)
+## 6. Quadro do Time (2.3)
 
 **Objetivo:** dar ao time uma ferramenta de fluxo pronta, que publica sozinha o que a Central precisa.
 
@@ -212,9 +212,9 @@ Cada pessoa grava o **próprio arquivo** (`quadro/<pessoa>-<computador>.json`) e
 
 ---
 
-## 7. Finanças (1.2: multianual e interface minimalista)
+## 7. Finanças (Finanças do Time 1.4 e do Grupo 1.6)
 
-As duas ferramentas de finanças planejam **vários anos**: o **ano base** é o ano em curso (meses fechados, realizado, alertas) e o **horizonte** é a lista de anos planejados. Um seletor de ano no topo troca o ano em exibição. As telas seguem o princípio de mais gráfico do que texto: **cards de leitura** (número, medidor e uma frase que interpreta, com o card principal em azul cheio), curva acumulada do ano e barras por categoria ou por time. Só tons de azul; vermelho apenas para o que passou do orçado ou do teto.
+Desde a 1.2, com interface minimalista e planejamento multianual, as duas ferramentas de finanças planejam **vários anos**: o **ano base** é o ano em curso (meses fechados, realizado, alertas) e o **horizonte** é a lista de anos planejados. Um seletor de ano no topo troca o ano em exibição. As telas seguem o princípio de mais gráfico do que texto: **cards de leitura** (número, medidor e uma frase que interpreta, com o card principal em azul cheio), curva acumulada do ano e barras por categoria ou por time. Só tons de azul; vermelho apenas para o que passou do orçado ou do teto.
 
 ### 7.1 Finanças do Time (`financas_time.html`)
 
@@ -326,14 +326,13 @@ Os exemplos são lidos, no teste da CI, pelas funções de leitura reais do hub,
 
 ## 11. Visual experimental (pasta `experimental/`)
 
-O pacote traz, numa pasta `experimental/`, **as mesmas sete ferramentas com um visual novo**, para experimentar sem trocar o que os times já usam ([ADR-0034](adr/0034-visual-experimental.md)).
+O pacote traz, numa pasta `experimental/`, **as mesmas seis ferramentas com um visual novo** (hub, assistente, Central com a página Férias, Quadro, Finanças do Grupo e do Time), para experimentar sem trocar o que os times já usam ([ADR-0034](adr/0034-visual-experimental.md)).
 
 | O que muda | Como fica |
 |---|---|
 | **Cores** | Azul de destaque `#1e4fc8`, fundo cinza-azulado (`#f4f7fc`, nunca branco puro), sinais da mesma família: carmim só para atraso, âmbar só para atenção, verde-azulado para "no prazo"; escuro em azul-noite |
 | **Trilho lateral** | Marinho (`#0b2155`), com o item ativo em branco sobre azul: a âncora da marca |
 | **Fontes** | DM Sans no texto e Plus Jakarta Sans nos títulos e números, embutidas no HTML (sem rede) |
-| **Ícone da aba** | Um por ferramenta (Central, Quadro, Hub, assistente, Finanças do Time e do Grupo, Mapa de Férias), para achar a aba certa entre muitas |
 | **Selo** | "Visual experimental" discreto no canto inferior direito, ao lado do botão de tema |
 
 | O que não muda | |
@@ -341,6 +340,7 @@ O pacote traz, numa pasta `experimental/`, **as mesmas sete ferramentas com um v
 | **Funcionalidades** | Todas as do main. A versão experimental é montada a partir das mesmas fontes a cada pacote (`tools/build_experimental.py`), e a CI roda nela os testes de ponta a ponta, do Mapa de Férias e do aviso sem pastas |
 | **Dados, senhas e chaves** | Os mesmos arquivos. Dá para abrir o mesmo arquivo de dados na versão atual e na experimental, e alternar quando quiser |
 | **Tema** | Claro, escuro ou automático, com a mesma escolha das outras ferramentas |
+| **Ícone da aba** | O mesmo da versão atual: um por ferramenta, com o lacre azul da Remessa ([ADR-0037](adr/0037-nome-remessa.md)) |
 
 **Como usar:** abra `experimental/hub.html` (ou `experimental/inicio.html`, que gera ferramentas já no visual novo). Para voltar, abra o `hub.html` da pasta principal. Passo a passo na [seção 15](passo-a-passo.md#15-experimentar-o-visual-novo).
 
