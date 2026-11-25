@@ -581,6 +581,25 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   ok(await pw.evaluate(() => gestaoSessao.recebida) === null, 'janela aberta sem clique num link do hub não recebe a senha');
   await pw.close();
   ok(await c.evaluate(() => gestaoSessao.recebida) === null && !(await c.evaluate(() => JSON.stringify(localStorage))).includes(SENHA2), 'senha da sessão só em memória (nada no localStorage)');
+  // Hub 2.0 (cockpit, ADR-0035): lê a Central só para leitura, resume status e métricas dos quadros e leva a senha própria da Central
+  ok(await h.evaluate(() => __hub.central.estado === 'ok' && !!__hub.central.resumo), 'cockpit lê o arquivo da Central da pasta pessoal com a senha da sessão: ' + await h.evaluate(() => __hub.central.estado + ' ' + __hub.central.arquivo));
+  ok(/Pede sua atenção/.test(await h.textContent('#app')) && /Visão geral/.test(await h.textContent('#app')) && /Sessão aberta/.test(await h.textContent('.hero')), 'cockpit mostra saudação, sessão aberta, visão geral e lista de atenção');
+  ok(/Nova remessa: /.test(await h.textContent('#app')) && await h.$('#topo .selo svg') && /Remessa · Hub/.test(await h.textContent('#topo')), 'hub mostra a marca Remessa e avisa a nova remessa de quem publicou nas últimas 24 h');
+  const rc = await h.evaluate(() => { const T = hojeISO(), d = n => { const x = new Date(T + 'T12:00:00'); x.setDate(x.getDate() + n); return x.toISOString().slice(0, 10); };
+    return __hub.resumoCentral({ people: [{ id: 'p1', name: 'Bia', cadence: 14 }], notes: [], ooSessions: [], teams: [],
+      tasks: [{ id: 'a', title: 'Revisar orçamento', end: d(-2), done: false }, { id: 'b', title: 'Hoje', end: T, done: false }, { id: 'c', title: 'Delegada', end: d(-1), assigneeId: 'p1', done: false, initiativeId: 'i1' }],
+      initiatives: [{ id: 'i1', name: 'Pix parcelado', bucket: 'now', phases: [] }],
+      ferias: { pessoas: [{ id: 'f1', nome: 'Caio', ativo: true }], ausencias: [{ pessoa: 'f1', inicio: d(-1), fim: d(3) }], unidades: [], retratos: {} } }); });
+  ok(rc.atrasadas === 1 && rc.hoje === 1 && rc.delegAtr === 1 && rc.inic.late === 1 && rc.oo.atrasados === 1 && rc.fora.length === 1 && rc.fora[0].nome === 'Caio', 'resumo da Central segue as regras da tela Hoje (atrasadas, delegadas, iniciativas, 1:1, fora hoje)');
+  const exSt = JSON.parse(fs.readFileSync(path.join(RAIZ, 'contratos/exemplos/conteudo/times/pagamentos/status.json'), 'utf8')), exMt = JSON.parse(fs.readFileSync(path.join(RAIZ, 'contratos/exemplos/conteudo/times/pagamentos/metricas.json'), 'utf8'));
+  const [rs, rm] = await h.evaluate(([a, b]) => [__hub.resumoStatus(a), __hub.resumoMetricas(b)], [exSt, exMt]);
+  ok(rs.total >= 1 && rs.bloqueios.length >= 1 && rm.ms.length >= 1 && rm.ms[0].v != null && rm.sprint === 'Sprint 21', 'cockpit resume o status (bloqueios) e as métricas de destaque que o quadro publica');
+  await h.evaluate(() => gestaoSessao.definir('senha-so-da-central', 'central'));
+  await h.evaluate(u => { const a = document.createElement('a'); a.id = 'sesLinkC'; a.href = u; a.target = '_blank'; a.rel = 'opener'; a.dataset.sessao = 'central'; a.textContent = 'c'; document.body.appendChild(a); }, SAIDA_URL + 'financas_grupo_gerado.html');
+  const [pcs] = await Promise.all([h.waitForEvent('popup'), h.click('#sesLinkC')]); await h.evaluate(() => document.getElementById('sesLinkC').remove()); await pcs.waitForLoadState();
+  await pcs.waitForFunction(() => window.gestaoSessao && window.gestaoSessao.recebida !== null, null, { timeout: 5000 }).catch(() => {});
+  ok(await pcs.evaluate(() => gestaoSessao.recebida) === 'senha-so-da-central', 'link com data-sessao="central" leva a senha própria da Central (digitada uma vez no hub)');
+  await pcs.close(); await h.evaluate(() => gestaoSessao.definir(null, 'central'));
   // Hub 1.3 da liderança: gestor par como unidade "grupo", lido de grupos/<grupo>/financas/plano.json
   const arqChefe = (await opfs(h, async () => listar('LocalChefe'))).find(n => /^financas-grupo-.*\.json$/.test(n));
   await h.evaluate(a => { window.__abrir = { dir: 'LocalChefe', arq: a }; }, arqChefe);

@@ -87,3 +87,15 @@ Em `contratos/schemas/` (antes `financas/contrato/`): `gestao-postits-1.schema.j
 - **Liderança:** ao importar do Finanças do Grupo da liderança, cada unidade do tipo `grupo` (um gestor par) entra no hub com `tipo: "grupo"`. O hub lê o consolidado que esse gestor publica em `grupos/<grupo>/financas/plano.json`, com a chave de finanças do grupo ([ADR-0025](adr/0025-consolidacao-em-niveis.md)). O card do gestor mostra o previsto, o orçado e o realizado do ano, sem post-its, e o painel vira **Visão dos gestores** quando todas as unidades são gestores.
 - **Uma senha por sessão:** o hub guarda em memória a senha com que abriu o próprio arquivo. As ferramentas abertas pelos links dele recebem essa senha uma vez ([ADR-0029](adr/0029-uma-senha-por-sessao.md)).
 - **Pasta pessoal:** o aviso de pasta errada só aparece quando o hub está na pasta compartilhada. Estar no OneDrive da pessoa é o recomendado ([ADR-0008](adr/0008-local-individual-comum-sincronizado.md)).
+
+## 12. Hub 2.0 (25/11/2026): cockpit de gestão e login único
+
+Decisão em [ADR-0035](adr/0035-hub-cockpit-de-gestao.md).
+
+- **Tela nova:** topo com menu dos módulos (Visão geral, Central, Quadros, Finanças, Férias, Times), faixa de saudação com a frase do dia e o número de pontos de atenção, **Visão geral** com cards de todos os módulos, **Pede sua atenção** (lista única, atrasado primeiro, cada item abre a ferramenta), **Pessoas** (fora hoje, próximos 14 dias, 1:1 em atraso), barras de finanças, **Módulos** com uma linha viva cada e **Times e post-its** com indicadores. Tela de entrada nova. Cores por variável: vale no claro, no escuro e no visual experimental.
+- **Leitura da Central:** `lerCentral()` acha o arquivo (o que a Central lembra em `gestao-local/handle`, o escolhido no hub em `hub-central` ou o `.json` da Central mais recente na pasta pessoal), decifra com a senha da sessão e guarda só `resumoCentral()`. Relê quando o arquivo muda (a cada 30 s, ao voltar para a aba e em **Atualizar**).
+- **Quadros:** `lerTime()` lê `status.json` e `metricas.json` com a chave de tarefas (`resumoStatus`, `resumoMetricas`).
+- **Login único:** sessão 1.1 (`definir(senha, 'central')` e `data-sessao="central"`), Central 15.10 entra direto, **Encerrar sessão** no topo.
+- **Testes:** seção 18 do `teste-e2e.js` (cockpit lê a Central, regras do resumo, status e métricas dos contratos de exemplo, senha própria da Central pelo link).
+
+![Cockpit de gestão](telas/hub-cockpit.png)

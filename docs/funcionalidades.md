@@ -1,6 +1,6 @@
 # Funcionalidades, usos e objetivos
 
-*25/11/2026 · Central v15.9, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.3, assistente 2.5, contratos 1.0 · visual experimental em `experimental/`*
+*25/11/2026 · Remessa · Central v15.11, Quadro do Time 2.3, Hub 2.1, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.3, assistente 2.6, contratos 1.0 · visual experimental em `experimental/`*
 
 Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. Para as regras técnicas por trás, veja as [decisões de arquitetura](adr/README.md). Para o caminho de quem usa, veja a [jornada do usuário](jornada-do-usuario.md) e o [passo a passo](passo-a-passo.md).
 
@@ -45,6 +45,8 @@ Todas têm, no topo, **Onde estou?** (qual ferramenta, qual arquivo, o que é lo
 ## 3. Assistente inicial (`inicio.html`)
 
 **Objetivo:** fazer a primeira montagem sem a pessoa precisar entender a arquitetura.
+
+**Por que Remessa (2.6).** As boas-vindas abrem com **Vamos montar sua Remessa** e um parágrafo que explica o nome: envelopes lacrados (cifrados com a chave do time) numa caixa postal (a pasta compartilhada); quando chega um envelope novo, a ferramenta avisa "nova remessa". O mesmo texto vai para o LEIA-ME da pasta compartilhada, o LEIA-ME de cada pasta em `para-os-times/` e o cartão "Onde fica cada coisa".
 
 **Como funciona (2.1).** A primeira tela explica a solução em quatro desenhos: o HTML é a ferramenta e o JSON é o caderno cifrado; a chave de integração é um idioma que só você e o time falam; quem lidera 1 time publica para o gestor, e quem lidera vários soma os times e publica para a liderança; a troca é por uma pasta sincronizada pelo OneDrive, onde cada pessoa grava só o próprio arquivo.
 
@@ -92,10 +94,16 @@ A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados
 
 ## 4. Hub da solução (`hub.html`)
 
-**Objetivo:** ser a porta de entrada diária e o canal de recados curtos para os times.
+**Objetivo:** ser o cockpit de gestão, a porta de entrada diária e o canal de recados curtos para os times.
 
 | Funcionalidade | Uso | Objetivo |
 |---|---|---|
+| **Cockpit de gestão (2.0)** | Saudação com a frase do dia e o número de pontos de atenção; cards de leitura de todos os módulos com a origem marcada (Central, Férias, Finanças, Quadros, Post-its) | Abrir o dia numa tela só ([ADR-0035](adr/0035-hub-cockpit-de-gestao.md)) |
+| **Marca e nova remessa (2.1)** | Ícone da Remessa (envelope com lacre) no topo e na entrada; na lista **Pede sua atenção**, "Nova remessa" para cada time que publicou backlog, métricas ou plano nas últimas 24 horas | Saber o que chegou na caixa postal sem abrir cada ferramenta ([ADR-0036](adr/0036-nome-remessa.md)) |
+| **Resumo da Central (2.0)** | Lê o arquivo da Central só para leitura, com a senha da sessão: meu dia (atrasadas, hoje, feitas), delegadas no prazo e a cobrar, iniciativas "agora" em dia, atrasadas ou em atenção, fora hoje e próximos 14 dias, 1:1 em atraso | Ver o que pede atenção sem abrir a Central |
+| **Pede sua atenção (2.0)** | Lista única de todos os módulos, atrasado primeiro: suas tarefas atrasadas, delegadas, iniciativas, 1:1, iniciativas e bloqueios dos quadros, time acima do orçado, time sem publicar há 7 dias. Cada item abre a ferramenta certa | Não deixar nada cair entre as ferramentas |
+| **Indicadores do time (2.0)** | No card do time: iniciativas do quadro no prazo, em atenção e atrasadas, bloqueios abertos e as métricas de destaque com a série (lidos de `status.json` e `metricas.json`) | Ver a saúde do time sem abrir o Quadro |
+| **Login único (2.0)** | Entra uma vez no hub; a Central entra direto (15.10) e as outras ferramentas abrem sem perguntar. Central com senha própria: digite uma vez no cockpit e ela vai junto nos links. **Encerrar sessão** no topo | Uma senha para navegar entre módulos |
 | **Lista de ferramentas** | Mostra os HTMLs da pasta local pelo título e abre cada um numa aba | Não procurar arquivos |
 | **Situação por time** | Quando o Quadro, o status, as métricas e o plano financeiro mudaram na pasta | Saber se o time está publicando |
 | **Post-its para os times** | Recado curto, com cor, destinatário opcional e "mostrar até"; um ou vários times | Comunicar sem reunião nem e-mail; aparece no topo do Quadro |
@@ -108,7 +116,7 @@ A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados
 
 ---
 
-## 5. Central de Gestão (v15.9)
+## 5. Central de Gestão (v15.10)
 
 **Férias dentro da Central (15.9, [ADR-0033](adr/0033-ferias-dentro-da-central.md)).** O Mapa de Férias do gestor e da liderança deixou de ser uma ferramenta à parte: é a página **Férias** (menu Pessoas), no mesmo arquivo e com a mesma senha da Central. Os times com pasta e as chaves de tarefas da Integração entram sozinhos; a pasta compartilhada é a da Integração. A página **Hoje** mostra quem está **fora hoje**.
 
@@ -179,6 +187,8 @@ Navegação em 9 páginas (teclas 1 a 9) e o botão **Importar e agentes** no to
 
 **Objetivo:** dar ao time uma ferramenta de fluxo pronta, que publica sozinha o que a Central precisa.
 
+Quando o catálogo da Central chega pela pasta, o Quadro avisa **Nova remessa da Central** (2.3.1).
+
 | Tela | Uso | Objetivo |
 |---|---|---|
 | **Quadro** | Kanban com raias (nenhuma, iniciativa ou pessoa), WIP visível, envelhecimento (âmbar acima da mediana, vermelho acima do p85), entrega recolhida, filtros, faixa de pulso, card em painel lateral (↑ ↓ Esc) | Ver gargalos e cards parados |
@@ -221,7 +231,11 @@ No topo: seletor de ano, **+ Adicionar ano…** (vazio ou copiando o previsto/or
 
 Alertas: categoria acima do teto do ano, mês sem lançamento, contrato vencendo em 60 dias, divergência entre previsto e realizado, ano futuro do horizonte ainda vazio.
 
+Quando chega uma diretriz nova do grupo, o Finanças do Time avisa **Nova remessa do grupo** (1.4.1).
+
 ### 7.2 Finanças do Grupo (`financas_grupo.html`)
+
+Planos dos times que chegaram e ainda não foram aplicados aparecem como **nova remessa** no aviso do Painel e em Planos recebidos (1.5.1).
 
 **Objetivo:** somar os planos dos times ano a ano, comparar com o orçamento aprovado e orientar os times, sem nunca alterar o número de um time.
 
