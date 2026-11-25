@@ -1,6 +1,6 @@
 # Funcionalidades, usos e objetivos
 
-*25/11/2026 · Central v15.11, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.4 (dentro da Central), assistente 2.6, contratos 1.0 · visual experimental em `experimental/`*
+*25/11/2026 · Central v15.11, Quadro do Time 2.3, Hub 2.0, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.4 (dentro da Central), assistente 2.6, contratos 1.0 · visual experimental em `experimental/`*
 
 Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. Para as regras técnicas por trás, veja as [decisões de arquitetura](adr/README.md). Para o caminho de quem usa, veja a [jornada do usuário](jornada-do-usuario.md) e o [passo a passo](passo-a-passo.md).
 
@@ -90,10 +90,15 @@ A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados
 
 ## 4. Hub da solução (`hub.html`)
 
-**Objetivo:** ser a porta de entrada diária e o canal de recados curtos para os times.
+**Objetivo:** ser o cockpit de gestão, a porta de entrada diária e o canal de recados curtos para os times.
 
 | Funcionalidade | Uso | Objetivo |
 |---|---|---|
+| **Cockpit de gestão (2.0)** | Saudação com a frase do dia e o número de pontos de atenção; cards de leitura de todos os módulos com a origem marcada (Central, Férias, Finanças, Quadros, Post-its) | Abrir o dia numa tela só ([ADR-0035](adr/0035-hub-cockpit-de-gestao.md)) |
+| **Resumo da Central (2.0)** | Lê o arquivo da Central só para leitura, com a senha da sessão: meu dia (atrasadas, hoje, feitas), delegadas no prazo e a cobrar, iniciativas "agora" em dia, atrasadas ou em atenção, fora hoje e próximos 14 dias, 1:1 em atraso | Ver o que pede atenção sem abrir a Central |
+| **Pede sua atenção (2.0)** | Lista única de todos os módulos, atrasado primeiro: suas tarefas atrasadas, delegadas, iniciativas, 1:1, iniciativas e bloqueios dos quadros, time acima do orçado, time sem publicar há 7 dias. Cada item abre a ferramenta certa | Não deixar nada cair entre as ferramentas |
+| **Indicadores do time (2.0)** | No card do time: iniciativas do quadro no prazo, em atenção e atrasadas, bloqueios abertos e as métricas de destaque com a série (lidos de `status.json` e `metricas.json`) | Ver a saúde do time sem abrir o Quadro |
+| **Login único (2.0)** | Entra uma vez no hub; a Central entra direto (15.10) e as outras ferramentas abrem sem perguntar. Central com senha própria: digite uma vez no cockpit e ela vai junto nos links. **Encerrar sessão** no topo | Uma senha para navegar entre módulos |
 | **Lista de ferramentas** | Mostra os HTMLs da pasta local pelo título e abre cada um numa aba | Não procurar arquivos |
 | **Situação por time** | Quando o Quadro, o status, as métricas e o plano financeiro mudaram na pasta | Saber se o time está publicando |
 | **Post-its para os times** | Recado curto, com cor, destinatário opcional e "mostrar até"; um ou vários times | Comunicar sem reunião nem e-mail; aparece no topo do Quadro |

@@ -1,6 +1,6 @@
 # ADR-0018 · Hub leve e separado do assistente
 
-**Status:** aceita · **Data:** 24/11/2026 (PR #11, #13) · **Origem:** `docs/plano-hub.md`
+**Status:** aceita, revista pela [ADR-0035](0035-hub-cockpit-de-gestao.md) (o hub passa a ler, sem gravar, a Central e os quadros) · **Data:** 24/11/2026 (PR #11, #13) · **Origem:** `docs/plano-hub.md`
 
 ## Decisão
 - `inicio.html` (assistente, ~600 KB) é de **uso único**: monta a solução, cria os primeiros arquivos cifrados e gera os HTMLs.

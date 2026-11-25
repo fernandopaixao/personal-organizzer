@@ -1,6 +1,6 @@
 # Contratos de integração · solução de gestão
 
-*Contratos 1.0 · 25/11/2026 · vale para Central v15.11, Quadro do Time 2.3, Hub 1.4, Finanças do Grupo 1.5, Finanças do Time 1.4 e Mapa de Férias 1.4 (dentro da Central)*
+*Contratos 1.0 · 25/11/2026 · vale para Central v15.11, Quadro do Time 2.3, Hub 2.0, Finanças do Grupo 1.5, Finanças do Time 1.4 e Mapa de Férias 1.4 (dentro da Central)*
 
 Esta pasta é **tudo o que outra solução precisa respeitar** para gravar arquivos que as ferramentas da solução leem e conciliam, até a visão da **liderança** (líder de líderes): o Hub da liderança, as Finanças do Grupo da liderança e a página Férias da Central. Vale para um time com ferramenta própria, um gestor par com planilha ou sistema próprio, um agente que gera arquivos, ou qualquer ferramenta nova.
 

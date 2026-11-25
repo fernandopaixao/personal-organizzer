@@ -77,3 +77,4 @@ Decisão do Fernando no card do thread: "Só o gestor cadastra". Registrada em [
 - **Todos os times da Central viram unidades**, com ou sem pasta e chave (o identificador cai para o nome do time quando não há slug). Time sem pasta não gera aviso.
 - **Consolidado:** as pessoas de cada time sobem com `people[].id` `<time>.<slug>` e `unit` do time, deduplicadas contra o que outra solução publicar em `times/<time>/ferias/`. Contrato `gestao-ferias/1` sem mudança.
 - **Teste:** seção 6 de `teste-ferias.js` (pessoas da Central por time, ausência de pessoa de time no consolidado, "3 fora", sem aviso de pasta) e `teste-e2e.js` (para-os-times sem `ferias.html`).
+- **Hub 2.0.1:** no card "Fora hoje" do cockpit, a pessoa de um time cadastrada pelo gestor aparece com o nome do time (antes aparecia como "você e diretos").
