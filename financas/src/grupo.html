@@ -21,7 +21,7 @@
    compara com o orçamento do grupo e publica diretrizes grupo/financas/diretriz-<time>.json.
    Orçamento aprovado, itens do grupo, chaves e versões ficam no arquivo local cifrado.
    ===================================================================== */
-const TOOL = 'financas-grupo', TOOL_NOME = 'Finanças do Grupo', TOOL_VERSION = '1.6.0';
+const TOOL = 'financas-grupo', TOOL_NOME = 'Finanças do Grupo', TOOL_VERSION = '1.7.0';
 const LOCAL_SCHEMA = 'gestao-financas-local/1', PLANO_SCHEMA = 'gestao-financas-plano/1', DIRETRIZ_SCHEMA = 'gestao-financas-diretriz/1';
 const PRESET = /*FING-PRESET*/null/*FIM-FING-PRESET*/;
 // Onde o arquivo desta ferramenta ficou neste navegador (gravado pelo assistente ou na última abertura).
@@ -597,33 +597,18 @@ async function telaInicial(msg = '') {
     <div class="row"><div class="logo" style="margin:0">GRP</div><div><h2 style="margin:0">Finanças do Grupo</h2><div class="small muted">Consolidado dos planos financeiros dos times</div></div></div>
     ${msg ? `<div class="banner warn" style="margin-top:12px">${esc(msg)}</div>` : ''}
     ${avisoFS()}
-    ${botaoUltimo(ult)}
-    <p class="lbl" style="margin-top:20px">É a primeira vez?</p>
+    <div id="passoArquivo"></div>
+    <p class="lbl" style="margin-top:22px">É a primeira vez?</p>
     <button class="opt" id="iNovo"><b>Criar o arquivo do grupo</b><span>Pasta pessoal só sua (de preferência no seu OneDrive), senha guardada no cofre, depois times e chaves.</span></button>
-    <p class="lbl" style="margin-top:16px">Já tenho o arquivo</p>
-    <button class="opt" id="iAbrir"><b>Abrir a pasta local</b><span>Onde está <span class="code">financas-grupo-&lt;nome&gt;.json</span>.</span></button>
   </div></div>`;
-  $('#iNovo').onclick = criarDlg; $('#iAbrir').onclick = abrirPasta; ligarUltimo(ult, abrirArquivo, telaInicial);
+  $('#iNovo').onclick = criarDlg; ligarEntrada(ENTRADA_CFG, ult);
 }
-async function abrirPasta() {
-  let h; try { h = await escolherPasta('fin-local'); } catch (e) { return; }
-  if (!await permissao(h)) return;
-  const cand = [];
-  for await (const [n, f] of h.entries()) if (f.kind === 'file' && /^financas-grupo-.*\.json$/.test(n)) { try { const o = JSON.parse(await (await f.getFile()).text()); if (o.schema === LOCAL_ENC && o.app === TOOL) cand.push(n); } catch {} }
-  if (!cand.length) return telaInicial('Não encontrei um arquivo das Finanças do Grupo nesta pasta.');
-  let nome = cand[0];
-  if (cand.length > 1) { const r = await perguntar('Qual arquivo?', cand.map((n, i) => `<button class="opt" data-r="${i}"><b class="code">${esc(n)}</b></button>`).join(''), [['no', 'Cancelar']]); if (r == null || r === 'no') return; nome = cand[+r]; }
-  await abrirArquivo(h, nome);
-}
-async function abrirArquivo(h, nome) {
-  const texto = await lerTexto(h, nome);
-  for (let i = 0; i < 3 && !db; i++) {
-    const s = await pedirSenhaDlg('Senha das Finanças do Grupo', i > 0, { sessao: true }); if (s == null) return;
-    try { const r = await decifrarLocal(texto, s); db = normalizar(r.dados); ctx = r.ctx; dirLocal = h; arquivo = nome; } catch (e) { if (e.code !== 'SENHA') return telaInicial(e.message); }
-  }
-  if (!db) return telaInicial('Senha incorreta três vezes.');
-  await aposAbrir();
-}
+const ENTRADA_CFG = {
+  pastaId: 'fin-local', padrao: /^financas-grupo-.*\.json$/, exemplo: '<span class="code">financas-grupo-&lt;nome&gt;.json</span>',
+  nada: 'Não encontrei um arquivo das Finanças do Grupo nesta pasta',
+  usar: async (h, nome, r) => { db = normalizar(r.dados); ctx = r.ctx; dirLocal = h; arquivo = nome; await aposAbrir(); }
+};
+async function abrirArquivo(h, nome) { escolherNaEntrada(h, nome); await telaInicial(); }
 async function aposAbrir() {
   render();
   if (await lembreteTesteSenha(db.seg, ctx)) agendarSalvar();

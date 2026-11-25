@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Remessa · apresentação</title>
+<style>
+:root{--bv:#223ad2;--bv-deep:#14257f;--bv-soft:#eef1fd;--bv-line:#d5dbf7;--ink:#161a23;--muted:#6f7689;--faint:#aab0bf;--line:#eceef4;--bg:#f7f8fb;--card:#fff;--ok:#1f7a4d;--title:"Plus Jakarta Sans",Inter,"Segoe UI",system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.6 Inter,"Segoe UI",system-ui,sans-serif;color:var(--ink);background:var(--bg)}
+a{color:var(--bv)}
+.cap{position:relative;color:#fff;padding:72px 20px 84px;overflow:hidden;background:
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='96' viewBox='0 0 120 96'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.07' stroke-width='1.4'%3E%3Crect x='14' y='18' width='40' height='26' rx='3'/%3E%3Cpath d='M15 20l19 13l19-13'/%3E%3Crect x='74' y='60' width='32' height='21' rx='3'/%3E%3Cpath d='M75 62l15 10l15-10'/%3E%3C/g%3E%3C/svg%3E"),
+  radial-gradient(900px 520px at 12% 18%,rgba(77,134,255,.38),transparent 62%),linear-gradient(135deg,#0b2155 0%,#122f80 58%,#1e4fc8 100%)}
+.in{max-width:1040px;margin:0 auto}
+.cap .logo{display:flex;align-items:center;gap:14px}.cap .logo svg{width:64px;height:64px;border-radius:16px;outline:1px solid rgba(255,255,255,.2);filter:drop-shadow(0 8px 22px rgba(0,0,0,.3))}
+.cap h1{font:700 44px/1.05 var(--title);letter-spacing:-.03em;margin:0}
+.cap .tag{font-size:20px;line-height:1.45;max-width:640px;margin:22px 0 0;color:rgba(255,255,255,.9)}
+.cap .sub{max-width:640px;margin:12px 0 0;color:rgba(255,255,255,.75)}
+.cap .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}.cap .chips span{padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);font-size:13px}
+section{padding:56px 20px}section:nth-of-type(even){background:var(--card)}
+h2{font:700 28px/1.2 var(--title);letter-spacing:-.02em;margin:0 0 6px}
+.lead{color:var(--muted);max-width:720px;margin:0 0 28px}
+.fluxo svg{width:100%;height:auto;display:block}
+.fluxo .s1{stroke:var(--bv);fill:none;stroke-width:1.6}.fluxo .sl{stroke:#c7ccda;fill:none;stroke-width:1.4}.fluxo .f1{fill:var(--bv-soft)}.fluxo .fw{fill:var(--card)}
+.fluxo .t{fill:var(--ink);font:600 12px Inter,"Segoe UI",sans-serif}.fluxo .tm{fill:var(--muted);font:11px Inter,"Segoe UI",sans-serif}
+.ana{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:22px}
+.ana div{border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:var(--card);font-size:13.5px;color:var(--muted)}.ana b{display:block;color:var(--ink);font-size:15px;margin-bottom:2px}
+.mods{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.mod{border:1px solid var(--line);border-radius:16px;padding:16px;background:var(--card);display:flex;gap:12px;align-items:flex-start}
+.mod svg{width:44px;height:44px;flex:none;border-radius:11px}.mod b{display:block;font-size:15px}.mod span{font-size:13px;color:var(--muted)}.mod em{display:block;font-style:normal;font-size:11.5px;color:var(--faint);margin-top:4px}
+.papeis{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.papel{border-left:3px solid var(--bv);padding:4px 0 4px 14px}.papel b{display:block}.papel span{font-size:13.5px;color:var(--muted)}
+.seg{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.seg div{background:var(--bv-soft);border-radius:14px;padding:14px 16px;font-size:13.5px}.seg b{display:block;font-size:15px;margin-bottom:2px}
+ol.passos{counter-reset:p;list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+ol.passos li{counter-increment:p;border:1px solid var(--line);border-radius:14px;padding:16px;background:var(--card);font-size:13.5px;color:var(--muted)}
+ol.passos li::before{content:counter(p);display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--bv);color:#fff;font-weight:700;margin-bottom:8px}
+ol.passos b{display:block;color:var(--ink);font-size:15px}
+footer{padding:28px 20px 40px;color:var(--muted);font-size:12.5px;text-align:center}
+.code{font-family:ui-monospace,Consolas,monospace;font-size:.92em}
+@media (max-width:760px){.cap h1{font-size:34px}.cap .tag{font-size:17px}.ana{grid-template-columns:1fr 1fr}ol.passos{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="cap"><div class="in">
+  <div class="logo"><!--ICONE:remessa--><h1>Remessa</h1></div>
+  <p class="tag">Gestão de times sem servidor: as ferramentas trocam envelopes lacrados numa caixa postal.</p>
+  <p class="sub">Tarefas, pessoas, rituais, iniciativas, quadros dos times, finanças e férias, em arquivos HTML que abrem com dois cliques. Cada pessoa guarda o que é seu num arquivo cifrado com a sua senha; com os times vai só o necessário, lacrado com a chave de cada time.</p>
+  <div class="chips"><span>Sem servidor e sem instalação</span><span>Tudo cifrado (AES-256)</span><span>Pasta do OneDrive como caixa postal</span><span>Um .zip autossuficiente</span></div>
+</div></header>
+
+<section><div class="in">
+  <h2>Por que Remessa</h2>
+  <p class="lead">A solução funciona como um serviço de correio. Cada ferramenta põe o que tem para contar num envelope, lacra com a chave do time e deixa na caixa postal. Só quem tem a chave rompe o lacre e lê. Quando chega um envelope novo, a ferramenta avisa: <b>nova remessa</b>.</p>
+  <div class="fluxo"><svg viewBox="0 0 960 190" role="img" aria-label="Da mesa à caixa postal e ao destinatário">
+    <rect class="s1 f1" x="10" y="40" width="200" height="110" rx="14"/><text class="t" x="110" y="68" text-anchor="middle">Sua mesa</text><text class="tm" x="110" y="88" text-anchor="middle">pasta pessoal no seu OneDrive</text><text class="tm" x="110" y="106" text-anchor="middle">arquivos cifrados com a SUA senha</text><text class="tm" x="110" y="124" text-anchor="middle">ninguém mais abre</text>
+    <path class="sl" d="M218 95H300" stroke-dasharray="5 5"/><path class="sl" d="M294 89l7 6l-7 6"/><text class="tm" x="259" y="84" text-anchor="middle">publica</text>
+    <g transform="translate(310 62)"><rect class="sl fw" width="96" height="64" rx="7"/><path class="sl" d="M3 5l45 32l45-32"/><circle cx="48" cy="40" r="11" fill="#4d86ff" stroke="#fff" stroke-width="2"/></g><text class="t" x="358" y="150" text-anchor="middle">envelope lacrado</text><text class="tm" x="358" y="166" text-anchor="middle">cifrado com a chave do time</text>
+    <path class="sl" d="M414 95H496" stroke-dasharray="5 5"/><path class="sl" d="M490 89l7 6l-7 6"/>
+    <rect class="s1" x="506" y="30" width="200" height="130" rx="14"/><text class="t" x="606" y="56" text-anchor="middle">Caixa postal</text><text class="tm" x="606" y="74" text-anchor="middle">pasta sincronizada do OneDrive</text>
+    <rect class="sl fw" x="530" y="88" width="72" height="22" rx="5"/><text class="tm" x="566" y="103" text-anchor="middle">times/…</text><rect class="sl fw" x="610" y="88" width="72" height="22" rx="5"/><text class="tm" x="646" y="103" text-anchor="middle">central/…</text>
+    <rect class="sl fw" x="530" y="116" width="72" height="22" rx="5"/><text class="tm" x="566" y="131" text-anchor="middle">grupo/…</text><rect class="sl fw" x="610" y="116" width="72" height="22" rx="5"/><text class="tm" x="646" y="131" text-anchor="middle">grupos/…</text>
+    <path class="sl" d="M714 95H796" stroke-dasharray="5 5"/><path class="sl" d="M790 89l7 6l-7 6"/><text class="tm" x="755" y="84" text-anchor="middle">nova remessa</text>
+    <g transform="translate(818 50)"><circle class="s1 f1" cx="52" cy="22" r="16"/><path class="s1 f1" d="M24 76a28 24 0 0 1 56 0z"/></g><text class="t" x="870" y="150" text-anchor="middle">quem tem a chave</text><text class="tm" x="870" y="166" text-anchor="middle">abre e lê</text>
+  </svg></div>
+  <div class="ana">
+    <div><b>Mesa</b>A sua pasta pessoal. O que está nela não vai pelo correio.</div>
+    <div><b>Envelope</b>Um arquivo cifrado com um único remetente. Ninguém sobrescreve o de ninguém.</div>
+    <div><b>Lacre</b>A chave do time. Sem ela, o envelope é só letras embaralhadas.</div>
+    <div><b>Caixa postal</b>A pasta do SharePoint, sincronizada pelo OneDrive em cada computador.</div>
+  </div>
+</div></section>
+
+<section><div class="in">
+  <h2>As ferramentas</h2>
+  <p class="lead">Cada uma é um arquivo HTML que abre com dois cliques no Edge ou no Chrome. Os dados ficam fora do HTML, então trocar de versão é só trocar o arquivo.</p>
+  <div class="mods">
+    <div class="mod"><!--ICONE:hub--><div><b>Hub</b><span>O cockpit do dia: o que pede atenção em todos os módulos, os times e os post-its.</span><em>v{{V:hub}}</em></div></div>
+    <div class="mod"><!--ICONE:central--><div><b>Central de Gestão</b><span>Tarefas, delegadas, 1:1, feedback, férias, iniciativas, fóruns e times.</span><em>v{{V:central}}</em></div></div>
+    <div class="mod"><!--ICONE:quadro--><div><b>Quadro do Time</b><span>Kanban, backlog, sprints e métricas de fluxo. Publica o status para a Central.</span><em>v{{V:quadro}}</em></div></div>
+    <div class="mod"><!--ICONE:financas-time--><div><b>Finanças do Time</b><span>Lançamentos, contratos, plano mensal e multianual, previsão rolante.</span><em>v{{V:financas-time}}</em></div></div>
+    <div class="mod"><!--ICONE:financas-grupo--><div><b>Finanças do Grupo</b><span>Soma os planos dos times, compara com o orçamento e publica diretrizes.</span><em>v{{V:financas-grupo}}</em></div></div>
+    <div class="mod"><!--ICONE:inicio--><div><b>Início</b><span>O assistente: monta tudo de uma vez, já com as chaves, e explica onde fica cada coisa.</span><em>v{{V:inicio}}</em></div></div>
+  </div>
+</div></section>
+
+<section><div class="in">
+  <h2>Quem usa</h2>
+  <p class="lead">A mesma pessoa pode ter mais de um papel.</p>
+  <div class="papeis">
+    <div class="papel"><b>Gestor de vários times</b><span>Hub, Central e Finanças do Grupo. Vê portfólio, fluxo, férias e dinheiro dos times sem pedir relatório.</span></div>
+    <div class="papel"><b>Responsável pelo time</b><span>Quadro do Time e, se cuidar do dinheiro, Finanças do Time. Publica para o gestor sem trabalho extra.</span></div>
+    <div class="papel"><b>Pessoa do time</b><span>Quadro do Time: move os próprios cards e lê os post-its do gestor.</span></div>
+    <div class="papel"><b>Liderança</b><span>Recebe o consolidado de finanças e de férias de cada gestor, em quantos níveis forem precisos.</span></div>
+  </div>
+</div></section>
+
+<section><div class="in">
+  <h2>Segurança</h2>
+  <p class="lead">Nada sai do seu computador além dos envelopes lacrados que você publica.</p>
+  <div class="seg">
+    <div><b>Cifrado sempre</b>AES-GCM de 256 bits; a chave vem da senha em 600 mil rodadas (PBKDF2). Não existe arquivo sem senha.</div>
+    <div><b>Uma chave por time</b>Diferente da sua senha, enviada por mensagem direta. Vazou? Troca e a antiga para de abrir na hora.</div>
+    <div><b>Um remetente por envelope</b>Cada pessoa grava só o próprio arquivo e lê o dos outros: sem sobrescrita e sem conflito.</div>
+    <div><b>Sem rede</b>Nenhuma chamada a servidor. As fontes, os ícones e as ferramentas embutidas vão dentro dos HTMLs.</div>
+  </div>
+</div></section>
+
+<section><div class="in">
+  <h2>Como começar</h2>
+  <p class="lead">Leva poucos minutos e não precisa colar chave nenhuma.</p>
+  <ol class="passos">
+    <li><b>Descompacte o .zip</b>Numa pasta só sua, de preferência dentro do seu OneDrive.</li>
+    <li><b>Abra o inicio.html</b>Use <b style="display:inline">Estou com sorte</b>: ele gera as suas ferramentas, as dos times e todas as chaves.</li>
+    <li><b>Aponte a caixa postal</b>Sincronize a pasta do SharePoint, marque "Sempre manter neste dispositivo" e aponte. Pronto.</li>
+  </ol>
+</div></section>
+
+<footer>Remessa · Hub {{V:hub}} · Central {{V:central}} · Quadro {{V:quadro}} · Finanças do Grupo {{V:financas-grupo}} e do Time {{V:financas-time}} · Início {{V:inicio}} · documentação em <span class="code">docs/</span></footer>
+</body>
+</html>

@@ -20,7 +20,7 @@
    Dados individuais (lançamentos, notas, cenários) ficam no arquivo local cifrado.
    Só o plano agregado vai para a pasta sincronizada: times/<time>/financas/plano.json
    ===================================================================== */
-const TOOL = 'financas-time', TOOL_NOME = 'Finanças do Time', TOOL_VERSION = '1.4.1';
+const TOOL = 'financas-time', TOOL_NOME = 'Finanças do Time', TOOL_VERSION = '1.5.0';
 const LOCAL_SCHEMA = 'gestao-financas-local/1', PLANO_SCHEMA = 'gestao-financas-plano/1', DIRETRIZ_SCHEMA = 'gestao-financas-diretriz/1';
 const PRESET = /*FIN-PRESET*/null/*FIM-FIN-PRESET*/;
 // Onde o arquivo desta ferramenta ficou neste navegador (gravado pelo assistente ou na última abertura).
@@ -722,36 +722,21 @@ async function telaInicial(msg = '') {
     ${PRESET ? `<div class="banner" style="margin-top:16px">Pré-configurado pelo gestor para o time <b>${esc(PRESET.team?.nome)}</b>.${PRESET.chave ? ' A chave do time vem junto: você vai guardá-la no cofre no primeiro uso.' : ''}</div>` : ''}
     ${msg ? `<div class="banner warn" style="margin-top:12px">${esc(msg)}</div>` : ''}
     ${avisoFS()}
-    ${botaoUltimo(ult)}
-    <p class="lbl" style="margin-top:20px">É a primeira vez?</p>
+    <div id="passoArquivo"></div>
+    <p class="lbl" style="margin-top:22px">É a primeira vez?</p>
     <button class="opt" id="iNovo"><b>Criar o arquivo do time</b><span>Passo a passo: pasta local, senha guardada no cofre e o primeiro plano.</span></button>
-    <p class="lbl" style="margin-top:16px">Já tenho o arquivo</p>
-    <button class="opt" id="iAbrir"><b>Abrir a pasta local</b><span>Escolha a pasta deste computador onde está o arquivo <span class="code">financas-&lt;time&gt;.json</span>.</span></button>
     <p class="small muted" style="margin-top:16px">Seus dados ficam num arquivo cifrado neste computador. Só o plano agregado vai para a pasta sincronizada pelo OneDrive.</p>
   </div></div>`;
   $('#iNovo').onclick = criarDlg;
-  $('#iAbrir').onclick = abrirPasta; ligarUltimo(ult, abrirArquivo, telaInicial);
+  ligarEntrada(ENTRADA_CFG, ult);
 }
-async function abrirPasta() {
-  let h; try { h = await escolherPasta('fin-local'); } catch (e) { if (e.name !== 'AbortError') toast(e.message); return; }
-  if (!await permissao(h)) return;
-  const cand = [];
-  for await (const [n, f] of h.entries()) if (f.kind === 'file' && /^financas-.*\.json$/.test(n)) { try { const o = JSON.parse(await (await f.getFile()).text()); if (o.schema === LOCAL_ENC && o.app === TOOL) cand.push(n); } catch {} }
-  if (!cand.length) return telaInicial('Não encontrei um arquivo das Finanças do Time nesta pasta.');
-  let nome = cand[0];
-  if (cand.length > 1) { const r = await perguntar('Qual arquivo?', cand.map((n, i) => `<button class="opt" data-r="${i}"><b class="code">${esc(n)}</b></button>`).join(''), [['no', 'Cancelar']]); if (r == null || r === 'no') return; nome = cand[+r]; }
-  await abrirArquivo(h, nome);
-}
-async function abrirArquivo(h, nome) {
-  const texto = await lerTexto(h, nome);
-  for (let i = 0; i < 3; i++) {
-    const s = await pedirSenhaDlg('Senha das Finanças do Time', i > 0, { sessao: true }); if (s == null) return;
-    try { const r = await decifrarLocal(texto, s); db = normalizar(r.dados); ctx = r.ctx; dirLocal = h; arquivo = nome; break; }
-    catch (e) { if (e.code !== 'SENHA') return telaInicial(e.message); }
-  }
-  if (!db) return telaInicial('Senha incorreta três vezes.');
-  await aposAbrir();
-}
+const ENTRADA_CFG = {
+  pastaId: 'fin-local', padrao: /^financas-.*\.json$/, exemplo: '<span class="code">financas-&lt;time&gt;.json</span>',
+  nada: 'Não encontrei um arquivo das Finanças do Time nesta pasta',
+  usar: async (h, nome, r) => { db = normalizar(r.dados); ctx = r.ctx; dirLocal = h; arquivo = nome; await aposAbrir(); }
+};
+// Abrir um arquivo conhecido = deixá-lo escolhido na tela de entrada; a senha vem no passo 2.
+async function abrirArquivo(h, nome) { escolherNaEntrada(h, nome); await telaInicial(); }
 async function aposAbrir() {
   await carregarChaves();
   render();

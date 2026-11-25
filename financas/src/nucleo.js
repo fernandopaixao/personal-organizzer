@@ -78,11 +78,74 @@ async function abrirLembradoSePuder(chave, abrir) {
   try { if (!await permissao(u.dir, false) || !await lerTexto(u.dir, u.arquivo)) return false; } catch { return false; }
   await abrir(u.dir, u.arquivo); return true;
 }
-// Botão "Abrir <arquivo>" da tela inicial (um clique libera a pasta quando a permissão expirou).
-function botaoUltimo(u) {
-  return u ? `<button class="opt" id="iUlt" style="margin-top:18px"><b>Abrir ${esc(u.arquivo)}</b><span>Pasta pessoal <span class="code">${esc(u.dir.name)}</span>, usada por último neste computador.</span></button>` : '';
+/* ---------- entrada em dois passos: primeiro o arquivo, depois a senha (ADR-0037, item 8) ----------
+   A tela inicial de cada ferramenta põe <div id="passoArquivo"></div> e chama ligarEntrada(cfg, ultimo).
+   cfg = { pastaId, padrao (RegExp do nome), exemplo (HTML do nome), nada (aviso), usar(dir, nome, r, senha) }.
+   O último arquivo usado vem escolhido; "Escolher outro" abre o seletor na pasta dele. A senha só aparece no passo 2.
+   Se a ferramenta foi aberta pelo hub ou pela Central, a senha da sessão é tentada sozinha. */
+const ENTRADA = { sel: null, cfg: null };
+const ICO_ARQ = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><rect x="9" y="12" width="6" height="5" rx="1"/><path d="M10.5 12v-1.5a1.5 1.5 0 0 1 3 0V12"/></svg>';
+// Deixa um arquivo escolhido para a próxima tela inicial (abertura automática, "abrir o existente").
+function escolherNaEntrada(dir, arquivo) { ENTRADA.sel = { dir, arquivo, lembrado: true }; }
+function ligarEntrada(cfg, ult) {
+  ENTRADA.cfg = cfg;
+  if (!ENTRADA.sel && ult?.dir && ult.arquivo) ENTRADA.sel = { dir: ult.dir, arquivo: ult.arquivo, lembrado: true };
+  desenharEntrada();
 }
-function ligarUltimo(u, abrir, tela) { const b = document.getElementById('iUlt'); if (b && u) b.onclick = async () => { if (!await permissao(u.dir)) return tela('Sem permissão na pasta.'); await abrir(u.dir, u.arquivo); }; }
+function desenharEntrada(aviso = '') {
+  const el = document.getElementById('passoArquivo'); if (!el) return;
+  const { sel, cfg } = ENTRADA, outros = sel?.cand?.length > 1;
+  el.innerHTML = `<div class="ent-passo"><span class="ent-n">1</span><div class="ent-c"><span class="ent-t">Arquivo</span>
+      ${sel ? `<div class="ent-arq">${ICO_ARQ}<div><b class="code">${esc(sel.arquivo)}</b><span>Pasta <span class="code">${esc(sel.dir.name)}</span>${sel.lembrado ? ', usada por último neste computador' : ''}</span></div></div>
+        ${outros ? `<div class="ent-lista">${sel.cand.map(n => `<label><input type="radio" name="entQual" value="${esc(n)}" ${n === sel.arquivo ? 'checked' : ''}><span class="code">${esc(n)}</span></label>`).join('')}</div>` : ''}`
+      : `<div class="ent-vazio">Nenhum arquivo escolhido. O seu é o ${cfg.exemplo}, na sua pasta pessoal.</div>`}
+      ${aviso ? `<div class="ent-msg">${esc(aviso)}</div>` : ''}
+      <div class="ent-acoes"><button class="btn${sel ? '' : ' pri'}" id="iAbrir">${sel ? 'Escolher outro arquivo' : 'Escolher o arquivo'}</button></div>
+      <div class="ent-dica">${sel ? 'Abre na pasta deste arquivo.' : 'O navegador pede a pasta onde ele está, para guardar as cópias de segurança ao lado.'}</div></div></div>
+    <div class="ent-passo${sel ? '' : ' off'}"><span class="ent-n">2</span><div class="ent-c"><label class="ent-t" for="pw">Senha</label>
+      <div class="ent-campo"><input type="password" id="pw" autocomplete="current-password" ${sel ? '' : 'disabled'}><button class="btn pri" id="entOk" ${sel ? '' : 'disabled'}>Abrir</button></div>
+      <div class="ent-msg" id="entMsg"></div>
+      <div class="ent-dica">${sel ? 'Esqueceu? A senha está no seu cofre de senhas. Sem ela não há como abrir o arquivo.' : 'Aparece depois de escolher o arquivo.'}</div></div></div>`;
+  $('#iAbrir', el).onclick = escolherArquivoNaPasta;
+  $('#entOk', el).onclick = enviarSenhaEntrada;
+  $('#pw', el).onkeydown = e => { if (e.key === 'Enter') enviarSenhaEntrada(); };
+  el.querySelectorAll('[name="entQual"]').forEach(r => r.onchange = () => { ENTRADA.sel.arquivo = r.value; desenharEntrada(); });
+  if (sel) { setTimeout(() => document.getElementById('pw')?.focus(), 30); sessaoNaEntrada(); }
+}
+async function escolherArquivoNaPasta() {
+  const { cfg, sel } = ENTRADA;
+  let h; try { h = await escolherPasta(cfg.pastaId, sel?.dir); } catch (e) { if (e.name !== 'AbortError') toast(e.message); return; }
+  if (!await permissao(h)) return desenharEntrada('O navegador não liberou a pasta.');
+  const cand = [];
+  for await (const [n, f] of h.entries()) if (f.kind === 'file' && cfg.padrao.test(n)) { try { const o = JSON.parse(await (await f.getFile()).text()); if (o.schema === LOCAL_ENC && o.app === TOOL) cand.push(n); } catch {} }
+  if (!cand.length) return desenharEntrada(cfg.nada + ` (pasta ${h.name}).`);
+  cand.sort();
+  ENTRADA.sel = { dir: h, arquivo: cand.includes(sel?.arquivo) ? sel.arquivo : cand[0], cand };
+  desenharEntrada();
+}
+function msgEntrada(t, cor = '') { const m = document.getElementById('entMsg'); if (m) { m.textContent = t; m.style.color = cor; } const p = document.getElementById('pw'); if (p && !cor) p.select(); }
+async function enviarSenhaEntrada() {
+  const { sel, cfg } = ENTRADA, b = document.getElementById('entOk'); if (!sel || !b || b.disabled) return;
+  const s = document.getElementById('pw').value; if (!s) return msgEntrada('Digite a senha.');
+  b.disabled = true; b.textContent = 'Abrindo…';
+  try {
+    if (!await permissao(sel.dir)) return msgEntrada('O navegador não liberou a pasta. Clique em Abrir de novo ou escolha o arquivo outra vez.');
+    const texto = await lerTexto(sel.dir, sel.arquivo); if (!texto) return msgEntrada('Não achei o arquivo nesta pasta. Escolha o arquivo de novo.');
+    let r; try { r = await decifrarLocal(texto, s); } catch (e) { return msgEntrada(e.code === 'SENHA' ? (ENTRADA.daSessao ? 'A senha da sessão (do hub ou da Central) não abre este arquivo. Digite a senha dele.' : 'Senha incorreta.') : e.message); }
+    finally { ENTRADA.daSessao = false; }
+    ENTRADA.sel = null;
+    await cfg.usar(sel.dir, sel.arquivo, r, s);
+  } finally { if (b.isConnected) { b.disabled = false; b.textContent = 'Abrir'; } }
+}
+// Senha da sessão (hub ou Central): com a pasta já liberada, abre sozinha; se não, fica preenchida para um clique.
+async function sessaoNaEntrada() {
+  const pw = document.getElementById('pw'); if (!ENTRADA.sel || !pw || pw.disabled) return;
+  const s = window.gestaoSessao?.usar(); if (!s) return;
+  pw.value = s; ENTRADA.daSessao = true;
+  if (await permissao(ENTRADA.sel.dir, false)) return enviarSenhaEntrada();
+  msgEntrada('Senha da sessão preenchida. Clique em Abrir para o navegador liberar a pasta.', 'var(--muted)');
+}
+window.addEventListener('gestao-sessao', sessaoNaEntrada);
 
 /* ---------------------- identidade do computador (dispositivo) ---------------------- */
 // Identificador aleatório e curto, guardado no navegador. Junto com a pessoa forma o "dono"
@@ -231,9 +294,9 @@ function semFS() {
 }
 // Quem chama trata AbortError como "cancelou". Quando o navegador recusa (função ausente ou página
 // dentro de outra), a explicação aparece aqui e o erro sobe como AbortError, sem aviso repetido.
-async function escolherPasta(id) {
+async function escolherPasta(id, startIn) {
   if (semFS()) throw new DOMException('Sem acesso a pastas', 'AbortError');
-  try { return await window.showDirectoryPicker({ id, mode: 'readwrite' }); }
+  try { return await window.showDirectoryPicker(startIn ? { id, mode: 'readwrite', startIn } : { id, mode: 'readwrite' }); }
   catch (e) {
     if (e.name !== 'SecurityError') throw e;
     const d = diagnosticoFS({ api: false });

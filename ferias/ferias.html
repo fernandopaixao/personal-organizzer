@@ -458,6 +458,84 @@ svg.ch{max-height:280px}
   };
 })();
 </script>
+<script id="marca">
+/* ---------- Remessa · tela de entrada comum (ADR-0037) ----------
+   Injetado pelo build no <head> de todas as ferramentas. Traz também o estilo da entrada em dois passos
+   (.ent-*: 1 arquivo, 2 senha), usado pela Central e pelo núcleo das outras ferramentas. Quando a tela de entrada aparece
+   (.lock da Central, .entrada do hub, .welcome das outras), põe o fundo da marca, o painel
+   da Remessa à esquerda com o nome e a versão da ferramenta, e desloca a caixa para a direita.
+   Não mexe em nada quando a ferramenta está embutida em outra (Férias dentro da Central). */
+(() => {
+  const SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#0b2155"/><rect x="5" y="9" width="22" height="15" rx="2" fill="#fff"/><path d="M5.8 10l10.2 7.6L26.2 10" fill="none" stroke="#0b2155" stroke-width="1.6" stroke-linejoin="round"/><circle cx="16" cy="17.6" r="3.2" fill="#4d86ff" stroke="#fff" stroke-width="1.1"/></svg>';
+  const PADRAO = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='96' viewBox='0 0 120 96'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.07' stroke-width='1.4'%3E%3Crect x='14' y='18' width='40' height='26' rx='3'/%3E%3Cpath d='M15 20l19 13l19-13'/%3E%3Crect x='74' y='60' width='32' height='21' rx='3'/%3E%3Cpath d='M75 62l15 10l15-10'/%3E%3C/g%3E%3C/svg%3E\")";
+  const CSS = `
+.rm-tela{--rm-larg:520px;position:relative;min-height:100vh;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,var(--rm-larg));align-items:center;gap:clamp(24px,6vw,96px);padding:6vh clamp(20px,8vw,140px) max(6vh,56px) clamp(20px,7vw,120px);box-sizing:border-box;
+  background:${PADRAO},radial-gradient(900px 520px at 12% 18%,rgba(77,134,255,.38),transparent 62%),linear-gradient(135deg,#0b2155 0%,#122f80 58%,#1e4fc8 100%);background-color:#0b2155}
+.lock.rm-tela{position:fixed;inset:0;place-items:center normal;overflow:auto}
+.rm-tela>.rm-lado{color:#fff;max-width:440px;align-self:center}
+.rm-lado .rm-logo{display:flex;align-items:center;gap:12px;margin-bottom:18px}.rm-lado .rm-logo svg{width:52px;height:52px;flex:none;filter:drop-shadow(0 6px 18px rgba(0,0,0,.25));border-radius:13px;outline:1px solid rgba(255,255,255,.18)}
+.rm-lado .rm-nome{font:700 30px/1.1 var(--title,inherit);letter-spacing:-.02em;color:#fff}
+.rm-lado .rm-frase{margin:0 0 18px;font-size:15px;line-height:1.55;color:rgba(255,255,255,.86)}
+.rm-rodape{position:absolute;left:0;right:0;bottom:16px;text-align:center;font-size:12px;color:rgba(255,255,255,.62);letter-spacing:.01em}.rm-rodape b{color:#fff;font-weight:650}
+.rm-tela .lockcard .appver{display:none}
+.rm-lado .rm-ver{display:inline-flex;gap:8px;align-items:center;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);font-size:12.5px;color:#fff}
+.rm-lado .rm-ver b{font-weight:700}.rm-lado .rm-sob{display:block;margin-top:14px;font-size:12px;color:rgba(255,255,255,.6)}
+.rm-lado a{color:#fff;text-decoration:underline;text-underline-offset:3px}
+.rm-tela>.welcome,.rm-tela>.entrada,.rm-tela>.lockcard{margin:0!important;width:100%;max-width:none!important;box-sizing:border-box}
+.rm-tela>.entrada,.rm-tela>.lockcard,.rm-tela>.welcome>.card,.rm-tela>.welcome>:only-child{box-shadow:0 30px 80px rgba(3,10,40,.45)!important}
+.rm-tela>.welcome{padding:0!important}
+.lock.rm-tela{--rm-larg:420px}.rm-tela.rm-hub{--rm-larg:480px}
+.rm-tela>.entrada{display:block!important;padding:0!important}.rm-tela>.entrada>.vitrine{display:none!important}
+.rm-lado .rm-extra h2{font:600 19px/1.3 var(--title,inherit);color:#fff;margin:22px 0 6px}.rm-lado .rm-extra p{margin:0 0 12px;color:rgba(255,255,255,.82);font-size:13.5px;line-height:1.55}.rm-lado .rm-extra ul{list-style:none;margin:0 0 18px;padding:0;display:grid;gap:9px}.rm-lado .rm-extra li{display:flex;gap:10px;font-size:13px;color:rgba(255,255,255,.9)}.rm-lado .rm-extra li svg{width:18px;height:18px;flex:none;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;margin-top:1px}
+.ent-passo{display:grid;grid-template-columns:26px minmax(0,1fr);gap:12px;margin-top:18px;transition:opacity .2s}
+.ent-n{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--bv,#223ad2);color:#fff;font:700 12.5px/1 var(--title,inherit)}
+.ent-passo.off{opacity:.5}.ent-passo.off .ent-n{background:var(--faint,#aab0bf)}
+.ent-c{min-width:0}.ent-t{display:block;font-size:11px;font-weight:650;letter-spacing:.06em;text-transform:uppercase;color:var(--muted,#6f7689);margin:5px 0 8px}
+.ent-arq{display:flex;align-items:center;gap:10px;border:1.5px solid var(--bv-line,#d5dbf7);background:var(--bv-soft,#f2f4fd);border-radius:12px;padding:10px 12px}
+.ent-arq svg{width:24px;height:24px;flex:none;color:var(--bv,#223ad2)}.ent-arq b{display:block;font-size:13.5px;overflow-wrap:anywhere}.ent-arq span{display:block;font-size:11.5px;color:var(--muted,#6f7689)}
+.ent-vazio{border:1.5px dashed var(--line,#e1e4ec);border-radius:12px;padding:10px 12px;font-size:12.5px;color:var(--muted,#6f7689)}
+.ent-lista{display:grid;gap:6px;margin-top:8px}.ent-lista label{display:flex;gap:8px;align-items:center;font-size:12.5px;border:1px solid var(--line,#e1e4ec);border-radius:10px;padding:7px 10px;cursor:pointer}.ent-lista label:has(input:checked){border-color:var(--bv,#223ad2);background:var(--bv-soft,#f2f4fd)}
+.ent-acoes{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.ent-campo{display:flex;gap:8px}.ent-campo input{flex:1;min-width:0;border:1px solid var(--line,#e1e4ec);border-radius:10px;padding:8px 10px;background:var(--card,#fff);color:inherit;outline:none;font-size:13px}
+.ent-campo input:focus{border-color:var(--bv,#223ad2);box-shadow:0 0 0 3px var(--bv-soft,#f2f4fd)}.ent-campo input:disabled{background:transparent}
+.ent-dica{font-size:11.5px;color:var(--muted,#6f7689);margin-top:6px}.ent-msg{font-size:12px;margin-top:6px;color:var(--late,#c4574f);min-height:0}
+@media (max-width:900px){.rm-rodape{position:static;grid-column:1/-1;padding-top:8px}.rm-tela{grid-template-columns:1fr;padding:5vh 16px;gap:22px;align-content:start}.rm-tela>.rm-lado{max-width:none}.rm-lado .rm-frase{display:none}.rm-tela>.welcome,.rm-tela>.entrada,.rm-tela>.lockcard{justify-self:stretch;width:auto}}`;
+  const versao = () => { try { if (typeof APP_VERSION !== 'undefined') return APP_VERSION; } catch {} try { if (typeof TOOL_VERSION !== 'undefined') return TOOL_VERSION; } catch {} return ''; };
+  const ferramenta = () => (document.title || '').split('·')[0].trim();
+  const lado = () => {
+    const d = document.createElement('div'); d.className = 'rm-lado';
+    d.innerHTML = `<div class="rm-logo">${SVG}<span class="rm-nome">Remessa</span></div>
+      <p class="rm-frase">Envelopes lacrados numa caixa postal. Cada ferramenta guarda o que é seu num arquivo cifrado com a sua senha e troca com os times só o necessário, lacrado com a chave de cada time.</p>
+      <span class="rm-sob">Nada sai do seu computador · <a href="apresentacao.html" target="_blank" rel="noopener">Conheça a Remessa</a></span>`;
+    return d;
+  };
+  // A versão aparece uma vez só, no rodapé da tela de entrada.
+  const rodape = () => {
+    const d = document.createElement('div'); d.className = 'rm-rodape';
+    const v = versao(), n = ferramenta().replace(/[<&>]/g, '');
+    d.innerHTML = `${n}${v ? ` · versão <b>${String(v).replace(/[<&>]/g, '')}</b>` : ''} · Remessa`;
+    return d;
+  };
+  const embutido = () => window.top !== window || document.documentElement.classList.contains('embutido') || document.body?.classList.contains('embutido') || !!document.querySelector('.embutido');
+  function aplicar() {
+    if (embutido()) return;
+    const lock = document.querySelector('.lock:not(.rm-tela)');
+    if (lock && lock.querySelector('.lockcard')) { lock.classList.add('rm-tela'); lock.insertBefore(lado(), lock.firstChild); lock.appendChild(rodape()); }
+    for (const el of document.querySelectorAll('.welcome, .entrada')) {
+      if (el.parentElement?.classList.contains('rm-tela')) continue;
+      const w = document.createElement('div'), l = lado(), v = el.querySelector(':scope > .vitrine'); w.className = 'rm-tela';
+      // Hub: o texto da vitrine (cockpit e módulos) vai para o painel da Remessa; a caixa fica só com as opções.
+      if (v) { w.classList.add('rm-hub'); const x = document.createElement('div'); x.className = 'rm-extra'; x.append(...[...v.children].filter(c => !c.classList.contains('selo')).map(c => c.cloneNode(true))); l.querySelector('.rm-frase').replaceWith(x); }
+      el.replaceWith(w); w.append(l, el, rodape());
+    }
+  }
+  function iniciar() {
+    if (!document.getElementById('rm-css')) { const s = document.createElement('style'); s.id = 'rm-css'; s.textContent = CSS; document.head.appendChild(s); }
+    aplicar(); new MutationObserver(aplicar).observe(document.body, { childList: true, subtree: true });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar); else iniciar();
+})();
+</script>
 <link rel="icon" id="favicon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%230b2155%22/%3E%3Ccircle cx=%2214%22 cy=%2214%22 r=%224.6%22 fill=%22%234d86ff%22/%3E%3Cg stroke=%22%23fff%22 stroke-width=%222.1%22 stroke-linecap=%22round%22%3E%3Cpath d=%22M14 4.5v2.4M14 21.1v2.4M4.5 14h2.4M21.1 14h2.4M7.3 7.3l1.7 1.7M19 19l1.4 1.4M7.3 20.7l1.7-1.7M19 9l1.7-1.7%22/%3E%3C/g%3E%3Ccircle cx=%2225.5%22 cy=%2225.5%22 r=%224%22 fill=%22%234d86ff%22 stroke=%22%230b2155%22 stroke-width=%221.6%22/%3E%3C/svg%3E">
 </head>
 <body>
@@ -544,11 +622,74 @@ async function abrirLembradoSePuder(chave, abrir) {
   try { if (!await permissao(u.dir, false) || !await lerTexto(u.dir, u.arquivo)) return false; } catch { return false; }
   await abrir(u.dir, u.arquivo); return true;
 }
-// Botão "Abrir <arquivo>" da tela inicial (um clique libera a pasta quando a permissão expirou).
-function botaoUltimo(u) {
-  return u ? `<button class="opt" id="iUlt" style="margin-top:18px"><b>Abrir ${esc(u.arquivo)}</b><span>Pasta pessoal <span class="code">${esc(u.dir.name)}</span>, usada por último neste computador.</span></button>` : '';
+/* ---------- entrada em dois passos: primeiro o arquivo, depois a senha (ADR-0037, item 8) ----------
+   A tela inicial de cada ferramenta põe <div id="passoArquivo"></div> e chama ligarEntrada(cfg, ultimo).
+   cfg = { pastaId, padrao (RegExp do nome), exemplo (HTML do nome), nada (aviso), usar(dir, nome, r, senha) }.
+   O último arquivo usado vem escolhido; "Escolher outro" abre o seletor na pasta dele. A senha só aparece no passo 2.
+   Se a ferramenta foi aberta pelo hub ou pela Central, a senha da sessão é tentada sozinha. */
+const ENTRADA = { sel: null, cfg: null };
+const ICO_ARQ = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><rect x="9" y="12" width="6" height="5" rx="1"/><path d="M10.5 12v-1.5a1.5 1.5 0 0 1 3 0V12"/></svg>';
+// Deixa um arquivo escolhido para a próxima tela inicial (abertura automática, "abrir o existente").
+function escolherNaEntrada(dir, arquivo) { ENTRADA.sel = { dir, arquivo, lembrado: true }; }
+function ligarEntrada(cfg, ult) {
+  ENTRADA.cfg = cfg;
+  if (!ENTRADA.sel && ult?.dir && ult.arquivo) ENTRADA.sel = { dir: ult.dir, arquivo: ult.arquivo, lembrado: true };
+  desenharEntrada();
 }
-function ligarUltimo(u, abrir, tela) { const b = document.getElementById('iUlt'); if (b && u) b.onclick = async () => { if (!await permissao(u.dir)) return tela('Sem permissão na pasta.'); await abrir(u.dir, u.arquivo); }; }
+function desenharEntrada(aviso = '') {
+  const el = document.getElementById('passoArquivo'); if (!el) return;
+  const { sel, cfg } = ENTRADA, outros = sel?.cand?.length > 1;
+  el.innerHTML = `<div class="ent-passo"><span class="ent-n">1</span><div class="ent-c"><span class="ent-t">Arquivo</span>
+      ${sel ? `<div class="ent-arq">${ICO_ARQ}<div><b class="code">${esc(sel.arquivo)}</b><span>Pasta <span class="code">${esc(sel.dir.name)}</span>${sel.lembrado ? ', usada por último neste computador' : ''}</span></div></div>
+        ${outros ? `<div class="ent-lista">${sel.cand.map(n => `<label><input type="radio" name="entQual" value="${esc(n)}" ${n === sel.arquivo ? 'checked' : ''}><span class="code">${esc(n)}</span></label>`).join('')}</div>` : ''}`
+      : `<div class="ent-vazio">Nenhum arquivo escolhido. O seu é o ${cfg.exemplo}, na sua pasta pessoal.</div>`}
+      ${aviso ? `<div class="ent-msg">${esc(aviso)}</div>` : ''}
+      <div class="ent-acoes"><button class="btn${sel ? '' : ' pri'}" id="iAbrir">${sel ? 'Escolher outro arquivo' : 'Escolher o arquivo'}</button></div>
+      <div class="ent-dica">${sel ? 'Abre na pasta deste arquivo.' : 'O navegador pede a pasta onde ele está, para guardar as cópias de segurança ao lado.'}</div></div></div>
+    <div class="ent-passo${sel ? '' : ' off'}"><span class="ent-n">2</span><div class="ent-c"><label class="ent-t" for="pw">Senha</label>
+      <div class="ent-campo"><input type="password" id="pw" autocomplete="current-password" ${sel ? '' : 'disabled'}><button class="btn pri" id="entOk" ${sel ? '' : 'disabled'}>Abrir</button></div>
+      <div class="ent-msg" id="entMsg"></div>
+      <div class="ent-dica">${sel ? 'Esqueceu? A senha está no seu cofre de senhas. Sem ela não há como abrir o arquivo.' : 'Aparece depois de escolher o arquivo.'}</div></div></div>`;
+  $('#iAbrir', el).onclick = escolherArquivoNaPasta;
+  $('#entOk', el).onclick = enviarSenhaEntrada;
+  $('#pw', el).onkeydown = e => { if (e.key === 'Enter') enviarSenhaEntrada(); };
+  el.querySelectorAll('[name="entQual"]').forEach(r => r.onchange = () => { ENTRADA.sel.arquivo = r.value; desenharEntrada(); });
+  if (sel) { setTimeout(() => document.getElementById('pw')?.focus(), 30); sessaoNaEntrada(); }
+}
+async function escolherArquivoNaPasta() {
+  const { cfg, sel } = ENTRADA;
+  let h; try { h = await escolherPasta(cfg.pastaId, sel?.dir); } catch (e) { if (e.name !== 'AbortError') toast(e.message); return; }
+  if (!await permissao(h)) return desenharEntrada('O navegador não liberou a pasta.');
+  const cand = [];
+  for await (const [n, f] of h.entries()) if (f.kind === 'file' && cfg.padrao.test(n)) { try { const o = JSON.parse(await (await f.getFile()).text()); if (o.schema === LOCAL_ENC && o.app === TOOL) cand.push(n); } catch {} }
+  if (!cand.length) return desenharEntrada(cfg.nada + ` (pasta ${h.name}).`);
+  cand.sort();
+  ENTRADA.sel = { dir: h, arquivo: cand.includes(sel?.arquivo) ? sel.arquivo : cand[0], cand };
+  desenharEntrada();
+}
+function msgEntrada(t, cor = '') { const m = document.getElementById('entMsg'); if (m) { m.textContent = t; m.style.color = cor; } const p = document.getElementById('pw'); if (p && !cor) p.select(); }
+async function enviarSenhaEntrada() {
+  const { sel, cfg } = ENTRADA, b = document.getElementById('entOk'); if (!sel || !b || b.disabled) return;
+  const s = document.getElementById('pw').value; if (!s) return msgEntrada('Digite a senha.');
+  b.disabled = true; b.textContent = 'Abrindo…';
+  try {
+    if (!await permissao(sel.dir)) return msgEntrada('O navegador não liberou a pasta. Clique em Abrir de novo ou escolha o arquivo outra vez.');
+    const texto = await lerTexto(sel.dir, sel.arquivo); if (!texto) return msgEntrada('Não achei o arquivo nesta pasta. Escolha o arquivo de novo.');
+    let r; try { r = await decifrarLocal(texto, s); } catch (e) { return msgEntrada(e.code === 'SENHA' ? (ENTRADA.daSessao ? 'A senha da sessão (do hub ou da Central) não abre este arquivo. Digite a senha dele.' : 'Senha incorreta.') : e.message); }
+    finally { ENTRADA.daSessao = false; }
+    ENTRADA.sel = null;
+    await cfg.usar(sel.dir, sel.arquivo, r, s);
+  } finally { if (b.isConnected) { b.disabled = false; b.textContent = 'Abrir'; } }
+}
+// Senha da sessão (hub ou Central): com a pasta já liberada, abre sozinha; se não, fica preenchida para um clique.
+async function sessaoNaEntrada() {
+  const pw = document.getElementById('pw'); if (!ENTRADA.sel || !pw || pw.disabled) return;
+  const s = window.gestaoSessao?.usar(); if (!s) return;
+  pw.value = s; ENTRADA.daSessao = true;
+  if (await permissao(ENTRADA.sel.dir, false)) return enviarSenhaEntrada();
+  msgEntrada('Senha da sessão preenchida. Clique em Abrir para o navegador liberar a pasta.', 'var(--muted)');
+}
+window.addEventListener('gestao-sessao', sessaoNaEntrada);
 
 /* ---------------------- identidade do computador (dispositivo) ---------------------- */
 // Identificador aleatório e curto, guardado no navegador. Junto com a pessoa forma o "dono"
@@ -697,9 +838,9 @@ function semFS() {
 }
 // Quem chama trata AbortError como "cancelou". Quando o navegador recusa (função ausente ou página
 // dentro de outra), a explicação aparece aqui e o erro sobe como AbortError, sem aviso repetido.
-async function escolherPasta(id) {
+async function escolherPasta(id, startIn) {
   if (semFS()) throw new DOMException('Sem acesso a pastas', 'AbortError');
-  try { return await window.showDirectoryPicker({ id, mode: 'readwrite' }); }
+  try { return await window.showDirectoryPicker(startIn ? { id, mode: 'readwrite', startIn } : { id, mode: 'readwrite' }); }
   catch (e) {
     if (e.name !== 'SecurityError') throw e;
     const d = diagnosticoFS({ api: false });
@@ -1038,7 +1179,7 @@ const pctTxt = (a, b) => b ? Math.round(a / b * 100) + '%' : '—';
      (a mesma chave GK1.<grupo>-fin-… das Finanças do Grupo serve). Funciona em quantos níveis forem precisos.
    Notas das ausências ficam só no arquivo local cifrado. Conteúdo comum: gestao-ferias/1.
    ===================================================================== */
-const TOOL = 'ferias', TOOL_NOME = 'Mapa de Férias', TOOL_VERSION = '1.4.0';
+const TOOL = 'ferias', TOOL_NOME = 'Mapa de Férias', TOOL_VERSION = '1.5.0';
 const LOCAL_SCHEMA = 'gestao-ferias-local/1', FERIAS_SCHEMA = 'gestao-ferias/1';
 const PRESET = /*FERIAS-PRESET*/null/*FIM-FERIAS-PRESET*/;
 // Dentro da Central de Gestão (ADR-0033): a Central abre esta ferramenta num quadro da própria página e entrega
@@ -1721,38 +1862,22 @@ async function telaInicial(msg = '') {
     ${PRESET?.unidade ? `<div class="banner" style="margin-top:16px">Pré-configurado para <b>${esc(PRESET.unidade.nome)}</b>.${PRESET.chave ? ' A chave do time vem junto: você vai guardá-la no cofre ao criar o arquivo.' : ''}</div>` : ''}
     ${msg ? `<div class="banner warn" style="margin-top:12px">${esc(msg)}</div>` : ''}
     ${avisoFS()}
-    ${botaoUltimo(ult)}
-    <p class="lbl" style="margin-top:20px">É a primeira vez?</p>
+    <div id="passoArquivo"></div>
+    <p class="lbl" style="margin-top:22px">É a primeira vez?</p>
     <button class="opt" id="iTime"><b>Sou de um time</b><span>Cadastro as minhas férias (e, se quiser, as do time). Elas somam com as dos colegas e chegam ao gestor.</span></button>
     <button class="opt" id="iGrupo"><b>Sou gestor ou liderança</b><span>Vejo os dias com mais e menos gente fora em todos os meus times e grupos, cadastro as minhas e as dos diretos e publico para a minha liderança.</span></button>
-    <p class="lbl" style="margin-top:16px">Já tenho o arquivo</p>
-    <button class="opt" id="iAbrir"><b>Abrir a pasta local</b><span>A pasta deste computador onde está o arquivo <span class="code">ferias-&lt;nome&gt;.json</span>.</span></button>
     <p class="small muted" style="margin-top:16px">Apoio para a visão do grupo: não substitui a ferramenta oficial de férias da empresa. Tudo fica cifrado; as notas nunca saem deste computador.</p>
   </div></div>`;
   $('#iTime').onclick = () => criarDlg('time');
   $('#iGrupo').onclick = () => criarDlg('grupo');
-  $('#iAbrir').onclick = abrirPasta; ligarUltimo(ult, abrirArquivo, telaInicial);
+  ligarEntrada(ENTRADA_CFG, ult);
 }
-async function abrirPasta() {
-  let h; try { h = await escolherPasta('ferias-local'); } catch (e) { if (e.name !== 'AbortError') toast(e.message); return; }
-  if (!await permissao(h)) return;
-  const cand = [];
-  for await (const [n, f] of h.entries()) if (f.kind === 'file' && /^ferias-.*\.json$/.test(n)) { try { const o = JSON.parse(await (await f.getFile()).text()); if (o.schema === LOCAL_ENC && o.app === TOOL) cand.push(n); } catch {} }
-  if (!cand.length) return telaInicial('Não encontrei um arquivo do Mapa de Férias nesta pasta.');
-  let nome = cand[0];
-  if (cand.length > 1) { const r = await perguntar('Qual arquivo?', cand.map((n, i) => `<button class="opt" data-r="${i}"><b class="code">${esc(n)}</b></button>`).join(''), [['no', 'Cancelar']]); if (r == null || r === 'no') return; nome = cand[+r]; }
-  await abrirArquivo(h, nome);
-}
-async function abrirArquivo(h, nome) {
-  const texto = await lerTexto(h, nome);
-  for (let i = 0; i < 3; i++) {
-    const s = await pedirSenhaDlg('Senha do Mapa de Férias', i > 0, { sessao: true }); if (s == null) return;
-    try { const r = await decifrarLocal(texto, s); db = normalizar(r.dados); ctx = r.ctx; dirLocal = h; arquivo = nome; break; }
-    catch (e) { if (e.code !== 'SENHA') return telaInicial(e.message); }
-  }
-  if (!db) return telaInicial('Senha incorreta três vezes.');
-  await aposAbrir();
-}
+const ENTRADA_CFG = {
+  pastaId: 'ferias-local', padrao: /^ferias-.*\.json$/, exemplo: '<span class="code">ferias-&lt;nome&gt;.json</span>',
+  nada: 'Não encontrei um arquivo do Mapa de Férias nesta pasta',
+  usar: async (h, nome, r) => { db = normalizar(r.dados); ctx = r.ctx; dirLocal = h; arquivo = nome; await aposAbrir(); }
+};
+async function abrirArquivo(h, nome) { escolherNaEntrada(h, nome); await telaInicial(); }
 async function aposAbrir() {
   await carregarChaves();
   render();
