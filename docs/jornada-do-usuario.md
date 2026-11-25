@@ -1,6 +1,6 @@
 # Jornada do usuário
 
-*25/11/2026 · como cada papel conhece, monta, usa e mantém a Remessa · Central v15.14, Hub 2.3, assistente 2.8*
+*25/11/2026 · como cada papel conhece, monta, usa e mantém a Remessa · Central v15.15, Hub 2.3, assistente 2.8*
 
 A solução tem quatro papéis. A mesma pessoa pode ter mais de um (o gestor costuma ser também o dono das finanças do grupo; o líder do time costuma ser também o responsável financeiro). Quem integra uma **outra solução** pelos contratos tem a jornada própria na [seção 9](#9-jornada-de-quem-integra-outra-solução).
 
@@ -41,7 +41,7 @@ A solução se chama **Remessa**: as ferramentas trocam envelopes lacrados (cifr
 | **8. Conduzir fóruns** | Abre o fórum, discute a pauta, registra decisões e compromissos, compartilha os acordos | Central (Fóruns) | Pauta não discutida rola para a próxima; compromissos viram tarefas | |
 | **9. Reunião de status** | Conduz a reunião do time com o status já preenchido pelo que o time publicou | Central (Times) | Downstream abaixo de cada feature; bloco Finanças quando o time passou do teto; nada da Central muda sem aceite | |
 | **10. Conciliar** | Une épicos do time a iniciativas, liga itens a features | Central (Integração) | Uniões podem ser desfeitas; códigos antigos viram apelidos | |
-| **11. Usar agentes** | Depois de reuniões, copia o prompt certo, roda no agente, importa o JSON | Central (Importar e agentes) | Prévia antes de aplicar; reimportar não duplica | |
+| **11. Usar agentes** | Depois de reuniões, copia o prompt certo, roda no agente, importa o JSON | Central (Importar e agentes) | Prévia antes de aplicar, com linhas que podem ser descartadas uma a uma; reimportar não duplica | |
 | **12. Recados** | Deixa post-its para um ou vários times e vê quem leu | Hub | Cifrados por time; um time não vê o post-it do outro | Atraso normal da sincronização |
 | **13. Finanças** | Lê os planos novos dos times, revisa a prévia, olha o consolidado contra o orçamento, publica diretrizes, fecha versões | Finanças do Grupo (Painel) | Um time com problema nunca derruba a soma; "Saúde da soma" aponta o que falta; consolidado ano a ano | Informar orçamento e tetos de cada ano do horizonte |
 | **14. Subir para a liderança** | Publica o consolidado para a liderança e recebe o teto dela | Finanças do Grupo (Ajustes › Nível acima) | Só sobe o total por ano e por unidade, cifrado com a chave da liderança | A liderança precisa ler a mesma pasta compartilhada |

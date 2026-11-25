@@ -249,8 +249,18 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   await c.fill('[data-upd=i1]', 'Homologação começou'); await c.keyboard.press('Enter'); await c.waitForTimeout(150);
   ok(await c.evaluate(() => initById('i1').updates.length === 1), 'atualização de iniciativa no formulário no lugar');
   await c.evaluate(() => { $('#importDialog').showModal(); $('#impText').value = JSON.stringify({ schema: 'gestao-import/3', tasks: [{ title: 'A' }], updates: [{ initiative: 'Não existe', text: 'y' }] }); analyzeImport(); });
-  ok(await c.evaluate(() => $('#impGo').textContent === 'Importar 1 item' && document.querySelectorAll('#impPrev .ipv button').length === 4), 'prévia da importação com contadores e verbo no botão');
-  await c.evaluate(() => { $('#importDialog').close(); go('home'); });
+  ok(await c.evaluate(() => $('#impGo').textContent === 'Importar 1 item' && document.querySelectorAll('#impPrev .ipv button').length === 5), 'prévia da importação com contadores e verbo no botão');
+  // v15.15: descartar linhas na prévia antes de confirmar (a tarefa descartada não entra; a pessoa criada por ela também não)
+  await c.evaluate(() => { $('#impText').value = JSON.stringify({ schema: 'gestao-import/3', tasks: [{ title: 'Fica' }, { title: 'Sai', assignee: 'Pessoa Nova Descartada' }, { title: 'Sai também' }] }); impDrop = new Set(); analyzeImport(); });
+  ok(await c.evaluate(() => $('#impGo').textContent === 'Importar 4 itens' && document.querySelectorAll('#impPrev [data-impdrop]').length === 3), 'prévia mostra uma caixa por linha que pode ser descartada (a pessoa criada pela tarefa não tem caixa)');
+  await c.click('#impPrev [data-impdrop="tasks:1"]'); await c.waitForTimeout(100);
+  ok(await c.evaluate(() => $('#impGo').textContent === 'Importar 2 itens' && /Descartada/.test($('#impPrev').textContent) && document.querySelector('#impPrev .ipv .drop b').textContent === '1' && !document.querySelector('#impPrev [data-impdrop="tasks:1"]').checked), 'desmarcar uma linha tira ela (e a pessoa que ela criaria) da importação, e ela continua na prévia como descartada');
+  await c.click('#impPrev [data-act=imp-dropgrp]'); await c.waitForTimeout(100);
+  ok(await c.evaluate(() => $('#impGo').textContent === 'Nada para importar' && $('#impGo').disabled), '"Descartar todos" do grupo deixa nada para importar');
+  await c.click('#impPrev [data-act=imp-dropgrp]'); await c.click('#impPrev [data-impdrop="tasks:2"]'); await c.waitForTimeout(100);
+  const antesImp = await c.evaluate(() => db.tasks.length); await c.click('#impGo'); await c.waitForTimeout(150);
+  ok(await c.evaluate((n) => db.tasks.length === n + 2 && db.tasks.some(t => t.title === 'Fica') && db.tasks.some(t => t.title === 'Sai') && !db.tasks.some(t => t.title === 'Sai também') && impDrop.size === 0, antesImp), 'confirmar aplica só as linhas marcadas');
+  await c.evaluate(() => { if ($('#importDialog').open) $('#importDialog').close(); go('home'); });
 
   ok(await c.evaluate(() => /Onde estou/.test(document.getElementById('ondeEstou')?.textContent || '')), 'Central mostra o botão "Onde estou?"');
   await c.click('#ondeEstou .f4btn:not(.f4hub)'); ok(/Central de Gestão/.test(await c.textContent('#f4dlg')) && /gestao-tecnologia\.json/.test(await c.textContent('#f4dlg')), '"Onde estou?" da Central mostra ferramenta e arquivo');

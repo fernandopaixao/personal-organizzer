@@ -1,6 +1,6 @@
 # Decisões de arquitetura (ADRs)
 
-*25/11/2026 · estado: Remessa · Central v15.14, Quadro do Time 2.3.2, Hub 2.3, Finanças do Grupo 1.7 e do Time 1.5, Mapa de Férias 1.5 (dentro da Central), assistente 2.8, contratos 1.0, visual experimental*
+*25/11/2026 · estado: Remessa · Central v15.15, Quadro do Time 2.3.2, Hub 2.3, Finanças do Grupo 1.7 e do Time 1.5, Mapa de Férias 1.5 (dentro da Central), assistente 2.8, contratos 1.0, visual experimental*
 
 Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequências e o que observar ao evoluir. Elas existem para que uma funcionalidade nova comece pelas regras certas, sem precisar reler todos os planos.
 
