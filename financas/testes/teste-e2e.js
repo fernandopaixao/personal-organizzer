@@ -12,6 +12,12 @@ const SENHA = 'senha-de-teste-123', SENHA2 = 'outra-senha-456!';
 let falhas = 0;
 const ok = (c, msg) => { console.log((c ? '  ok  ' : '  FALHOU  ') + msg); if (!c) falhas++; };
 
+// Marca Remessa (ADR-0037): cada HTML montado traz o ícone da aba com o lacre, também nas cópias geradas.
+{ const ler = f => fs.readFileSync(path.join(RAIZ, f), 'utf8'), central = fs.readdirSync(RAIZ).filter(n => /^gestao_pessoal_v\d+\.html$/.test(n)).sort((a, b) => parseInt(a.slice(15)) - parseInt(b.slice(15))).pop();
+  const fav = ['hub.html', 'inicio.html', central, 'ferramenta-time/quadro_do_time_v1.html', 'financas/financas_grupo.html', 'financas/financas_time.html', 'ferias/ferias.html'].filter(f => !/<link rel="icon" id="favicon" type="image\/svg\+xml" href="data:image\/svg\+xml,[^"]*%230b2155[^"]*%234d86ff/.test(ler(f)));
+  ok(!fav.length, 'ícone da aba da Remessa (lacre azul) em todas as ferramentas' + (fav.length ? ': falta em ' + fav.join(', ') : ''));
+  ok(/\['rec','Remessas'\]/.test(ler(central)) && /nova remessa|novas remessas/i.test(ler(central)), 'Central chama de remessa o arquivo de integração recebido'); }
+
 const srv = http.createServer((q, r) => {
   const f = path.join(RAIZ, decodeURIComponent(q.url.split('?')[0]));
   if (!f.startsWith(RAIZ) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { r.writeHead(404); return r.end(); }
@@ -159,6 +165,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
 
   console.log('6. Assistente inicial: responsável por um time, finanças + tarefas');
   const a = await nova('/inicio.html', { 'fin-local': 'LocalInicio', 'fin-comum': 'Gestao-Compartilhado' });
+  ok(/Vamos montar sua Remessa/.test(await a.textContent('#wz')) && /Por que Remessa\?.*caixa postal.*nova remessa/s.test(await a.textContent('.porque')), 'boas-vindas explicam o nome Remessa');
   await a.click('#prox'); await a.click('[data-p="responsavel"]');
   await a.click('[data-u="financas"]'); await a.click('[data-u="tarefas"]');
   ok((await a.textContent('#wz')).includes('Finanças do Time') && (await a.textContent('#wz')).includes('Quadro do Time'), 'perfil: lidera 1 time, finanças e tarefas; mostra os HTMLs que serão gerados');
@@ -493,9 +500,17 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   const ls = await nova('/inicio.html', { 'fin-local': 'LocalSorte', 'fin-comum': 'CompSorte' });
   ok(await ls.evaluate(() => document.querySelectorAll('.ilu svg').length === 4 && /idioma que só vocês dois falam/.test(document.body.textContent)), 'primeira tela explica a solução em quatro desenhos (HTML e JSON, chave como idioma, níveis, OneDrive)');
   await ls.click('#sorte'); await ls.fill('#sN', 'Tecnologia'); await ls.fill('#sP', 'Fernando'); await ls.fill('#sT', 'Pagamentos PAG\nCartões CAR');
-  await ls.click('#sL'); await ls.waitForSelector('#sL + .chip'); await ls.click('#sC'); await ls.click('#dlg [data-r="ok"]').catch(() => {}); await ls.waitForSelector('#sC + .chip');
+  ok(!(await ls.$('#sC')), 'Estou com sorte: a pasta sincronizada sai do formulário e vira o último passo');
+  await ls.click('#sL'); await ls.waitForSelector('#sL + .chip'); await ls.check('[name="sLid"][value="gerar"]');
   await ls.click('#sS'); await criarSenha(ls, SENHA2); await ls.waitForSelector('#sGo:not([disabled])');
-  await ls.click('#sGo'); await cofre(ls); await ls.waitForSelector('.mapa-svg', { timeout: 30000 });
+  await ls.click('#sGo'); await cofre(ls); await ls.waitForSelector('.passos', { timeout: 30000 });
+  const guia = await ls.textContent('.passos');
+  ok(await ls.$$eval('.passo', x => x.length) === 4 && /Sua mesa/.test(guia) && /Remessas para os times/.test(guia) && /Remessa para a liderança/.test(guia) && /Aponte a caixa postal/.test(guia), 'guia da Remessa em 4 passos: mesa, times, liderança e caixa postal');
+  ok(/todo o time/.test(guia) && /só quem cuida do dinheiro do time/.test(guia) && /grupos\/tecnologia\//.test(guia) && await ls.$$eval('.passo .mapa-svg', x => x.length) === 4, 'guia diz o que vai para cada pessoa e para que serve cada pasta, com um desenho por passo');
+  ok(!(await ls.$('#pCx.feito')) && (await ls.$('#sCx.pri')), 'só falta apontar a caixa postal');
+  await ls.click('#sCx'); await ls.click('#dlg [data-r="ok"]').catch(() => {}); await ls.waitForSelector('#pCx.feito', { timeout: 30000 });
+  const lid = await opfs(ls, async () => ler('LocalSorte/para-a-lideranca', 'LEIA-ME.txt'));
+  ok(/GK1\.tecnologia-fin-\d{4}\./.test(lid || '') && /\+ Grupo de outro gestor/.test(lid || ''), 'envelope para a liderança com a chave do grupo e onde colar');
   const locS = await opfs(ls, async () => [await listar('LocalSorte'), await listar('LocalSorte/para-os-times'), await listar('LocalSorte/para-os-times/pagamentos')]);
   ok(['hub.html', 'gestao_pessoal.html', 'financas_grupo.html', 'onde-fica-cada-coisa.html', 'hub-tecnologia.json', 'gestao-tecnologia.json', 'financas-grupo-tecnologia.json'].every(n => locS[0].includes(n)), 'Estou com sorte: ferramentas do gestor geradas na pasta');
   ok(!locS[0].includes('ferias.html') && !locS[0].includes('ferias-tecnologia.json'), 'Estou com sorte: gestor não recebe Mapa de Férias à parte (férias ficam na Central, ADR-0033)');
@@ -507,6 +522,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   await ls.click('[data-ck="cofre"]'); ok(/1/.test(await ls.textContent('#ckV')), 'checklist marca item e conta o progresso');
   ok(await ls.evaluate(() => { const m = document.querySelector('[data-ck="manter"]'); return !!m && /Sempre manter neste dispositivo/.test(m.closest('.ck').textContent) && /Windows/.test(m.closest('.ck').textContent) && /Mac/.test(m.closest('.ck').textContent); }), 'checklist pede "Sempre manter neste dispositivo" na pasta de troca, com o caminho no Windows e no Mac');
   ok(/Sempre manter neste dispositivo/.test(await opfs(ls, async () => ler('LocalSorte/para-os-times/pagamentos', 'LEIA-ME.txt'))) && /Sempre manter neste dispositivo/.test(await opfs(ls, async () => ler('CompSorte', 'LEIA-ME.md'))), 'LEIA-ME dos times e da pasta compartilhada orientam "Sempre manter neste dispositivo"');
+  ok(/Por que Remessa\?.*nova remessa/s.test(await opfs(ls, async () => ler('LocalSorte/para-os-times/pagamentos', 'LEIA-ME.txt'))) && /Por que Remessa\?/.test(await opfs(ls, async () => ler('CompSorte', 'LEIA-ME.md'))), 'LEIA-ME dos times e da caixa postal explicam o nome Remessa');
   ok((await opfs(ls, async () => listar('CompSorte/times'))).join() === 'cartoes,pagamentos', 'pasta sincronizada recebe a estrutura dos times');
   await ls.setViewportSize({ width: 900, height: 900 }); await ls.screenshot({ path: path.join(SAIDA, 'inicio-sorte.png'), fullPage: true });
   fs.writeFileSync(path.join(SAIDA, 'gestao_sorte.html'), await opfs(ls, async () => ler('LocalSorte', 'gestao_pessoal.html')));
@@ -576,6 +592,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   // Hub 2.0 (cockpit, ADR-0035): lê a Central só para leitura, resume status e métricas dos quadros e leva a senha própria da Central
   ok(await h.evaluate(() => __hub.central.estado === 'ok' && !!__hub.central.resumo), 'cockpit lê o arquivo da Central da pasta pessoal com a senha da sessão: ' + await h.evaluate(() => __hub.central.estado + ' ' + __hub.central.arquivo));
   ok(/Pede sua atenção/.test(await h.textContent('#app')) && /Visão geral/.test(await h.textContent('#app')) && /Sessão aberta/.test(await h.textContent('.hero')), 'cockpit mostra saudação, sessão aberta, visão geral e lista de atenção');
+  ok(/Nova remessa: /.test(await h.textContent('#app')) && await h.$('#topo .selo svg') && /Remessa · Hub/.test(await h.textContent('#topo')), 'hub mostra a marca Remessa e avisa a nova remessa de quem publicou nas últimas 24 h');
   const rc = await h.evaluate(() => { const T = hojeISO(), d = n => { const x = new Date(T + 'T12:00:00'); x.setDate(x.getDate() + n); return x.toISOString().slice(0, 10); };
     return __hub.resumoCentral({ people: [{ id: 'p1', name: 'Bia', cadence: 14 }], notes: [], ooSessions: [], teams: [],
       tasks: [{ id: 'a', title: 'Revisar orçamento', end: d(-2), done: false }, { id: 'b', title: 'Hoje', end: T, done: false }, { id: 'c', title: 'Delegada', end: d(-1), assigneeId: 'p1', done: false, initiativeId: 'i1' }],

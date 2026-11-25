@@ -458,6 +458,7 @@ svg.ch{max-height:280px}
   };
 })();
 </script>
+<link rel="icon" id="favicon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%230b2155%22/%3E%3Ccircle cx=%2214%22 cy=%2214%22 r=%224.6%22 fill=%22%234d86ff%22/%3E%3Cg stroke=%22%23fff%22 stroke-width=%222.1%22 stroke-linecap=%22round%22%3E%3Cpath d=%22M14 4.5v2.4M14 21.1v2.4M4.5 14h2.4M21.1 14h2.4M7.3 7.3l1.7 1.7M19 19l1.4 1.4M7.3 20.7l1.7-1.7M19 9l1.7-1.7%22/%3E%3C/g%3E%3Ccircle cx=%2225.5%22 cy=%2225.5%22 r=%224%22 fill=%22%234d86ff%22 stroke=%22%230b2155%22 stroke-width=%221.6%22/%3E%3C/svg%3E">
 </head>
 <body>
 <div id="app"></div>
@@ -947,7 +948,7 @@ function ondeEstou(info) {
       <div><h4>Fica só neste computador</h4>${info.local.map(x => '• ' + esc(x)).join('<br>')}</div>
       <div><h4>Vai para a pasta sincronizada</h4>${info.comum.map(x => '• ' + esc(x)).join('<br>')}</div>
     </div>
-    <p class="lbl" style="margin-top:16px">Ferramentas da solução</p>
+    <p class="lbl" style="margin-top:16px">Ferramentas da Remessa</p>
     ${FERRAMENTAS.map(([n, a, d]) => `<div class="al"><span class="dot ${n === info.ferramenta ? '' : 'late'}" style="${n === info.ferramenta ? '' : 'background:var(--faint)'}"></span><div><b>${esc(n)}</b> <span class="code faint">${esc(a)}</span>${n === info.ferramenta ? ' <span class="chip bv">você está aqui</span>' : ''}<br><span class="muted">${esc(d)}</span></div></div>`).join('')}
     <p class="small muted">Os HTMLs não guardam dados: podem ser trocados por versões novas. Os dados ficam nos arquivos cifrados.</p>
     </div><div class="mf"><button class="btn pri" onclick="fecharModal()">Fechar</button></div>`, 'wide');

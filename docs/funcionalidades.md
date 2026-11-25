@@ -1,12 +1,14 @@
 # Funcionalidades, usos e objetivos
 
-*25/11/2026 · Central v15.11, Quadro do Time 2.3, Hub 2.0, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.4 (dentro da Central), assistente 2.6, contratos 1.0 · visual experimental em `experimental/`*
+*25/11/2026 · Remessa · Central v15.12, Quadro do Time 2.3, Hub 2.1, Finanças do Grupo 1.6 e do Time 1.4, Mapa de Férias 1.4 (dentro da Central), assistente 2.7, contratos 1.0 · visual experimental em `experimental/`*
 
 Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. Para as regras técnicas por trás, veja as [decisões de arquitetura](adr/README.md). Para o caminho de quem usa, veja a [jornada do usuário](jornada-do-usuario.md) e o [passo a passo](passo-a-passo.md).
 
 ---
 
 ## 1. Objetivo da solução
+
+**Nome: Remessa** ([ADR-0037](adr/0037-nome-remessa.md)). A solução funciona como um serviço de envelopes lacrados com uma caixa postal: cada ferramenta põe o que tem para contar num envelope cifrado com a chave do time (o lacre) e deixa na pasta compartilhada (a caixa postal). Só quem tem a chave abre. Um arquivo que chegou de outra pessoa e ainda não foi aplicado é uma **nova remessa**. Cada ferramenta tem o seu ícone na aba do navegador, com o lacre azul da Remessa no canto; o hub usa o envelope lacrado.
 
 Dar a um gestor de vários times, e aos próprios times, **um lugar organizado para tarefas, pessoas, rituais, portfólio de iniciativas, fluxo dos times e finanças**, sem servidor, sem instalação e com tudo cifrado. Os objetivos que guiam cada funcionalidade:
 
@@ -43,6 +45,8 @@ Todas têm, no topo, **Onde estou?** (qual ferramenta, qual arquivo, o que é lo
 
 **Objetivo:** fazer a primeira montagem sem a pessoa precisar entender a arquitetura.
 
+**Por que Remessa (2.6).** As boas-vindas abrem com **Vamos montar sua Remessa** e um parágrafo que explica o nome: envelopes lacrados (cifrados com a chave do time) numa caixa postal (a pasta compartilhada); quando chega um envelope novo, a ferramenta avisa "nova remessa". O mesmo texto vai para o LEIA-ME da pasta compartilhada, o LEIA-ME de cada pasta em `para-os-times/` e o cartão "Onde fica cada coisa".
+
 **Como funciona (2.1).** A primeira tela explica a solução em quatro desenhos: o HTML é a ferramenta e o JSON é o caderno cifrado; a chave de integração é um idioma que só você e o time falam; quem lidera 1 time publica para o gestor, e quem lidera vários soma os times e publica para a liderança; a troca é por uma pasta sincronizada pelo OneDrive, onde cada pessoa grava só o próprio arquivo.
 
 | Passo | O que acontece |
@@ -69,14 +73,17 @@ Todas têm, no topo, **Onde estou?** (qual ferramenta, qual arquivo, o que é lo
 
 Onde as chaves coladas vão parar: no hub (tarefas e finanças de cada time), no Quadro (chave de tarefas), no Finanças do Time (chave de finanças) e no Finanças do Grupo (`acima`, a chave da liderança). Nenhuma chave vai para a pasta compartilhada.
 
-**Estou com sorte (2.1).** Para quem lidera times e quer tudo de uma vez. Uma tela só (grupo, times, seu nome, pasta, pasta sincronizada opcional e senha) e o assistente:
+**Estou com sorte (2.1; passo a passo da Remessa no 2.7).** Para quem lidera times e quer tudo de uma vez. Uma tela só (grupo, times, seu nome, pasta pessoal, senha e se a liderança também usa a Remessa) e o assistente:
 
 | Gera | Onde | Com o quê |
 |---|---|---|
 | Chaves de tarefas e de finanças de cada time | Dentro dos arquivos cifrados e dos HTMLs dos times | Aviso de cofre antes; botões para copiar cada chave depois |
 | Hub, Central (com a página Férias), Finanças do Grupo e "Onde fica cada coisa" | Na pasta escolhida | Times, prefixos, pastas e chaves já cadastrados; uma senha para todos |
 | Quadro do Time, Finanças do Time e LEIA-ME de cada time | `para-os-times/<time>/` | A chave do time e a pasta sincronizada já configuradas |
-| Estrutura da pasta sincronizada | `times/<time>/quadro`, `postits`, `financas`…, `grupos/<grupo>/ferias/` | Só pastas vazias |
+| Chave do grupo para a liderança (2.7, se escolhida) e `para-a-lideranca/LEIA-ME.txt` | Finanças do Grupo (Nível acima), Férias da Central e o envelope para a liderança | Ou a chave que a liderança mandou, colada no formulário |
+| Estrutura da pasta sincronizada | `times/<time>/quadro`, `postits`, `financas`…, `grupos/<grupo>/` | Só pastas vazias, criadas quando você aponta a pasta no último passo |
+
+**Passo a passo da Remessa (2.7).** A tela final organiza tudo em quatro passos numerados, cada um com um desenho e um exemplo: **Sua mesa** (o que fica na pasta pessoal), **Remessas para os times** (um envelope por time, com a tabela de quem recebe cada arquivo), **Remessa para a liderança** (o que sobe e como a chave chega) e **Aponte a caixa postal** (para que serve cada pasta da pasta sincronizada). A pasta sincronizada saiu do formulário: é o último passo, a única escolha que resta, e configura todas as ferramentas de uma vez. No Finanças do Grupo da liderança (1.6), **+ Grupo de outro gestor** aceita colar a chave que o gestor mandou.
 
 A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados), um desenho do que ficou em cada pasta, as chaves por time e um **checklist** (senha no cofre, pasta pessoal só sua e no seu OneDrive, pasta compartilhada sincronizando, pasta compartilhada marcada como **"Sempre manter neste dispositivo"**, hub mostrando os times, pasta ligada na Central e no Finanças do Grupo, chaves no cofre, pastas enviadas aos times). O caminho normal também termina com o checklist do perfil. As marcações ficam só no navegador.
 
@@ -95,6 +102,7 @@ A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados
 | Funcionalidade | Uso | Objetivo |
 |---|---|---|
 | **Cockpit de gestão (2.0)** | Saudação com a frase do dia e o número de pontos de atenção; cards de leitura de todos os módulos com a origem marcada (Central, Férias, Finanças, Quadros, Post-its) | Abrir o dia numa tela só ([ADR-0035](adr/0035-hub-cockpit-de-gestao.md)) |
+| **Marca e nova remessa (2.1)** | Ícone da Remessa (envelope com lacre azul) no topo e na entrada; na lista **Pede sua atenção**, "Nova remessa" para cada time que publicou backlog, métricas ou plano nas últimas 24 horas | Saber o que chegou na caixa postal sem abrir cada ferramenta ([ADR-0037](adr/0037-nome-remessa.md)) |
 | **Resumo da Central (2.0)** | Lê o arquivo da Central só para leitura, com a senha da sessão: meu dia (atrasadas, hoje, feitas), delegadas no prazo e a cobrar, iniciativas "agora" em dia, atrasadas ou em atenção, fora hoje e próximos 14 dias, 1:1 em atraso | Ver o que pede atenção sem abrir a Central |
 | **Pede sua atenção (2.0)** | Lista única de todos os módulos, atrasado primeiro: suas tarefas atrasadas, delegadas, iniciativas, 1:1, iniciativas e bloqueios dos quadros, time acima do orçado, time sem publicar há 7 dias. Cada item abre a ferramenta certa | Não deixar nada cair entre as ferramentas |
 | **Indicadores do time (2.0)** | No card do time: iniciativas do quadro no prazo, em atenção e atrasadas, bloqueios abertos e as métricas de destaque com a série (lidos de `status.json` e `metricas.json`) | Ver a saúde do time sem abrir o Quadro |
@@ -111,7 +119,7 @@ A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados
 
 ---
 
-## 5. Central de Gestão (v15.11)
+## 5. Central de Gestão (v15.12)
 
 **Férias dentro da Central (15.9, [ADR-0033](adr/0033-ferias-dentro-da-central.md)).** O Mapa de Férias do gestor e da liderança deixou de ser uma ferramenta à parte: é a página **Férias** (menu Pessoas), no mesmo arquivo e com a mesma senha da Central. Os times com pasta e as chaves de tarefas da Integração entram sozinhos; a pasta compartilhada é a da Integração. A página **Hoje** mostra quem está **fora hoje**.
 
@@ -169,7 +177,7 @@ Navegação em 9 páginas (teclas 1 a 9) e o botão **Importar e agentes** no to
 - **Objetivo:** acompanhar cada time e entregar a ferramenta pronta.
 
 ### 5.9 Integração (9)
-- **Uso:** pasta e chaves (gerar, copiar, revogar; **chave de finanças** por time, colada ou importada com **Chaves do Finanças do Grupo**), arquivos recebidos (com prévia), **Conciliação** (unir épicos, trazer para a Central, ligar itens a features, códigos das finanças dos times sem iniciativa na Central) e **Compartilhar** (tela que mostra o que vai para cada time).
+- **Uso:** pasta e chaves (gerar, copiar, revogar; **chave de finanças** por time, colada ou importada com **Chaves do Finanças do Grupo**), **Remessas** (15.12: os arquivos que chegaram dos times, com prévia; cada um ainda não aplicado é uma "nova remessa" e aparece no cartão Dos times), **Conciliação** (unir épicos, trazer para a Central, ligar itens a features, códigos das finanças dos times sem iniciativa na Central) e **Compartilhar** (tela que mostra o que vai para cada time).
 - **Abrir o Finanças do Grupo (15.7):** botão em Integração e na aba Finanças da iniciativa; a senha da sessão vai junto.
 - **Objetivo:** manter a Central e os times falando a mesma língua, sem sobrescrever nada.
 
@@ -183,6 +191,8 @@ Navegação em 9 páginas (teclas 1 a 9) e o botão **Importar e agentes** no to
 ## 6. Quadro do Time (2.2)
 
 **Objetivo:** dar ao time uma ferramenta de fluxo pronta, que publica sozinha o que a Central precisa.
+
+Quando o catálogo da Central chega pela pasta, o Quadro avisa **Nova remessa da Central** (2.3.1).
 
 | Tela | Uso | Objetivo |
 |---|---|---|
@@ -226,7 +236,11 @@ No topo: seletor de ano, **+ Adicionar ano…** (vazio ou copiando o previsto/or
 
 Alertas: categoria acima do teto do ano, mês sem lançamento, contrato vencendo em 60 dias, divergência entre previsto e realizado, ano futuro do horizonte ainda vazio.
 
+Quando chega uma diretriz nova do grupo, o Finanças do Time avisa **Nova remessa do grupo** (1.4.1).
+
 ### 7.2 Finanças do Grupo (`financas_grupo.html`)
+
+Planos dos times que chegaram e ainda não foram aplicados aparecem como **nova remessa** no aviso do Painel e em Planos recebidos (1.5.1).
 
 **Objetivo:** somar os planos dos times ano a ano, comparar com o orçamento aprovado e orientar os times, sem nunca alterar o número de um time.
 

@@ -21,7 +21,7 @@
    compara com o orçamento do grupo e publica diretrizes grupo/financas/diretriz-<time>.json.
    Orçamento aprovado, itens do grupo, chaves e versões ficam no arquivo local cifrado.
    ===================================================================== */
-const TOOL = 'financas-grupo', TOOL_NOME = 'Finanças do Grupo', TOOL_VERSION = '1.5.0';
+const TOOL = 'financas-grupo', TOOL_NOME = 'Finanças do Grupo', TOOL_VERSION = '1.6.0';
 const LOCAL_SCHEMA = 'gestao-financas-local/1', PLANO_SCHEMA = 'gestao-financas-plano/1', DIRETRIZ_SCHEMA = 'gestao-financas-diretriz/1';
 const PRESET = /*FING-PRESET*/null/*FIM-FING-PRESET*/;
 // Onde o arquivo desta ferramenta ficou neste navegador (gravado pelo assistente ou na última abertura).
@@ -159,7 +159,7 @@ async function lerPasta(silencioso = false) {
     if (fora) s.avisos.push(`${fora} linha(s) com categoria fora da lista do grupo (somadas em "Outras")`);
   }
   await lerAcima();
-  if (!silencioso) toast(pendentes.length ? `${pendentes.length} plano(s) novo(s) para revisar.` : 'Pasta lida. Nada novo.');
+  if (!silencioso) toast(pendentes.length ? (pendentes.length > 1 ? `${pendentes.length} novas remessas: planos para revisar.` : 'Nova remessa: 1 plano para revisar.') : 'Pasta lida. Nenhuma remessa nova.');
   render();
 }
 function diffPlano(antes, depois) {
@@ -367,7 +367,7 @@ function vCons(el) {
   const desv = c.porTime.filter(x => x.ok && x.tot.orcado).map(x => ({ ...x, d: x.tot.previsto - x.tot.orcado })).sort((p, q) => q.d - p.d)[0];
   const idx = ms.indexOf(m), passado = idx < 0 ? (ms[0] < m ? ms.length - 1 : -1) : idx;
   const serie = k => ms.map(x => consolidado([x]).total[k]);
-  el.innerHTML = `${pendentes.length ? `<div class="banner">${pendentes.length} plano(s) novo(s) na pasta. <button class="btn sm pri" id="cRev">Revisar</button></div>` : ''}
+  el.innerHTML = `${pendentes.length ? `<div class="banner">${pendentes.length > 1 ? pendentes.length + ' novas remessas' : 'Nova remessa'} na caixa postal: ${pendentes.length} plano(s) novo(s) dos times. <button class="btn sm pri" id="cRev">Revisar</button></div>` : ''}
     ${acimaPendente() ? `<div class="banner">O consolidado mudou desde a última publicação para a liderança. <button class="btn sm pri" id="cAcima">Publicar para a liderança</button></div>` : ''}
     <div class="inss">
       ${cardLeitura({ hi: true, k: `Previsto em ${a}`, v: fm(c.total.previsto), pct: orc ? c.total.previsto / orc : null, s: orc ? (orc >= c.total.previsto ? `Saldo de <b>${fm(orc - c.total.previsto)}</b> no orçamento aprovado` : `<b>${fm(c.total.previsto - orc)}</b> acima do orçamento aprovado`) : `Orçamento aprovado de ${a}: <b>definir em Ajustes</b>` })}
@@ -466,7 +466,7 @@ function vRevisar(el) {
     ${pendentes.length ? pendentes.map(x => { const d = diffPlano(db.retratos[x.t.slug]?.payload, x.p), ok = somavel(x.p); return `<div class="al"><span class="dot ${ok ? '' : 'late'}"></span><div class="grow"><b>${esc(x.t.nome)}</b> · revisão ${x.p.revision} · ${esc(x.p.planVersion || '')} · ${fmtDataHora(x.p.generatedAt)} <span class="faint small">${esc(x.de)}</span><br>
       ${anosPlano(x.p).length > 1 ? `Anos ${anosPlano(x.p).join(', ')} · ` : ''}Previsto em ${anoV()} ${fm(d.a.previsto)} → <b>${fm(d.b.previsto)}</b> (${d.b.previsto - d.a.previsto >= 0 ? '+' : ''}${fm(d.b.previsto - d.a.previsto)}) · orçado ${fm(d.b.orcado)} · realizado ${fm(d.b.realizado)}
       ${d.linhas.length ? `<div class="small muted">${d.linhas.slice(0, 8).map(esc).join(' · ')}${d.linhas.length > 8 ? ` · e mais ${d.linhas.length - 8}` : ''}</div>` : ''}${ok ? '' : '<div class="small latec">Moeda diferente: fica guardado, mas não entra na soma.</div>'}</div>
-      <button class="btn sm" data-ap="${x.t.slug}">Aplicar</button></div>`; }).join('') : '<div class="empty">Nenhum plano novo. A ferramenta confere a pasta a cada minuto e quando você volta para a aba.</div>'}</div>
+      <button class="btn sm" data-ap="${x.t.slug}">Aplicar</button></div>`; }).join('') : '<div class="empty">Nenhuma remessa nova. A ferramenta confere a pasta a cada minuto e quando você volta para a aba.</div>'}</div>
     <div class="card"><p class="lbl">Saúde da soma</p>${db.times.length ? db.times.map(t => { const p = db.retratos[t.slug]?.payload, s = [...(saude[t.slug]?.avisos || []), ...(p && !anosPlano(p).includes(anoV()) ? [`o plano publicado não cobre ${anoV()} (cobre ${anosPlano(p).join(', ') || '—'})`] : [])]; return `<div class="al"><span class="dot ${s.length ? 'late' : ''}"></span><div class="grow"><b>${esc(t.nome)}</b> ${s.length ? '<br><span class="small">' + s.map(esc).join('<br>') + '</span>' : '<span class="small okc">ok</span>'}</div></div>`; }).join('') : '<div class="empty">Cadastre os times na aba Times.</div>'}</div>`;
   if ($('#rTodos')) $('#rTodos').onclick = () => aplicar();
   $$('[data-ap]', el).forEach(b => b.onclick = () => aplicar(b.dataset.ap));
@@ -495,6 +495,7 @@ function timeDlg(slug, tipo = 'time') {
   const v = c => c ? (c / 100).toLocaleString('pt-BR') : '';
   const d = modal(`<div class="mh"><h2>${slug ? esc(t.nome) : ehGrupo(t) ? 'Novo grupo de outro gestor' : 'Novo time'}</h2></div><div class="mb">${ehGrupo(t) && !slug ? '<p class="small muted" style="margin-top:0">Use como identificador o mesmo do grupo do gestor (aparece em Ajustes das Finanças do Grupo dele). Depois gere a chave e envie a ele por mensagem direta.</p>' : ''}
     <div class="f2"><label class="field"><span>Nome</span><input class="sin" id="mN" value="${esc(t.nome)}"></label><label class="field"><span>Identificador (pasta)</span><input class="sin code" id="mS" value="${esc(t.slug)}" ${slug ? 'disabled' : ''}></label></div>
+    ${ehGrupo(t) && !slug ? '<label class="field"><span>Chave que o gestor mandou (opcional: se ele gerou a chave no Estou com sorte, cole aqui em vez de gerar outra)</span><input class="sin code" id="mK" placeholder="GK1.grupo-fin-AAMM.…"></label>' : ''}
     <div class="f2"><label class="field"><span>Prefixo de código (opcional)</span><input class="sin" id="mP" value="${esc(t.prefixo || '')}" maxlength="5"></label><label class="field"><span>Publicar plano até</span><input class="sin" type="date" id="mD" value="${esc(t.publishBy || '')}"></label></div>
     <p class="lbl">Teto de ${anoV()} (vai na diretriz; troque o ano no topo para os outros anos)</p>
     <label class="field"><span>Teto total</span><input class="sin" id="mT" value="${v(tetoAno(t).total)}"></label>
@@ -505,13 +506,14 @@ function timeDlg(slug, tipo = 'time') {
   $('#mNo', d).onclick = fecharModal;
   if (slug) $('#mX', d).onclick = async () => { fecharModal(); if (await perguntar('Remover time?', '<p>O time sai do consolidado e as chaves dele são apagadas deste arquivo. Os arquivos na pasta não são apagados.</p>', [['no', 'Cancelar'], ['ok', 'Remover', 'danger']]) !== 'ok') return; db.times = db.times.filter(x => x.slug !== slug); delete db.retratos[slug]; agendarSalvar(); };
   $('#mOk', d).onclick = () => {
-    const nome = clamp($('#mN', d).value.trim(), 80), s = slugify($('#mS', d).value);
+    const nome = clamp($('#mN', d).value.trim(), 80), s = slugify($('#mS', d).value), kTxt = $('#mK', d)?.value.trim() || '';
+    let kCol = null; if (kTxt) { try { kCol = lerChaveTexto(kTxt); } catch (e) { return toast('Chave inválida: ' + e.message, 6000); } if (!kCol.kid.startsWith(s + '-fin')) return toast(`Esta chave é de "${kCol.kid.split('-fin')[0]}", não do identificador "${s}". Use o identificador do grupo do gestor.`, 7000); }
     if (!nome || !s) return toast('Preencha nome e identificador.'); if (!slug && timePorSlug(s)) return toast('Já existe um time com esse identificador.');
     t.nome = nome; t.prefixo = clamp($('#mP', d).value.trim().toUpperCase(), 5); t.publishBy = $('#mD', d).value; t.nota = clamp($('#mR', d).value.trim(), 500);
     const te = tetoEditavel(t); te.total = parseValor($('#mT', d).value) || 0; te.caps = {}; $$('[data-cap]', d).forEach(i => { const x = parseValor(i.value); if (x) te.caps[i.dataset.cap] = x; });
     if (anoV() === db.ano) t.teto = structuredClone(te);   // compatibilidade com arquivos 1.0
     if (!db.anos.includes(anoV())) db.anos = [...db.anos, anoV()].sort();
-    if (!slug) { t.slug = s; db.times.push(t); }
+    if (!slug) { t.slug = s; if (kCol) t.chaves.push({ kid: kCol.kid, texto: kTxt, em: new Date().toISOString(), origem: 'colada' }); db.times.push(t); }
     fecharModal(); agendarSalvar();
     if (slug && t.diretriz.revision) toast('Lembre de publicar a diretriz de novo para o time ver o teto atualizado.', 5000);
   };

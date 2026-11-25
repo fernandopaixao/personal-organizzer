@@ -420,6 +420,7 @@ svg.ch{max-height:280px}
   };
 })();
 </script>
+<link rel="icon" id="favicon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%230b2155%22/%3E%3Crect x=%225%22 y=%2215%22 width=%225%22 height=%229%22 rx=%221.4%22 fill=%22%23fff%22/%3E%3Crect x=%2212%22 y=%2210%22 width=%225%22 height=%2214%22 rx=%221.4%22 fill=%22%23fff%22/%3E%3Crect x=%2219%22 y=%225%22 width=%225%22 height=%2212%22 rx=%221.4%22 fill=%22%234d86ff%22/%3E%3Ccircle cx=%2225.5%22 cy=%2225.5%22 r=%224%22 fill=%22%234d86ff%22 stroke=%22%230b2155%22 stroke-width=%221.6%22/%3E%3C/svg%3E">
 </head>
 <body>
 <div id="app"></div>
@@ -909,7 +910,7 @@ function ondeEstou(info) {
       <div><h4>Fica só neste computador</h4>${info.local.map(x => '• ' + esc(x)).join('<br>')}</div>
       <div><h4>Vai para a pasta sincronizada</h4>${info.comum.map(x => '• ' + esc(x)).join('<br>')}</div>
     </div>
-    <p class="lbl" style="margin-top:16px">Ferramentas da solução</p>
+    <p class="lbl" style="margin-top:16px">Ferramentas da Remessa</p>
     ${FERRAMENTAS.map(([n, a, d]) => `<div class="al"><span class="dot ${n === info.ferramenta ? '' : 'late'}" style="${n === info.ferramenta ? '' : 'background:var(--faint)'}"></span><div><b>${esc(n)}</b> <span class="code faint">${esc(a)}</span>${n === info.ferramenta ? ' <span class="chip bv">você está aqui</span>' : ''}<br><span class="muted">${esc(d)}</span></div></div>`).join('')}
     <p class="small muted">Os HTMLs não guardam dados: podem ser trocados por versões novas. Os dados ficam nos arquivos cifrados.</p>
     </div><div class="mf"><button class="btn pri" onclick="fecharModal()">Fechar</button></div>`, 'wide');
@@ -991,7 +992,7 @@ const pctTxt = (a, b) => b ? Math.round(a / b * 100) + '%' : '—';
    Dados individuais (lançamentos, notas, cenários) ficam no arquivo local cifrado.
    Só o plano agregado vai para a pasta sincronizada: times/<time>/financas/plano.json
    ===================================================================== */
-const TOOL = 'financas-time', TOOL_NOME = 'Finanças do Time', TOOL_VERSION = '1.4.0';
+const TOOL = 'financas-time', TOOL_NOME = 'Finanças do Time', TOOL_VERSION = '1.4.1';
 const LOCAL_SCHEMA = 'gestao-financas-local/1', PLANO_SCHEMA = 'gestao-financas-plano/1', DIRETRIZ_SCHEMA = 'gestao-financas-diretriz/1';
 const PRESET = /*FIN-PRESET*/null/*FIM-FIN-PRESET*/;
 // Onde o arquivo desta ferramenta ficou neste navegador (gravado pelo assistente ou na última abertura).
@@ -1142,7 +1143,7 @@ async function lerPasta(silencioso = false) {
       const p = dlida.melhor.payload;
       if (!db.diretriz || p.revision > db.diretriz.revision) {
         db.diretriz = p; agendarSalvar();
-        if (!silencioso) toast(`Diretriz do grupo lida (revisão ${p.revision}).`);
+        if (!silencioso) toast(`Nova remessa do grupo: diretriz na revisão ${p.revision}.`);
         aplicarCategoriasDiretriz();
       }
     }

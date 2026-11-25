@@ -555,6 +555,7 @@ pre.json{background:#f6f7fb;border-radius:10px;padding:12px;font-size:11.5px;max
   };
 })();
 </script>
+<link rel="icon" id="favicon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%230b2155%22/%3E%3Crect x=%225%22 y=%226%22 width=%225.5%22 height=%2218%22 rx=%221.6%22 fill=%22%23fff%22/%3E%3Crect x=%2212.25%22 y=%226%22 width=%225.5%22 height=%2212%22 rx=%221.6%22 fill=%22%234d86ff%22/%3E%3Crect x=%2219.5%22 y=%226%22 width=%225.5%22 height=%227%22 rx=%221.6%22 fill=%22%23fff%22/%3E%3Ccircle cx=%2225.5%22 cy=%2225.5%22 r=%224%22 fill=%22%234d86ff%22 stroke=%22%230b2155%22 stroke-width=%221.6%22/%3E%3C/svg%3E">
 </head>
 <body class="v2">
 <nav class="rail" id="rail"></nav>
@@ -571,7 +572,7 @@ pre.json{background:#f6f7fb;border-radius:10px;padding:12px;font-size:11.5px;max
      gestao-status/1, gestao-metricas/1 dentro de gestao-envelope/1 (AES-256-GCM).
    - Só métricas de time, calculadas a partir da movimentação dos cards.
    ========================================================================= */
-const TOOL = 'quadro_do_time_v1.html', TOOL_VERSION = '2.3.0';
+const TOOL = 'quadro_do_time_v1.html', TOOL_VERSION = '2.3.1';
 /* Pré-configuração gravada pela Central de Gestão (Pessoas › Times › HTML do time).
    No arquivo original fica null; a Central troca o trecho entre os marcadores por um
    objeto quadro-preset/1: { team: { name, slug, prefix, contact }, people: [{ name, role }], key? }.
@@ -859,7 +860,7 @@ async function lerCatalogoEnvelope(env, origem) {
   catalog = cat; catalogErr = '';
   await IDB.set('catalogoEnv', env);        // guardado ainda cifrado
   const n = applyCatalogLinks();
-  if (origem) toast(`Catálogo carregado: ${catInits().length} iniciativa(s) do time${n ? `, ${n} vínculo(s) aplicados` : ''}.`);
+  if (origem) toast(`Nova remessa da Central: catálogo com ${catInits().length} iniciativa(s) do time${n ? `, ${n} vínculo(s) aplicados` : ''}.`);
 }
 async function lerCatalogo(root, { silencioso = false } = {}) {
   if (!db?.team.slug) return;
@@ -2250,7 +2251,7 @@ window.__qt = { PRESET, conectarPasta, get db() { return db; }, set db(v) { db =
       <dt>Arquivo aberto</dt><dd>${info.arquivo ? e(info.arquivo) : '<span style="color:#aab0bf">nenhum</span>'}</dd>
       <dt>Pasta sincronizada</dt><dd>${info.pastaComum ? e(info.pastaComum) : '<span style="color:#aab0bf">não ligada</span>'}</dd>${info.voce ? `<dt>Você neste computador</dt><dd>${e(info.voce)}</dd>` : ''}</dl>
       <div class="mp"><div><h4>Fica só neste computador</h4>${info.local.map(x => '• ' + e(x)).join('<br>')}</div><div><h4>Vai para a pasta sincronizada</h4>${info.comum.map(x => '• ' + e(x)).join('<br>')}</div></div>
-      <h4 style="margin-top:16px">Ferramentas da solução</h4>${FERR.map(([n, a, t]) => `<div class="t"><b>${e(n)}</b> <code style="color:#aab0bf">${e(a)}</code>${n === info.ferramenta ? ' <b style="color:#223ad2">· você está aqui</b>' : ''}<br><span style="color:#6f7689">${e(t)}</span></div>`).join('')}
+      <h4 style="margin-top:16px">Ferramentas da Remessa</h4>${FERR.map(([n, a, t]) => `<div class="t"><b>${e(n)}</b> <code style="color:#aab0bf">${e(a)}</code>${n === info.ferramenta ? ' <b style="color:#223ad2">· você está aqui</b>' : ''}<br><span style="color:#6f7689">${e(t)}</span></div>`).join('')}
       <p style="font-size:12px;color:#6f7689">Os HTMLs não guardam dados. Os dados ficam em arquivos cifrados: o pessoal numa pasta só sua (de preferência no seu OneDrive, como backup), o comum na pasta sincronizada.</p></div>
       <div class="f"><button class="p" id="f4fecha">Fechar</button></div>`);
     d.querySelector('#f4fecha').onclick = () => d.close();

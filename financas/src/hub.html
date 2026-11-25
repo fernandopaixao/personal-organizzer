@@ -11,6 +11,7 @@
 .hub .top .logo{margin:0}
 .hub .top{gap:10px}.hub .top h1{font-size:18px}.hub .top .pill{padding:3px 9px}
 .marca{width:38px;height:38px;border-radius:12px;background:linear-gradient(140deg,var(--bv) 0%,var(--bv-deep) 100%);color:#fff;display:grid;place-items:center;flex:none;box-shadow:0 4px 12px rgba(34,58,210,.28)}
+.selo{width:38px;height:38px;flex:none;display:block}.selo svg{width:100%;height:100%}
 .marca svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .nav{display:flex;gap:2px;align-items:center;flex-wrap:wrap;background:#f0f1f6;border-radius:12px;padding:3px}
 .nav a,.nav summary{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:9px;color:var(--muted);font-weight:550;font-size:12.5px;text-decoration:none;cursor:pointer;list-style:none;white-space:nowrap}
@@ -146,7 +147,9 @@ details.pis>summary:before{content:"▸";transition:transform .15s}details.pis[o
       (tarefas, iniciativas, 1:1 e férias) e o status e as métricas que cada Quadro publica, e mostra cards de todos os
       módulos numa tela. Os dados lidos ficam só em memória, resumidos; o hub nunca grava no arquivo de outra ferramenta.
    ===================================================================== */
-const TOOL = 'hub', TOOL_NOME = 'Hub da solução', TOOL_VERSION = '2.0.1';
+const TOOL = 'hub', TOOL_NOME = 'Hub da solução', TOOL_VERSION = '2.1.0';
+// Marca da solução (ADR-0037): envelope com lacre azul. Arquivo que um time publicou há pouco = "nova remessa".
+const MARCA = 'Remessa', MARCA_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#0b2155"/><rect x="5" y="9" width="22" height="15" rx="2" fill="#fff"/><path d="M5.8 10l10.2 7.6L26.2 10" fill="none" stroke="#0b2155" stroke-width="1.6" stroke-linejoin="round"/><circle cx="16" cy="17.6" r="3.2" fill="#4d86ff" stroke="#fff" stroke-width="1.1"/></svg>`;
 try { window.name = 'gestao-hub'; } catch {}   // o botão "← Hub" das ferramentas volta para esta aba sem recarregar
 const LOCAL_SCHEMA = 'gestao-hub-local/1', POSTITS = 'gestao-postits/1', VISTOS = 'gestao-postits-vistos/1', PLANO = 'gestao-financas-plano/1', STATUS = 'gestao-status/1', METRICAS = 'gestao-metricas/1';
 const CORES = [['amarelo', 'Amarelo'], ['rosa', 'Rosa'], ['verde', 'Verde'], ['azul', 'Azul'], ['lilas', 'Lilás']];
@@ -549,7 +552,7 @@ function navHtml() {
 function renderTopo() {
   const el = $('#topo'); if (!el || !db) return;
   const pend = Object.values(pubEstado).filter(x => x.pendente).length;
-  el.innerHTML = `<span class="marca">${ico('painel', '')}</span><div style="min-width:0"><h1>${esc(db.nome || TOOL_NOME)}</h1><div class="sub">${esc(db.pessoa.nome)} · Hub ${TOOL_VERSION} · <span title="Arquivo do hub">${sujo || salvando ? 'salvando…' : 'salvo'}</span></div></div>
+  el.innerHTML = `<span class="selo" title="${MARCA}">${MARCA_SVG}</span><div style="min-width:0"><h1>${esc(db.nome || TOOL_NOME)}</h1><div class="sub">${esc(db.pessoa.nome)} · ${MARCA} · Hub ${TOOL_VERSION} · <span title="Arquivo do hub">${sujo || salvando ? 'salvando…' : 'salvo'}</span></div></div>
     <nav class="nav" aria-label="Módulos">${navHtml()}</nav><span class="grow"></span>
     <button class="pill" id="tPasta" title="Pasta sincronizada pelo OneDrive"><span class="led ${raiz ? '' : 'err'}"></span>${raiz ? esc(raiz.name) + (situacao.lidoEm ? ' · lida ' + esc(fmtDataHora(situacao.lidoEm)) : '') : 'Ligar pasta sincronizada'}</button>
     ${pend ? `<span class="pill"><span class="led wait"></span>${pend} time(s) aguardando publicação</span>` : ''}
@@ -672,6 +675,8 @@ function itensAtencao() {
     const x = totaisAno(r.plano); if (x && x.orcado && x.previsto > x.orcado) out.push({ k: 'late', tx: `Previsto acima do orçado em ${fmtMoeda(x.previsto - x.orcado, r.plano.moeda)}`, sub: `Finanças ${anoCorrente()}`, tg: esc(t.nome), f: ff });
     if (r.planoErro) out.push({ k: 'attn', tx: 'Finanças: ' + esc(r.planoErro), sub: 'Confira a chave de finanças em Ajustes', tg: esc(t.nome) });
     const a = r.atividade || {}, ult = Math.max(a.quadro || 0, a.status || 0, a.plano || 0);
+    const novas = [['status', 'backlog do quadro'], ['metricas', 'métricas da sprint'], ['plano', 'plano financeiro']].filter(([k]) => a[k] && a[k] > Date.now() - 864e5);
+    if (novas.length) out.push({ k: 'info', tx: 'Nova remessa: ' + novas.map(x => x[1]).join(' e '), sub: `Publicada ${tempo(Math.max(...novas.map(([k]) => a[k])))}`, tg: esc(t.nome), f: novas[0][0] === 'plano' ? ff : fq });
     if (t.tipo !== 'grupo' && ult && ult < Date.now() - 7 * 864e5) out.push({ k: 'info', tx: 'Sem publicar há mais de 7 dias', sub: `Última publicação ${tempo(ult)}`, tg: esc(t.nome), f: fq });
   }
   const ord = { late: 0, attn: 1, info: 2 };
@@ -965,8 +970,8 @@ function ajustes() {
 async function telaInicial(msg = '') {
   const ult = lembrarAtivo() ? await kv.get('hub-local') : null;
   const li = (ic, t) => `<li>${ico(ic, '')}<span>${t}</span></li>`;
-  $('#app').innerHTML = `<div class="entrada"><div class="vitrine"><span class="marca" style="background:rgba(255,255,255,.16);box-shadow:none">${ico('painel', '')}</span>
-      <h2>Seu cockpit de gestão</h2><p>Uma senha, uma tela: o que pede a sua atenção em todos os módulos da solução.</p>
+  $('#app').innerHTML = `<div class="entrada"><div class="vitrine"><span class="selo" title="${MARCA}">${MARCA_SVG}</span>
+      <h2>${MARCA} · seu cockpit de gestão</h2><p>Uma senha, uma tela: o que pede a sua atenção em todos os módulos. Cada time deixa os seus envelopes lacrados na caixa postal (a pasta compartilhada) e o hub avisa quando chega uma nova remessa.</p>
       <ul>${li('central', '<b>Central</b>: suas tarefas, delegadas, iniciativas e 1:1')}${li('quadro', '<b>Quadros dos times</b>: iniciativas, bloqueios e métricas publicadas')}${li('fin', '<b>Finanças</b>: previsto, orçado e realizado de cada time')}${li('ferias', '<b>Férias</b>: quem está fora hoje e nos próximos dias')}${li('cadeado', 'Entre uma vez: as ferramentas abertas pelo hub não pedem a senha de novo')}</ul></div>
     <div class="acoes"><h2 style="margin:0 0 2px;font-family:var(--title);font-weight:600">${TOOL_NOME}</h2><div class="small muted">Entre com a senha do hub (a mesma das outras ferramentas, se você usou o assistente).</div>
     ${msg ? `<div class="banner warn" style="margin-top:12px">${esc(msg)}</div>` : ''}

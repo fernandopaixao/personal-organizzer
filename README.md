@@ -1,10 +1,12 @@
-# personal-organizzer · Central de Gestão
+# Remessa · personal-organizzer
+
+**Remessa** é o nome da solução ([ADR-0037](docs/adr/0037-nome-remessa.md)): as ferramentas trocam envelopes lacrados (arquivos cifrados com a chave de cada time) numa caixa postal (a pasta compartilhada do OneDrive). Só quem tem a chave abre; o que chega de outra pessoa aparece como **nova remessa**. Cada ferramenta tem um ícone na aba com um lacre azul no canto; o hub usa o envelope lacrado.
 
 Ferramenta de gestão pessoal em um único arquivo HTML, sem servidor e sem instalação.
 
 - **Abrir:** dê dois cliques em `gestao_pessoal_v15.html` (Chrome ou Edge recomendados, para salvar direto no arquivo e usar a pasta de integração).
 - **Dados:** ficam num arquivo JSON separado, criptografado com AES-GCM 256 e senha. O HTML não guarda nenhum dado, então pode ser atualizado à vontade.
-- **Versão atual:** Central 15.11, Hub 2.0 (cockpit de gestão com login único, [ADR-0035](docs/adr/0035-hub-cockpit-de-gestao.md)), assistente 2.6 e Mapa de Férias 1.4 (dentro da Central). As férias são uma página da Central, não mais uma ferramenta à parte, e só o gestor cadastra: os times não recebem ferramenta de férias ([ADR-0033](docs/adr/0033-ferias-dentro-da-central.md), [ADR-0036](docs/adr/0036-ferias-so-o-gestor-cadastra.md)). Se uma ferramenta disser "Daqui não dá para abrir pastas", ela foi aberta no Safari, no Firefox, no celular ou numa pré-visualização: o aviso diz o que fazer ([ADR-0030](docs/adr/0030-aviso-quando-nao-da-para-abrir-pastas.md)). A Central lê as finanças dos times e o custo de cada iniciativa, só para leitura ([ADR-0028](docs/adr/0028-financas-na-central-so-leitura.md)); o hub e a Central passam a senha da sessão para as ferramentas que abrem ([ADR-0029](docs/adr/0029-uma-senha-por-sessao.md)); o arquivo pessoal fica numa pasta só sua, de preferência no seu OneDrive ([ADR-0008](docs/adr/0008-local-individual-comum-sincronizado.md)); a pasta compartilhada fica marcada como **Sempre manter neste dispositivo** em cada computador, para o navegador ler os arquivos dos outros ([ADR-0004](docs/adr/0004-troca-por-arquivos-na-pasta-sincronizada.md)).
+- **Versão atual:** Central 15.12, Hub 2.1 (cockpit de gestão com login único, [ADR-0035](docs/adr/0035-hub-cockpit-de-gestao.md)), assistente 2.7 e Mapa de Férias 1.4 (dentro da Central). As férias são uma página da Central, não mais uma ferramenta à parte, e só o gestor cadastra: os times não recebem ferramenta de férias ([ADR-0033](docs/adr/0033-ferias-dentro-da-central.md), [ADR-0036](docs/adr/0036-ferias-so-o-gestor-cadastra.md)). Se uma ferramenta disser "Daqui não dá para abrir pastas", ela foi aberta no Safari, no Firefox, no celular ou numa pré-visualização: o aviso diz o que fazer ([ADR-0030](docs/adr/0030-aviso-quando-nao-da-para-abrir-pastas.md)). A Central lê as finanças dos times e o custo de cada iniciativa, só para leitura ([ADR-0028](docs/adr/0028-financas-na-central-so-leitura.md)); o hub e a Central passam a senha da sessão para as ferramentas que abrem ([ADR-0029](docs/adr/0029-uma-senha-por-sessao.md)); o arquivo pessoal fica numa pasta só sua, de preferência no seu OneDrive ([ADR-0008](docs/adr/0008-local-individual-comum-sincronizado.md)); a pasta compartilhada fica marcada como **Sempre manter neste dispositivo** em cada computador, para o navegador ler os arquivos dos outros ([ADR-0004](docs/adr/0004-troca-por-arquivos-na-pasta-sincronizada.md)).
 - **Atualizar de versão:** abra o arquivo de dados atual na versão nova. A migração é automática e um backup do arquivo anterior é baixado.
 
 ## Telas
@@ -19,7 +21,7 @@ Ferramenta de gestão pessoal em um único arquivo HTML, sem servidor e sem inst
 | 6 | Iniciativas | Lista, Semana, Horizonte, Linha do tempo (fases sobrepostas) e Dependências; aba Finanças com o custo da iniciativa somando os times |
 | 7 | Fóruns | Pautas, Acordos e Staff (semana dos times) |
 | 8 | Times | Cadastro dos times, métricas publicadas pelos times, finanças de cada time (só leitura, 15.5) e visão de cada time (backlog, features, reunião de status) |
-| 9 | Integração | Pasta e chaves, arquivos recebidos, conciliação e compartilhamento com os times |
+| 9 | Integração | Pasta e chaves, **Remessas** (arquivos que chegaram dos times), conciliação e compartilhamento com os times |
 
 **Documentação:** [funcionalidades, usos e objetivos](docs/funcionalidades.md) · [jornada do usuário](docs/jornada-do-usuario.md) · [passo a passo](docs/passo-a-passo.md) · [decisões de arquitetura (ADRs)](docs/adr/README.md), com o checklist para funcionalidades novas.
 

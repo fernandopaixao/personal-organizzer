@@ -1,6 +1,6 @@
 # Visão geral da solução · Central de Gestão, Quadro do Time e integração
 
-*25/11/2026 · estado atual: Central v15.11, Quadro do Time 2.3, Hub 2.0, Finanças do Grupo 1.5 e do Time 1.4, Mapa de Férias 1.4 (dentro da Central) e contratos 1.0 (detalhes em `docs/plano-v15.md`, `docs/plano-hub.md`, `docs/plano-financas.md` e [`contratos/`](../contratos/LEIA-ME.md))*
+*25/11/2026 · estado atual: Remessa · Central v15.12, Quadro do Time 2.3, Hub 2.1, Finanças do Grupo 1.6 e do Time 1.4, Mapa de Férias 1.4 (dentro da Central) e contratos 1.0 (detalhes em `docs/plano-v15.md`, `docs/plano-hub.md`, `docs/plano-financas.md` e [`contratos/`](../contratos/LEIA-ME.md))*
 
 > **Por onde começar:** [funcionalidades, usos e objetivos](funcionalidades.md) · [jornada do usuário](jornada-do-usuario.md) · [passo a passo](passo-a-passo.md) · [decisões de arquitetura (ADRs)](adr/README.md)
 
@@ -9,6 +9,8 @@ Este documento explica a solução como um todo: quais ferramentas existem, para
 ---
 
 ## 1. Em uma página
+
+A solução se chama **Remessa** ([ADR-0037](adr/0037-nome-remessa.md)): envelopes lacrados (arquivos cifrados com a chave de cada time) numa caixa postal (a pasta compartilhada). Só quem tem a chave abre; o que chega de outra pessoa é uma **nova remessa**.
 
 A solução é um pequeno ecossistema de **ferramentas HTML de arquivo único**, sem servidor, sem instalação e sem chamadas de rede. Cada ferramenta guarda os dados num arquivo separado do HTML, e as ferramentas conversam apenas por **arquivos JSON cifrados numa pasta do SharePoint sincronizada** no computador de cada um.
 

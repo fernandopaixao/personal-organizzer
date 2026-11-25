@@ -5,7 +5,8 @@
 
 - injeta o núcleo comum (financas/src/nucleo.css e nucleo.js) em cada HTML;
 - injeta o tema claro/escuro/automático (financas/src/tema.js) e a senha por sessão (financas/src/sessao.js) no <head> de cada HTML;
-- só na versão experimental (tools/build_experimental.py): identidade visual e ícone da aba (função visual, ADR-0034);
+- ícone da aba da marca Remessa em cada HTML (financas/src/icones/, ADR-0037) e, só na versão experimental
+  (tools/build_experimental.py), a identidade visual (função visual, ADR-0034);
 - financas/financas_time.html   ← src/time.html
 - financas/financas_grupo.html  ← src/grupo.html (+ Finanças do Time embutido, para gerar o HTML de cada time)
 - hub.html                      ← src/hub.html (tela inicial do dia a dia, sem nada embutido)
@@ -46,10 +47,10 @@ def tema(html):
     i = html.index('</head>')
     return visual(sessao(html[:i] + tag + '\n' + html[i:]))
 
-# ---- Visual experimental (ADR-0034) ----
-# No repositório, financas/src/ não tem identidade.css nem icones/: visual() não muda nada.
-# tools/build_experimental.py monta uma cópia temporária do repositório com esses arquivos
-# (vindos de experimental/src/) e roda este mesmo build: aí cada HTML ganha a identidade e o ícone da aba.
+# ---- Marca Remessa (ADR-0037) e visual experimental (ADR-0034) ----
+# O ícone da aba (financas/src/icones/, um por ferramenta, com o lacre azul da Remessa no canto) entra em todos os HTMLs,
+# inclusive nas cópias embutidas. identidade.css só existe na cópia temporária que
+# tools/build_experimental.py monta (vinda de experimental/src/): aí cada HTML ganha também o visual novo.
 ICONES = {'Central de Gestão': 'central', 'Quadro do Time': 'quadro', 'Hub da solução': 'hub',
           'Início da solução': 'inicio', 'Finanças do Time': 'financas-time',
           'Finanças do Grupo': 'financas-grupo', 'Mapa de Férias': 'ferias'}
