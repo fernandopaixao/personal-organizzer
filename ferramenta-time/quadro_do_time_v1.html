@@ -740,7 +740,7 @@ pre.json{background:#f6f7fb;border-radius:10px;padding:12px;font-size:11.5px;max
      gestao-status/1, gestao-metricas/1 dentro de gestao-envelope/1 (AES-256-GCM).
    - Só métricas de time, calculadas a partir da movimentação dos cards.
    ========================================================================= */
-const TOOL = 'quadro_do_time_v1.html', TOOL_VERSION = '2.4.0';
+const TOOL = 'quadro_do_time_v1.html', TOOL_VERSION = '2.5.0';
 /* Pré-configuração gravada pela Central de Gestão (Pessoas › Times › HTML do time).
    No arquivo original fica null; a Central troca o trecho entre os marcadores por um
    objeto quadro-preset/1: { team: { name, slug, prefix, contact }, people: [{ name, role }], key? }.
@@ -754,7 +754,8 @@ const PRESET = (() => {
     key: typeof p.key === 'string' ? p.key.trim() : '', generatedAt: s(p.generatedAt, 40) };
 })();
 const DB_SCHEMA = 'quadro-time/1', DB_SCHEMA_ENC = 'quadro-time-cifrado/1';
-const KINDS = ['história','feature','entrega','bug','spike','melhoria'];
+// 2.5: "feature" deixou de ser tipo de card. Feature é o nível entre a iniciativa e os cards, como na Central (ADR-0039).
+const KINDS = ['história','entrega','bug','spike','melhoria'];
 const BLOCK_CATS = [['terceiro','Dependência de terceiro'],['decisao','Aguardando decisão'],['ambiente','Ambiente ou acesso'],['negocio','Dúvida de negócio'],['outro','Outro']];
 const ST_LABEL = { ok:'No prazo', attn:'Atenção', late:'Atrasada', done:'Concluída', paused:'Pausada', auto:'Automático' };
 const BUCKET = { now:'Agora', next:'Próximas', later:'Depois', discovery:'Discovery' };
@@ -888,8 +889,8 @@ function newDb(name, slug) {
       ],
       commitCol: 'pronto', startCol: 'fazendo', autoPublish: true
     },
-    seq: { card: 0, epic: 0, sprint: 0, person: 0 },
-    people: [], epics: [], cards: [], sprints: [],
+    seq: { card: 0, epic: 0, sprint: 0, person: 0, feature: 0 },
+    people: [], epics: [], features: [], cards: [], sprints: [],
     publish: { revision: 0, lastStatus: null, lastMetrics: null }
   };
 }
@@ -897,14 +898,15 @@ function normalizeDb(d) {
   if (!d || d.schema !== DB_SCHEMA) throw new Error('Arquivo não é um quadro do time (quadro-time/1)');
   d.team ??= { name: 'Time', slug: '', upd: 0 }; d.settings ??= newDb('', '').settings;
   d.settings.autoPublish ??= true;
-  d.seq ??= { card: 0, epic: 0, sprint: 0 }; d.seq.person ??= 0; d.epics ??= []; d.cards ??= []; d.sprints ??= []; d.people ??= [];
+  d.seq ??= { card: 0, epic: 0, sprint: 0 }; d.seq.person ??= 0; d.seq.feature ??= 0; d.features ??= []; d.epics ??= []; d.cards ??= []; d.sprints ??= []; d.people ??= [];
   // Migração: a lista antiga (settings.members, só nomes) e os responsáveis dos cards viram pessoas do time
   const nomes = [...(d.settings.members || []), ...d.cards.map(c => c.owner)].map(n => String(n || '').trim()).filter(Boolean);
   for (const n of nomes) if (!d.people.some(p => normName(p.name) === normName(n))) { d.seq.person++; d.people.push({ id: `P-${d.seq.person}`, uid: uid(), name: n, role: '', active: true, createdAt: agoraComFuso(), upd: Date.now() }); }
   delete d.settings.members;
   for (const p of d.people) p.uid ??= uid();
   d.publish ??= { revision: 0, lastStatus: null, lastMetrics: null };
-  for (const c of d.cards) { c.history ??= []; c.blocks ??= []; c.uid ??= uid(); }
+  for (const c of d.cards) { c.history ??= []; c.blocks ??= []; c.uid ??= uid(); c.featureId ??= null; }
+  for (const f of d.features) { f.uid ??= uid(); f.status ??= 'open'; }
   for (const e of d.epics) { e.updates ??= []; e.featureNotes ??= {}; e.uid ??= uid(); }
   for (const s of d.sprints) { s.committed ??= []; s.uid ??= uid(); }
   return d;
@@ -992,7 +994,7 @@ function applyCatalogLinks() {    // links[] e aliases[] decididos na conciliaç
   if (!catalog || !db) return 0; let n = 0; const t = Date.now();
   for (const l of catalog.links || []) {
     if (l.kind === 'initiative') { const e = epicById(l.localId); if (e && !e.centralRef) { e.centralRef = l.ref; e.upd = t; n++; } }
-    if (l.kind === 'feature') { const c = cardById(l.localId); if (c && !c.featureRef) { c.featureRef = l.ref; c.upd = t; n++; } }
+    if (l.kind === 'feature') { const c = cardById(l.localId), lf = featById(l.localId); if (c && !c.featureRef) { c.featureRef = l.ref; c.featureId = null; c.upd = t; n++; } else if (lf) { unirFeature(lf, l.ref); n++; } }
   }
   const al = new Map((catalog.aliases || []).map(a => [a.ref, a.sameAs]));
   if (al.size) {
@@ -1048,6 +1050,44 @@ async function catalogoDoCache() {
 
 /* --------------------------- montar status.json --------------------------- */
 function epicCards(e) { return activeCards().filter(c => c.epicId === e.id); }
+/* --------- features do time: Iniciativa › Feature › Card, a mesma hierarquia da Central (ADR-0039) --------- */
+// A feature pode vir da Central (catálogo, código PAG-042.F2) ou ser criada pelo time (FEAT-3), dentro de uma iniciativa,
+// e não muda de iniciativa. Cada card fica em no máximo uma feature: c.featureRef (da Central) ou c.featureId (do time).
+const featsLive = () => (db.features || []).filter(f => !f.deleted);
+const featById = id => (db.features || []).find(f => f.id === id && !f.deleted);
+const epicFeats = e => featsLive().filter(f => f.epicId === e.id);
+const featCards = f => activeCards().filter(c => c.featureId === f.id);
+const FEAT_ST = { open: 'aberta', done: 'concluída', cancelled: 'cancelada' };
+function novaFeature(d) {
+  db.seq.feature = (db.seq.feature || 0) + 1;
+  const f = { id: `FEAT-${db.seq.feature}`, uid: uid(), epicId: d.epicId, name: clip(d.name, 200) || 'Nova feature', owner: d.owner || '', due: isYmd(d.due) ? d.due : '', status: 'open', notes: d.notes || '', doneAt: null, createdAt: agoraComFuso(), upd: Date.now() };
+  db.features.push(f); return f;
+}
+function ligarFeature(c, v) {
+  if (!v) { c.featureRef = null; c.featureId = null; }
+  else if (FEAT_RE.test(v)) { c.featureRef = v; c.featureId = null; const ep = epicsLive().find(e => e.centralRef === v.split('.')[0]); if (ep) c.epicId = ep.id; }
+  else { const f = featById(v); if (!f) return false; c.featureId = f.id; c.featureRef = null; c.epicId = f.epicId; }
+  c.upd = Date.now(); return true;
+}
+// A feature do time vira a feature da Central (conciliação do gestor ou escolha do time): os cards passam para o código da Central.
+function unirFeature(f, ref) {
+  const t = Date.now(); let n = 0;
+  for (const c of live()) if (c.featureId === f.id) { c.featureRef = ref; c.featureId = null; c.upd = t; n++; }
+  f.deleted = true; f.mergedInto = ref; f.upd = t; return n;
+}
+function featStatus(f) {
+  if (f.status === 'done') return 'done';
+  const cs = featCards(f); return cs.length ? derivedStatus(cs, { due: f.due, forecast: cs.filter(c => !isDone(c)).map(c => c.due).filter(isYmd).sort().at(-1) }) : 'ok';
+}
+function cardFeat(c) {   // { ref, nome, curto, time } da feature do card, ou null
+  if (c.featureRef) { const f = catFeature(c.featureRef); return { ref: c.featureRef, nome: f?.name || '', curto: c.featureRef.split('.').pop(), time: false }; }
+  const f = c.featureId ? featById(c.featureId) : null;
+  return f ? { ref: f.id, nome: f.name, curto: clip(f.name, 18), time: true } : null;
+}
+function featTag(c, cls = 'code bvc') {
+  const cf = cardFeat(c); if (!cf) return '';
+  return cf.time ? `<span class="${cls}" title="Feature do time ${esc(cf.ref)}: ${esc(cf.nome)}">◆ ${esc(cf.curto)}</span>` : `<span class="${cls}" title="${esc(cf.ref)}${cf.nome ? ' · ' + esc(cf.nome) : ''}">${esc(cf.curto)}</span>`;
+}
 function derivedStatus(cards, { due, forecast } = {}) {
   const t = today(), open = cards.filter(c => !isDone(c));
   if (cards.length && !open.length) return 'done';
@@ -1083,12 +1123,21 @@ function buildStatus(revision, generatedAt) {
       return f;
     });
     if (feats.length) o.features = feats.slice(0, 200);
-    const items = all.filter(c => (c.featureRef || c.showToCentral) && (!(isDone(c) || c.cancelledAt) || new Date(c.cancelledAt || doneAt(c) || 0) >= lim60)).slice(0, 500).map(c => {
+    // features do time vão como itens kind "feature"; os cards dentro delas levam featureLocalId (gestao-status/1, campo opcional)
+    const fsT = (db.features || []).filter(f => f.epicId === e.id && !f.deleted && (f.status === 'open' || new Date(f.doneAt || f.upd || 0) >= lim60));
+    const vivas = new Set(fsT.map(f => f.id));
+    const itF = fsT.map(f => {
+      const it = { localId: f.id, title: clip(f.name, 200), kind: 'feature', status: f.status === 'done' ? 'done' : f.status === 'cancelled' ? 'cancelled' : 'open', featureRef: null };
+      if (isYmd(f.due)) it.due = f.due; if (f.status === 'done' && f.doneAt) it.doneAt = ymd(new Date(f.doneAt)); if (f.owner) it.owner = clip(f.owner, 80);
+      return it;
+    });
+    const items = itF.concat(all.filter(c => (c.featureRef || vivas.has(c.featureId) || c.showToCentral) && (!(isDone(c) || c.cancelledAt) || new Date(c.cancelledAt || doneAt(c) || 0) >= lim60)).map(c => {
       const it = { localId: c.id, title: clip(c.title, 200), kind: clip(c.kind || 'história', 30), status: cardStatusOut(c), featureRef: FEAT_RE.test(c.featureRef || '') ? c.featureRef : null };
+      if (!it.featureRef && vivas.has(c.featureId)) it.featureLocalId = c.featureId;
       if (isYmd(c.due)) it.due = c.due; const d = doneAt(c); if (d) it.doneAt = ymd(d);
       if (c.owner) it.owner = clip(c.owner, 80); if (https(c.link)) it.link = https(c.link);
       return it;
-    });
+    })).slice(0, 500);
     if (items.length) o.items = items;
     o.counts = { cards_total: cards.length, cards_done: done.length, cards_blocked: cards.filter(c => c.blocked && !isDone(c)).length };
     if (https(e.link)) o.link = https(e.link);
@@ -1197,7 +1246,8 @@ function validar(o) {
       P(i.localId && i.localId.length <= 80, 'localId inválido'); P(i.ref === null || INIT_RE.test(i.ref), `${i.localId}: ref inválido`);
       P(['ok', 'attn', 'late', 'done', 'paused'].includes(i.status), `${i.localId}: status inválido`); d(i.forecastEnd, i.localId);
       for (const f of i.features || []) P(FEAT_RE.test(f.ref), `${i.localId}: feature ${f.ref} inválida`);
-      for (const it of i.items || []) { P(it.featureRef === null || FEAT_RE.test(it.featureRef), `${it.localId}: featureRef inválido`); d(it.due, it.localId); d(it.doneAt, it.localId); P(!it.link || /^https:\/\//.test(it.link), `${it.localId}: link deve ser https`); }
+      const fLoc = new Set((i.items || []).filter(x => x.kind === 'feature').map(x => x.localId));
+      for (const it of i.items || []) { P(it.featureRef === null || FEAT_RE.test(it.featureRef), `${it.localId}: featureRef inválido`); P(it.featureLocalId === undefined || (it.featureRef === null && fLoc.has(it.featureLocalId)), `${it.localId}: featureLocalId deve apontar para uma feature do time nesta iniciativa`); d(it.due, it.localId); d(it.doneAt, it.localId); P(!it.link || /^https:\/\//.test(it.link), `${it.localId}: link deve ser https`); }
     }
   } else if (o.schema === 'gestao-metricas/1') {
     P(o.metrics.length <= 100, 'mais de 100 métricas'); const ids = new Set();
@@ -1321,17 +1371,18 @@ function pedirSenhaDlg(errou) {
 }
 function mergeDb(mine, theirs) {     // une mudanças de duas pessoas no mesmo arquivo: por item, vence a alteração mais recente
   const out = structuredClone(theirs);
-  out.people ??= []; mine.people ??= [];
-  for (const k of ['people', 'epics', 'cards', 'sprints']) {
+  out.people ??= []; mine.people ??= []; out.features ??= []; mine.features ??= []; out.seq ??= {}; mine.seq ??= {};
+  for (const k of ['people', 'epics', 'features', 'cards', 'sprints']) {
     const m = new Map(out[k].map(x => [x.id, x]));
     for (const x of mine[k]) {
       const t = m.get(x.id);
       if (!t) { out[k].push(x); continue; }
       if (t.uid !== x.uid) {         // mesmo código criado por duas pessoas: renumera o meu
-        const [pref, sk] = { cards: ['CARD', 'card'], epics: ['EPIC', 'epic'], sprints: ['SPR', 'sprint'], people: ['P', 'person'] }[k];
+        const [pref, sk] = { cards: ['CARD', 'card'], epics: ['EPIC', 'epic'], features: ['FEAT', 'feature'], sprints: ['SPR', 'sprint'], people: ['P', 'person'] }[k];
         if (k === 'people') { const igual = out.people.find(p => normName(p.name) === normName(x.name)); if (igual) continue; }
-        out.seq[sk] = Math.max(out.seq[sk], mine.seq[sk]) + 1; const novo = `${pref}-${out.seq[sk]}`;
-        if (k === 'epics') for (const c of mine.cards) if (c.epicId === x.id) { c.epicId = novo; c.upd = Date.now(); }
+        out.seq[sk] = Math.max(out.seq[sk] || 0, mine.seq[sk] || 0) + 1; const novo = `${pref}-${out.seq[sk]}`;
+        if (k === 'epics') { for (const c of mine.cards) if (c.epicId === x.id) { c.epicId = novo; c.upd = Date.now(); } for (const f of mine.features) if (f.epicId === x.id) { f.epicId = novo; f.upd = Date.now(); } }
+        if (k === 'features') for (const c of mine.cards) if (c.featureId === x.id) { c.featureId = novo; c.upd = Date.now(); }
         if (k === 'sprints') for (const c of mine.cards) if (c.sprintId === x.id) { c.sprintId = novo; c.upd = Date.now(); }
         x.id = novo; x.upd = Date.now(); out[k].push(x); continue;
       }
@@ -1340,7 +1391,7 @@ function mergeDb(mine, theirs) {     // une mudanças de duas pessoas no mesmo a
   }
   if ((mine.settings.upd || 0) > (out.settings.upd || 0)) out.settings = mine.settings;
   if ((mine.team.upd || 0) > (out.team.upd || 0)) out.team = mine.team;
-  for (const s of ['card', 'epic', 'sprint', 'person']) out.seq[s] = Math.max(out.seq[s] || 0, mine.seq[s] || 0);
+  for (const s of ['card', 'epic', 'sprint', 'person', 'feature']) out.seq[s] = Math.max(out.seq[s] || 0, mine.seq[s] || 0);
   out.publish.revision = Math.max(out.publish.revision || 0, mine.publish.revision || 0);
   for (const s of ['lastStatus', 'lastMetrics']) if ((mine.publish[s]?.revision || 0) > (out.publish[s]?.revision || 0)) out.publish[s] = mine.publish[s];
   return out;
@@ -1411,7 +1462,7 @@ async function criarArquivo(name, slug, senha, pessoas = []) {
 function novoCard(dados = {}) {
   db.seq.card++; const at = agoraComFuso(), t = Date.now();
   const col = dados.col || cols()[0].id;
-  const c = { id: `CARD-${db.seq.card}`, uid: uid(), title: dados.title || 'Novo card', kind: dados.kind || 'história', epicId: dados.epicId || '', featureRef: dados.featureRef || null,
+  const c = { id: `CARD-${db.seq.card}`, uid: uid(), title: dados.title || 'Novo card', kind: dados.kind || 'história', epicId: dados.epicId || '', featureRef: dados.featureRef || null, featureId: dados.featureId || null,
     owner: dados.owner || '', due: dados.due || '', points: dados.points ?? null, notes: '', link: '', showToCentral: false, col, history: [{ col, at }], blocked: null, blocks: [],
     sprintId: 'sprintId' in dados ? dados.sprintId : (activeSprint() && colIdx(col) > 0 ? activeSprint().id : null), createdAt: at, upd: t, order: t };
   db.cards.push(c); return c;
@@ -1483,7 +1534,7 @@ function render() {
   const alert = (!keysInfo.atual || !SLUG_RE.test(db.team.slug || '') || pub.err) && !db.demo, MAIN = ['board', 'backlog', 'epics', 'metrics'];
   const nav = `<nav class="tnav">${VIEWS.filter(v => MAIN.includes(v[0])).map(([k, l]) => `<button class="${view === k ? 'on' : ''}" data-act="view" data-v="${k}">${l}</button>`).join('')}
     <details class="tmore"><summary title="Mais" aria-label="Mais telas">···${alert ? '<span class="b" style="position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:var(--late)"></span>' : ''}</summary><div class="menu">${VIEWS.filter(v => !MAIN.includes(v[0])).map(([k, l]) => `<button class="${view === k ? 'on' : ''}" data-act="view" data-v="${k}">${l}${k === 'central' && alert ? ' <span class="chip late" style="margin-left:auto">!</span>' : ''}</button>`).join('')}</div></details></nav>`;
-  $('#main').innerHTML = `<header class="top top2"><div class="brand"><div class="logo" title="Quadro do Time">${esc(initials(db.team.name) || 'QT')}</div><div style="min-width:0"><b>${esc(db.team.name)}</b>${db.team.slug ? `<div class="code">${esc(db.team.slug)}</div>` : ''}</div></div>${nav}<h1>${esc(title)}</h1><div class="quick"><span class="pl">+</span><input id="quickCard" autocomplete="off" placeholder="Novo card… @pessoa amanhã #iniciativa" aria-label="Criar card rápido"><button class="btn sm ghost more" data-act="quickMore" title="Abrir o formulário completo">Detalhes</button><div class="qinfo" id="qinfo">Enter cria no ${esc(cols()[0].name)} · @pessoa responsável · hoje, amanhã ou dd/mm · #iniciativa ou #PAG-042 · F2 feature da Central · !bug, !spike, !feature…</div></div><div class="grow"></div><div id="ondeEstou"></div><div class="row" id="chrome">${chromeHtml()}</div>${view === 'backlog' ? '' : '<button class="btn pri" data-act="newCard">+ Card</button>'}</header>
+  $('#main').innerHTML = `<header class="top top2"><div class="brand"><div class="logo" title="Quadro do Time">${esc(initials(db.team.name) || 'QT')}</div><div style="min-width:0"><b>${esc(db.team.name)}</b>${db.team.slug ? `<div class="code">${esc(db.team.slug)}</div>` : ''}</div></div>${nav}<h1>${esc(title)}</h1><div class="quick"><span class="pl">+</span><input id="quickCard" autocomplete="off" placeholder="Novo card… @pessoa amanhã #iniciativa" aria-label="Criar card rápido"><button class="btn sm ghost more" data-act="quickMore" title="Abrir o formulário completo">Detalhes</button><div class="qinfo" id="qinfo">Enter cria no ${esc(cols()[0].name)} · @pessoa responsável · hoje, amanhã ou dd/mm · #iniciativa ou #PAG-042 · F2 feature da Central · !bug, !spike, !entrega…</div></div><div class="grow"></div><div id="ondeEstou"></div><div class="row" id="chrome">${chromeHtml()}</div>${view === 'backlog' ? '' : '<button class="btn pri" data-act="newCard">+ Card</button>'}</header>
     ${db.demo ? '<div class="banner">Exemplo com dados fictícios do time Pagamentos. Nada é salvo nem publicado. <button class="btn sm" data-act="home">Voltar ao início</button></div>' : ''}
     ${view === 'board' ? '' : `<h2 class="vtitle">${esc(title)}</h2>`}${body}`;
   document.body.classList.toggle('dense', view === 'board' && !!ui.dense);
@@ -1529,7 +1580,7 @@ function boardCards() {
     if (ui.onlyLate && !(isYmd(c.due) && c.due < today() && !isDone(c))) return false;
     if (ui.onlyAging && agingLevel(c) !== 3) return false;
     if (ui.ownerF && normName(c.owner) !== normName(ui.ownerF)) return false;
-    if (q && !(`${c.id} ${c.title} ${c.owner} ${c.featureRef || ''}`.toLowerCase().includes(q))) return false;
+    if (q && !(`${c.id} ${c.title} ${c.owner} ${c.featureRef || ''} ${cardFeat(c)?.nome || ''}`.toLowerCase().includes(q))) return false;
     if (isDone(c) && !ui.showOldDone && (doneAt(c) || 0) < lim) return false;
     return true;
   });
@@ -1580,8 +1631,9 @@ function vBoard() {
     <select class="sel" data-act="ef" style="height:30px;border-radius:99px">${epicOpts(ui.epicFilter, 'Todas as iniciativas', true)}</select>
     ${ppl.length ? `<span class="fppl" title="Filtrar por responsável">${ppl.slice(0, 10).map(p => `<button class="${normName(ui.ownerF) === normName(p.name) ? 'on' : ''}" data-act="fOwner" data-name="${esc(p.name)}" title="${esc(p.name)}">${avatar(p.name)}</button>`).join('')}</span>` : ''}
     <input class="sin" placeholder="Buscar" value="${esc(ui.q)}" data-act="q" style="width:120px;height:30px">
-    <div class="grow"></div><span class="small muted" style="margin-left:4px">Raias</span><span class="segx">${[['none', 'Nenhuma'], ['epic', 'Iniciativa'], ['owner', 'Pessoa']].map(([k, l]) => `<button class="${ui.lanes === k ? 'on' : ''}" data-act="lanes" data-v="${k}">${l}</button>`).join('')}</span>
-    <button class="fchip ${ui.dense ? 'on' : ''}" data-act="dense" data-v="${ui.dense ? '' : 1}" title="Cards compactos: só título, responsável e tempo na coluna">Compacto</button></div>
+    <div class="grow"></div><span class="small muted" style="margin-left:4px">Raias</span><span class="segx">${[['none', 'Nenhuma'], ['epic', 'Iniciativa'], ['feature', 'Feature'], ['owner', 'Pessoa']].map(([k, l]) => `<button class="${ui.lanes === k ? 'on' : ''}" data-act="lanes" data-v="${k}">${l}</button>`).join('')}</span>
+    <button class="fchip ${ui.dense ? 'on' : ''}" data-act="dense" data-v="${ui.dense ? '' : 1}" title="Cards compactos: só título, responsável e tempo na coluna">Compacto</button>
+    <button class="fchip" data-act="exportar" title="Baixar os dados do quadro num arquivo legível (CSV ou JSON), sem criptografia">Exportar</button></div>
     ${ui.boardFilter === 'sprint' && !sp ? '<div class="banner">Nenhuma sprint em andamento: mostrando todos os cards. Times em fluxo contínuo podem trabalhar sem sprints.</div>' : ''}`;
   const bc = boardCols(), last = cols().length - 1;
   const colBody = (col, list) => `<div class="cards">${list.sort((a, b) => a.order - b.order).map(kcHtml).join('')}</div>${colIdx(col.id) < last ? `<button class="addc" data-act="newCard" data-col="${col.id}">+ Adicionar card</button>` : ''}`;
@@ -1595,11 +1647,21 @@ function vBoard() {
     }).join('');
     return filt + `<div class="board board2">${html}</div>` + pulseHtml(cs);
   }
-  const lanes = ui.lanes === 'epic' ? [...epicsLive().filter(e => e.status !== 'done').map(e => ({ k: e.id, name: e.name, sub: e.centralRef || 'do time', f: c => c.epicId === e.id })), { k: '-', name: 'Sem iniciativa', f: c => !c.epicId || !epicById(c.epicId) || epicById(c.epicId).deleted }]
+  const lanes = ui.lanes === 'feature' ? lanesFeature() : ui.lanes === 'epic' ? [...epicsLive().filter(e => e.status !== 'done').map(e => ({ k: e.id, name: e.name, sub: e.centralRef || 'do time', f: c => c.epicId === e.id })), { k: '-', name: 'Sem iniciativa', f: c => !c.epicId || !epicById(c.epicId) || epicById(c.epicId).deleted }]
     : [...ppl.map(p => ({ k: p.id, name: p.name, sub: p.role || '', f: c => normName(c.owner) === normName(p.name) })), { k: '-', name: 'Sem responsável', f: c => !c.owner || !ppl.some(p => normName(p.name) === normName(c.owner)) }];
   const head = `<div class="lanehd"><div class="lh"></div>${bc.map(col => isLast(col) && !ui.doneOpen ? '<div style="flex:0 0 58px"></div>' : `<div class="col" style="flex:0 0 272px">${colHead(col, colIdx(col.id), activeCards().filter(c => c.col === col.id).length)}</div>`).join('')}</div>`;
   const rows = lanes.map(L => { const lc = cs.filter(L.f); if (!lc.length) return ''; return `<div class="lane"><div class="lh">${esc(L.name)}<small>${lc.length} card(s)${L.sub ? ' · ' + esc(L.sub) : ''}</small></div>${bc.map(col => isLast(col) && !ui.doneOpen ? `<section class="col dcol" data-col="${col.id}" data-act="doneOpen"><b>${lc.filter(c => c.col === col.id).length}</b></section>` : `<section class="col" data-col="${col.id}"><div class="cards">${lc.filter(c => c.col === col.id).sort((a, b) => a.order - b.order).map(kcHtml).join('')}</div></section>`).join('')}</div>`; }).join('');
   return filt + `<div class="lanes board">${head}${rows || '<div class="muted small">Nenhum card neste filtro.</div>'}</div>` + pulseHtml(cs);
+}
+function lanesFeature() {     // uma raia por feature (da Central ou do time), dentro de cada iniciativa
+  const out = [];
+  for (const e of epicsLive().filter(x => x.status !== 'done')) {
+    const ci = catInit(e.centralRef);
+    for (const f of (ci?.features || []).filter(f => f.status !== 'cancelled')) out.push({ k: f.ref, name: f.name, sub: `${f.ref} · ${e.name}`, f: c => c.featureRef === f.ref });
+    for (const f of epicFeats(e).filter(f => f.status !== 'cancelled')) out.push({ k: f.id, name: f.name, sub: `feature do time · ${e.name}`, f: c => c.featureId === f.id && !!featById(c.featureId) });
+  }
+  out.push({ k: '-', name: 'Sem feature', f: c => !out.some(l => l.k !== '-' && l.f(c)) });
+  return out;
 }
 function cardChips2(c) {
   const f = c.featureRef ? catFeature(c.featureRef) : null, od = f ? openDeps(f) : [], e = epicById(c.epicId);
@@ -1610,7 +1672,7 @@ function cardChips2(c) {
 function kcHtml(c) {
   const lv = agingLevel(c), d = relDue(c), soon = d && !isDone(c) && isYmd(c.due) && c.due <= addDays(today(), 5), ec = epicTone(c);
   return `<article class="kc ${c.blocked ? 'blk' : ''} ${ui.selCard === c.id ? 'sel' : ''}" draggable="true" data-card="${c.id}" data-act="card" tabindex="0" ${ec ? `style="--ec:${ec}"` : ''}>
-    <div class="row small muted">${kic(c.kind)}<span class="code">${esc(c.id)}</span>${c.featureRef ? `<span class="code bvc" title="${esc(c.featureRef)}">${esc(c.featureRef.split('.').pop())}</span>` : ''}<span class="grow"></span>${soon ? `<span class="due ${d.cls}" title="Prazo ${fmtD(c.due)}">◷ ${d.txt}</span>` : ''}${c.points != null && c.points !== '' && !ui.dense ? `<span class="chip line">${esc(c.points)} pt</span>` : ''}</div>
+    <div class="row small muted">${kic(c.kind)}<span class="code">${esc(c.id)}</span>${featTag(c)}<span class="grow"></span>${soon ? `<span class="due ${d.cls}" title="Prazo ${fmtD(c.due)}">◷ ${d.txt}</span>` : ''}${c.points != null && c.points !== '' && !ui.dense ? `<span class="chip line">${esc(c.points)} pt</span>` : ''}</div>
     <div class="tt">${esc(c.title)}</div><div class="mt">${cardChips2(c)}</div>
     <div class="ft">${c.owner ? avatar(c.owner) : ''}<span class="grow"></span>${lv ? `<span class="age" title="${daysInCol(c)} dia(s) nesta coluna${lv === 3 ? ' · mais que 85% dos cards do time' : lv === 2 ? ' · mais que a metade dos cards do time' : ''}"><i class="on"></i><i class="${lv >= 2 ? 'on' : ''}"></i><i class="${lv === 3 ? 'hot' : ''}"></i></span><span>${daysInCol(c)}d</span>` : ''}</div></article>`;
 }
@@ -1641,7 +1703,7 @@ function listRow(c, sps) {
   const d = relDue(c), col = cols()[colIdx(c.col)];
   const spOpts = [...sps, ...(c.sprintId && !sps.some(s => s.id === c.sprintId) ? [sprintById(c.sprintId)].filter(Boolean) : [])];
   return `<div class="lrow ${isDone(c) ? 'done' : ''}" data-act="card" data-card="${c.id}">${kic(c.kind)}<span class="code muted hm">${c.id}</span>
-    <span class="lt"><span>${esc(c.title)}</span>${c.featureRef ? `<span class="chip bv code">${esc(c.featureRef.split('.')[1])}</span>` : ''}${c.blocked ? '<span class="chip late">bloqueado</span>' : ''}</span>
+    <span class="lt"><span>${esc(c.title)}</span>${featTag(c, 'chip bv code')}${c.blocked ? '<span class="chip late">bloqueado</span>' : ''}</span>
     <span class="colp hm"><i style="background:${colDot(c.col)}"></i>${esc(col?.name || c.col)}</span>
     <span class="hm"><select class="sel" data-act="setSprint" data-card="${c.id}" onclick="event.stopPropagation()"><option value="">Sem sprint</option>${spOpts.map(s => `<option value="${s.id}" ${c.sprintId === s.id ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></span>
     <span class="due ${d?.cls || ''}">${d ? '◷ ' + d.txt : '<span class="faint">sem prazo</span>'}</span>${c.owner ? avatar(c.owner) : '<span class="av" title="Sem responsável" style="background:#fff;border:1px dashed var(--faint)"></span>'}</div>`;
@@ -1650,23 +1712,32 @@ function vBacklog() {
   const sps = db.sprints.filter(s => !s.deleted && s.state !== 'closed').sort((a, b) => (a.start || '').localeCompare(b.start || ''));
   const q = normName(ui.lq), t = today();
   const F = { open: c => !isDone(c), late: c => !isDone(c) && isYmd(c.due) && c.due < t, week: c => !isDone(c) && isYmd(c.due) && c.due <= addDays(t, 7), blocked: c => !!c.blocked && !isDone(c), noowner: c => !c.owner && !isDone(c), all: () => true };
-  const base = activeCards().filter(c => !q || normName(`${c.id} ${c.title} ${c.owner} ${c.featureRef || ''}`).includes(q));
+  const base = activeCards().filter(c => !q || normName(`${c.id} ${c.title} ${c.owner} ${c.featureRef || ''} ${cardFeat(c)?.nome || ''}`).includes(q));
   const cs = base.filter(F[ui.bFilter] || F.open);
   const cnt = k => base.filter(F[k]).length;
   let groups;
   if (ui.bGroup === 'col') groups = cols().map(c => ({ key: c.id, name: c.name, def: { col: c.id }, cards: cs.filter(x => x.col === c.id), dot: colDot(c.id) }));
   else if (ui.bGroup === 'owner') { const ps = activePeople(); groups = [...ps.map(p => ({ key: p.id, name: p.name, av: p.name, sub: p.role, def: { owner: p.name }, cards: cs.filter(c => normName(c.owner) === normName(p.name)) })), { key: '-', name: 'Sem responsável', def: {}, cards: cs.filter(c => !c.owner) }, { key: '+', name: 'Fora da lista do time', def: {}, cards: cs.filter(c => c.owner && !ps.some(p => normName(p.name) === normName(c.owner))) }]; }
   else if (ui.bGroup === 'sprint') groups = [...sps.map(s => ({ key: s.id, name: s.name, sub: `${fmtD(s.start)} a ${fmtD(s.end)}${s.state === 'active' ? ' · em andamento' : ''}`, def: { sprintId: s.id }, cards: cs.filter(c => c.sprintId === s.id) })), { key: '-', name: 'Sem sprint', def: { sprintId: null }, cards: cs.filter(c => !c.sprintId || !sps.some(s => s.id === c.sprintId)) }];
+  else if (ui.bGroup === 'feature') {   // Iniciativa › Feature › Card, como na Central
+    groups = [];
+    for (const e of epicsLive().filter(x => x.status !== 'done')) {
+      const ci = catInit(e.centralRef), ec = cs.filter(c => c.epicId === e.id);
+      for (const f of (ci?.features || []).filter(f => f.status !== 'cancelled')) groups.push({ key: f.ref, name: f.name, ref: f.ref, sub: e.name, def: { epicId: e.id, featureRef: f.ref }, cards: ec.filter(c => c.featureRef === f.ref), keep: f.status === 'open' });
+      for (const f of epicFeats(e).filter(f => f.status !== 'cancelled')) groups.push({ key: f.id, name: f.name, lat: true, sub: e.name, def: { epicId: e.id, featureId: f.id }, cards: ec.filter(c => c.featureId === f.id), keep: f.status === 'open', fid: f.id });
+    }
+    groups.push({ key: '-', name: 'Sem feature', def: {}, cards: cs.filter(c => !cardFeat(c)) });
+  }
   else groups = [...epicsLive().filter(e => e.status !== 'done').map(e => ({ key: e.id, name: e.name, ref: e.centralRef || '', lat: !e.centralRef, def: { epicId: e.id }, cards: cs.filter(c => c.epicId === e.id), prog: epicProgress(e) })), { key: '-', name: 'Sem iniciativa', def: { epicId: '' }, cards: cs.filter(c => !c.epicId || epicById(c.epicId)?.status === 'done') }];
   const sortC = (a, b) => (isDone(a) - isDone(b)) || ((b.blocked ? 1 : 0) - (a.blocked ? 1 : 0)) || (a.due || '9999').localeCompare(b.due || '9999') || colIdx(b.col) - colIdx(a.col) || a.order - b.order;
-  const html = groups.filter(g => g.cards.length || ['epic', 'col', 'sprint'].includes(ui.bGroup) && g.key !== '-').map(g => `<div class="lgrp"><div class="lgh">${g.av ? avatar(g.av) : g.dot ? `<span class="colp"><i style="background:${g.dot}"></i></span>` : ''}<h3>${esc(g.name)}</h3>
+  const html = groups.filter(g => g.cards.length || g.keep || ['epic', 'col', 'sprint'].includes(ui.bGroup) && g.key !== '-').map(g => `<div class="lgrp"><div class="lgh">${g.av ? avatar(g.av) : g.dot ? `<span class="colp"><i style="background:${g.dot}"></i></span>` : ''}<h3>${esc(g.name)}</h3>
       ${g.ref ? `<span class="chip bv code">${esc(g.ref)}</span>` : g.lat ? '<span class="chip">do time</span>' : ''}${g.sub ? `<span class="small muted">${esc(g.sub)}</span>` : ''}<span class="small faint">${g.cards.length} card(s)</span>
       ${g.prog != null ? `<span class="row small muted" style="width:140px;flex-wrap:nowrap"><span class="pb"><i style="width:${g.prog}%"></i></span>${g.prog}%</span>` : ''}<span class="grow"></span>
-      <button class="btn sm ghost" data-act="newCardIn" data-def="${esc(JSON.stringify(g.def))}">+ Card</button></div>
+      ${g.fid ? `<button class="btn sm ghost" data-act="editFeat" data-id="${g.fid}">Editar feature</button>` : ''}<button class="btn sm ghost" data-act="newCardIn" data-def="${esc(JSON.stringify(g.def))}">+ Card</button></div>
       ${g.cards.length ? g.cards.sort(sortC).map(c => listRow(c, sps)).join('') : '<div class="empty" style="padding:12px 16px">Nada aqui com este filtro.</div>'}</div>`).join('');
   return `<div class="bar"><div class="sgw" style="flex:none">${[['open', 'Abertos'], ['late', 'Atrasados'], ['week', 'Vencem em 7 dias'], ['blocked', 'Bloqueados'], ['noowner', 'Sem responsável'], ['all', 'Todos']].map(([k, l]) => `<button class="${ui.bFilter === k ? 'on' : ''}" data-act="bFilter" data-v="${k}">${l} <span class="faint">${cnt(k)}</span></button>`).join('')}</div>
     <input class="sin" data-act="lq" placeholder="Filtrar cards" value="${esc(ui.lq)}" style="width:180px"><div class="grow"></div>
-    <span class="small muted">Agrupar por</span><div class="sgw" style="flex:none">${[['epic', 'Iniciativa'], ['owner', 'Responsável'], ['sprint', 'Sprint']].map(([k, l]) => `<button class="${ui.bGroup === k ? 'on' : ''}" data-act="bGroup" data-v="${k}">${l}</button>`).join('')}</div>
+    <span class="small muted">Agrupar por</span><div class="sgw" style="flex:none">${[['epic', 'Iniciativa'], ['feature', 'Feature'], ['owner', 'Responsável'], ['sprint', 'Sprint']].map(([k, l]) => `<button class="${ui.bGroup === k ? 'on' : ''}" data-act="bGroup" data-v="${k}">${l}</button>`).join('')}</div>
     <button class="btn" data-act="newEpic">+ Iniciativa do time</button><button class="btn pri" data-act="newCard">+ Card</button></div>
     <div class="stack">${html || '<div class="card flat muted">Nenhum card ainda. Use a barra no topo ou "+ Card".</div>'}</div>`;
 }
@@ -1720,6 +1791,18 @@ function timeline(e, ci) {
       ${isYmd(e.forecastEnd) ? `<span class="tl-vl f" style="left:${x(e.forecastEnd)}" title="Previsão do time ${fmtD(e.forecastEnd)}"></span>` : ''}</div>
     <div class="legend" style="margin-top:8px"><span><i style="background:var(--late)"></i>hoje</span>${isYmd(ci?.end) ? `<span><i style="background:var(--ink)"></i>prazo na Central ${fmtD(ci.end)}</span>` : ''}${isYmd(e.forecastEnd) ? `<span><i style="background:var(--bv)"></i>previsão do time ${fmtD(e.forecastEnd)}</span>` : ''}<span><i style="background:var(--bv-mid)"></i>fases</span><span>◆ features</span></div></div>`;
 }
+function fcCards(open) {
+  return open.length ? `<div class="cl">${open.slice(0, 5).map(c => `<button class="ci" data-act="card" data-card="${c.id}">${c.owner ? avatar(c.owner) : '<span class="av">–</span>'}<span class="t">${esc(c.title)}</span>${c.blocked ? '<span class="chip late">bloq.</span>' : `<span class="faint">${esc(cols()[colIdx(c.col)]?.name || '')}</span>`}</button>`).join('')}${open.length > 5 ? `<span class="small faint" style="padding-left:6px">+${open.length - 5} card(s)</span>` : ''}</div>` : '';
+}
+function tfcardHtml(e, f) {     // feature criada pelo time, com os cards dentro dela
+  const cs = featCards(f), open = cs.filter(c => !isDone(c)), pr = cs.length ? Math.round((cs.length - open.length) / cs.length * 100) : 0, st = featStatus(f);
+  return `<div class="fcard ${f.status === 'done' ? 'done' : ''}" data-feat="${f.id}"><div class="row"><span class="hd ${st}"></span><span class="chip">do time</span><span class="code muted">${esc(f.id)}</span><span class="grow"></span>${f.status === 'done' ? '<span class="chip">concluída</span>' : f.due ? `<span class="small ${f.due < today() ? 'latec' : 'muted'}">prazo ${fmtD(f.due)}</span>` : ''}</div>
+    <b style="font-size:14px">${esc(f.name)}</b>
+    ${f.owner ? `<div class="row small muted">${avatar(f.owner)}${esc(f.owner)}</div>` : ''}
+    <div class="row small"><div class="pb"><i style="width:${pr}%"></i></div><span class="muted">${cs.length ? `${cs.length - open.length}/${cs.length} cards` : 'sem cards'}</span></div>
+    ${fcCards(open)}
+    <div class="row">${f.status === 'open' ? `<button class="btn sm ghost" data-act="addCardFeat" data-epic="${e.id}" data-fid="${f.id}">+ Card nesta feature</button>` : ''}<button class="btn sm ghost" data-act="editFeat" data-id="${f.id}">Editar</button></div></div>`;
+}
 function fcardHtml(e, f, ci) {
   const cs = epicCards(e).filter(c => c.featureRef === f.ref), open = cs.filter(c => !isDone(c)), ph = featPhase({ ...f, init: ci }), deps = featDeps(f), od = openDeps(f);
   const pr = cs.length ? Math.round((cs.length - open.length) / cs.length * 100) : 0;
@@ -1729,7 +1812,7 @@ function fcardHtml(e, f, ci) {
     <div class="row">${ph ? `<span class="chip line">fase ${esc(ph.name)}</span>` : ''}${deps.map(d => `<span class="chip ${d.f?.status === 'done' ? '' : 'late'}" title="${esc(d.f?.name || '')} (${d.f?.status === 'done' ? 'concluída' : 'aberta'})">depende de ${esc(d.ref.split('.')[1])}</span>`).join('')}</div>
     <div class="row small"><div class="pb"><i style="width:${pr}%"></i></div><span class="muted">${cs.length ? `${cs.length - open.length}/${cs.length} cards` : 'sem cards'}</span></div>
     ${od.length && open.length ? `<div class="small latec">Atenção: depende de ${esc(od.map(d => d.ref).join(', '))}, ainda aberta(s) na Central.</div>` : ''}
-    ${open.length ? `<div class="cl">${open.slice(0, 5).map(c => `<button class="ci" data-act="card" data-card="${c.id}">${c.owner ? avatar(c.owner) : '<span class="av">–</span>'}<span class="t">${esc(c.title)}</span>${c.blocked ? '<span class="chip late">bloq.</span>' : `<span class="faint">${esc(cols()[colIdx(c.col)]?.name || '')}</span>`}</button>`).join('')}${open.length > 5 ? `<span class="small faint" style="padding-left:6px">+${open.length - 5} card(s)</span>` : ''}</div>` : ''}
+    ${fcCards(open)}
     ${f.status !== 'done' ? `<button class="btn sm ghost" style="align-self:flex-start" data-act="addCardFeat" data-epic="${e.id}" data-ref="${esc(f.ref)}">+ Card nesta feature</button>` : ''}</div>`;
 }
 function vEpics() {
@@ -1749,8 +1832,10 @@ function vEpics() {
   const bl = open.filter(c => c.blocked), up = e.updates.at(-1);
   const delta = isYmd(e.forecastEnd) && isYmd(ci?.end) ? Math.round((parseYmd(e.forecastEnd) - parseYmd(ci.end)) / DAY) : null;
   const porCol = cols().map((col, i) => ({ col, n: cs.filter(c => c.col === col.id).length, cor: STAGE_COL[Math.min(STAGE_COL.length - 1, Math.round(i / Math.max(1, cols().length - 1) * (STAGE_COL.length - 1)))] }));
-  const feats = (ci?.features || []).filter(f => f.status !== 'cancelled');
-  const semF = open.filter(c => !c.featureRef);
+  const feats = (ci?.features || []).filter(f => f.status !== 'cancelled'), tfs = epicFeats(e).filter(f => f.status !== 'cancelled');
+  const semF = open.filter(c => !cardFeat(c));
+  const abertasF = [...feats.filter(f => f.status !== 'done').map(f => [f.ref, `${f.ref.split('.')[1]} · ${clip(f.name, 30)}`]), ...tfs.filter(f => f.status === 'open').map(f => [f.id, `◆ ${clip(f.name, 30)} (do time)`])];
+  const ordF = (a, b) => (a.status === 'done') - (b.status === 'done') || (a.due || '9').localeCompare(b.due || '9');
   const detalhe = `<div>
     ${!catalog && e.centralRef ? `<div class="banner">${esc(catalogErr || 'Catálogo da Central não carregado: features e fases aparecem depois de ler o catálogo.')} <button class="btn sm" data-act="view" data-v="central">Abrir Central</button></div>` : ''}
     <div class="ep-head">${ring(prog, 56, st)}<div class="grow" style="min-width:0"><div class="row small muted"><span class="code">${esc(e.id)}</span>${e.centralRef ? `<span class="chip bv code">${esc(e.centralRef)}</span>${ci ? `<span class="chip">${esc(BUCKET[ci.bucket] || ci.bucket)}</span>${ci.owner ? `<span>dono na Central: ${esc(ci.owner)}</span>` : ''}` : '<span class="chip late">fora do catálogo</span>'}` : '<span class="chip" title="O gestor concilia na Central">iniciativa do time, sem vínculo</span>'}</div>
@@ -1766,12 +1851,13 @@ function vEpics() {
     <div class="upd">${up ? avatar(up.author || db.team.name) : ''}<div class="grow" style="min-width:0">${up ? `<q>${esc(up.text)}</q><div class="small muted">${fmtD(up.date)}${up.author ? ' · ' + esc(up.author) : ''} · vai para a reunião de status do gestor</div>` : '<span class="muted small">Nenhuma atualização ainda. Uma linha basta: o que avançou e o que preocupa.</span>'}
       <form class="mini" data-act="quickUpdate" data-id="${e.id}" style="margin-top:8px"><input class="sin" name="t" maxlength="500" placeholder="Nova atualização de status"><button class="btn sm pri">Registrar</button></form></div></div>
     ${ci ? `<div class="sec-t">Linha do tempo da Central <span class="faint" style="text-transform:none;letter-spacing:0;font-weight:500">fases podem se sobrepor</span></div>${timeline(e, ci) || '<div class="small faint">A Central ainda não informou fases nem prazos de features.</div>'}` : ''}
-    ${ci ? `<div class="sec-t">Features da Central <span class="n" style="color:var(--faint)">${feats.length}</span></div>${feats.length ? `<div class="fgrid">${feats.sort((a, b) => (a.status === 'done') - (b.status === 'done') || (a.due || '9').localeCompare(b.due || '9')).map(f => fcardHtml(e, f, ci)).join('')}</div>` : '<div class="small faint">A Central ainda não cadastrou features nesta iniciativa.</div>'}` : ''}
-    <div class="sec-t">${ci ? 'Cards abertos sem feature' : 'Cards abertos'} <span class="faint" style="text-transform:none;letter-spacing:0;font-weight:500">${semF.length}${ci && semF.length ? ' · ligue a uma feature para aparecerem embaixo dela na Central' : ''}</span></div>
+    <div class="sec-t">Features <span class="n" style="color:var(--faint)">${feats.length + tfs.length}</span> <span class="faint" style="text-transform:none;letter-spacing:0;font-weight:500">${ci ? 'da Central e do time · ' : ''}cada feature agrupa os cards que a entregam</span><span class="grow"></span><button class="btn sm" data-act="newFeat" data-epic="${e.id}" style="text-transform:none;letter-spacing:0" ${e.status === 'done' ? 'disabled' : ''}>+ Feature do time</button></div>
+    ${feats.length + tfs.length ? `<div class="fgrid">${feats.sort(ordF).map(f => fcardHtml(e, f, ci)).join('')}${tfs.sort(ordF).map(f => tfcardHtml(e, f)).join('')}</div>` : `<div class="small faint">${ci ? 'A Central ainda não cadastrou features nesta iniciativa. ' : ''}Crie uma feature do time para agrupar os cards: o gestor vê a feature e os cards dela na Central, embaixo da iniciativa.</div>`}
+    <div class="sec-t">Cards abertos sem feature <span class="faint" style="text-transform:none;letter-spacing:0;font-weight:500">${semF.length}${abertasF.length && semF.length ? ' · ligue a uma feature para aparecerem embaixo dela na Central' : ''}</span></div>
     ${semF.length ? `<div class="card flat" style="padding:6px 10px">${semF.map(c => `<div class="row" style="padding:5px 0;border-bottom:1px solid var(--line);flex-wrap:nowrap"><button class="ci row grow" style="min-width:0;flex-wrap:nowrap;text-align:left" data-act="card" data-card="${c.id}">${c.owner ? avatar(c.owner) : '<span class="av">–</span>'}<span class="code muted">${c.id}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.title)}</span>${c.blocked ? '<span class="chip late">bloq.</span>' : ''}</button>
-      <span class="small faint" style="white-space:nowrap">${esc(cols()[colIdx(c.col)]?.name || '')}</span>${feats.some(f => f.status !== 'done') ? `<select class="sel" data-act="linkFeat" data-card="${c.id}" style="max-width:200px"><option value="">Ligar a feature…</option>${feats.filter(f => f.status !== 'done').map(f => `<option value="${esc(f.ref)}">${esc(f.ref.split('.')[1])} · ${esc(clip(f.name, 30))}</option>`).join('')}</select>` : ''}</div>`).join('')}</div>` : '<div class="small faint">Nenhum.</div>'}
+      <span class="small faint" style="white-space:nowrap">${esc(cols()[colIdx(c.col)]?.name || '')}</span>${abertasF.length ? `<select class="sel" data-act="linkFeat" data-card="${c.id}" style="max-width:220px"><option value="">Ligar a feature…</option>${abertasF.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join('')}</select>` : ''}</div>`).join('')}</div>` : '<div class="small faint">Nenhum.</div>'}
     <div class="row" style="margin-top:12px"><button class="btn sm" data-act="addCardFeat" data-epic="${e.id}" data-ref="">+ Card nesta iniciativa</button></div></div>`;
-  return `<div class="bar"><span class="muted small">Iniciativas (épicos) do time. Ligue cada uma à iniciativa da Central, quando houver, e os cards às features dela. As que nasceram no time vão sem vínculo e o gestor concilia.</span></div>
+  return `<div class="bar"><span class="muted small">Iniciativa › Feature › Card, como na Central. Ligue cada iniciativa à da Central, quando houver, e os cards às features dela ou a features do time. O que nasceu no time vai sem vínculo e o gestor concilia.</span></div>
     <div class="ep-layout">${lista}${detalhe}</div>`;
 }
 
@@ -1898,7 +1984,7 @@ function vSettings() {
     <div class="card"><div class="lbl">Arquivo de dados</div>
       <dl class="kv"><dt>Arquivo</dt><dd>${db.demo ? 'exemplo em memória' : esc(fileHandle?.name || '–')}</dd><dt>Senha</dt><dd>${fileKey ? 'protegido por senha' : 'sem senha'}</dd><dt>Cards</dt><dd>${activeCards().length} ativos, ${live().filter(c => c.cancelledAt).length} cancelados</dd></dl>
       <p class="small muted">Guarde o arquivo numa pasta do próprio time (não na pasta da Central). Várias pessoas podem usar o mesmo arquivo: a ferramenta confere a cada 20 s e une as mudanças de cada um.</p>
-      <div class="row"><button class="btn" data-act="setPw" ${db.demo ? 'disabled' : ''}>${fileKey ? 'Trocar senha' : 'Proteger com senha'}</button><button class="btn" data-act="backup">Baixar cópia (.json)</button><button class="btn" data-act="home">Trocar de quadro</button></div></div>
+      <div class="row"><button class="btn" data-act="setPw" ${db.demo ? 'disabled' : ''}>${fileKey ? 'Trocar senha' : 'Proteger com senha'}</button><button class="btn" data-act="backup" title="Cópia do arquivo de dados, cifrada com a senha do quadro">Baixar cópia cifrada (.json)</button><button class="btn" data-act="exportar" title="CSV ou JSON legível, sem criptografia">Exportar dados legíveis</button><button class="btn" data-act="home">Trocar de quadro</button></div></div>
   </div>`;
 }
 
@@ -1912,15 +1998,16 @@ document.addEventListener('keydown', e => {
   const i = ids.indexOf(ui.selCard); if (i < 0) return; const nx = ids[i + (e.key === 'ArrowDown' ? 1 : -1)]; if (nx) { e.preventDefault(); cardModal(nx); }
 });
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.classList?.contains('kc') && e.target.dataset.card) { e.preventDefault(); cardModal(e.target.dataset.card); } });
-function featureOpts(c) {
-  const e = epicById(c.epicId), ci = catInit(e?.centralRef);
-  const fs = (ci?.features || []).filter(f => f.status !== 'cancelled' || f.ref === c.featureRef);
-  const extra = c.featureRef && !fs.some(f => f.ref === c.featureRef) ? `<option value="${esc(c.featureRef)}" selected>${esc(c.featureRef)} (fora do catálogo)</option>` : '';
-  return `<option value="">Sem feature</option>${extra}${fs.map(f => { const ph = featPhase({ ...f, init: ci }); return `<option value="${esc(f.ref)}" ${c.featureRef === f.ref ? 'selected' : ''}>${esc(f.ref)} · ${esc(f.name)}${ph ? ' · ' + esc(ph.name) : ''}</option>`; }).join('')}`;
+function featureOpts(sel, epicId, { abertas = false, vazio = 'Sem feature' } = {}) {   // features da Central e do time da iniciativa
+  const e = epicById(epicId), ci = catInit(e?.centralRef);
+  const fs = (ci?.features || []).filter(f => (abertas ? f.status === 'open' : f.status !== 'cancelled') || f.ref === sel);
+  const tfs = e ? epicFeats(e).filter(f => (abertas ? f.status === 'open' : f.status !== 'cancelled') || f.id === sel) : [];
+  const extra = sel && FEAT_RE.test(sel) && !fs.some(f => f.ref === sel) ? `<option value="${esc(sel)}" selected>${esc(sel)} (fora do catálogo)</option>` : '';
+  return `<option value="">${esc(vazio)}</option>${extra}${fs.length ? `<optgroup label="Da Central${ci ? ' · ' + esc(ci.ref) : ''}">${fs.map(f => { const ph = featPhase({ ...f, init: ci }); return `<option value="${esc(f.ref)}" ${sel === f.ref ? 'selected' : ''}>${esc(f.ref)} · ${esc(f.name)}${ph ? ' · ' + esc(ph.name) : ''}${f.status === 'done' ? ' (concluída)' : ''}</option>`; }).join('')}</optgroup>` : ''}${tfs.length ? `<optgroup label="Do time">${tfs.map(f => `<option value="${f.id}" ${sel === f.id ? 'selected' : ''}>${esc(f.name)} · ${f.id}${f.status !== 'open' ? ' (' + FEAT_ST[f.status] + ')' : ''}</option>`).join('')}</optgroup>` : ''}`;
 }
 function cardModal(id) {
   const c = cardById(id); if (!c) return;
-  const e = epicById(c.epicId), ci = catInit(e?.centralRef), f = c.featureRef ? catFeature(c.featureRef) : null, ph = featPhase(f), deps = featDeps(f);
+  const e = epicById(c.epicId), ci = catInit(e?.centralRef), f = c.featureRef ? catFeature(c.featureRef) : null, ph = featPhase(f), deps = featDeps(f), lf = !c.featureRef && c.featureId ? featById(c.featureId) : null;
   const sps = db.sprints.filter(s => !s.deleted && (s.state !== 'closed' || s.id === c.sprintId));
   const k = colIdx(c.col), now = new Date(), ca = commitAt(c), sa = startAt(c), da = doneAt(c), fim = da || (c.cancelledAt ? new Date(c.cancelledAt) : now);
   const dias = (a, b) => a ? Math.max(0, (b - a) / DAY) : null;
@@ -1935,23 +2022,26 @@ function cardModal(id) {
   evs.sort((x, y) => new Date(y.at) - new Date(x.at));
   const fd = v => v == null ? '–' : v < 1 ? (v * 24 < 1 ? '<1 h' : Math.round(v * 24) + ' h') : fmtN(v, v < 10 ? 1 : 0) + ' d';
   modal(`<div class="cm-top"><div class="row"><span class="code muted">${esc(c.id)}</span><span class="chip">${KIND_IC[c.kind] || '◧'} ${esc(c.kind)}</span>
-      ${e ? `<span class="chip" title="Iniciativa">${esc(clip(e.name, 40))}</span>` : ''}${c.featureRef ? `<span class="chip bv code">${esc(c.featureRef)}</span>` : ''}
+      ${e ? `<span class="chip" title="Iniciativa">${esc(clip(e.name, 40))}</span>` : ''}${c.featureRef ? `<span class="chip bv code">${esc(c.featureRef)}</span>` : lf ? `<span class="chip bv" title="Feature do time ${esc(lf.id)}">◆ ${esc(clip(lf.name, 36))}</span>` : ''}
       ${c.blocked ? '<span class="chip late">bloqueado</span>' : ''}${c.cancelledAt ? '<span class="chip late">cancelado</span>' : isDone(c) ? '<span class="chip bv">entregue</span>' : ''}
       <span class="grow"></span><span class="navh">↑ ↓ navega · Esc fecha</span><button class="btn ghost" data-act="close" aria-label="Fechar">Fechar</button></div>
     <input class="ttl-in" data-cf="title" value="${esc(c.title)}" maxlength="200" aria-label="Título">
     <div class="flow" role="group" aria-label="Coluna">${cols().map((x, i) => `<button class="${i < k ? 'past' : i === k ? 'cur' : ''}" data-act="cmove" data-card="${c.id}" data-col="${x.id}" title="Mover para ${esc(x.name)}" ${c.cancelledAt ? 'disabled' : ''}>${esc(x.name)}</button>`).join('')}</div></div>
   <div class="cm-grid"><div class="cm-main">
+    ${c.kind === 'feature' ? `<div class="banner">Este card é do tipo feature. Desde o Quadro 2.5, feature é o nível acima dos cards, como na Central: Iniciativa › Feature › Card. Transforme-o para pendurar outros cards nele; o histórico e as métricas do card continuam. <button class="btn sm" data-act="cardToFeat" data-card="${c.id}" ${e || c.featureRef ? '' : 'disabled title="Escolha a iniciativa do card primeiro"'}>Transformar em feature</button></div>` : ''}
     ${c.blocked ? `<div class="blkbox"><b>Bloqueado há ${fd(dias(new Date(c.blocked.since), now))}</b><span>${esc(catLabel(c.blocked.cat))}${c.blocked.reason ? ': ' + esc(c.blocked.reason) : ''}</span><span class="grow"></span><button class="btn sm" data-act="unblock" data-card="${c.id}">Desbloquear</button></div>`
       : !c.cancelledAt && !isDone(c) ? `<details><summary class="btn sm" style="list-style:none">⚑ Sinalizar bloqueio</summary><div class="mini" style="margin-top:8px"><select class="sel" id="bcat">${BLOCK_CATS.map(([kk, l]) => `<option value="${kk}">${l}</option>`).join('')}</select><input class="sin" id="breason" placeholder="O que está travando?"><button class="btn sm pri" data-act="block" data-card="${c.id}">Bloquear</button></div></details>` : ''}
     <div class="stats">
       <div class="stat"><b>${fd(dias(ca, fim))}</b><span>${da ? 'Lead time' : 'No fluxo'} <span class="faint">desde o compromisso</span></span></div>
       <div class="stat"><b>${fd(dias(sa, fim))}</b><span>${da ? 'Cycle time' : 'Em andamento'} <span class="faint">desde o início</span></span></div>
       <div class="stat ${blk >= 1 ? 'alert' : ''}"><b>${blk ? fd(blk) : '0'}</b><span>Bloqueado <span class="faint">${c.blocks.length + (c.blocked ? 1 : 0)} vez(es)</span></span></div></div>
-    <div class="sec-t">Central de Gestão</div>
-    ${f ? `<div class="fbox"><div class="row"><span class="code bvc">${esc(f.ref)}</span><b>${esc(f.name)}</b><span class="grow"></span>${f.status === 'done' ? '<span class="chip">concluída na Central</span>' : f.due ? `<span class="small muted">prazo ${fmtD(f.due)}</span>` : ''}</div>
+    <div class="sec-t">Feature</div>
+    ${lf ? `<div class="fbox"><div class="row"><span class="chip">feature do time</span><span class="code muted">${esc(lf.id)}</span><b>${esc(lf.name)}</b><span class="grow"></span>${lf.status !== 'open' ? `<span class="chip">${FEAT_ST[lf.status]}</span>` : lf.due ? `<span class="small muted">prazo ${fmtD(lf.due)}</span>` : ''}</div>
+        <div class="row small" style="margin-top:6px"><span class="muted">${featCards(lf).length} card(s) nesta feature · ${e?.centralRef ? `o gestor vê a feature e os cards embaixo de ${esc(e.centralRef)} e pode uni-la a uma feature dele` : 'o gestor vê a feature quando conciliar a iniciativa'}</span><span class="grow"></span><button class="btn sm ghost" data-act="editFeat" data-id="${lf.id}">Abrir feature</button></div></div>`
+      : f ? `<div class="fbox"><div class="row"><span class="code bvc">${esc(f.ref)}</span><b>${esc(f.name)}</b><span class="grow"></span>${f.status === 'done' ? '<span class="chip">concluída na Central</span>' : f.due ? `<span class="small muted">prazo ${fmtD(f.due)}</span>` : ''}</div>
         <div class="row small" style="margin-top:6px">${ci ? `<span class="muted">${esc(ci.ref)} · ${esc(ci.name)}</span>` : ''}${ph ? `<span class="chip line">fase ${esc(ph.name)}${ph.start ? ` · ${fmtD(ph.start)} a ${fmtD(ph.end)}` : ''}</span>` : ''}</div>
         ${deps.length ? `<div class="deps">${deps.map(d => `<span class="row"><span class="hd ${d.f?.status === 'done' ? 'done' : 'late'}"></span>Depende de <span class="code">${esc(d.ref)}</span> ${esc(d.f?.name || '')} <span class="${d.f?.status === 'done' ? 'muted' : 'latec'}">${d.f?.status === 'done' ? 'concluída' : 'ainda aberta'}</span></span>`).join('')}</div>` : ''}</div>`
-      : `<div class="small muted">${e?.centralRef ? 'Escolha ao lado a feature da Central que este card ajuda a entregar. Sem feature, ele conta nas métricas do time mas não aparece embaixo de uma feature.' : e ? 'A iniciativa deste card ainda não está ligada à Central. O gestor pode conciliá-la depois.' : 'Card sem iniciativa: conta nas métricas do time.'}</div>`}
+      : `<div class="small muted">${e ? `Escolha ao lado a feature${e.centralRef ? ' da Central ou do time' : ' do time'} que este card ajuda a entregar. Sem feature, ele conta nas métricas do time mas não aparece embaixo de uma feature.${e.centralRef ? '' : ' A iniciativa ainda não está ligada à Central: o gestor concilia depois.'}` : 'Card sem iniciativa: conta nas métricas do time. Escolha a iniciativa para poder ligá-lo a uma feature.'}</div>`}
     <label class="row small" style="margin-top:10px"><input type="checkbox" data-cf="showToCentral" ${c.showToCentral ? 'checked' : ''}> Mostrar ao gestor mesmo sem feature <span class="faint">(cards com feature sempre aparecem)</span></label>
     <div class="sec-t">Notas do time <span class="faint" style="text-transform:none;letter-spacing:0;font-weight:500">não vão para a Central</span></div>
     <textarea class="notes" data-cf="notes" placeholder="Contexto, critérios de aceite, links úteis…">${esc(c.notes)}</textarea>
@@ -1961,11 +2051,11 @@ function cardModal(id) {
   <aside class="cm-side">
     <div class="prop"><span>Responsável</span><div class="who"><button class="none ${c.owner ? '' : 'on'}" data-act="cowner" data-card="${c.id}" data-name="">Ninguém</button>${pessoas.map(p => `<button class="${normName(p.name) === normName(c.owner) ? 'on' : ''}" data-act="cowner" data-card="${c.id}" data-name="${esc(p.name)}" title="${esc(p.role || (p.fora ? 'fora da lista do time' : ''))}">${avatar(p.name)}${esc(p.name.split(' ')[0])}</button>`).join('')}</div>
       <form class="mini" data-act="addPersonCard" data-card="${c.id}"><input class="sin" name="n" placeholder="+ Nova pessoa" maxlength="80" autocomplete="off"><button class="btn sm">Adicionar</button></form></div>
-    <div class="prop"><span>Tipo</span><div class="pills">${KINDS.map(kk => `<button class="${c.kind === kk ? 'on' : ''}" data-act="ckind" data-card="${c.id}" data-kind="${kk}">${KIND_IC[kk]} ${kk}</button>`).join('')}</div></div>
+    <div class="prop"><span>Tipo</span><div class="pills">${[...KINDS, ...(KINDS.includes(c.kind) ? [] : [c.kind])].map(kk => `<button class="${c.kind === kk ? 'on' : ''}" data-act="ckind" data-card="${c.id}" data-kind="${kk}">${KIND_IC[kk] || '◧'} ${kk}</button>`).join('')}</div></div>
     <div class="prop"><span>Prazo</span><input class="sin" type="date" data-cf="due" value="${esc(c.due)}">${venc != null ? `<span class="hint ${venc <= 0 ? 'latec' : ''}">${venc < 0 ? `venceu há ${-venc} dia(s)` : venc === 0 ? 'vence hoje' : `vence em ${venc} dia(s)`}</span>` : ''}</div>
     <div class="prop"><span>Sprint</span><select class="sel" data-cf="sprintId"><option value="">Sem sprint</option>${sps.map(s => `<option value="${s.id}" ${c.sprintId === s.id ? 'selected' : ''}>${esc(s.name)}${s.state === 'active' ? ' (atual)' : ''}</option>`).join('')}</select></div>
     <div class="prop"><span>Iniciativa</span><select class="sel" data-cf="epicId">${epicOpts(c.epicId, 'Sem iniciativa')}</select></div>
-    <div class="prop"><span>Feature na Central</span><select class="sel" data-cf="featureRef" ${e?.centralRef ? '' : 'disabled title="Ligue a iniciativa à Central primeiro"'}>${featureOpts(c)}</select></div>
+    <div class="prop"><span>Feature</span><select class="sel" data-cf="feature" ${e ? '' : 'disabled title="Escolha a iniciativa primeiro"'}>${featureOpts(c.featureRef || (lf ? lf.id : ''), c.epicId, { vazio: e ? 'Sem feature' : 'Escolha a iniciativa primeiro' })}</select>${e && e.status !== 'done' ? `<button class="btn sm ghost" data-act="newFeat" data-epic="${e.id}" data-card="${c.id}" style="align-self:flex-start">+ Nova feature do time</button>` : ''}</div>
     <div class="prop"><span>Pontos</span><input class="sin" type="number" min="0" step="0.5" data-cf="points" value="${c.points ?? ''}" placeholder="opcional"></div>
     <div class="prop"><span>Link</span><input class="sin" data-cf="link" value="${esc(c.link)}" placeholder="https://">${c.link && !https(c.link) ? '<span class="hint latec">Só links https vão para a Central.</span>' : ''}</div>
     <div class="row" style="margin-top:8px">${c.cancelledAt ? `<button class="btn sm" data-act="uncancel" data-card="${c.id}">Reativar card</button>` : `<button class="btn sm danger" data-act="cancelCard" data-card="${c.id}">Cancelar card</button>`}<span class="grow"></span><button class="btn pri" data-act="close">Pronto</button></div>
@@ -1973,7 +2063,8 @@ function cardModal(id) {
   $('#dlg').querySelectorAll('[data-cf]').forEach(el => el.addEventListener('change', () => {
     const kk = el.dataset.cf; let v = el.type === 'checkbox' ? el.checked : el.value;
     if (kk === 'points') c.points = v === '' ? null : Number(v);
-    else if (kk === 'epicId') { c.epicId = v; const ne = epicById(v); if (c.featureRef && (!ne?.centralRef || !c.featureRef.startsWith(ne.centralRef + '.'))) c.featureRef = null; }
+    else if (kk === 'epicId') { c.epicId = v; const ne = epicById(v); if (c.featureRef && (!ne?.centralRef || !c.featureRef.startsWith(ne.centralRef + '.'))) c.featureRef = null; if (c.featureId && featById(c.featureId)?.epicId !== v) c.featureId = null; }
+    else if (kk === 'feature') ligarFeature(c, v);
     else if (kk === 'featureRef' || kk === 'sprintId') c[kk] = v || null;
     else if (kk === 'title') c.title = clip(v, 200) || c.title;
     else c[kk] = v;
@@ -1984,13 +2075,14 @@ function cardModal(id) {
 let nf = null;               // rascunho do formulário de novo card
 function newCardModal(def = {}) {
   const sp = activeSprint();
-  nf = { title: '', owner: '', due: '', epicId: '', featureRef: null, kind: 'história', col: cols()[0].id, sprintId: view === 'board' && ui.boardFilter === 'sprint' && sp ? sp.id : null, points: '', link: '', notes: '', showToCentral: false, again: false, ...def };
+  nf = { title: '', owner: '', due: '', epicId: '', featureRef: null, featureId: null, kind: 'história', col: cols()[0].id, sprintId: view === 'board' && ui.boardFilter === 'sprint' && sp ? sp.id : null, points: '', link: '', notes: '', showToCentral: false, again: false, ...def };
   if (nf.featureRef && !nf.epicId) { const ini = nf.featureRef.split('.')[0]; nf.epicId = epicsLive().find(e => e.centralRef === ini)?.id || ''; }
+  if (nf.featureId) { const lf = featById(nf.featureId); if (lf) nf.epicId = lf.epicId; else nf.featureId = null; }
   renderNewCard(); setTimeout(() => { const t = $('#nfTitle'); t?.focus(); t?.setSelectionRange(t.value.length, t.value.length); }, 30);
 }
 function renderNewCard() {
   const e = epicById(nf.epicId), ci = catInit(e?.centralRef), f = nf.featureRef ? catFeature(nf.featureRef) : null, ph = featPhase(f), od = openDeps(f);
-  const fs = (ci?.features || []).filter(x => x.status === 'open');
+  const lf = nf.featureId ? featById(nf.featureId) : null;
   const pessoas = activePeople();
   const sps = db.sprints.filter(s => !s.deleted && s.state !== 'closed');
   const venc = isYmd(nf.due) ? Math.round((parseYmd(nf.due) - parseYmd(today())) / DAY) : null;
@@ -2005,7 +2097,8 @@ function renderNewCard() {
         <div class="field"><label>Sprint</label><select data-nf="sprintId"><option value="">Sem sprint</option>${sps.map(s => `<option value="${s.id}" ${nf.sprintId === s.id ? 'selected' : ''}>${esc(s.name)}${s.state === 'active' ? ' (atual)' : ''}</option>`).join('')}</select></div>
       </div>
       <div class="field"><label>Iniciativa</label><select data-nf="epicId">${epicOpts(nf.epicId, 'Sem iniciativa')}</select><div class="hint">${e ? (e.centralRef ? `Ligada à Central: <span class="code bvc">${esc(e.centralRef)}</span>${ci ? ' · ' + esc(ci.name) : ''}` : 'Iniciativa do time, sem vínculo com a Central') : 'Sem iniciativa, o card conta só nas métricas do time'}</div></div>
-      <div class="field"><label>Feature na Central</label><select data-nf="featureRef" ${fs.length ? '' : 'disabled'}><option value="">${ci ? 'Sem feature' : e?.centralRef ? 'Catálogo não carregado' : 'Ligue a iniciativa à Central para escolher'}</option>${fs.map(x => { const p2 = featPhase({ ...x, init: ci }); return `<option value="${esc(x.ref)}" ${nf.featureRef === x.ref ? 'selected' : ''}>${esc(x.ref)} · ${esc(x.name)}${p2 ? ' · ' + esc(p2.name) : ''}</option>`; }).join('')}</select>
+      <div class="field"><label>Feature</label><select data-nf="feature" ${e ? '' : 'disabled'}>${featureOpts(nf.featureRef || nf.featureId || '', nf.epicId, { abertas: true, vazio: e ? 'Sem feature' : 'Escolha a iniciativa para ver as features' })}</select>
+        ${lf ? `<div class="hint">Feature do time <span class="code">${esc(lf.id)}</span>${lf.due ? ` · prazo ${fmtD(lf.due)}` : ''}</div>` : e && !f ? `<div class="hint">${e.centralRef && !ci ? 'Catálogo da Central não carregado: aparecem só as features do time. ' : ''}Crie features do time na aba Iniciativas.</div>` : ''}
         ${f ? `<div class="hint">${ph ? `<span class="chip line">fase ${esc(ph.name)}</span>` : ''}${f.due ? `prazo na Central ${fmtD(f.due)}` : ''}${od.length ? `<span class="latec">depende de ${esc(od.map(d => d.ref).join(', '))}, ainda aberta</span>` : ''}</div>` : ''}</div>
       <div class="field"><label>Descrição <span class="faint">(fica só no time)</span></label><textarea data-nf="notes" rows="3" placeholder="Contexto, critérios de aceite…">${esc(nf.notes)}</textarea></div>
     </div>
@@ -2022,15 +2115,16 @@ function renderNewCard() {
   $('#nfTitle').addEventListener('input', ev => { nf.title = ev.target.value; });
   d.querySelectorAll('[data-nf]').forEach(el => el.addEventListener(el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && el.type !== 'checkbox' && el.type !== 'date') ? 'input' : 'change', () => {
     const k = el.dataset.nf; nf[k] = el.type === 'checkbox' ? el.checked : el.value;
-    if (k === 'epicId') { const ne = epicById(nf.epicId); if (nf.featureRef && !nf.featureRef.startsWith((ne?.centralRef || '#') + '.')) nf.featureRef = null; }
-    if (['epicId', 'featureRef', 'due', 'sprintId'].includes(k)) renderNewCard();
+    if (k === 'epicId') { const ne = epicById(nf.epicId); if (nf.featureRef && !nf.featureRef.startsWith((ne?.centralRef || '#') + '.')) nf.featureRef = null; if (nf.featureId && featById(nf.featureId)?.epicId !== nf.epicId) nf.featureId = null; }
+    if (k === 'feature') { const v = nf.feature; delete nf.feature; nf.featureRef = FEAT_RE.test(v) ? v : null; nf.featureId = v && !FEAT_RE.test(v) ? v : null; if (nf.featureId) nf.epicId = featById(nf.featureId)?.epicId || nf.epicId; }
+    if (['epicId', 'feature', 'due', 'sprintId'].includes(k)) renderNewCard();
   }));
   $('#nfNewP').addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); d.querySelector('[data-act=nfAddP]').click(); } });
   $('#nfForm').addEventListener('submit', ev => { ev.preventDefault(); criarDoFormulario(); });
 }
 function criarDoFormulario() {
   const title = clip(nf.title, 200); if (!title) { toast('Escreva o que precisa ser feito.'); $('#nfTitle')?.focus(); return; }
-  const c = novoCard({ title, kind: nf.kind, epicId: nf.epicId, featureRef: nf.featureRef || null, owner: nf.owner, due: isYmd(nf.due) ? nf.due : '', col: nf.col, sprintId: nf.sprintId || null, points: nf.points === '' ? null : Number(nf.points) });
+  const c = novoCard({ title, kind: nf.kind, epicId: nf.epicId, featureRef: nf.featureRef || null, featureId: nf.featureRef ? null : nf.featureId || null, owner: nf.owner, due: isYmd(nf.due) ? nf.due : '', col: nf.col, sprintId: nf.sprintId || null, points: nf.points === '' ? null : Number(nf.points) });
   c.notes = nf.notes; c.link = nf.link.trim(); c.showToCentral = !!nf.showToCentral;
   touch(); toast(`${c.id} criado em ${cols()[colIdx(c.col)].name}.`);
   if (nf.again) { nf.title = ''; nf.notes = ''; renderNewCard(); setTimeout(() => $('#nfTitle')?.focus(), 30); } else closeModal();
@@ -2051,7 +2145,7 @@ function quickInfo(o) {
   const e = epicById(o.epicId);
   return [o.owner ? 'Com ' + o.owner : 'Sem responsável', o.due ? 'prazo ' + fmtD(o.due) : 'sem prazo', e ? e.name + (e.centralRef ? ' · ' + e.centralRef : '') : 'sem iniciativa', o.featureRef ? 'feature ' + o.featureRef : '', o.kind || ''].filter(Boolean).join(' · ') + ` · entra em ${cols()[0].name}`;
 }
-document.addEventListener('input', e => { if (e.target.id !== 'quickCard' || !db) return; const v = e.target.value.trim(), q = $('#qinfo'); if (q) q.textContent = v ? quickInfo(parseQuickCard(v)) + ' · Enter cria' : `Enter cria no ${cols()[0].name} · @pessoa responsável · hoje, amanhã ou dd/mm · #iniciativa ou #PAG-042 · F2 feature da Central · !bug, !spike, !feature…`; });
+document.addEventListener('input', e => { if (e.target.id !== 'quickCard' || !db) return; const v = e.target.value.trim(), q = $('#qinfo'); if (q) q.textContent = v ? quickInfo(parseQuickCard(v)) + ' · Enter cria' : `Enter cria no ${cols()[0].name} · @pessoa responsável · hoje, amanhã ou dd/mm · #iniciativa ou #PAG-042 · F2 feature da Central · !bug, !spike, !entrega…`; });
 document.addEventListener('keydown', e => {
   if (e.target.id !== 'quickCard' || e.key !== 'Enter' || !db) return;
   const v = e.target.value.trim(); if (!v) return; const o = parseQuickCard(v); if (!o.title) return;
@@ -2132,7 +2226,7 @@ function epicModal(id) {
       <div class="field"><label>Previsão de término do time</label><input type="date" data-ef="forecastEnd" value="${esc(e.forecastEnd)}"><div class="hint">${dias == null ? 'sem data' : dias < 0 ? `<span class="latec">venceu há ${-dias} dia(s)</span>` : dias === 0 ? 'hoje' : `em ${dias} dias`}</div></div>
       <div class="field"><label>Link do épico <span class="faint">(https, opcional)</span></label><input data-ef="link" value="${esc(e.link)}" placeholder="https://"></div>
     </aside></div>
-    <div class="macts">${epicCards(e).length ? `<span class="small faint" style="margin-right:auto">${epicCards(e).length} card(s) nesta iniciativa</span>` : `<button class="btn danger" data-act="delEpic" data-id="${e.id}" style="margin-right:auto">Excluir iniciativa</button>`}<button class="btn pri" data-act="close">Pronto</button></div></div>`, 'wide');
+    <div class="macts">${epicCards(e).length || epicFeats(e).length ? `<span class="small faint" style="margin-right:auto">${epicCards(e).length} card(s)${epicFeats(e).length ? ` e ${epicFeats(e).length} feature(s)` : ''} nesta iniciativa</span>` : `<button class="btn danger" data-act="delEpic" data-id="${e.id}" style="margin-right:auto">Excluir iniciativa</button>`}<button class="btn pri" data-act="close">Pronto</button></div></div>`, 'wide');
   $('#dlg').querySelectorAll('[data-ef]').forEach(el => el.addEventListener('change', () => {
     const k = el.dataset.ef; let v = el.value;
     if (k === 'name') { v = clip(v.trim(), 200); if (!v) { el.value = e.name; return; } }
@@ -2143,6 +2237,104 @@ function epicModal(id) {
   }));
   $('#upd').addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); $('#dlg [data-act=addUpdate]').click(); } });
   $('#dlg').querySelectorAll('[data-fn]').forEach(el => el.addEventListener('change', () => { if (el.value.trim()) e.featureNotes[el.dataset.fn] = el.value.trim(); else delete e.featureNotes[el.dataset.fn]; e.upd = Date.now(); touch(); }));
+}
+/* Feature do time: formulário em duas colunas (ADR-0020), sem prompt(). Mesma regra da Central: a feature não muda de iniciativa. */
+let nfe = null;
+function featModal(def = {}) {
+  const f = def.id ? featById(def.id) : null;
+  nfe = f ? { id: f.id, name: f.name, epicId: f.epicId, owner: f.owner, due: f.due, notes: f.notes, status: f.status, edit: true }
+    : { name: '', epicId: def.epicId || '', owner: '', due: '', notes: '', status: 'open', cardId: def.cardId || '', edit: false };
+  renderFeat(); setTimeout(() => $('#feName')?.focus(), 30);
+}
+function renderFeat() {
+  const f = nfe.edit ? featById(nfe.id) : null, e = epicById(nfe.epicId), ci = catInit(e?.centralRef), pessoas = activePeople();
+  const cs = f ? featCards(f) : [], venc = isYmd(nfe.due) ? Math.round((parseYmd(nfe.due) - parseYmd(today())) / DAY) : null;
+  const cfs = (ci?.features || []).filter(x => x.status === 'open');
+  modal(`<form class="tform" id="feForm" style="display:flex;flex-direction:column;min-height:0;flex:1"><div class="tf-grid">
+    <div class="tf-main">
+      <div class="tf-h">${f ? `Feature do time <span class="code">${esc(f.id)}</span>` : 'Nova feature do time'}</div>
+      <input class="tf-title" id="feName" placeholder="O que a feature entrega? Ex.: Painel de erros do checkout" value="${esc(nfe.name)}" maxlength="200" autocomplete="off" required>
+      <div class="field"><label>Iniciativa</label>${f ? `<div class="row"><span class="chip">${esc(e?.name || '–')}</span>${e?.centralRef ? `<span class="chip bv code">${esc(e.centralRef)}</span>` : '<span class="chip">do time</span>'}</div><div class="hint">Uma feature não muda de iniciativa, como na Central.</div>`
+        : `<select data-fe="epicId" id="feEpic"><option value="">Escolha a iniciativa…</option>${epicsLive().filter(x => x.status !== 'done').map(x => `<option value="${x.id}" ${nfe.epicId === x.id ? 'selected' : ''}>${esc(x.name)}${x.centralRef ? ' · ' + esc(x.centralRef) : ''}</option>`).join('')}</select><div class="hint">Toda feature fica dentro de uma iniciativa e não muda depois, como na Central.</div>`}</div>
+      <div class="field"><label>Descrição <span class="faint">(fica só no time)</span></label><textarea data-fe="notes" rows="3" placeholder="Resultado esperado, critérios de aceite…">${esc(nfe.notes)}</textarea></div>
+      ${f ? `<div class="field"><label>Cards nesta feature <span class="faint">${cs.length}</span></label>${cs.length ? `<div class="cl">${cs.map(c => `<button type="button" class="ci" data-act="card" data-card="${c.id}" style="gap:8px">${c.owner ? avatar(c.owner) : '<span class="av">–</span>'}<span class="code muted">${c.id}</span><span class="t" style="flex:1;min-width:0">${esc(c.title)}</span><span class="faint">${esc(cols()[colIdx(c.col)]?.name || '')}</span></button>`).join('')}</div>` : '<div class="hint">Nenhum card ainda. Use "+ Card nesta feature" na iniciativa ou escolha esta feature no card.</div>'}</div>` : ''}
+    </div>
+    <aside class="tf-side">
+      <div class="tf-h">Detalhes</div>
+      <div class="field"><label>Responsável</label><div class="who"><button type="button" class="none ${nfe.owner ? '' : 'on'}" data-act="feSet" data-k="owner" data-v="">Ninguém</button>${pessoas.map(p => `<button type="button" class="${normName(p.name) === normName(nfe.owner) ? 'on' : ''}" data-act="feSet" data-k="owner" data-v="${esc(p.name)}" title="${esc(p.role || '')}">${avatar(p.name)}${esc(p.name.split(' ')[0])}</button>`).join('')}</div></div>
+      <div class="field"><label>Prazo <span class="faint">(opcional)</span></label><input type="date" data-fe="due" value="${esc(nfe.due)}" style="max-width:220px"><div class="hint">${venc == null ? 'sem data' : venc < 0 ? '<span class="latec">data no passado</span>' : venc === 0 ? 'hoje' : `em ${venc} dias`}</div></div>
+      ${f ? `<div class="field"><label>Situação</label><div class="pills">${['open', 'done', 'cancelled'].map(k => `<button type="button" class="${nfe.status === k ? 'on' : ''}" data-act="feSet" data-k="status" data-v="${k}">${FEAT_ST[k][0].toUpperCase() + FEAT_ST[k].slice(1)}</button>`).join('')}</div></div>` : ''}
+      ${f && cfs.length ? `<div class="field"><label>Já existe na Central?</label><select id="feUnir"><option value="">Escolha a feature da Central…</option>${cfs.map(x => `<option value="${esc(x.ref)}">${esc(x.ref)} · ${esc(x.name)}</option>`).join('')}</select><button type="button" class="btn sm" data-act="feUnir" style="margin-top:6px;align-self:flex-start">Unir com a da Central</button><div class="hint">Os cards passam para a feature da Central e esta feature do time deixa de existir. O gestor também pode unir pela conciliação.</div></div>` : ''}
+      <div class="tf-sum"><b>${esc(nfe.name.trim() || 'Sem nome ainda')}</b><div class="ln"><span>Iniciativa</span><span>${e ? esc(clip(e.name, 40)) : 'escolha'}</span></div><div class="ln"><span>Na Central</span><span>${e?.centralRef ? `embaixo de <span class="code bvc">${esc(e.centralRef)}</span>` : 'quando o gestor conciliar'}</span></div><div class="ln"><span>Prazo</span><span>${isYmd(nfe.due) ? fmtD(nfe.due) : 'sem data'}</span></div></div>
+    </aside></div>
+    <div class="macts">${f ? `<button type="button" class="btn danger" data-act="feDel" style="margin-right:auto">Excluir feature</button>` : `<span class="small faint" style="margin-right:auto">${nfe.cardId ? `O card ${esc(nfe.cardId)} entra nesta feature · ` : ''}Ctrl+Enter cria · Esc fecha</span>`}<button type="button" class="btn" data-act="close">Cancelar</button><button class="btn pri">${f ? 'Salvar' : 'Criar feature'}</button></div></form>`, 'wide');
+  const d = $('#dlg');
+  $('#feName').addEventListener('input', ev => { nfe.name = ev.target.value; const b = d.querySelector('.tf-sum b'); if (b) b.textContent = nfe.name.trim() || 'Sem nome ainda'; });
+  d.querySelectorAll('[data-fe]').forEach(el => el.addEventListener(el.tagName === 'TEXTAREA' ? 'input' : 'change', () => { nfe[el.dataset.fe] = el.value; if (el.tagName !== 'TEXTAREA') renderFeat(); }));
+  $('#feForm').addEventListener('keydown', ev => { if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) { ev.preventDefault(); salvarFeature(); } });
+  $('#feForm').addEventListener('submit', ev => { ev.preventDefault(); salvarFeature(); });
+}
+function salvarFeature() {
+  const name = clip((nfe.name || '').trim(), 200); if (!name) { toast('Dê um nome para a feature.'); $('#feName')?.focus(); return; }
+  if (!nfe.edit) {
+    if (!epicById(nfe.epicId)) { toast('Escolha a iniciativa da feature.'); $('#feEpic')?.focus(); return; }
+    const f = novaFeature({ ...nfe, name }), c = nfe.cardId ? cardById(nfe.cardId) : null;
+    if (c) ligarFeature(c, f.id);
+    ui.epicSel = f.epicId; closeModal(); touch(); toast(`${f.id} criada${c ? `, com o card ${c.id}` : ''}.`); if (c) cardModal(c.id); return;
+  }
+  const f = featById(nfe.id); if (!f) { closeModal(); return; }
+  f.name = name; f.owner = nfe.owner; f.due = isYmd(nfe.due) ? nfe.due : ''; f.notes = nfe.notes;
+  if (f.status !== nfe.status) { f.status = nfe.status; f.doneAt = nfe.status === 'done' ? agoraComFuso() : null; }
+  f.upd = Date.now(); closeModal(); touch(); toast(`${f.id} salva.`);
+}
+
+/* Exportar dados legíveis: o arquivo sai SEM cifra, só depois de a pessoa confirmar (ADR-0040). */
+let exp = { fmt: 'csv' };
+function exportModal() {
+  const nC = live().length, nF = featsLive().length;
+  modal(`<div class="mh"><h2 class="grow" style="margin:0">Exportar dados legíveis</h2><button class="btn ghost" data-act="close">Fechar</button></div><div class="mb">
+    <p class="small muted" style="margin-top:0">Baixa os dados deste quadro num arquivo que qualquer programa abre: ${nC} card(s), ${epicsLive().length} iniciativa(s) e ${nF} feature(s) do time.</p>
+    <div class="pick" role="radiogroup" aria-label="Formato">${[['csv', 'Planilha dos cards (.csv)', 'Um card por linha, com iniciativa, feature, coluna, responsável, prazo e sprint. Abre no Excel.'], ['json', 'Tudo em JSON legível (.json)', 'Iniciativa › Feature › Card, mais pessoas, sprints e colunas. Bom para arquivar ou levar para outra ferramenta.']].map(([k, n, sub]) => `<button type="button" class="${exp.fmt === k ? 'on' : ''}" data-act="expFmt" data-v="${k}"><span class="rd"></span><span></span><span class="nm">${n}<small>${sub}</small></span></button>`).join('')}</div>
+    <div class="blkbox" style="margin-top:14px;display:block"><b>O arquivo sai sem criptografia.</b> Quem tiver o arquivo lê tudo: nomes, cards, notas do time e bloqueios. Guarde numa pasta só sua e apague quando não precisar mais. Nunca coloque na pasta compartilhada.</div>
+    <label class="row small" style="margin-top:12px"><input type="checkbox" id="expOk"> Entendo que o arquivo sai sem criptografia</label></div>
+    <div class="macts"><span class="small faint" style="margin-right:auto">Para guardar uma cópia protegida, use Ajustes › Baixar cópia cifrada.</span><button class="btn" data-act="close">Cancelar</button><button class="btn pri" id="expGo" data-act="expGo" disabled>Exportar sem cifra</button></div>`);
+  $('#expOk').addEventListener('change', ev => { $('#expGo').disabled = !ev.target.checked; });
+}
+function baixarTexto(nome, texto, tipo) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([texto], { type: tipo })); a.download = nome; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+const situacaoCard = c => c.cancelledAt ? 'cancelado' : isDone(c) ? 'concluído' : 'aberto';
+const nomeCol = id => cols()[colIdx(id)]?.name || id;
+function exportCard(c) {
+  const da = doneAt(c);
+  return { codigo: c.id, titulo: c.title, tipo: c.kind, coluna: nomeCol(c.col), situacao: situacaoCard(c), responsavel: c.owner || null, prazo: c.due || null, sprint: sprintById(c.sprintId)?.name || null, pontos: c.points ?? null,
+    bloqueado: c.blocked ? { motivo: catLabel(c.blocked.cat) + (c.blocked.reason ? ': ' + c.blocked.reason : ''), desde: c.blocked.since } : null, link: c.link || null, notas: c.notes || '', mostrarAoGestor: !!c.showToCentral,
+    criadoEm: c.createdAt || null, concluidoEm: da ? agoraComFuso(da) : null, canceladoEm: c.cancelledAt || null,
+    historico: c.history.map(h => ({ coluna: nomeCol(h.col), em: h.at })), bloqueios: c.blocks.map(b => ({ motivo: catLabel(b.cat) + (b.reason ? ': ' + b.reason : ''), de: b.from, ate: b.to })) };
+}
+function exportLegivel() {     // Iniciativa › Feature › Card, a mesma hierarquia da Central
+  const cards = live(), semIni = c => !c.epicId || !epicById(c.epicId) || epicById(c.epicId).deleted;
+  const iniciativas = epicsLive().map(e => {
+    const ci = catInit(e.centralRef), ec = cards.filter(c => c.epicId === e.id);
+    const daCentral = [...new Set([...(ci?.features || []).map(f => f.ref), ...ec.map(c => c.featureRef).filter(Boolean)])].map(ref => { const f = catFeature(ref); return { codigo: ref, origem: 'Central', nome: f?.name || null, situacaoNaCentral: f?.status || null, prazo: f?.due || null, fase: featPhase(f)?.name || null, cards: ec.filter(c => c.featureRef === ref).map(exportCard) }; });
+    const doTime = epicFeats(e).map(f => ({ codigo: f.id, origem: 'time', nome: f.name, situacao: FEAT_ST[f.status] || f.status, responsavel: f.owner || null, prazo: f.due || null, notas: f.notes || '', cards: ec.filter(c => c.featureId === f.id).map(exportCard) }));
+    return { codigo: e.id, codigoNaCentral: e.centralRef || null, nome: e.name, situacao: ST_LABEL[e.status === 'done' ? 'done' : epicStatus(e)], previsao: e.forecastEnd || null, link: e.link || null,
+      atualizacoes: e.updates.map(u => ({ data: u.date, texto: u.text, autor: u.author || null })), features: [...daCentral, ...doTime], cardsSemFeature: ec.filter(c => !cardFeat(c)).map(exportCard) };
+  });
+  return { formato: 'quadro-exportacao/1', aviso: 'Arquivo SEM criptografia, exportado a pedido de quem usa o Quadro. Guarde numa pasta só sua e apague quando não precisar mais.', exportadoEm: agoraComFuso(),
+    ferramenta: { nome: TOOL, versao: TOOL_VERSION }, time: { nome: db.team.name, codigo: db.team.slug || null }, hierarquia: 'Iniciativa › Feature › Card',
+    colunas: cols().map(c => c.name), pessoas: peopleLive().map(p => ({ nome: p.name, papel: p.role || null, ativa: p.active !== false })),
+    sprints: db.sprints.filter(s => !s.deleted).map(s => ({ codigo: s.id, nome: s.name, inicio: s.start, fim: s.end, objetivo: s.goal || '', situacao: { planned: 'planejada', active: 'em andamento', closed: 'fechada' }[s.state] || s.state })),
+    iniciativas, cardsSemIniciativa: cards.filter(semIni).map(exportCard) };
+}
+function exportCsv() {          // separador ";" e BOM: abre direto no Excel em português
+  const cel = v => { let x = v == null ? '' : String(v); if (/^[=+\-@\t\r]/.test(x)) x = "'" + x; return /[";\r\n]/.test(x) ? '"' + x.replace(/"/g, '""') + '"' : x; };
+  const dt = v => { if (!v) return ''; const d = typeof v === 'string' && v.length === 10 ? parseYmd(v) : new Date(v); return isNaN(d) ? '' : d.toLocaleDateString('pt-BR'); };
+  const cab = ['Código', 'Título', 'Tipo', 'Coluna', 'Situação', 'Iniciativa', 'Iniciativa na Central', 'Feature', 'Código da feature', 'Feature de', 'Responsável', 'Prazo', 'Sprint', 'Pontos', 'Bloqueado', 'Motivo do bloqueio', 'Criado em', 'Concluído em', 'Cancelado em', 'Link', 'Notas'];
+  const linhas = live().map(c => {
+    const e = epicById(c.epicId), ev = e && !e.deleted ? e : null, cf = cardFeat(c);
+    return [c.id, c.title, c.kind, nomeCol(c.col), situacaoCard(c), ev?.name || '', ev?.centralRef || '', cf?.nome || '', cf?.ref || '', cf ? (cf.time ? 'time' : 'Central') : '', c.owner, dt(c.due), sprintById(c.sprintId)?.name || '', c.points ?? '',
+      c.blocked ? 'sim' : 'não', c.blocked ? catLabel(c.blocked.cat) + (c.blocked.reason ? ': ' + c.blocked.reason : '') : '', dt(c.createdAt), dt(doneAt(c)), dt(c.cancelledAt), c.link, c.notes];
+  });
+  return '﻿' + [cab, ...linhas].map(l => l.map(cel).join(';')).join('\r\n') + '\r\n';
 }
 function sprintModal(id) {
   const s = sprintById(id); if (!s) return;
@@ -2243,7 +2435,38 @@ document.addEventListener('click', async e => {
       case 'epicFromCentral': { const ci = catInit(el.dataset.ref); const ep = novoEpico(ci.name); ep.centralRef = ci.ref; ui.epicSel = ep.id; touch(); toast(`Iniciativa ${ci.ref} trazida para o quadro.`); break; }
       case 'epicSel': ui.epicSel = id; render(); break;
       case 'toggleEpDone': ui.epicDone = !ui.epicDone; render(); break;
-      case 'addCardFeat': newCardModal({ epicId: el.dataset.epic, featureRef: el.dataset.ref || null }); break;
+      case 'addCardFeat': newCardModal({ epicId: el.dataset.epic, featureRef: el.dataset.ref || null, featureId: el.dataset.fid || null }); break;
+      case 'newFeat': featModal({ epicId: el.dataset.epic || '', cardId: el.dataset.card || '' }); break;
+      case 'editFeat': featModal({ id }); break;
+      case 'feSet': nfe[el.dataset.k] = el.dataset.v; renderFeat(); break;
+      case 'feUnir': {
+        const ref = $('#feUnir')?.value, f = featById(nfe.id); if (!f) return; if (!ref) { toast('Escolha a feature da Central.'); return; }
+        if (!confirm(`Unir ${f.id} com ${ref}? Os ${featCards(f).length} card(s) passam para ${ref} e esta feature do time deixa de existir.`)) return;
+        const n = unirFeature(f, ref); closeModal(); touch(); toast(`${n} card(s) agora estão em ${ref}.`); break;
+      }
+      case 'feDel': {
+        const f = featById(nfe.id); if (!f) return; const n = featCards(f).length;
+        if (!confirm(`Excluir a feature ${f.id}?${n ? ` Os ${n} card(s) continuam na iniciativa, sem feature.` : ''}`)) return;
+        for (const c of live()) if (c.featureId === f.id) { c.featureId = null; c.upd = Date.now(); }
+        f.deleted = true; f.upd = Date.now(); closeModal(); touch(); toast(`${f.id} excluída.`); break;
+      }
+      case 'cardToFeat': {
+        const c = cardById(el.dataset.card); if (!c) return;
+        if (c.featureRef) { c.kind = 'entrega'; c.upd = Date.now(); touch(); toast(`${c.id} agora é uma entrega dentro de ${c.featureRef}.`); cardModal(c.id); break; }
+        const ep = epicById(c.epicId); if (!ep) { toast('Escolha a iniciativa do card primeiro.'); return; }
+        if (!confirm(`Criar a feature do time "${clip(c.title, 60)}" em ${ep.name}? Este card entra nela como entrega, com o histórico e as métricas.`)) return;
+        const f = novaFeature({ epicId: ep.id, name: c.title, owner: c.owner, due: c.due, notes: c.notes });
+        if (isDone(c)) { f.status = 'done'; f.doneAt = agoraComFuso(); }
+        c.kind = 'entrega'; ligarFeature(c, f.id); touch(); toast(`${f.id} criada; ${c.id} está dentro dela.`); cardModal(c.id); break;
+      }
+      case 'exportar': exportModal(); break;
+      case 'expFmt': exp.fmt = el.dataset.v; el.parentElement.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === el)); break;
+      case 'expGo': {
+        if (!$('#expOk')?.checked) { toast('Confirme que o arquivo sai sem criptografia.'); return; }
+        const base = `quadro-${db.team.slug || 'time'}-legivel-${today()}`;
+        if (exp.fmt === 'csv') baixarTexto(base + '.csv', exportCsv(), 'text/csv;charset=utf-8'); else baixarTexto(base + '.json', JSON.stringify(exportLegivel(), null, 2), 'application/json');
+        closeModal(); toast('Arquivo exportado sem criptografia. Guarde numa pasta só sua e apague quando não precisar mais.', 7000); break;
+      }
       case 'editEpic': epicModal(id); break;
       case 'addUpdate': { const ep = epicById(id), t = $('#upd').value.trim(); if (!t) return; ep.updates.push({ date: today(), text: clip(t, 500), ...(db.team.contact ? { author: db.team.contact } : {}) }); ep.upd = Date.now(); touch(); epicModal(id); break; }
       case 'delEpic': { const ep = epicById(id); if (!confirm('Excluir esta iniciativa?')) return; ep.deleted = true; ep.upd = Date.now(); closeModal(); touch(); break; }
@@ -2302,7 +2525,7 @@ document.addEventListener('change', e => {
     case 'showBl': db.settings.showBacklogCol = el.checked; db.settings.upd = t; touch(false); break;
     case 'ob': ui.onlyBlocked = el.checked; render(); break;
     case 'od': ui.showOldDone = el.checked; render(); break;
-    case 'linkFeat': { const c = cardById(el.dataset.card); if (!el.value) return; c.featureRef = el.value; c.upd = t; touch(); toast(`${c.id} ligado a ${el.value}.`); break; }
+    case 'linkFeat': { const c = cardById(el.dataset.card); if (!el.value) return; ligarFeature(c, el.value); touch(); toast(`${c.id} ligado a ${cardFeat(c)?.time ? cardFeat(c).nome : el.value}.`); break; }
     case 'epicStatus': { const ep = epicById(el.dataset.id); ep.status = el.value; ep.doneAt = el.value === 'done' ? agoraComFuso() : null; ep.upd = t; touch(); break; }
     case 'setSprint': { const c = cardById(el.dataset.card); c.sprintId = el.value || null; c.upd = t; touch(); break; }
     case 'slug': { const v = el.value.trim(); if (v && !SLUG_RE.test(v)) { toast('Identificador: só minúsculas, números e hífens (ex.: pagamentos).'); el.value = db.team.slug; return; } db.team.slug = v; db.team.upd = t; catalog = null; touch(); break; }
@@ -2377,6 +2600,9 @@ function demoDb() {
     if (sp) c.sprintId = sp.id;
     if (rnd() < 0.5) c.due = ymd(new Date((da ? +da : now) + (rnd() - 0.4) * 10 * DAY));
   }
+  // features do time na iniciativa sem vínculo: o exemplo mostra Iniciativa › Feature › Card também fora da Central
+  const fa = novaFeature({ epicId: e2.id, name: 'Painel de erros do checkout', owner: nomes[1], due: addDays(today(), 12) }), fb = novaFeature({ epicId: e2.id, name: 'Alertas de latência', owner: nomes[3] });
+  activeCards().filter(c => c.epicId === e2.id).forEach((c, i) => { c.featureId = i % 3 === 2 ? null : i % 3 ? fb.id : fa.id; });
   const last = sps.at(-1); last.state = 'active';
   for (const [k, s] of sps.entries()) {   // compromisso = cards da sprint já comprometidos no início + os que vieram da anterior
     s.committed = activeCards().filter(c => c.sprintId === s.id && commitAt(c) && commitAt(c) <= new Date(+parseYmd(s.start) + DAY * 2)).map(c => c.id);
@@ -2408,7 +2634,7 @@ async function chaveDoPreset() {   // cadastra a chave embutida uma única vez (
   if (h && h.queryPermission && (await h.queryPermission({ mode: 'readwrite' })) === 'granted') { try { await abrirArquivo(h, { pedir: false }); return; } catch {} }
   renderWelcome();
 })();
-window.__qt = { PRESET, conectarPasta, get db() { return db; }, set db(v) { db = v; }, get catalog() { return catalog; }, buildStatus, buildMetrics, validar, publicar, colarChave, chaveiro, decifrar, cifrar, lerCatalogoEnvelope, render, mergeDb, demoDb, abrirArquivo, salvar, get pub() { return pub; } };
+window.__qt = { PRESET, conectarPasta, get db() { return db; }, set db(v) { db = v; }, get catalog() { return catalog; }, set catalog(v) { catalog = v; }, applyCatalogLinks, buildStatus, buildMetrics, validar, exportCsv, exportLegivel, novaFeature, ligarFeature, publicar, colarChave, chaveiro, decifrar, cifrar, lerCatalogoEnvelope, render, mergeDb, demoDb, abrirArquivo, salvar, get pub() { return pub; } };
 </script>
 <script id="f4seg">
 /* seguranca-comum 1.0 · aviso de senha e cofre, lembrete de teste da senha e "Onde estou?"
@@ -2540,7 +2766,7 @@ function f4quemSou() {
 async function f4ler() {
   const dir = await f4pasta(false); if (!dir) return false;
   const { mapa } = await chaveiro(); let mudou = false, lidos = 0;
-  const assinatura = () => JSON.stringify([db.cards, db.epics, db.sprints, db.people, db.settings, db.team]);
+  const assinatura = () => JSON.stringify([db.cards, db.epics, db.features, db.sprints, db.people, db.settings, db.team]);
   for await (const [n, h] of dir.entries()) {
     if (h.kind !== 'file' || !n.endsWith('.json') || n.startsWith('.') || n === f4arquivo()) continue;
     try {

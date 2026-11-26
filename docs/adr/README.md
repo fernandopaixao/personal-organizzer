@@ -1,6 +1,6 @@
 # Decisões de arquitetura (ADRs)
 
-*26/11/2026 · estado: Remessa · Central v15.17, Quadro do Time 2.4, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.2, contratos 1.0, visual experimental*
+*26/11/2026 · estado: Remessa · Central v15.18, Quadro do Time 2.5, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.2, contratos 1.1, visual experimental*
 
 Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequências e o que observar ao evoluir. Elas existem para que uma funcionalidade nova comece pelas regras certas, sem precisar reler todos os planos.
 
@@ -46,6 +46,8 @@ Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequê
 | [0036](0036-ferias-so-o-gestor-cadastra.md) | Férias: só o gestor cadastra | Times não usam ferramenta de férias; o gestor marca as de todos na Central, pessoa com time; `ferias.html` sai do pacote |
 | [0037](0037-nome-remessa.md) | Nome Remessa | A solução se chama Remessa (envelopes lacrados numa caixa postal); ícone da aba com o lacre azul em todas as ferramentas; arquivo de integração que chegou é "nova remessa" |
 | [0038](0038-ligar-visual-experimental-na-entrada.md) | Ligar o visual experimental pela tela de entrada | Caixa **Visual experimental** no painel da Remessa: troca para a pasta `experimental/` e lembra a escolha no navegador; só troca sozinho para arquivos que já abriram; Quadro e Finanças do Time de um time não trocam |
+| [0039](0039-hierarquia-iniciativa-feature-card.md) | Iniciativa › Feature › Card nos times | A mesma hierarquia da Central no Quadro: feature da Central ou do time (`FEAT-n`), card em no máximo uma; "feature" deixa de ser tipo de card; `featureLocalId` no `status.json` leva os cards junto na conciliação |
+| [0040](0040-exportar-dados-legiveis-com-confirmacao.md) | Exportar dados legíveis com confirmação | CSV ou JSON em claro só depois de marcar que sai sem criptografia; separado da cópia cifrada; nunca na pasta compartilhada |
 
 ## Checklist para uma funcionalidade nova
 
@@ -57,7 +59,7 @@ Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequê
 6. **Migração:** campo novo com padrão em `normalizeDb`; abrir um arquivo da versão anterior ([0011](0011-migracao-aditiva-versionada.md)).
 7. **Entrada externa:** escapar, validar, prévia antes de aplicar ([0013](0013-downstream-previa-e-conciliacao.md), [0015](0015-agentes-por-arquivo.md)).
 8. **Interface:** um destaque, gráfico antes de texto, criar em modal, ver em painel, sem página nova se uma existente é a dona do dado ([0020](0020-principios-de-interface.md)). Cores por variável (`var(--card)`, `var(--ink)`...) para o modo escuro funcionar ([0027](0027-tema-claro-escuro-compartilhado.md)). Cor fixa nova que deve mudar no visual experimental: par em `experimental/src/trocas.json` ([0034](0034-visual-experimental.md)); ferramenta nova: ícone com o lacre da Remessa em `financas/src/icones/` e o título em `ICONES` de `tools/build_financas.py` ([0037](0037-nome-remessa.md)). Arquivo que chegou de outra pessoa se chama "nova remessa" nos textos ([0037](0037-nome-remessa.md)).
-9. **Build e teste:** editar a fonte, rodar `python3 tools/injetar_seguranca.py` (Central/Quadro) ou `python3 tools/build_financas.py`, e `node financas/testes/teste-e2e.js` (mais `teste-navegador.js` se mexeu em pastas, [0030](0030-aviso-quando-nao-da-para-abrir-pastas.md)) ([0017](0017-build-embutir-e-injetar.md)). A CI também monta e testa a versão experimental (`python3 tools/build_experimental.py --testar`, [0034](0034-visual-experimental.md)).
+9. **Build e teste:** editar a fonte, rodar `python3 tools/injetar_seguranca.py` (Central/Quadro) ou `python3 tools/build_financas.py`, e `node financas/testes/teste-e2e.js` (mais `teste-quadro.js` se mexeu no Quadro e `teste-navegador.js` se mexeu em pastas, [0030](0030-aviso-quando-nao-da-para-abrir-pastas.md)) ([0017](0017-build-embutir-e-injetar.md)). A CI também monta e testa a versão experimental (`python3 tools/build_experimental.py --testar`, [0034](0034-visual-experimental.md)).
 10. **Documentar no mesmo PR** ([0022](0022-documentacao-no-mesmo-pr.md)): atualizar [funcionalidades](../funcionalidades.md), o [passo a passo](../passo-a-passo.md) e a [jornada](../jornada-do-usuario.md) quando o caminho do usuário muda; plano do recurso em `docs/`; ADR nova se a decisão vale para mais de uma ferramenta; versões no cabeçalho dos documentos. A CI recusa PR que muda ferramenta sem mudar documentação.
 
 ## Como escrever uma ADR nova

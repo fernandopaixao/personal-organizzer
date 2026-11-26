@@ -56,6 +56,9 @@ jobs:
       - name: Teste de ponta a ponta
         run: node financas/testes/teste-e2e.js
 
+      - name: Teste do Quadro do Time (hierarquia e exportação)
+        run: node financas/testes/teste-quadro.js
+
       - name: Teste do Mapa de Férias
         run: node financas/testes/teste-ferias.js
 

@@ -37,7 +37,7 @@ function f4quemSou() {
 async function f4ler() {
   const dir = await f4pasta(false); if (!dir) return false;
   const { mapa } = await chaveiro(); let mudou = false, lidos = 0;
-  const assinatura = () => JSON.stringify([db.cards, db.epics, db.sprints, db.people, db.settings, db.team]);
+  const assinatura = () => JSON.stringify([db.cards, db.epics, db.features, db.sprints, db.people, db.settings, db.team]);
   for await (const [n, h] of dir.entries()) {
     if (h.kind !== 'file' || !n.endsWith('.json') || n.startsWith('.') || n === f4arquivo()) continue;
     try {

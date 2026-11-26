@@ -1,6 +1,6 @@
 # Funcionalidades, usos e objetivos
 
-*26/11/2026 · Remessa · Central v15.17, Quadro do Time 2.4, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.2, contratos 1.0 · visual experimental em `experimental/`*
+*26/11/2026 · Remessa · Central v15.18, Quadro do Time 2.5, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.2, contratos 1.1 · visual experimental em `experimental/`*
 
 Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. Para as regras técnicas por trás, veja as [decisões de arquitetura](adr/README.md). Para o caminho de quem usa, veja a [jornada do usuário](jornada-do-usuario.md) e o [passo a passo](passo-a-passo.md).
 
@@ -121,7 +121,7 @@ A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados
 
 ---
 
-## 5. Central de Gestão (v15.17)
+## 5. Central de Gestão (v15.18)
 
 **Férias dentro da Central (15.9, [ADR-0033](adr/0033-ferias-dentro-da-central.md)).** O Mapa de Férias do gestor e da liderança deixou de ser uma ferramenta à parte: é a página **Férias** (menu Pessoas), no mesmo arquivo e com a mesma senha da Central. Os times com pasta e as chaves de tarefas da Integração entram sozinhos; a pasta compartilhada é a da Integração. A página **Hoje** mostra quem está **fora hoje**.
 
@@ -179,7 +179,7 @@ Navegação em 9 páginas (teclas 1 a 9) e o botão **Importar e agentes** no to
 - **Objetivo:** acompanhar cada time e entregar a ferramenta pronta.
 
 ### 5.9 Integração (9)
-- **Uso:** pasta e chaves (gerar, copiar, revogar; **chave de finanças** por time, colada ou importada com **Chaves do Finanças do Grupo**), **Remessas** (15.12: os arquivos que chegaram dos times, com prévia; cada um ainda não aplicado é uma "nova remessa" e aparece no cartão Dos times), **Conciliação** (unir épicos, trazer para a Central, ligar itens a features, códigos das finanças dos times sem iniciativa na Central) e **Compartilhar** (tela que mostra o que vai para cada time).
+- **Uso:** pasta e chaves (gerar, copiar, revogar; **chave de finanças** por time, colada ou importada com **Chaves do Finanças do Grupo**), **Remessas** (15.12: os arquivos que chegaram dos times, com prévia; cada um ainda não aplicado é uma "nova remessa" e aparece no cartão Dos times), **Conciliação** (unir épicos, trazer para a Central, ligar itens a features; 15.18: a feature criada pelo time chega com a contagem de cards e, ligada a uma feature da Central, leva os cards junto, [ADR-0039](adr/0039-hierarquia-iniciativa-feature-card.md); códigos das finanças dos times sem iniciativa na Central) e **Compartilhar** (tela que mostra o que vai para cada time).
 - **Abrir o Finanças do Grupo (15.7):** botão em Integração e na aba Finanças da iniciativa; a senha da sessão vai junto.
 - **Objetivo:** manter a Central e os times falando a mesma língua, sem sobrescrever nada.
 
@@ -190,23 +190,26 @@ Navegação em 9 páginas (teclas 1 a 9) e o botão **Importar e agentes** no to
 
 ---
 
-## 6. Quadro do Time (2.4)
+## 6. Quadro do Time (2.5)
 
 **Objetivo:** dar ao time uma ferramenta de fluxo pronta, que publica sozinha o que a Central precisa.
 
 Quando o catálogo da Central chega pela pasta, o Quadro avisa **Nova remessa da Central** (2.3.1).
 
+**Hierarquia (2.5, [ADR-0039](adr/0039-hierarquia-iniciativa-feature-card.md)):** **Iniciativa › Feature › Card**, a mesma da Central. A feature vem da Central (catálogo, `PAG-042.F2`) ou é **criada pelo time** (`FEAT-3`) dentro de uma iniciativa, ligada ou não à Central, e não muda de iniciativa. Cada card fica em no máximo uma feature. "feature" deixou de ser tipo de card: card antigo desse tipo mostra **Transformar em feature**.
+
 | Tela | Uso | Objetivo |
 |---|---|---|
-| **Quadro** | Kanban com raias (nenhuma, iniciativa ou pessoa), WIP visível, envelhecimento (âmbar acima da mediana, vermelho acima do p85), entrega recolhida, filtros, faixa de pulso, card em painel lateral (↑ ↓ Esc) | Ver gargalos e cards parados |
+| **Quadro** | Kanban com raias (nenhuma, iniciativa, **feature** ou pessoa), WIP visível, envelhecimento (âmbar acima da mediana, vermelho acima do p85), entrega recolhida, filtros, faixa de pulso, card em painel lateral (↑ ↓ Esc); o card escolhe a feature num campo só, separado em "Da Central" e "Do time", com **+ Nova feature do time** | Ver gargalos e cards parados |
+| **Exportar** (2.5, [ADR-0040](adr/0040-exportar-dados-legiveis-com-confirmacao.md)) | Botão na barra do quadro e em Ajustes: **planilha dos cards (.csv)**, um card por linha com iniciativa, feature, coluna, responsável, prazo e sprint, ou **JSON legível** (Iniciativa › Feature › Card, pessoas, sprints, histórico). O arquivo sai **sem criptografia**: o botão só liga depois de marcar **Entendo que o arquivo sai sem criptografia** | Levar os dados a uma planilha, outra ferramenta ou arquivo morto |
 | **Post-its para o time** | Faixa no topo com os recados do hub; **Vi** grava o recibo | Receber recados do gestor |
-| **Backlog** | Lista agrupável por iniciativa, responsável ou sprint, com "+ Card" | Preparar trabalho |
+| **Backlog** | Lista agrupável por iniciativa, **feature** (da Central e do time, com "Sem feature" no fim), responsável ou sprint, com "+ Card" | Preparar trabalho |
 | **Criação rápida** | `Ajustar retry @ana amanhã #PAG-042 F2 !bug` | Criar card em uma linha |
-| **Iniciativas** | Ligadas à Central, só do time, da Central sem épico (**Trazer**), concluídas. **+ Iniciativa do time** (2.4) abre um formulário em duas colunas, no padrão do Novo card: nome, iniciativa da Central como opções (preenche o nome; as já ligadas ficam apagadas), previsão com atalhos; ao lado, situação em pílulas, link (só https, validado no campo), primeira atualização de status e um resumo. Ctrl+Enter cria, Esc fecha. **Editar** usa o mesmo desenho | Ligar o trabalho do time ao portfólio |
+| **Iniciativas** | Ligadas à Central, só do time, da Central sem épico (**Trazer**), concluídas. **+ Iniciativa do time** (2.4) abre um formulário em duas colunas, no padrão do Novo card: nome, iniciativa da Central como opções (preenche o nome; as já ligadas ficam apagadas), previsão com atalhos; ao lado, situação em pílulas, link (só https, validado no campo), primeira atualização de status e um resumo. Ctrl+Enter cria, Esc fecha. **Editar** usa o mesmo desenho. No detalhe, **Features** mostra as da Central e as do time, cada uma com progresso e os cards abertos; **+ Feature do time** abre o formulário em duas colunas (nome, iniciativa, descrição; ao lado, responsável, prazo, situação e **Unir com a da Central**) | Ligar o trabalho do time ao portfólio |
 | **Métricas** | Vazão, lead time, cycle time, WIP, idade do WIP, fluxo cumulativo, demanda, compromisso cumprido, % bloqueado; "Ver JSON" | Melhorar o fluxo e publicar para a Central |
 | **Sprints** (menu ···) | Planejar, iniciar, fechar; ao fechar, pergunta se publica as métricas | Ritmo do time |
 | **Central** (menu ···) | Slug, chave, pasta, catálogo, situação das publicações | Conferir a integração |
-| **Ajustes** (menu ···) | Nome, pessoas, colunas (compromisso, início, mostrar Backlog), senha, cópia de segurança | Configurar |
+| **Ajustes** (menu ···) | Nome, pessoas, colunas (compromisso, início, mostrar Backlog), senha, **Baixar cópia cifrada** e **Exportar dados legíveis** | Configurar |
 
 Cada pessoa grava o **próprio arquivo** (`quadro/<pessoa>-<computador>.json`) e o Quadro une os arquivos de todos a cada 20 s. O backlog (`status.json`) é publicado a cada movimentação; as métricas, ao fechar a sprint.
 

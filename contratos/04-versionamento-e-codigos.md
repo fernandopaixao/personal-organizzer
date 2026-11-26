@@ -42,7 +42,7 @@
 | Id de post-it | único no mundo, ex.: `pi-<tempo><aleatório>` | `pi-mhx1a2b3c` | O autor |
 
 **Regras dos códigos** ([ADR-0012](../docs/adr/0012-modelo-iniciativa-feature.md)):
-- Os times **nunca inventam** `ref` de iniciativa, feature ou fase: só referenciam os que vieram no catálogo. Um item sem vínculo vai com `ref: null` (ou sem `featureRef`) e `localId` próprio.
+- Os times **nunca inventam** `ref` de iniciativa, feature ou fase: só referenciam os que vieram no catálogo. Um item sem vínculo vai com `ref: null` (ou sem `featureRef`) e `localId` próprio. Uma feature criada pelo time também tem só `localId` (ex.: `FEAT-7`); os cards dela apontam para ela com `featureLocalId` ([ADR-0039](../docs/adr/0039-hierarquia-iniciativa-feature-card.md)).
 - Feature pertence a uma iniciativa e a no máximo uma fase; não muda de iniciativa (só por união de iniciativas, que a Central comunica em `aliases`).
 - Itens dos times entram na Central como *downstream* (andamento), nunca como tarefa do gestor.
 - No plano financeiro, `lines[].initiative` aceita o código da iniciativa (`PAG-042`) para a Central mostrar o custo dela.

@@ -184,7 +184,7 @@
           "items": {
             "type": "array",
             "maxItems": 500,
-            "description": "Itens do time (features locais, histórias, entregas) relevantes para o gestor. Vinculados a uma feature da Central por featureRef, quando houver.",
+            "description": "Itens do time relevantes para o gestor, na hierarquia Iniciativa › Feature › Card (igual à Central). Uma feature criada pelo time vai como item com kind \"feature\"; os cards dentro dela levam featureLocalId com o localId dessa feature. Item ligado a uma feature da Central leva featureRef.",
             "items": {
               "type": "object",
               "required": [
@@ -218,6 +218,12 @@
                     "null"
                   ],
                   "pattern": "^[A-Z]{2,5}-[0-9]{3,}\\.F[0-9]+$"
+                },
+                "featureLocalId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80,
+                  "description": "Opcional (desde 26/11/2026). localId do item kind \"feature\" desta mesma iniciativa em que o card está (feature criada pelo time). Só com featureRef null. Quando o gestor liga essa feature a uma feature da Central, o card vai junto."
                 },
                 "due": {
                   "type": "string",
