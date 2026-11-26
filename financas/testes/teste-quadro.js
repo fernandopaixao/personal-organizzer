@@ -1,4 +1,4 @@
-// Teste do Quadro do Time 2.6: Iniciativa › Feature › Card (igual à Central), exportação legível e Refinamento.
+// Teste do Quadro do Time 2.7: Iniciativa › Feature › Card (igual à Central), exportação legível, Refinamento e desenho de sprints.
 // Uso: node financas/testes/teste-quadro.js   (precisa do Playwright e do Chromium instalados)
 const { chromium } = require('playwright');
 const http = require('http'), fs = require('fs'), path = require('path');
@@ -215,6 +215,60 @@ const central = fs.readdirSync(RAIZ).filter(n => /^gestao_pessoal_v\d+\.html$/.t
   // exportação legível leva critérios e pronto
   ok(await rq.evaluate(id => { const j = window.__qt.exportLegivel(); const all = j.iniciativas.flatMap(i => [...i.cardsSemFeature, ...i.features.flatMap(f => f.cards)]); const c = all.find(x => x.codigo === id); return c.criteriosDeAceite.some(a => a.texto === 'Mostra o CET') && c.prontoParaSprint; }, alvoD), 'exportação legível leva critérios de aceite e pronto para sprint');
   await rq.screenshot({ path: path.join(RAIZ, 'financas', 'testes', 'saida', 'quadro-refinamento.png') }).catch(() => {});
+
+  console.log('7. Desenhar sprints e planejar a sprint');
+  const sq = await nova(process.env.QUADRO || '/ferramenta-time/quadro_do_time_v1.html');
+  await sq.click('[data-act=demo]'); await sq.waitForSelector('.kc');
+  await sq.evaluate(() => { const bs = [...document.querySelectorAll('[data-act=view][data-v=refine]')]; (bs.find(b => b.offsetParent) || bs[0]).click(); });
+  await sq.click('[data-act=rStep][data-v=draw]'); await sq.waitForSelector('.rgrid');
+  const sp = await sq.evaluate(() => window.__qt.db.sprints.filter(s => s.state === 'planned').sort((a, b) => a.start.localeCompare(b.start)).map(s => ({ id: s.id, end: s.end })));
+  ok(sp.length === 2 && await sq.locator('.rgrid .rgh:has-text("em andamento")').count() === 1, 'grade mostra a sprint em andamento e as planejadas');
+  ok(await sq.evaluate(() => window.__qt.rVazao()) > 0 && /de \d+ cards/.test(await sq.locator('.rgrid .rgh').nth(2).innerText()), 'capacidade pela vazão média das últimas sprints');
+  const pv1 = await sq.evaluate(() => window.__qt.rPrevisao('r:PAG-042.F3'));
+  ok(pv1 && pv1.end === sp[1].end, 'previsão da feature = fim da última sprint com card dela');
+  // arrastar um card da F3 para a primeira planejada
+  const c75 = await sq.evaluate(id => window.__qt.db.cards.find(c => c.sprintId === id && c.featureRef === 'PAG-042.F3').id, sp[1].id);
+  const dt2 = await sq.evaluateHandle(() => new DataTransfer());
+  await sq.dispatchEvent(`.rpill[data-card="${c75}"]`, 'dragstart', { dataTransfer: dt2 });
+  await sq.dispatchEvent(`.rgrid .rgc[data-rsp="${sp[0].id}"]`, 'drop', { dataTransfer: dt2 });
+  ok(await sq.evaluate(id => window.__qt.db.cards.find(c => c.id === id).sprintId, c75) === sp[0].id, 'arrastar o card entre sprints troca a sprint dele');
+  const st2 = await sq.evaluate(() => window.__qt.buildStatus(5, '2026-11-26T10:00:00-03:00'));
+  const f3 = st2.initiatives.flatMap(i => i.features || []).find(f => f.ref === 'PAG-042.F3');
+  const esperado = await sq.evaluate(() => window.__qt.rPrevisao('r:PAG-042.F3')?.end);
+  ok(f3 && f3.forecastEnd && f3.forecastEnd >= esperado, 'a previsão da feature pelo desenho vai no status.json (forecastEnd)');
+  // mudar o escopo da sprint em andamento pede confirmação
+  const ativa = await sq.evaluate(() => window.__qt.db.sprints.find(s => s.state === 'active').id);
+  sq.once('dialog', d => d.dismiss());
+  const n0 = await sq.evaluate(([id, a]) => window.__qt.rMudarSprint([id], a), [c75, ativa]);
+  ok(n0 === 0, 'levar card para a sprint em andamento pergunta antes (cancelado, nada muda)');
+  // planejar a sprint
+  await sq.click('[data-act=rStep][data-v=plan]'); await sq.waitForSelector('.rplan');
+  const naAntes = await sq.locator('.rplan .rpane').nth(0).locator('.rrow').count();
+  const traz = sq.locator('.rplan [data-act=rTrazer]').first();
+  if (await traz.count()) await traz.click();
+  ok(await sq.locator('.rplan .rpane').nth(0).locator('.rrow').count() === naAntes + 1, 'Trazer coloca um card pronto na sprint');
+  await sq.fill('.rplan [data-rsf=goal]', 'Contratação em homologação'); await sq.press('.rplan [data-rsf=goal]', 'Tab');
+  await sq.fill('.rplan [data-rsf=capacity]', '9'); await sq.press('.rplan [data-rsf=capacity]', 'Tab');
+  const pl = await sq.evaluate(id => { const s = window.__qt.db.sprints.find(x => x.id === id); return { goal: s.goal, cap: s.capacity }; }, sp[0].id);
+  ok(pl.goal === 'Contratação em homologação' && pl.cap?.value === 9 && pl.cap.unit === 'cards', 'objetivo e capacidade gravados na sprint');
+  ok(await sq.locator('.rplan:has-text("O que a Central vai ver")').count() === 1 && await sq.locator('.rplan [data-act=rIniciar]').count() === 0, 'com uma sprint em andamento, Iniciar fica para depois de fechá-la');
+  // fechar a sprint em andamento com objetivo e comentário, depois iniciar a planejada
+  await sq.evaluate(id => { const s = window.__qt.db.sprints.find(x => x.id === id); s.goal = 'Simulação pronta'; }, ativa);
+  await sq.evaluate(() => { const bs = [...document.querySelectorAll('[data-act=view][data-v=sprints]')]; (bs.find(b => b.offsetParent) || bs[0]).click(); });
+  await sq.click(`[data-act=closeSprint][data-id="${ativa}"]`); await sq.waitForSelector('#goalMet');
+  await sq.click('#goalMet [data-v=partly]'); await sq.fill('#sprNote', 'Parceiro atrasou o contrato.');
+  await sq.click(`#dlg [data-act=doClose][data-id="${ativa}"]`); await sq.waitForTimeout(100); await sq.keyboard.press('Escape');
+  const fe = await sq.evaluate(id => { const s = window.__qt.db.sprints.find(x => x.id === id); return { g: s.goalMet, n: s.note, st: s.state, co: s.result.carriedOver }; }, ativa);
+  ok(fe.g === 'partly' && fe.n === 'Parceiro atrasou o contrato.' && fe.st === 'closed' && fe.co >= 0, 'Fechar sprint grava objetivo atingido, a linha sobre a sprint e o que ficou aberto');
+  await sq.evaluate(() => { const bs = [...document.querySelectorAll('[data-act=view][data-v=refine]')]; (bs.find(b => b.offsetParent) || bs[0]).click(); });
+  await sq.click('[data-act=rStep][data-v=plan]'); await sq.waitForSelector('[data-act=rIniciar]');
+  const esp = await sq.evaluate(id => window.__qt.db.cards.filter(c => c.sprintId === id && !c.cancelledAt && !c.deleted && c.col !== 'concluido').length, sp[0].id);
+  await sq.click('[data-act=rIniciar]');
+  const ini2 = await sq.evaluate(id => { const s = window.__qt.db.sprints.find(x => x.id === id); return { st: s.state, n: s.committed.length }; }, sp[0].id);
+  ok(ini2.st === 'active' && ini2.n === esp && esp > naAntes, 'Iniciar a sprint grava o compromisso com os cards planejados (e os que vieram da anterior)');
+  const novaS = await sq.evaluate(() => { const db = window.__qt.db; db.settings.refinement.cadenceDays = 7; document.querySelector('[data-act=rNovaSprint]').click(); const s = db.sprints.at(-1); return Math.round((new Date(s.end) - new Date(s.start)) / 864e5) + 1; });
+  ok(novaS === 7, '+ Sprint usa a duração definida em Ajustes › Refinamento');
+  await sq.screenshot({ path: path.join(RAIZ, 'financas', 'testes', 'saida', 'quadro-desenhar-sprints.png') }).catch(() => {});
 
   ok(!erros.length, 'sem erros de JavaScript' + (erros.length ? ': ' + erros.join(' | ') : ''));
   await browser.close(); srv.close();

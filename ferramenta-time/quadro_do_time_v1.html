@@ -300,6 +300,15 @@ pre.json{background:#f6f7fb;border-radius:10px;padding:12px;font-size:11.5px;max
 .rpts{width:62px;padding:4px 8px}
 .toast.undo{display:flex;gap:14px;align-items:center}.toast.undo button{color:#b8c3ff;font-weight:650}
 @media (max-width:1100px){.rlay{grid-template-columns:1fr}.rlay .rpane{max-height:none}}
+.rgrid{display:grid;overflow:auto;font-size:12px}.rgrid>div{border-bottom:1px solid var(--line);border-right:1px solid var(--line);padding:8px;min-height:56px;min-width:0}
+.rgrid .rgh{min-height:auto;background:#fcfcfe;padding:10px 8px}.rgrid .rgc.act{background:repeating-linear-gradient(135deg,#fafafc 0 8px,#f4f5f9 8px 16px)}
+.rgf b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rpill{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:7px;padding:2px 6px;margin:2px;font-size:11px;background:#fff;cursor:grab;white-space:nowrap}.rpill.nr{border-style:dashed;color:var(--muted)}.rpill.drag{opacity:.4}
+.rcap{height:6px;border-radius:3px;background:#eceef4;overflow:hidden;margin-top:6px}.rcap i{display:block;height:100%;background:var(--bv)}.rcap.over i{background:#d9a23c}
+.rplan{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px;align-items:start}.rlay2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}.rlay2 .rpane{max-height:calc(100vh - 330px)}
+.rsec{padding:12px 14px;border-bottom:1px solid var(--line);line-height:1.6}.rsec .lbl{margin-bottom:4px}
+@media (max-width:1100px){.rplan,.rlay2{grid-template-columns:1fr}}
+
 </style>
 <script id="visual">
 /* visual 1.0 · liga e desliga o visual experimental pela tela de entrada (ADR-0038)
@@ -769,7 +778,7 @@ pre.json{background:#f6f7fb;border-radius:10px;padding:12px;font-size:11.5px;max
      gestao-status/1, gestao-metricas/1 dentro de gestao-envelope/1 (AES-256-GCM).
    - Só métricas de time, calculadas a partir da movimentação dos cards.
    ========================================================================= */
-const TOOL = 'quadro_do_time_v1.html', TOOL_VERSION = '2.6.0';
+const TOOL = 'quadro_do_time_v1.html', TOOL_VERSION = '2.7.0';
 /* Pré-configuração gravada pela Central de Gestão (Pessoas › Times › HTML do time).
    No arquivo original fica null; a Central troca o trecho entre os marcadores por um
    objeto quadro-preset/1: { team: { name, slug, prefix, contact }, people: [{ name, role }], key? }.
@@ -1145,7 +1154,7 @@ function buildStatus(revision, generatedAt) {
     const byF = new Map(); for (const c of cards) if (FEAT_RE.test(c.featureRef || '')) (byF.get(c.featureRef) || byF.set(c.featureRef, []).get(c.featureRef)).push(c);
     const feats = [...byF].map(([ref, cs]) => {
       const cf = catFeature(ref), openC = cs.filter(c => !isDone(c)), dues = openC.map(c => c.due).filter(isYmd).sort();
-      const fc = dues.at(-1);
+      const pv = rPrevisao('r:' + ref), fc = [dues.at(-1), pv?.end].filter(isYmd).sort().at(-1);
       const f = { ref, status: derivedStatus(cs, { due: cf?.due, forecast: fc }), progress: Math.round((cs.length - openC.length) / cs.length * 100) };
       if (fc) f.forecastEnd = fc;
       if (e.featureNotes[ref]) f.note = clip(e.featureNotes[ref], 300);
@@ -1515,7 +1524,7 @@ function novoEpico(name) { db.seq.epic++; const e = { id: `EPIC-${db.seq.epic}`,
 function novaSprint() {
   db.seq.sprint++; const last = db.sprints.filter(s => !s.deleted).sort((a, b) => (a.end || '').localeCompare(b.end || '')).at(-1);
   const start = last?.end ? addDays(last.end, 1) : ymd(weekStart(new Date()));
-  const s = { id: `SPR-${db.seq.sprint}`, uid: uid(), name: `Sprint ${db.seq.sprint}`, start, end: addDays(start, 13), goal: '', state: 'planned', committed: [], upd: Date.now() };
+  const s = { id: `SPR-${db.seq.sprint}`, uid: uid(), name: `Sprint ${db.seq.sprint}`, start, end: addDays(start, Math.max(1, Number(db.settings.refinement?.cadenceDays) || 14) - 1), goal: '', state: 'planned', committed: [], upd: Date.now() };
   db.sprints.push(s); return s;
 }
 
@@ -1569,7 +1578,7 @@ function render() {
     ${view === 'board' ? '' : `<h2 class="vtitle">${esc(title)}</h2>`}${body}`;
   document.body.classList.toggle('dense', view === 'board' && !!ui.dense);
   if (sx) { const b = $('#main').querySelector('.board'); if (b) b.scrollLeft = sx; }
-  wireBoard(); wireRefine();
+  wireBoard(); wireRefine(); wireDesenhar();
 }
 
 /* ------------------------------- boas-vindas ------------------------------- */
@@ -1797,7 +1806,7 @@ function vSprints() {
 // Refinar (tamanho, critérios de aceite, pronto para sprint) e Resumo da sessão. Tudo é dado do time (ADR-0041).
 const READY_PADRAO = ['Critérios de aceite escritos', 'Tamanho combinado', 'Sem dependência aberta'];
 const rCfg = () => db.settings.refinement || (db.settings.refinement = { ready: [...READY_PADRAO], unit: 'cards', cadenceDays: 14, horizon: 3 });
-const R_STEPS = [['org', 'Organizar'], ['ref', 'Refinar']];
+const R_STEPS = [['org', 'Organizar'], ['ref', 'Refinar'], ['draw', 'Desenhar sprints'], ['plan', 'Planejar a sprint']];
 const rSel = new Set();          // cards selecionados no Organizar
 let rUndo = [];                  // pilha de desfazer da sessão (só nesta aba)
 const fKey = c => c.featureRef ? 'r:' + c.featureRef : c.featureId ? 't:' + c.featureId : '-';
@@ -1887,7 +1896,7 @@ function rLinha(c, { sub = false } = {}) {
 function vRefine() {
   ui.rStep ??= 'org';
   if (!rCfg()) return '';
-  return rPassos() + (ui.rStep === 'ref' ? vRefinar() : vOrganizar());
+  return rPassos() + ({ ref: vRefinar, draw: vDesenhar, plan: vPlanejar }[ui.rStep] || vOrganizar)();
 }
 function vOrganizar() {
   const arv = rArvore(), chaves = arv.flatMap(g => g.feats.map(f => f.key));
@@ -2089,6 +2098,126 @@ function rResumoModal() {
   $('#rsN').addEventListener('input', ev => { s.notes = clip(ev.target.value, 3000); s.upd = Date.now(); scheduleSave(); });
   $('#rsX').addEventListener('input', ev => { s.next = clip(ev.target.value, 80); s.upd = Date.now(); scheduleSave(); });
 }
+/* --- Refinamento 2.7: Desenhar sprints e Planejar a sprint --- */
+const rSprintsAbertas = () => db.sprints.filter(s => !s.deleted && s.state !== 'closed').sort((a, b) => (a.state === 'active' ? -1 : 0) - (b.state === 'active' ? -1 : 0) || a.start.localeCompare(b.start));
+const rUnidade = () => rCfg().unit === 'points' ? 'points' : 'cards';
+const rPeso = c => rUnidade() === 'points' ? (Number(c.points) || 0) : 1;
+function rVazao() {   // média das 3 últimas sprints fechadas, em cards ou pontos
+  const fs = db.sprints.filter(s => !s.deleted && s.state === 'closed' && s.result).sort((a, b) => b.start.localeCompare(a.start)).slice(0, 3);
+  if (!fs.length) return null;
+  const v = s => rUnidade() === 'points' ? (s.deliveredIds || []).map(cardById).filter(Boolean).reduce((t, c) => t + (Number(c.points) || 0), 0) : s.result.delivered;
+  return fs.reduce((t, s) => t + v(s), 0) / fs.length;
+}
+function rCapacidade(s) { const c = s.capacity; if (c && c.value != null && (c.unit || 'cards') === rUnidade()) return Number(c.value); const v = rVazao(); return v == null ? null : Math.round(v * 10) / 10; }
+function rCarga(s) { return activeCards().filter(c => c.sprintId === s.id && !c.cancelledAt && (!isDone(c) || s.state === 'active')).reduce((t, c) => t + rPeso(c), 0); }
+const rUnTxt = () => rUnidade() === 'points' ? 'pt' : 'cards';
+// Previsão da feature pelo desenho das sprints: fim da última sprint com card aberto dela.
+function rPrevisao(k) {
+  const cs = rCardsOf(k); if (!cs.length) return null;
+  const abertas = new Map(rSprintsAbertas().map(s => [s.id, s]));
+  const comS = cs.filter(c => abertas.has(c.sprintId)), sem = cs.length - comS.length;
+  const ultimo = comS.map(c => abertas.get(c.sprintId)).sort((a, b) => b.end.localeCompare(a.end))[0];
+  const fimDesenho = rSprintsAbertas().map(s => s.end).sort().at(-1);
+  if (sem) return { end: null, depois: fimDesenho || null, sem, ultimo };
+  return { end: ultimo.end, sprint: ultimo, sem: 0 };
+}
+function rPrevChip(k) {
+  const p = rPrevisao(k), f = rFeatInfo(k); if (!p) return '<span class="faint small">sem cards abertos</span>';
+  const prazo = f?.prazo, fim = p.end || p.depois, txt = p.end ? `fim da ${esc(p.sprint.name.replace(/^Sprint\s*/i, ''))} · ${fmtD(p.end)}` : p.depois ? `depois de ${fmtD(p.depois)}` : 'sem sprint';
+  const cls = !prazo ? '' : p.end ? (p.end > prazo ? 'late' : addDays(p.end, 3) > prazo ? 'attn' : 'ok') : (p.depois && p.depois >= prazo ? 'late' : 'attn');
+  const dif = prazo && fim ? Math.round((parseYmd(fim) - parseYmd(prazo)) / DAY) : null;
+  return `<span class="chip ${cls}">${txt}</span><div class="small muted">${prazo ? `prazo ${fmtD(prazo)}${dif > 0 ? ` · ${dif} dia(s) depois` : ' ✓'}` : f?.time ? 'sem prazo' : 'sem prazo da Central'}${p.sem ? ` · ${p.sem} card(s) sem sprint` : ''}</div>`;
+}
+function vDesenhar() {
+  const cfg = rCfg(), abertas = rSprintsAbertas(), ativa = abertas.find(s => s.state === 'active'), plan = abertas.filter(s => s.state === 'planned').slice(0, Math.max(1, cfg.horizon || 3));
+  const colsS = [...(ativa ? [ativa] : []), ...plan], keys = [...rTodasChaves().filter(k => rCardsOf(k).length), ...(rCardsOf('-').length ? ['-'] : [])];
+  const pill = c => `<span class="rpill ${isReady(c) ? '' : 'nr'}" draggable="true" data-card="${c.id}" data-act="card" title="${esc(c.title)}${isReady(c) ? '' : ' · não está pronto'}">${KIND_IC[c.kind] || '◧'} ${esc(c.id)}${rUnidade() === 'points' && c.points != null ? ` · ${esc(c.points)}` : ''}</span>`;
+  const head = colsS.map(s => { const cap = rCapacidade(s), carga = rCarga(s), over = cap != null && carga > cap; return `<div class="rgh"><b>${esc(s.name)}</b>${s.state === 'active' ? ' <span class="chip">em andamento</span>' : ''}<div class="small muted">${fmtD(s.start)} a ${fmtD(s.end)} · ${fmtN(carga)}${cap != null ? ` de ${fmtN(cap)}` : ''} ${rUnTxt()}</div>${cap != null ? `<div class="rcap ${over ? 'over' : ''}"><i style="width:${Math.min(100, cap ? carga / cap * 100 : 0)}%"></i></div>` : ''}</div>`; }).join('');
+  const linhas = keys.map(k => { const f = rFeatInfo(k), cs = rCardsOf(k); return `<div class="rgf"><b>${esc(f.nome)}</b><div class="small muted">${f.code ? `<span class="${f.time ? 'chip' : 'chip bv code'}">${esc(f.curto)}</span> ` : ''}${esc(f.epic?.name || '')}</div></div>
+      ${colsS.map(s => `<div class="rgc ${s.state === 'active' ? 'act' : ''}" data-rsp="${s.id}">${cs.filter(c => c.sprintId === s.id).map(pill).join('')}</div>`).join('')}
+      <div class="rgc" data-rsp="">${cs.filter(c => !colsS.some(s => s.id === c.sprintId)).map(pill).join('')}</div><div class="rgp">${k === '-' ? '' : rPrevChip(k)}</div>`; }).join('');
+  const over = colsS.filter(s => { const c = rCapacidade(s); return s.state === 'planned' && c != null && rCarga(s) > c; });
+  const v = rVazao();
+  return `<div class="bar"><span class="small muted">Capacidade</span><div class="sg"><button class="${rUnidade() === 'cards' ? 'on' : ''}" data-act="rUnit" data-v="cards">cards (vazão)</button><button class="${rUnidade() === 'points' ? 'on' : ''}" data-act="rUnit" data-v="points">pontos</button></div>
+      <span class="small muted">${v == null ? 'Sem sprint fechada ainda: informe a capacidade em Planejar a sprint.' : `Vazão média das últimas sprints: ${fmtN(Math.round(v * 10) / 10)} ${rUnTxt()}`}</span><span class="grow"></span><button class="btn sm" data-act="rNovaSprint">+ Sprint</button></div>
+    ${colsS.length ? `<div class="rpane"><div class="rgrid" style="grid-template-columns:minmax(180px,230px) repeat(${colsS.length},minmax(150px,1fr)) minmax(110px,150px) minmax(150px,190px)">
+      <div class="rgh lbl">Feature</div>${head}<div class="rgh lbl">Mais tarde</div><div class="rgh lbl">Previsão × prazo</div>${linhas || `<div class="empty" style="grid-column:1/-1;padding:16px">Nenhum card aberto.</div>`}</div></div>
+    <div class="row" style="margin-top:12px">${over.map(s => `<div class="banner warn" style="margin:0">${esc(s.name)} passou da capacidade (${fmtN(rCarga(s))} de ${fmtN(rCapacidade(s))} ${rUnTxt()}).</div>`).join('')}<div class="banner" style="margin:0">Arraste os cards entre as sprints. Card tracejado ainda não está pronto. As previsões vão para a Central no próximo backlog publicado.</div></div>`
+    : `<div class="card flat">Nenhuma sprint planejada. <button class="btn sm pri" data-act="rNovaSprint">+ Sprint</button></div>`}`;
+}
+function vPlanejar() {
+  const plan = db.sprints.filter(s => !s.deleted && s.state === 'planned').sort((a, b) => a.start.localeCompare(b.start)), ativa = activeSprint();
+  if (!ui.rPlan || !plan.some(s => s.id === ui.rPlan)) ui.rPlan = plan[0]?.id || '';
+  const s = sprintById(ui.rPlan);
+  if (!s) return `<div class="card flat">Nenhuma sprint planejada. <button class="btn sm pri" data-act="rNovaSprint">+ Sprint</button></div>`;
+  const na = activeCards().filter(c => c.sprintId === s.id && rOpen(c)).sort((a, b) => rankOf(a) - rankOf(b)), fora = activeCards().filter(c => rOpen(c) && isReady(c) && c.sprintId !== s.id && !(ativa && c.sprintId === ativa.id)).sort((a, b) => rankOf(a) - rankOf(b));
+  const cap = rCapacidade(s), carga = rCarga(s), naoP = na.filter(c => !isReady(c)), feats = [...new Set(na.map(fKey).filter(k => k !== '-'))].map(k => rFeatInfo(k)?.code).filter(Boolean);
+  const dias = Math.round((parseYmd(s.end) - parseYmd(s.start)) / DAY) + 1;
+  const lin = (c, dentro) => `<div class="rrow" data-card="${c.id}" data-act="card">${kic(c.kind)}<span class="code muted">${esc(c.id)}</span><span class="rt">${esc(c.title)}</span>${(() => { const f = rFeatInfo(fKey(c)); return f && f.code ? `<span class="${f.time ? 'chip' : 'chip bv code'}">${esc(f.curto)}</span>` : ''; })()}${c.points != null ? `<span class="chip line">${esc(c.points)} pt</span>` : ''}${dentro ? (isReady(c) ? '' : '<span class="chip attn">não pronto</span>') + `<button class="btn sm ghost" data-act="rTirar" data-card="${c.id}" title="Tirar da sprint">×</button>` : `<button class="btn sm" data-act="rTrazer" data-card="${c.id}">Trazer</button>`}</div>`;
+  return `<div class="bar"><span class="small muted">Sprint</span><select class="sel" data-act="rPlanSel">${plan.map(x => `<option value="${x.id}" ${x.id === s.id ? 'selected' : ''}>${esc(x.name)} · ${fmtD(x.start)} a ${fmtD(x.end)}</option>`).join('')}</select><span class="grow"></span><button class="btn sm" data-act="rNovaSprint">+ Sprint</button></div>
+    <div class="rplan"><div class="stack" style="min-width:0">
+      <div class="card flat"><div class="tf-row" style="grid-template-columns:1.2fr 1fr 1fr 1fr;align-items:end">
+        <div class="field"><label>Sprint</label><input class="sin" data-rsf="name" value="${esc(s.name)}"></div>
+        <div class="field"><label>Início</label><input class="sin" type="date" data-rsf="start" value="${esc(s.start)}"></div>
+        <div class="field"><label>Fim <span class="faint">(${dias} dia(s))</span></label><input class="sin" type="date" data-rsf="end" value="${esc(s.end)}"></div>
+        <div class="field"><label>Capacidade (${rUnTxt()})</label><input class="sin" type="number" min="0" step="0.5" data-rsf="capacity" value="${s.capacity?.value != null && (s.capacity.unit || 'cards') === rUnidade() ? esc(s.capacity.value) : ''}" placeholder="${rVazao() == null ? 'informe' : 'vazão: ' + fmtN(Math.round(rVazao() * 10) / 10)}"></div></div>
+        <div class="field" style="margin-top:12px"><label>Objetivo da sprint</label><input class="sin" data-rsf="goal" value="${esc(s.goal || '')}" placeholder="O que esta sprint entrega? Ex.: Liberar a contratação em homologação" maxlength="200"></div></div>
+      <div class="rlay2"><section class="rpane"><div class="rph"><h3>Na sprint</h3><span class="chip ${cap != null && carga > cap ? 'late' : ''}">${fmtN(carga)}${cap != null ? ' de ' + fmtN(cap) : ''} ${rUnTxt()}</span><span class="grow"></span><span class="small muted">vira o compromisso ao iniciar</span></div><div class="rbody">${na.map(c => lin(c, true)).join('') || '<div class="empty" style="padding:14px">Traga cards prontos da coluna ao lado ou desenhe as sprints no passo 3.</div>'}</div></section>
+        <section class="rpane"><div class="rph"><h3>Prontos fora da sprint</h3><span class="chip">${fora.length}</span></div><div class="rbody">${fora.map(c => lin(c, false)).join('') || '<div class="empty" style="padding:14px">Nenhum card pronto fora da sprint. Marque o pronto no passo Refinar.</div>'}</div></section></div></div>
+      <aside class="rpane"><div class="rph"><h3>O que a Central vai ver</h3></div>
+        <div class="rsec small"><div class="lbl">Ao iniciar a sprint</div>${esc(s.name)} · ${fmtD(s.start)} a ${fmtD(s.end)}<br>Objetivo: ${s.goal ? esc(s.goal) : '<span class="faint">sem objetivo</span>'}<br>Compromisso: ${na.length} card(s)${naoP.length ? ` (${na.length - naoP.length} prontos)` : ''}${feats.length ? `<br>Features: ${feats.map(esc).join(', ')}` : ''}</div>
+        <div class="rsec small"><div class="lbl">Durante a sprint</div>Feitos do compromisso, o que entrou e saiu, bloqueados e dias restantes, a cada movimentação.</div>
+        <div class="rsec small"><div class="lbl">Ao fechar (com confirmação)</div>Cumprido, objetivo atingido, uma linha sobre a sprint e as métricas.</div>
+        ${naoP.length ? `<div class="rsec"><div class="banner warn" style="margin:0">${naoP.length} card(s) não estão prontos (${naoP.slice(0, 3).map(c => esc(c.id)).join(', ')}${naoP.length > 3 ? '…' : ''}). Dá para iniciar mesmo assim.</div></div>` : ''}
+        ${!s.goal ? '<div class="rsec"><div class="banner" style="margin:0">Sem objetivo, o fechamento não pergunta se ele foi atingido.</div></div>' : ''}
+        <div class="rsec row"><span class="grow"></span>${ativa ? `<span class="small muted">Feche a ${esc(ativa.name)} antes de iniciar esta.</span>` : `<button class="btn pri" data-act="rIniciar" data-id="${s.id}" ${na.length ? '' : 'disabled'}>Iniciar ${esc(s.name)}</button>`}</div></aside></div>`;
+}
+function iniciarSprint(s) {
+  s.state = 'active'; s.startedAt = agoraComFuso(); s.committed = activeCards().filter(c => c.sprintId === s.id && !isDone(c)).map(c => c.id);
+  if (s.capacity?.value == null) { const v = rCapacidade(s); if (v != null) s.capacity = { value: v, unit: rUnidade(), auto: true }; }
+  s.upd = Date.now(); return s.committed.length;
+}
+// escopo da sprint em andamento, derivado: entrou depois do início e saiu do compromisso sem ser entregue
+function sprintEscopo(s) {
+  const comp = new Set(s.committed || []), cs = activeCards().filter(c => c.sprintId === s.id);
+  return { added: cs.filter(c => !comp.has(c.id)).map(c => c.id), removed: [...comp].filter(id => { const c = cardById(id); return !c || c.cancelledAt || (c.sprintId !== s.id && !(s.deliveredIds || []).includes(id)); }) };
+}
+function rMudarSprint(ids, spId) {
+  const sp = spId ? sprintById(spId) : null, cs = ids.map(cardById).filter(c => c && rOpen(c) && c.sprintId !== (spId || null)); if (!cs.length) return 0;
+  const ativa = activeSprint(), mexe = cs.filter(c => ativa && (c.sprintId === ativa.id || spId === ativa.id));
+  if (mexe.length && !confirm(`Isso muda o escopo da ${ativa.name}, que já está em andamento: ${mexe.length} card(s) ${spId === ativa.id ? 'entram' : 'saem'}. A Central vê o que entrou e saiu. Continuar?`)) return 0;
+  rFoto(`${cs.length} card(s) para ${sp ? sp.name : 'Mais tarde'}`, cs.map(c => c.id));
+  for (const c of cs) { const de = sprintById(c.sprintId)?.name || 'sem sprint'; c.sprintId = spId || null; c.upd = Date.now(); registrar('sprint', `${c.id} ${clip(c.title, 60)}: ${de} → ${sp ? sp.name : 'sem sprint'}`, c.id); }
+  return cs.length;
+}
+function wireDesenhar() {
+  const m = $('#main'); if (view !== 'refine' || !m.querySelector('.rgrid, .rplan')) return;
+  m.querySelectorAll('.rpill[draggable]').forEach(p => { p.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', p.dataset.card); p.classList.add('drag'); }); p.addEventListener('dragend', () => p.classList.remove('drag')); });
+  m.querySelectorAll('[data-rsp]').forEach(t => {
+    t.addEventListener('dragover', e => { e.preventDefault(); t.classList.add('rdropon'); });
+    t.addEventListener('dragleave', e => { if (!t.contains(e.relatedTarget)) t.classList.remove('rdropon'); });
+    t.addEventListener('drop', e => { e.preventDefault(); t.classList.remove('rdropon'); const id = e.dataTransfer.getData('text/plain'); if (!cardById(id)) return; const n = rMudarSprint([id], t.dataset.rsp || null); if (n) { touch(); rToast(`${id} agora em ${sprintById(t.dataset.rsp)?.name || 'Mais tarde'}`); } });
+  });
+  m.querySelectorAll('[data-rsf]').forEach(el => el.addEventListener('change', () => {
+    const s = sprintById(ui.rPlan); if (!s) return; const k = el.dataset.rsf, v = el.value;
+    if ((k === 'start' || k === 'end') && !isYmd(v)) return;
+    if (k === 'capacity') s.capacity = v === '' ? null : { value: Math.max(0, Number(v)) || 0, unit: rUnidade() };
+    else if (k === 'name') s.name = clip(v, 60) || s.name; else s[k] = k === 'goal' ? clip(v, 200) : v;
+    s.upd = Date.now(); touch();
+  }));
+}
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if (!el || !db) return; const a = el.dataset.act;
+  if (!['rUnit', 'rNovaSprint', 'rTrazer', 'rTirar', 'rIniciar'].includes(a)) return;
+  try {
+    if (a === 'rUnit') { rCfg().unit = el.dataset.v; db.settings.upd = Date.now(); touch(false); }
+    if (a === 'rNovaSprint') { const s = novaSprint(); ui.rPlan = s.id; touch(false); toast(`${s.name} criada: ${fmtD(s.start)} a ${fmtD(s.end)}.`); }
+    if (a === 'rTrazer' || a === 'rTirar') { e.stopPropagation(); if (rMudarSprint([el.dataset.card], a === 'rTrazer' ? ui.rPlan : null)) touch(); }
+    if (a === 'rIniciar') { const s = sprintById(el.dataset.id); if (activeSprint()) { toast('Feche a sprint em andamento antes.'); return; } const n = iniciarSprint(s); registrar('start', `${s.name} iniciada com ${n} card(s)${s.goal ? ': ' + s.goal : ''}`); touch(); toast(`${s.name} iniciada com ${n} card(s) no compromisso.`); }
+  } catch (err) { console.error(err); toast(err.message || String(err), 5000); }
+});
+document.addEventListener('change', e => { if (e.target.dataset?.act === 'rPlanSel' && db) { ui.rPlan = e.target.value; render(); } });
+
 const rSessaoPorId = id => (db.refinements || []).find(x => x.id === id);
 
 // Ações do refinamento (o listener principal ignora data-act que não conhece)
@@ -2130,6 +2259,7 @@ document.addEventListener('submit', e => {
 document.addEventListener('change', e => {
   const el = e.target; if (!db) return;
   if (el.dataset?.act === 'rFeatSel') { ui.rFeat = el.value; render(); return; }
+  if (['rUnitSel', 'rCad', 'rHor'].includes(el.dataset?.act)) { const c = rCfg(), a = el.dataset.act; if (a === 'rUnitSel') c.unit = el.value; else { const n = Math.round(Number(el.value)); if (!n || n < 1) { render(); return; } c[a === 'rCad' ? 'cadenceDays' : 'horizon'] = Math.min(a === 'rCad' ? 60 : 8, n); } db.settings.upd = Date.now(); touch(false); return; }
   if (el.dataset?.act === 'rReadyItems') { const it = el.value.split('\n').map(s => clip(s.trim(), 80)).filter(Boolean).slice(0, 5); rCfg().ready = it; db.settings.upd = Date.now(); touch(false); toast(it.length ? `Pronto para sprint com ${it.length} item(ns).` : 'Sem itens: o pronto passa a ser marcado à mão.'); return; }
   if (el.dataset?.rpts) { const c = cardById(el.dataset.rpts); if (!c) return; const v = el.value === '' ? null : Number(el.value); if (v != null && (isNaN(v) || v < 0)) { el.value = c.points ?? ''; return; } rFoto(`tamanho de ${c.id}`, [c.id]); const antes = c.points; c.points = v; c.upd = Date.now(); registrar('size', `${c.id} ${clip(c.title, 60)}: ${antes ?? '?'} → ${v ?? '?'} pt`, c.id); touch(false); }
 });
@@ -2376,7 +2506,10 @@ function vSettings() {
     ${vPeople()}
     <div class="card"><div class="lbl">Refinamento</div>
       <p class="small muted" style="margin-top:0">Itens do <b>pronto para sprint</b>, um por linha (até 5). O card fica pronto quando todos estão marcados; também dá para marcar à mão no card.</p>
-      <textarea class="sin" data-act="rReadyItems" rows="4">${esc(rCfg().ready.join('\n'))}</textarea></div>
+      <textarea class="sin" data-act="rReadyItems" rows="4">${esc(rCfg().ready.join('\n'))}</textarea>
+      <div class="fg" style="margin-top:12px"><label class="f"><span>Capacidade das sprints</span><select class="sel" data-act="rUnitSel"><option value="cards" ${rUnidade() === 'cards' ? 'selected' : ''}>cards, pela vazão</option><option value="points" ${rUnidade() === 'points' ? 'selected' : ''}>pontos</option></select></label>
+        <label class="f"><span>Duração da sprint (dias)</span><input class="sin" type="number" min="1" max="60" data-act="rCad" value="${esc(rCfg().cadenceDays || 14)}"></label>
+        <label class="f"><span>Sprints no desenho</span><input class="sin" type="number" min="1" max="8" data-act="rHor" value="${esc(rCfg().horizon || 3)}"></label></div></div>
     <div class="card"><div class="lbl">Colunas do quadro</div>
       <p class="small muted" style="margin-top:0">A última coluna é a entrega. Marque onde o card vira compromisso e onde o trabalho começa: as métricas de lead time, cycle time e WIP dependem disso.</p>
       <table class="t"><thead><tr><th>Coluna</th><th>Limite WIP</th><th>Compromisso</th><th>Início</th><th></th></tr></thead><tbody>${c.map((x, i) => `<tr>
@@ -2757,6 +2890,8 @@ function closeSprintModal(id) {
   const deliv = sprintDelivered(s), dc = s.committed.filter(cid => { const c = cardById(cid); return c && isDone(c) && deliv.includes(c); }).length;
   modal(`<div class="mh"><h2 class="grow" style="margin:0">Fechar ${esc(s.name)}</h2></div><div class="mb">
     <dl class="kv"><dt>Compromisso inicial</dt><dd>${s.committed.length} card(s)</dd><dt>Cumprido</dt><dd>${dc} (${s.committed.length ? Math.round(dc / s.committed.length * 100) : 0}%)</dd><dt>Fechados na sprint</dt><dd>${deliv.length}</dd><dt>Ficaram abertos</dt><dd>${abertos.length}</dd></dl>
+    ${s.goal ? `<div class="f" style="margin-top:14px"><span>Objetivo: “${esc(s.goal)}”</span><div class="sg" id="goalMet">${[['yes', 'atingido'], ['partly', 'em parte'], ['no', 'não']].map(([v, l]) => `<button type="button" data-v="${v}" class="${(s.goalMet || '') === v ? 'on' : ''}" onclick="this.parentElement.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === this))">${l}</button>`).join('')}</div></div>` : ''}
+    <label class="f" style="margin-top:14px"><span>Uma linha sobre a sprint <span class="faint">(vai para a Central com as métricas)</span></span><input class="sin" id="sprNote" maxlength="200" value="${esc(s.note || '')}" placeholder="Ex.: parceiro atrasou o contrato; simulação pronta."></label>
     ${abertos.length ? `<label class="f" style="margin-top:14px"><span>Cards abertos vão para</span><select class="sel" id="dest">${prox ? `<option value="${prox.id}">${esc(prox.name)}</option>` : ''}<option value="">Backlog (sem sprint)</option></select></label>` : ''}
     <p class="small muted">Em seguida a ferramenta pergunta se publica as métricas desta sprint para a Central.</p></div>
     <div class="mf"><button class="btn" data-act="close">Voltar</button><button class="btn pri" data-act="doClose" data-id="${s.id}">Fechar sprint</button></div>`);
@@ -2878,11 +3013,13 @@ document.addEventListener('click', async e => {
       case 'newSprint': { const s = novaSprint(); touch(false); sprintModal(s.id); break; }
       case 'editSprint': sprintModal(id); break;
       case 'delSprint': { const s = sprintById(id); s.deleted = true; s.upd = Date.now(); for (const c of db.cards) if (c.sprintId === id) { c.sprintId = null; c.upd = Date.now(); } closeModal(); touch(); break; }
-      case 'startSprint': { const s = sprintById(id); s.state = 'active'; s.startedAt = agoraComFuso(); s.committed = activeCards().filter(c => c.sprintId === s.id && !isDone(c)).map(c => c.id); s.upd = Date.now(); touch(); toast(`${s.name} iniciada com ${s.committed.length} card(s) no compromisso.`); break; }
+      case 'startSprint': { const s = sprintById(id); iniciarSprint(s); touch(); toast(`${s.name} iniciada com ${s.committed.length} card(s) no compromisso.`); break; }
       case 'closeSprint': closeSprintModal(id); break;
       case 'doClose': {
         const s = sprintById(id), deliv = sprintDelivered(s), dest = $('#dest')?.value || null;
-        s.result = { committed: s.committed.length, deliveredCommitted: s.committed.filter(cid => deliv.some(c => c.id === cid)).length, delivered: deliv.length };
+        s.goalMet = $('#goalMet button.on')?.dataset.v || null; s.note = clip($('#sprNote')?.value.trim() || '', 200);
+        { const esc0 = sprintEscopo(s); s.added = esc0.added; s.removed = esc0.removed; }
+        s.result = { committed: s.committed.length, deliveredCommitted: s.committed.filter(cid => deliv.some(c => c.id === cid)).length, delivered: deliv.length, carriedOver: activeCards().filter(c => c.sprintId === s.id && !isDone(c)).length };
         s.deliveredIds = deliv.map(c => c.id); s.state = 'closed'; s.closedAt = agoraComFuso(); s.upd = Date.now();
         for (const c of activeCards()) if (c.sprintId === s.id && !isDone(c)) { c.sprintId = dest; c.upd = Date.now(); }
         touch(); pubMetricsModal({ name: s.name, start: s.start, end: s.end, closedAt: s.closedAt }); break;
@@ -3014,7 +3151,8 @@ function demoDb() {
     if (sps[k + 1]) for (const c of activeCards()) if (c.sprintId === sps[k + 1].id && commitAt(c) && commitAt(c) < parseYmd(sps[k + 1].start)) s.committed.push(c.id);
   }
   for (const s of sps) { if (s.state === 'closed') { const dl = sprintDelivered(s); s.result = { committed: s.committed.length, deliveredCommitted: s.committed.filter(id => dl.some(c => c.id === id)).length, delivered: dl.length }; s.closedAt = isoAt(new Date(+parseYmd(s.end) + 18 * 3600000)); } }
-  const nx = novaSprint(); nx.name = `Sprint ${16 + sps.length}`;
+  const nx = novaSprint(); nx.name = `Sprint ${16 + sps.length}`; nx.goal = 'Liberar a contratação do Pix parcelado em homologação';
+  const nx2 = novaSprint(); nx2.name = `Sprint ${17 + sps.length}`;
   const wipC = activeCards().filter(c => isWip(c));
   if (wipC[0]) bloquear(wipC[0], 'terceiro', 'Aguardando credenciais de homologação do parceiro');
   if (wipC[1]) bloquear(wipC[1], 'decisao', 'Definição do limite de parcelas');
@@ -3023,6 +3161,9 @@ function demoDb() {
   for (const x of [...d.epics, ...d.features]) x.createdAt = isoAt(base);
   const crit = [['Simulação mostra o CET de cada parcela', 'Erro do motor vira mensagem amigável', 'Teste com 3, 6 e 12 parcelas'], ['Termo aceito fica registrado com data e hora', 'Link para o contrato completo']];
   activeCards().filter(c => !isDone(c) && c.featureRef).slice(0, 4).forEach((c, i) => { c.acceptance = crit[i % 2].map(t => ({ id: uid(), text: t, done: i === 0 })); c.points = [3, 2, 5, 1][i]; if (i < 2) c.ready = { checks: [...READY_PADRAO], manual: null, at: isoAt(new Date(Date.now() - 3 * DAY)) }; });
+  const novos = [['Taxa por parcela no recibo', e1, 'PAG-042.F2', null, 2, nx], ['Contrato v2 do parceiro em homologação', e1, 'PAG-042.F2', null, 3, nx], ['Régua de comunicação do piloto', e1, 'PAG-042.F3', null, 2, nx2], ['Painel do piloto com 1% da base', e1, 'PAG-042.F3', null, 5, nx2],
+    ['Agrupar erros por adquirente', e2, null, fa.id, 5, nx], ['Limite de latência por adquirente', e2, null, fb.id, 3, null], ['Exportar extrato em PDF', null, null, null, null, null]];
+  for (const [t, ep, ref, fid, pts, sp] of novos) { const c = novoCard({ title: t, kind: 'história', epicId: ep?.id || '', owner: nomes[Math.floor(rnd() * 5)], col: 'backlog', sprintId: sp?.id || null, points: pts }); c.featureRef = ref; c.featureId = fid; c.createdAt = c.history[0].at = isoAt(new Date(Date.now() - 6 * DAY)); if (pts && pts < 5) c.ready = { checks: [...READY_PADRAO], manual: null, at: isoAt(new Date(Date.now() - 2 * DAY)) }; c.acceptance = [{ id: uid(), text: 'Critério combinado com o PO', done: true }]; }
   return d;
 }
 
@@ -3043,7 +3184,7 @@ async function chaveDoPreset() {   // cadastra a chave embutida uma única vez (
   if (h && h.queryPermission && (await h.queryPermission({ mode: 'readwrite' })) === 'granted') { try { await abrirArquivo(h, { pedir: false }); return; } catch {} }
   renderWelcome();
 })();
-window.__qt = { moverParaFeature, dividirCard, juntarCards, rDesfazer, isReady, rSessao, rResumoTexto, rCardsOf, fKey, PRESET, conectarPasta, get db() { return db; }, set db(v) { db = v; }, get catalog() { return catalog; }, set catalog(v) { catalog = v; }, applyCatalogLinks, buildStatus, buildMetrics, validar, exportCsv, exportLegivel, novaFeature, ligarFeature, publicar, colarChave, chaveiro, decifrar, cifrar, lerCatalogoEnvelope, render, mergeDb, demoDb, abrirArquivo, salvar, get pub() { return pub; } };
+window.__qt = { rPrevisao, rMudarSprint, rCapacidade, rVazao, iniciarSprint, sprintEscopo, moverParaFeature, dividirCard, juntarCards, rDesfazer, isReady, rSessao, rResumoTexto, rCardsOf, fKey, PRESET, conectarPasta, get db() { return db; }, set db(v) { db = v; }, get catalog() { return catalog; }, set catalog(v) { catalog = v; }, applyCatalogLinks, buildStatus, buildMetrics, validar, exportCsv, exportLegivel, novaFeature, ligarFeature, publicar, colarChave, chaveiro, decifrar, cifrar, lerCatalogoEnvelope, render, mergeDb, demoDb, abrirArquivo, salvar, get pub() { return pub; } };
 </script>
 <script id="f4seg">
 /* seguranca-comum 1.0 · aviso de senha e cofre, lembrete de teste da senha e "Onde estou?"

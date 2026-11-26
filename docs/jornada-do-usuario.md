@@ -1,6 +1,6 @@
 # Jornada do usuário
 
-*26/11/2026 · como cada papel conhece, monta, usa e mantém a Remessa · Central v15.18, Quadro do Time 2.6, Hub 2.4, assistente 2.8.2*
+*26/11/2026 · como cada papel conhece, monta, usa e mantém a Remessa · Central v15.18, Quadro do Time 2.7, Hub 2.4, assistente 2.8.2*
 
 A solução tem quatro papéis. A mesma pessoa pode ter mais de um (o gestor costuma ser também o dono das finanças do grupo; o líder do time costuma ser também o responsável financeiro). Quem integra uma **outra solução** pelos contratos tem a jornada própria na [seção 9](#9-jornada-de-quem-integra-outra-solução).
 
@@ -54,10 +54,10 @@ A solução se chama **Remessa**: as ferramentas trocam envelopes lacrados (cifr
 | **2. Primeiro uso** | No assistente: "lidero 1 time", cola a chave, escolhe as pastas e cria a senha; abre o Quadro já com a chave e diz quem é | Assistente → Quadro | Senha obrigatória, aviso de cofre, chave já no arquivo | Edge ou Chrome |
 | **3. Ligar ao portfólio** | Em Iniciativas, liga épicos às iniciativas da Central ou usa **Trazer** | Quadro | Códigos da Central entram nos cards | |
 | **4. Dia a dia** | Move cards, cria pela barra rápida, acompanha WIP e envelhecimento; agrupa cards em features (da Central ou do time) | Quadro | Backlog publicado sozinho a cada movimentação; Iniciativa › Feature › Card igual à Central | |
-| **4a. Refinar** | Na reunião de refinamento, abre **Refinamento**: organiza as features, move entregáveis entre elas, divide e junta cards, escreve critérios, marca o pronto para sprint e copia o resumo para o Teams | Quadro (Refinamento, 2.6) | Feature nova vai para a conciliação do gestor sozinha; critérios ficam no time | Antes, um card por vez no painel |
+| **4a. Refinar e planejar** | Na reunião de refinamento, abre **Refinamento**: organiza as features, move entregáveis entre elas, divide e junta cards, escreve critérios, marca o pronto, desenha as próximas sprints contra a capacidade, planeja a próxima com objetivo e inicia; copia o resumo para o Teams | Quadro (Refinamento, 2.6 e 2.7) | Feature nova vai para a conciliação do gestor sozinha; critérios ficam no time | Antes, um card por vez no painel |
 | **4b. Exportar** | Baixa a planilha dos cards ou o JSON legível para levar a outra ferramenta | Quadro (Exportar) | Só sai depois de confirmar que vai sem criptografia; nada vai para a pasta compartilhada | Guardar numa pasta só sua |
 | **5. Recados** | Lê post-its no topo e clica **Vi** | Quadro | O gestor vê quem leu | |
-| **6. Fim de sprint** | Fecha a sprint e confirma a publicação das métricas | Quadro | Métricas autodescritivas, a Central só desenha | |
+| **6. Fim de sprint** | Fecha a sprint, diz se o objetivo foi atingido, escreve uma linha sobre ela e confirma a publicação das métricas | Quadro | Métricas autodescritivas, a Central só desenha | |
 | **7. Convidar o time** | Envia o mesmo HTML às pessoas do time, com a chave por mensagem direta | Teams / e-mail | Cada pessoa grava o próprio arquivo, sem conflito | |
 
 ## 4. Jornada do membro do time
