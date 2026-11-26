@@ -1,6 +1,6 @@
 # Funcionalidades, usos e objetivos
 
-*25/11/2026 · Remessa · Central v15.17, Quadro do Time 2.3.3, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.1, contratos 1.0 · visual experimental em `experimental/`*
+*26/11/2026 · Remessa · Central v15.17, Quadro do Time 2.4, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.2, contratos 1.0 · visual experimental em `experimental/`*
 
 Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. Para as regras técnicas por trás, veja as [decisões de arquitetura](adr/README.md). Para o caminho de quem usa, veja a [jornada do usuário](jornada-do-usuario.md) e o [passo a passo](passo-a-passo.md).
 
@@ -10,7 +10,7 @@ Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. 
 
 **Nome: Remessa** ([ADR-0037](adr/0037-nome-remessa.md)). A solução funciona como um serviço de envelopes lacrados com uma caixa postal: cada ferramenta põe o que tem para contar num envelope cifrado com a chave do time (o lacre) e deixa na pasta compartilhada (a caixa postal). Só quem tem a chave abre. Um arquivo que chegou de outra pessoa e ainda não foi aplicado é uma **nova remessa**. Cada ferramenta tem o seu ícone na aba do navegador, com o lacre azul da Remessa no canto; o hub usa o envelope lacrado.
 
-**Tela de entrada e apresentação (Central 15.16, Hub 2.4, assistente 2.8.1).** Todas as ferramentas abrem com a mesma tela de entrada: fundo marinho com envelopes em marca-d'água, o painel da Remessa à esquerda (com o link **Conheça a Remessa**), a caixa de abertura à direita e a versão da ferramenta uma vez só, no rodapé. A caixa tem dois passos: **1 · Arquivo** (o último usado neste computador já vem escolhido; **Escolher outro arquivo** abre na pasta dele) e **2 · Senha**, que só libera depois de haver arquivo e mostra o erro embaixo do campo, sem janela por cima. O link leva à `apresentacao.html`, uma página que apresenta a solução: a analogia em desenho, as ferramentas com as versões, quem usa, a segurança e como começar. Ela vai no .zip e o assistente grava uma cópia na pasta do gestor e na de cada time. No painel da Remessa fica também a caixa **Visual experimental**, que liga e desliga o visual novo ([seção 11](#11-visual-experimental-pasta-experimental), [ADR-0038](adr/0038-ligar-visual-experimental-na-entrada.md)).
+**Tela de entrada e apresentação (Central 15.16, Hub 2.4, assistente 2.8.2).** Todas as ferramentas abrem com a mesma tela de entrada: fundo marinho com envelopes em marca-d'água, o painel da Remessa à esquerda (com o link **Conheça a Remessa**), a caixa de abertura à direita e a versão da ferramenta uma vez só, no rodapé. A caixa tem dois passos: **1 · Arquivo** (o último usado neste computador já vem escolhido; **Escolher outro arquivo** abre na pasta dele) e **2 · Senha**, que só libera depois de haver arquivo e mostra o erro embaixo do campo, sem janela por cima. O link leva à `apresentacao.html`, uma página que apresenta a solução: a analogia em desenho, as ferramentas com as versões, quem usa, a segurança e como começar. Ela vai no .zip e o assistente grava uma cópia na pasta do gestor e na de cada time. No painel da Remessa fica também a caixa **Visual experimental**, que liga e desliga o visual novo ([seção 11](#11-visual-experimental-pasta-experimental), [ADR-0038](adr/0038-ligar-visual-experimental-na-entrada.md)).
 
 Dar a um gestor de vários times, e aos próprios times, **um lugar organizado para tarefas, pessoas, rituais, portfólio de iniciativas, fluxo dos times e finanças**, sem servidor, sem instalação e com tudo cifrado. Os objetivos que guiam cada funcionalidade:
 
@@ -58,7 +58,7 @@ Todas têm, no topo, **Onde estou?** (qual ferramenta, qual arquivo, o que é lo
 | Dados | Nome, identificador, prefixo, ano fiscal e moeda. O identificador do time (ou do grupo, para o gestor com chave da liderança) **vem da chave e fica travado**, para casar com os arquivos do líder |
 | Pastas | Pasta **pessoal** (só sua, de preferência no seu OneDrive, como backup) e pasta **compartilhada**; aviso automático se a pessoal parecer ser a compartilhada |
 | Senha | Criação da senha com aviso de cofre |
-| Pronto | Grava os HTMLs do perfil, o primeiro arquivo cifrado de cada um **já com as chaves coladas**, o hub e o cartão "Onde fica cada coisa". Explica os **dois tipos de arquivo** (pessoal × comum, por que em pastas separadas, ninguém lê sem a senha), mostra os **próximos passos do perfil** e o botão **Abrir o hub** (2.2), que abre o hub criado já com a senha da sessão |
+| Pronto | Grava os HTMLs do perfil, o primeiro arquivo cifrado de cada um **já com as chaves coladas**, o hub e o cartão "Onde fica cada coisa". Explica os **dois tipos de arquivo** (pessoal × comum, por que em pastas separadas, ninguém lê sem a senha), mostra os **próximos passos do perfil** e o quadro **Agora abra o hub** (2.8.2): fechar o assistente, abrir o `hub.html` da pasta pessoal e digitar a senha uma vez. O antigo botão "Abrir o hub" saiu, porque aberto de outra pasta o hub não funcionava (links e login) |
 
 | Papel × uso | HTMLs gerados |
 |---|---|
@@ -190,7 +190,7 @@ Navegação em 9 páginas (teclas 1 a 9) e o botão **Importar e agentes** no to
 
 ---
 
-## 6. Quadro do Time (2.3.3)
+## 6. Quadro do Time (2.4)
 
 **Objetivo:** dar ao time uma ferramenta de fluxo pronta, que publica sozinha o que a Central precisa.
 
@@ -202,7 +202,7 @@ Quando o catálogo da Central chega pela pasta, o Quadro avisa **Nova remessa da
 | **Post-its para o time** | Faixa no topo com os recados do hub; **Vi** grava o recibo | Receber recados do gestor |
 | **Backlog** | Lista agrupável por iniciativa, responsável ou sprint, com "+ Card" | Preparar trabalho |
 | **Criação rápida** | `Ajustar retry @ana amanhã #PAG-042 F2 !bug` | Criar card em uma linha |
-| **Iniciativas** | Ligadas à Central, só do time, da Central sem épico (**Trazer**), concluídas | Ligar o trabalho do time ao portfólio |
+| **Iniciativas** | Ligadas à Central, só do time, da Central sem épico (**Trazer**), concluídas. **+ Iniciativa do time** (2.4) abre um formulário em duas colunas, no padrão do Novo card: nome, iniciativa da Central como opções (preenche o nome; as já ligadas ficam apagadas), previsão com atalhos; ao lado, situação em pílulas, link (só https, validado no campo), primeira atualização de status e um resumo. Ctrl+Enter cria, Esc fecha. **Editar** usa o mesmo desenho | Ligar o trabalho do time ao portfólio |
 | **Métricas** | Vazão, lead time, cycle time, WIP, idade do WIP, fluxo cumulativo, demanda, compromisso cumprido, % bloqueado; "Ver JSON" | Melhorar o fluxo e publicar para a Central |
 | **Sprints** (menu ···) | Planejar, iniciar, fechar; ao fechar, pergunta se publica as métricas | Ritmo do time |
 | **Central** (menu ···) | Slug, chave, pasta, catálogo, situação das publicações | Conferir a integração |

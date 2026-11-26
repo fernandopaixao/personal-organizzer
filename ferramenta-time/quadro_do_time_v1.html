@@ -220,6 +220,15 @@ dialog.wide{width:min(1020px,96vw)}
 .field input:not([type=checkbox]),.field select,.field textarea{width:100%;border:1px solid #e1e4ec;border-radius:10px;padding:8px 10px;background:#fff;outline:none}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--bv)}
 .hint{font-size:11.5px;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.hint[hidden]{display:none}
+.pick{display:flex;flex-direction:column;gap:6px;max-height:232px;overflow:auto;padding:2px}
+.pick button{display:grid;grid-template-columns:18px auto minmax(0,1fr);gap:10px;align-items:center;text-align:left;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font-size:13px}
+.pick button:hover:not(:disabled){border-color:#cfd3e0}.pick button:disabled{opacity:.5;cursor:default}
+.pick button .rd{width:16px;height:16px;border-radius:50%;border:1.5px solid #cfd3e0;display:grid;place-items:center}
+.pick button.on{border-color:var(--bv);background:var(--bv-soft)}.pick button.on .rd{border-color:var(--bv)}.pick button.on .rd::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--bv)}
+.pick button .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pick button small{display:block;color:var(--muted);font-size:11.5px;white-space:normal}
+.tf-sum{border:1px solid var(--line);border-radius:12px;background:#fff;padding:12px 14px;font-size:12.5px;display:flex;flex-direction:column;gap:6px}
+.tf-sum b{font-family:var(--title)}.tf-sum .ln{display:flex;gap:8px;align-items:baseline}.tf-sum .ln span:first-child{color:var(--muted);min-width:78px}
 .tgl{display:inline-flex;gap:8px;align-items:center;font-size:13px;color:var(--ink);font-weight:500;cursor:pointer}.tgl input{accent-color:var(--bv)}
 .sgw{display:flex;background:#f0f1f6;border-radius:10px;padding:2px;gap:2px;flex-wrap:wrap}.sgw button{flex:1;padding:5px 6px;border-radius:8px;color:var(--muted);font-weight:550;font-size:12px;white-space:nowrap}
 .sgw button.on{background:#fff;color:var(--bv);box-shadow:0 1px 2px rgba(20,30,70,.1)}
@@ -731,7 +740,7 @@ pre.json{background:#f6f7fb;border-radius:10px;padding:12px;font-size:11.5px;max
      gestao-status/1, gestao-metricas/1 dentro de gestao-envelope/1 (AES-256-GCM).
    - Só métricas de time, calculadas a partir da movimentação dos cards.
    ========================================================================= */
-const TOOL = 'quadro_do_time_v1.html', TOOL_VERSION = '2.3.3';
+const TOOL = 'quadro_do_time_v1.html', TOOL_VERSION = '2.4.0';
 /* Pré-configuração gravada pela Central de Gestão (Pessoas › Times › HTML do time).
    No arquivo original fica null; a Central troca o trecho entre os marcadores por um
    objeto quadro-preset/1: { team: { name, slug, prefix, contact }, people: [{ name, role }], key? }.
@@ -2050,29 +2059,89 @@ document.addEventListener('keydown', e => {
   toast(`${c.id} criado: ${clip(c.title, 50)}`); setTimeout(() => $('#quickCard')?.focus(), 0);
 });
 
+/* Nova iniciativa do time: modal no padrão do "Novo card" (ADR-0020: essencial à esquerda, detalhes ao lado). */
+let ne = null;
+const ST_CRIAR = ['auto', 'ok', 'attn', 'late', 'paused'];
+function newEpicModal(def = {}) {
+  ne = { name: '', nameTouched: false, centralRef: '', forecastEnd: '', status: 'auto', link: '', update: '', ...def };
+  renderNewEpic(); setTimeout(() => $('#neName')?.focus(), 30);
+}
+function linkInvalido(v) { v = (v || '').trim(); return !!v && !/^https:\/\/\S+$/i.test(v); }
+function renderNewEpic() {
+  const inits = catInits(), used = new Set(epicsLive().map(x => x.centralRef).filter(Boolean)), ci = catInit(ne.centralRef);
+  const dias = isYmd(ne.forecastEnd) ? Math.round((parseYmd(ne.forecastEnd) - parseYmd(today())) / DAY) : null;
+  const opc = (ref, nome, sub, dis) => `<button type="button" class="${(ne.centralRef || '') === ref ? 'on' : ''}" data-act="neSet" data-k="centralRef" data-v="${esc(ref)}" ${dis ? 'disabled' : ''}><span class="rd"></span>${ref ? `<span class="code bvc">${esc(ref)}</span>` : '<span class="chip">do time</span>'}<span class="nm">${esc(nome)}${sub ? `<small>${esc(sub)}</small>` : ''}</span></button>`;
+  modal(`<form class="tform" id="neForm" style="display:flex;flex-direction:column;min-height:0;flex:1"><div class="tf-grid">
+    <div class="tf-main">
+      <div class="tf-h">Nova iniciativa do time</div>
+      <input class="tf-title" id="neName" placeholder="Qual é a iniciativa? Ex.: Novo checkout" value="${esc(ne.name)}" maxlength="200" autocomplete="off" required>
+      <div class="field"><label>Na Central</label>
+        <div class="pick" role="radiogroup" aria-label="Iniciativa na Central">${opc('', 'Só do time, por enquanto', 'O gestor vê na Central e liga a uma iniciativa dele quando fizer sentido.', false)}${inits.map(i => opc(i.ref, i.name, used.has(i.ref) ? 'Já tem uma iniciativa aqui no quadro' : '', used.has(i.ref))).join('')}</div>
+        <div class="hint">${!catalog ? 'Para ligar a uma iniciativa do gestor, carregue o catálogo em ··· › Central.' : inits.length ? 'Ligada à Central, os cards podem escolher a feature e aparecem na reunião de status.' : 'O catálogo da Central ainda não tem iniciativas para o time.'}</div></div>
+      <div class="field"><label>Previsão de término do time <span class="faint">(opcional)</span></label><input type="date" data-ne="forecastEnd" value="${esc(ne.forecastEnd)}" style="max-width:220px">
+        <div class="hint">${dias == null ? '' : dias < 0 ? '<span class="latec">data no passado</span>' : dias === 0 ? 'hoje' : `em ${dias} dias`} <button type="button" class="chip line" data-act="neDue" data-n="14">+2 semanas</button><button type="button" class="chip line" data-act="neDue" data-n="30">+1 mês</button><button type="button" class="chip line" data-act="neDue" data-n="90">+3 meses</button>${ne.forecastEnd ? '<button type="button" class="chip line" data-act="neSet" data-k="forecastEnd" data-v="">limpar</button>' : ''}</div></div>
+    </div>
+    <aside class="tf-side">
+      <div class="tf-h">Mais detalhes</div>
+      <div class="field"><label>Situação</label><div class="pills">${ST_CRIAR.map(k => `<button type="button" class="${ne.status === k ? 'on' : ''}" data-act="neSet" data-k="status" data-v="${k}">${k === 'auto' ? 'Automática' : ST_LABEL[k]}</button>`).join('')}</div>
+        <div class="hint">${ne.status === 'auto' ? 'Automática: o quadro calcula pelos cards e pela previsão.' : 'Fixa até você mudar.'}</div></div>
+      <div class="field"><label>Link do épico <span class="faint">(opcional)</span></label><input data-ne="link" id="neLink" value="${esc(ne.link)}" placeholder="https://" autocomplete="off"><div class="hint" id="neLinkMsg" style="color:var(--late)" hidden>Use um endereço que comece com https://</div></div>
+      <div class="field"><label>Primeira atualização de status <span class="faint">(opcional)</span></label><textarea data-ne="update" rows="3" maxlength="500" placeholder="Uma linha: o que começou, o que preocupa">${esc(ne.update)}</textarea><div class="hint">Vai para a reunião de status da Central.</div></div>
+      <div class="tf-sum"><b>${esc(ne.name.trim() || 'Sem nome ainda')}</b><div class="ln"><span>Central</span><span>${ci ? `<span class="code bvc">${esc(ci.ref)}</span> ${esc(ci.name)}` : 'só do time'}</span></div><div class="ln"><span>Previsão</span><span>${isYmd(ne.forecastEnd) ? fmtD(ne.forecastEnd) : 'sem data'}</span></div><div class="ln"><span>Situação</span><span>${ne.status === 'auto' ? 'automática' : esc(ST_LABEL[ne.status])}</span></div></div>
+    </aside></div>
+    <div class="macts"><span class="small faint" style="margin-right:auto">Ctrl+Enter cria · Esc fecha</span><button type="button" class="btn" data-act="close">Cancelar</button><button class="btn pri">Criar iniciativa</button></div></form>`, 'wide');
+  const d = $('#dlg');
+  $('#neName').addEventListener('input', ev => { ne.name = ev.target.value; ne.nameTouched = true; const b = d.querySelector('.tf-sum b'); if (b) b.textContent = ne.name.trim() || 'Sem nome ainda'; });
+  d.querySelectorAll('[data-ne]').forEach(el => el.addEventListener(el.type === 'date' ? 'change' : 'input', () => { ne[el.dataset.ne] = el.value; if (el.type === 'date') renderNewEpic(); }));
+  const marcarLink = () => { const ruim = linkInvalido(ne.link), l = $('#neLink'); l.toggleAttribute('aria-invalid', ruim); l.style.borderColor = ruim ? 'var(--late)' : ''; $('#neLinkMsg').hidden = !ruim; };
+  $('#neLink').addEventListener('change', marcarLink); if (ne.linkCheck) marcarLink();
+  $('#neForm').addEventListener('keydown', ev => { if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) { ev.preventDefault(); criarIniciativa(); } });
+  $('#neForm').addEventListener('submit', ev => { ev.preventDefault(); criarIniciativa(); });
+}
+function criarIniciativa() {
+  const name = clip((ne.name || '').trim(), 200);
+  if (!name) { toast('Dê um nome para a iniciativa.'); $('#neName')?.focus(); return; }
+  if (linkInvalido(ne.link)) { ne.linkCheck = true; $('#neLink')?.dispatchEvent(new Event('change')); toast('O link precisa começar com https://'); $('#neLink')?.focus(); return; }
+  if (ne.centralRef && epicsLive().some(x => x.centralRef === ne.centralRef)) { toast(`${ne.centralRef} já tem uma iniciativa no quadro.`); return; }
+  const ep = novoEpico(name);
+  ep.centralRef = ne.centralRef || null; ep.forecastEnd = isYmd(ne.forecastEnd) ? ne.forecastEnd : ''; ep.status = ST_CRIAR.includes(ne.status) ? ne.status : 'auto'; ep.link = ne.link.trim();
+  const u = (ne.update || '').trim(); if (u) ep.updates.push({ date: today(), text: clip(u, 500), ...(db.team.contact ? { author: db.team.contact } : {}) });
+  ui.epicSel = ep.id; closeModal(); touch(); toast(`${ep.id} criada${ep.centralRef ? ', ligada a ' + ep.centralRef : ''}.`);
+}
 function epicModal(id) {
   const e = epicById(id); if (!e) return;
   const inits = catInits(), ci = catInit(e.centralRef);
   const used = new Set(epicsLive().filter(x => x.id !== e.id).map(x => x.centralRef).filter(Boolean));
   const fr = [...new Set(epicCards(e).map(c => c.featureRef).filter(Boolean))];
-  modal(`<div class="mh"><span class="code muted">${esc(e.id)}</span><h2 class="grow" style="margin:0">${esc(e.name)}</h2><button class="btn ghost" data-act="close">Fechar</button></div><div class="mb"><div class="fg">
-    <label class="f full"><span>Nome</span><input class="sin" data-ef="name" value="${esc(e.name)}" maxlength="200"></label>
-    <label class="f full"><span>Iniciativa na Central</span><select class="sel" data-ef="centralRef"><option value="">Sem vínculo (iniciativa do time; o gestor concilia)</option>${e.centralRef && !ci ? `<option value="${esc(e.centralRef)}" selected>${esc(e.centralRef)} (fora do catálogo)</option>` : ''}${inits.map(i => `<option value="${esc(i.ref)}" ${e.centralRef === i.ref ? 'selected' : ''}>${esc(i.ref)} · ${esc(i.name)}${used.has(i.ref) ? ' (já ligada a outro épico)' : ''}</option>`).join('')}</select>
-      ${!catalog ? '<span class="small faint">Carregue o catálogo em Central para escolher.</span>' : ''}</label>
-    <label class="f"><span>Situação</span><select class="sel" data-ef="status">${['auto', 'ok', 'attn', 'late', 'paused', 'done'].map(s => `<option value="${s}" ${(e.status || 'auto') === s ? 'selected' : ''}>${ST_LABEL[s]}${s === 'auto' ? ` (agora: ${ST_LABEL[epicStatus({ ...e, status: 'auto' })]})` : ''}</option>`).join('')}</select></label>
-    <label class="f"><span>Previsão de término do time</span><input class="sin" type="date" data-ef="forecastEnd" value="${esc(e.forecastEnd)}"></label>
-    <label class="f full"><span>Link do épico (https, opcional)</span><input class="sin" data-ef="link" value="${esc(e.link)}" placeholder="https://"></label></div>
-    <div class="lbl" style="margin-top:16px">Atualização de status <span class="n">vai para a reunião de status da Central</span></div>
-    <div class="row"><input class="sin grow" id="upd" maxlength="500" placeholder="Uma linha: o que avançou, o que preocupa"><button class="btn pri" data-act="addUpdate" data-id="${e.id}">Registrar</button></div>
-    <div class="hist" style="margin-top:8px">${[...e.updates].reverse().slice(0, 8).map(u => `<span>${fmtD(u.date)} · ${esc(u.text)}${u.author ? ' · ' + esc(u.author) : ''}</span>`).join('') || '<span class="faint">Nenhuma ainda.</span>'}</div>
-    ${fr.length ? `<div class="lbl" style="margin-top:16px">Notas por feature <span class="n">opcional, até 300 caracteres</span></div>${fr.map(r => `<label class="f" style="margin-bottom:8px"><span class="code">${esc(r)} ${esc(catFeature(r)?.name || '')}</span><input class="sin" data-fn="${esc(r)}" maxlength="300" value="${esc(e.featureNotes[r] || '')}"></label>`).join('')}` : ''}
-  </div><div class="mf">${epicCards(e).length ? '' : `<button class="btn danger" data-act="delEpic" data-id="${e.id}">Excluir iniciativa</button>`}<span class="grow"></span><button class="btn pri" data-act="close">Pronto</button></div>`);
+  const st = e.status || 'auto', dias = isYmd(e.forecastEnd) ? Math.round((parseYmd(e.forecastEnd) - parseYmd(today())) / DAY) : null;
+  modal(`<div class="tform" style="display:flex;flex-direction:column;min-height:0;flex:1"><div class="tf-grid">
+    <div class="tf-main">
+      <div class="tf-h">Iniciativa <span class="code">${esc(e.id)}</span>${e.centralRef ? ` · <span class="code bvc">${esc(e.centralRef)}</span>` : ' · do time'}</div>
+      <input class="tf-title" data-ef="name" value="${esc(e.name)}" maxlength="200" aria-label="Nome da iniciativa">
+      <div class="field"><label>Na Central</label><select data-ef="centralRef"><option value="">Só do time (o gestor concilia)</option>${e.centralRef && !ci ? `<option value="${esc(e.centralRef)}" selected>${esc(e.centralRef)} (fora do catálogo)</option>` : ''}${inits.map(i => `<option value="${esc(i.ref)}" ${e.centralRef === i.ref ? 'selected' : ''} ${used.has(i.ref) ? 'disabled' : ''}>${esc(i.ref)} · ${esc(i.name)}${used.has(i.ref) ? ' (já ligada a outra)' : ''}</option>`).join('')}</select>
+        <div class="hint">${!catalog ? 'Para escolher, carregue o catálogo em ··· › Central.' : ci ? esc(ci.name) : 'Sem vínculo: aparece para o gestor conciliar.'}</div></div>
+      <div class="field"><label>Atualização de status <span class="faint">(vai para a reunião de status da Central)</span></label>
+        <div class="mini"><input class="sin" id="upd" maxlength="500" placeholder="Uma linha: o que avançou, o que preocupa"><button class="btn pri" data-act="addUpdate" data-id="${e.id}">Registrar</button></div>
+        <div class="hist" style="margin-top:4px">${[...e.updates].reverse().slice(0, 8).map(u => `<span>${fmtD(u.date)} · ${esc(u.text)}${u.author ? ' · ' + esc(u.author) : ''}</span>`).join('') || '<span class="faint">Nenhuma ainda.</span>'}</div></div>
+      ${fr.length ? `<div class="field"><label>Notas por feature <span class="faint">(opcional, até 300 caracteres)</span></label>${fr.map(r => `<label class="f" style="margin-bottom:6px"><span class="code small">${esc(r)} ${esc(catFeature(r)?.name || '')}</span><input class="sin" data-fn="${esc(r)}" maxlength="300" value="${esc(e.featureNotes[r] || '')}"></label>`).join('')}</div>` : ''}
+    </div>
+    <aside class="tf-side">
+      <div class="tf-h">Mais detalhes</div>
+      <div class="field"><label>Situação</label><div class="pills">${['auto', 'ok', 'attn', 'late', 'paused', 'done'].map(k => `<button type="button" class="${st === k ? 'on' : ''}" data-act="epSet" data-id="${e.id}" data-v="${k}">${k === 'auto' ? 'Automática' : ST_LABEL[k]}</button>`).join('')}</div>
+        <div class="hint">${st === 'auto' ? `Agora: ${esc(ST_LABEL[epicStatus({ ...e, status: 'auto' })])}, calculada pelos cards e pela previsão.` : 'Fixa até você mudar.'}</div></div>
+      <div class="field"><label>Previsão de término do time</label><input type="date" data-ef="forecastEnd" value="${esc(e.forecastEnd)}"><div class="hint">${dias == null ? 'sem data' : dias < 0 ? `<span class="latec">venceu há ${-dias} dia(s)</span>` : dias === 0 ? 'hoje' : `em ${dias} dias`}</div></div>
+      <div class="field"><label>Link do épico <span class="faint">(https, opcional)</span></label><input data-ef="link" value="${esc(e.link)}" placeholder="https://"></div>
+    </aside></div>
+    <div class="macts">${epicCards(e).length ? `<span class="small faint" style="margin-right:auto">${epicCards(e).length} card(s) nesta iniciativa</span>` : `<button class="btn danger" data-act="delEpic" data-id="${e.id}" style="margin-right:auto">Excluir iniciativa</button>`}<button class="btn pri" data-act="close">Pronto</button></div></div>`, 'wide');
   $('#dlg').querySelectorAll('[data-ef]').forEach(el => el.addEventListener('change', () => {
-    const k = el.dataset.ef; e[k] = el.value || (k === 'centralRef' ? null : '');
-    if (k === 'status') e.doneAt = el.value === 'done' ? agoraComFuso() : null;
+    const k = el.dataset.ef; let v = el.value;
+    if (k === 'name') { v = clip(v.trim(), 200); if (!v) { el.value = e.name; return; } }
+    if (k === 'link' && linkInvalido(v)) { toast('O link precisa começar com https://'); el.value = e.link; return; }
+    e[k] = v || (k === 'centralRef' ? null : '');
     if (k === 'centralRef') for (const c of epicCards(e)) if (c.featureRef && !c.featureRef.startsWith((e.centralRef || '#') + '.')) { c.featureRef = null; c.upd = Date.now(); }
     e.upd = Date.now(); touch(); epicModal(e.id);
   }));
+  $('#upd').addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); $('#dlg [data-act=addUpdate]').click(); } });
   $('#dlg').querySelectorAll('[data-fn]').forEach(el => el.addEventListener('change', () => { if (el.value.trim()) e.featureNotes[el.dataset.fn] = el.value.trim(); else delete e.featureNotes[el.dataset.fn]; e.upd = Date.now(); touch(); }));
 }
 function sprintModal(id) {
@@ -2167,7 +2236,10 @@ document.addEventListener('click', async e => {
       case 'lanes': ui.lanes = el.dataset.v; uiSave(); render(); break;
       case 'dense': ui.dense = !!el.dataset.v; uiSave(); render(); break;
       case 'doneOpen': ui.doneOpen = !ui.doneOpen; uiSave(); render(); break;
-      case 'newEpic': { const n = prompt('Nome da iniciativa (épico) do time'); if (!n?.trim()) return; const ep = novoEpico(clip(n, 200)); ui.epicSel = ep.id; touch(); epicModal(ep.id); break; }
+      case 'newEpic': newEpicModal(); break;
+      case 'neSet': ne[el.dataset.k] = el.dataset.v; if (el.dataset.k === 'centralRef' && el.dataset.v && !ne.nameTouched) ne.name = catInit(el.dataset.v)?.name || ne.name; renderNewEpic(); break;
+      case 'neDue': ne.forecastEnd = addDays(today(), +el.dataset.n); renderNewEpic(); break;
+      case 'epSet': { const ep = epicById(id); ep.status = el.dataset.v; ep.doneAt = ep.status === 'done' ? agoraComFuso() : null; ep.upd = Date.now(); touch(); epicModal(id); break; }
       case 'epicFromCentral': { const ci = catInit(el.dataset.ref); const ep = novoEpico(ci.name); ep.centralRef = ci.ref; ui.epicSel = ep.id; touch(); toast(`Iniciativa ${ci.ref} trazida para o quadro.`); break; }
       case 'epicSel': ui.epicSel = id; render(); break;
       case 'toggleEpDone': ui.epicDone = !ui.epicDone; render(); break;
