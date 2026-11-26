@@ -118,10 +118,27 @@ const vistos = {
 const met = JSON.parse(fs.readFileSync(path.join(CONT, 'times/pagamentos/metricas.json'), 'utf8'));
 const DEF = { lead_time_dist: 'Cards entregues nos últimos 90 dias por faixa de lead time (dias do compromisso à entrega).', compromisso_sprint: 'Cards na sprint quando ela começou e entregues até o fim dela ÷ cards na sprint quando ela começou.', bloqueados_por_motivo: 'Cards bloqueados agora, agrupados pelo motivo informado no bloqueio.' };
 for (const m of met.metrics) if (!m.standard && !m.definition && DEF[m.id]) m.definition = DEF[m.id];
+// Contratos 1.2: resultado da sprint no metricas.json e sprints ao vivo no status.json (campos opcionais, aditivos).
+Object.assign(met.sprint, { localId: 'SPR-21', goal: 'Simulação de parcelas em produção', goalMet: 'partly', note: 'Homologação do parceiro atrasou; simulação pronta.',
+  committed: 9, deliveredCommitted: 7, delivered: 8, added: 1, removed: 1, carriedOver: 2, capacity: { value: 9, unit: 'cards' } });
+if (!met.metrics.some(m => m.id === 'objetivo_sprint')) met.metrics.push({ id: 'objetivo_sprint', standard: 'sprint_goal_met', name: 'Objetivo da sprint atingido',
+  definition: 'Resposta de quem fechou a sprint: atingido = 100, em parte = 50, não = 0. Sprint sem objetivo fica sem valor.', group: 'previsibilidade', order: 3, scope: { level: 'team' },
+  valueType: 'percent', unit: '%', direction: 'higher_is_better', grain: 'sprint', viz: { type: 'bar' },
+  data: { series: [{ key: 'objetivo', label: 'Objetivo', points: [{ t: '2026-09-29', label: 'Sprint 19', v: 100 }, { t: '2026-10-13', label: 'Sprint 20', v: 100 }, { t: '2026-10-27', label: 'Sprint 21', v: 50 }] }] } });
+const status = JSON.parse(fs.readFileSync(path.join(CONT, 'times/pagamentos/status.json'), 'utf8'));
+status.sprints = [
+  { localId: 'SPR-21', name: 'Sprint 21', start: '2026-10-27', end: '2026-11-09', state: 'closed', goal: 'Simulação de parcelas em produção', capacity: { value: 9, unit: 'cards' },
+    committed: 9, doneCommitted: 7, added: 1, removed: 1, blocked: 0, features: [{ ref: 'PAG-042.F1', cards: 3 }, { ref: 'PAG-042.F2', cards: 2 }] },
+  { localId: 'SPR-22', name: 'Sprint 22', start: '2026-11-10', end: '2026-11-23', state: 'active', goal: 'Contratação em homologação', capacity: { value: 8, unit: 'cards' },
+    committed: 8, doneCommitted: 3, added: 1, removed: 0, blocked: 1, features: [{ ref: 'PAG-042.F2', cards: 5 }, { localId: 'FEAT-7', cards: 2 }] },
+  { localId: 'SPR-23', name: 'Sprint 23', start: '2026-11-24', end: '2026-12-07', state: 'planned', capacity: { value: 8, unit: 'cards' }, committed: 6, blocked: 0, features: [{ ref: 'PAG-042.F2', cards: 2 }, { ref: 'PAG-042.F3', cards: 4 }] }
+];
+for (const i of status.initiatives) for (const it of i.items || []) { const sp = { 'CARD-295': 'SPR-22', 'CARD-344': 'SPR-22', 'CARD-320': 'SPR-23' }[it.localId]; if (sp) it.sprintLocalId = sp; }
+for (const i of status.initiatives) for (const f of i.features || []) if (f.forecastEnd) f.forecastBasis = 'sprints';
 
 const CONTEUDOS = {
   'times/pagamentos/metricas.json': [met, KIDS.tarefas],
-  'times/pagamentos/status.json': [null, KIDS.tarefas],
+  'times/pagamentos/status.json': [status, KIDS.tarefas],
   'central/catalogo-pagamentos.json': [null, KIDS.tarefas],
   'times/pagamentos/financas/plano.json': [planoTime, KIDS.finTime],
   'grupo/financas/diretriz-pagamentos.json': [diretrizTime, KIDS.finTime],

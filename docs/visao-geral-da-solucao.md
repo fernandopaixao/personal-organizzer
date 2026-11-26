@@ -1,6 +1,6 @@
 # Visão geral da solução · Central de Gestão, Quadro do Time e integração
 
-*26/11/2026 · estado atual: Remessa · Central v15.18, Quadro do Time 2.7, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central) e contratos 1.1 (detalhes em `docs/plano-v15.md`, `docs/plano-hub.md`, `docs/plano-financas.md` e [`contratos/`](../contratos/LEIA-ME.md))*
+*26/11/2026 · estado atual: Remessa · Central v15.19, Quadro do Time 2.8, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central) e contratos 1.2 (detalhes em `docs/plano-v15.md`, `docs/plano-hub.md`, `docs/plano-financas.md` e [`contratos/`](../contratos/LEIA-ME.md))*
 
 > **Por onde começar:** [funcionalidades, usos e objetivos](funcionalidades.md) · [jornada do usuário](jornada-do-usuario.md) · [passo a passo](passo-a-passo.md) · [decisões de arquitetura (ADRs)](adr/README.md)
 
@@ -45,7 +45,7 @@ O desenho mostra só a troca de tarefas. Pela mesma pasta passam as finanças, o
 |---|---|---|---|
 | **Hub da solução** | Cockpit de gestão (2.3): login único, cards e lista de atenção de todos os módulos (lidos sem gravar), abre as outras ferramentas e deixa post-its cifrados para os times, que aparecem no Quadro | Fernando (e quem quiser) | Repositório: `hub.html`, plano em `docs/plano-hub.md` |
 | **Central de Gestão v15** | Gestão pessoal e de portfólio do gestor: tarefas, delegação, iniciativas e features, rituais, pessoas, métricas e integração com os times | Fernando | Repositório: `gestao_pessoal_v15.html`, plano em `docs/plano-v15.md`. Projeto: `gestao-v15/` |
-| **Quadro do Time 2.7** | Quadro de cards, backlog, refinamento com o time, sprints, iniciativas ligadas à Central e métricas de fluxo do time | Cada time | Repositório e projeto: `ferramenta-time/` (HTML, guia, telas) |
+| **Quadro do Time 2.8** | Quadro de cards, backlog, refinamento com o time, sprints, iniciativas ligadas à Central e métricas de fluxo do time | Cada time | Repositório e projeto: `ferramenta-time/` (HTML, guia, telas) |
 | **Finanças do Grupo e do Time** | Plano financeiro multianual de cada time (lançamentos locais, plano agregado publicado) e consolidado do grupo ano a ano contra o orçamento, com cards de leitura e gráficos | Fernando (grupo) e responsável financeiro de cada time | Repositório: `financas/`, plano em `docs/plano-financas.md` |
 | **Férias (página da Central)** | Férias e ausências em níveis (gestor → liderança): mapa de calor dos dias com mais e menos gente fora, calendário e sugestão de períodos. Fica na página **Férias da Central** (mesmo arquivo e senha, [ADR-0033](adr/0033-ferias-dentro-da-central.md)) e só o gestor cadastra, inclusive as pessoas dos times ([ADR-0036](adr/0036-ferias-so-o-gestor-cadastra.md)). Apoio, não substitui a ferramenta oficial | Gestores e liderança | Repositório: página Férias em `gestao_pessoal_v15.html`, montada a partir de `financas/src/ferias.html`; plano em `docs/plano-ferias.md` |
 | **Assistente inicial** | Monta a solução para o papel da pessoa e cria os primeiros arquivos cifrados | Quem está começando | Repositório: `inicio.html` |
@@ -111,6 +111,7 @@ Teclas 1 a 9 trocam de página. O botão do topo **Importar e agentes** reúne a
 | v15.16 | Tela de entrada com a caixa **Visual experimental**: liga e desliga o visual novo em todas as ferramentas e lembra a escolha ([ADR-0038](adr/0038-ligar-visual-experimental-na-entrada.md)) |
 | v15.17 | Prévia da importação dos agentes com **descartar linhas**: cada linha nova ou atualizada pode ser desmarcada antes de confirmar ([ADR-0013](adr/0013-downstream-previa-e-conciliacao.md)) |
 | v15.18 | Feature criada pelo time chega com os cards dela (`featureLocalId`): na conciliação e no painel da iniciativa aparece com a contagem, e ligada a uma feature da Central leva os cards junto, recuados no downstream ([ADR-0039](adr/0039-hierarquia-iniciativa-feature-card.md)) |
+| v15.19 | Aba **Sprints** no time, cartão **Sprints dos times** em Hoje e bloco Sprint na reunião de status: a sprint e o resultado dela chegam do Quadro 2.8 (contratos 1.2) e a Central guarda o histórico ([ADR-0042](adr/0042-sprint-sincronizada-com-a-central.md)) |
 
 Detalhes da v15: `docs/plano-v15.md` (e da v14 em `docs/plano-v14.md`).
 
