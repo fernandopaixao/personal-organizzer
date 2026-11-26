@@ -1,6 +1,6 @@
 # Jornada do usuário
 
-*26/11/2026 · como cada papel conhece, monta, usa e mantém a Remessa · Central v15.17, Hub 2.4, assistente 2.8.2*
+*26/11/2026 · como cada papel conhece, monta, usa e mantém a Remessa · Central v15.18, Quadro do Time 2.5, Hub 2.4, assistente 2.8.2*
 
 A solução tem quatro papéis. A mesma pessoa pode ter mais de um (o gestor costuma ser também o dono das finanças do grupo; o líder do time costuma ser também o responsável financeiro). Quem integra uma **outra solução** pelos contratos tem a jornada própria na [seção 9](#9-jornada-de-quem-integra-outra-solução).
 
@@ -40,7 +40,7 @@ A solução se chama **Remessa**: as ferramentas trocam envelopes lacrados (cifr
 | **7. Conversar com pessoas** | Prepara e conduz o 1:1 em modo Em conversa, copia o resumo | Central (1:1) | Pauta montada a partir de quatro fontes; combinados registrados | |
 | **8. Conduzir fóruns** | Abre o fórum, discute a pauta, registra decisões e compromissos, compartilha os acordos | Central (Fóruns) | Pauta não discutida rola para a próxima; compromissos viram tarefas | |
 | **9. Reunião de status** | Conduz a reunião do time com o status já preenchido pelo que o time publicou | Central (Times) | Downstream abaixo de cada feature; bloco Finanças quando o time passou do teto; nada da Central muda sem aceite | |
-| **10. Conciliar** | Une épicos do time a iniciativas, liga itens a features | Central (Integração) | Uniões podem ser desfeitas; códigos antigos viram apelidos | |
+| **10. Conciliar** | Une épicos do time a iniciativas, liga itens a features; a feature do time vem com os cards dela e vai inteira | Central (Integração) | Uniões podem ser desfeitas; códigos antigos viram apelidos | |
 | **11. Usar agentes** | Depois de reuniões, copia o prompt certo, roda no agente, importa o JSON | Central (Importar e agentes) | Prévia antes de aplicar, com linhas que podem ser descartadas uma a uma; reimportar não duplica | |
 | **12. Recados** | Deixa post-its para um ou vários times e vê quem leu | Hub | Cifrados por time; um time não vê o post-it do outro | Atraso normal da sincronização |
 | **13. Finanças** | Lê os planos novos dos times, revisa a prévia, olha o consolidado contra o orçamento, publica diretrizes, fecha versões | Finanças do Grupo (Painel) | Um time com problema nunca derruba a soma; "Saúde da soma" aponta o que falta; consolidado ano a ano | Informar orçamento e tetos de cada ano do horizonte |
@@ -53,7 +53,8 @@ A solução se chama **Remessa**: as ferramentas trocam envelopes lacrados (cifr
 | **1. Receber** | Recebe o `inicio.html` (ou o HTML do Quadro) e, à parte, a chave e o nome da pasta | Teams / e-mail | A chave define o time; nada a digitar de identificador | Guardar a chave no cofre |
 | **2. Primeiro uso** | No assistente: "lidero 1 time", cola a chave, escolhe as pastas e cria a senha; abre o Quadro já com a chave e diz quem é | Assistente → Quadro | Senha obrigatória, aviso de cofre, chave já no arquivo | Edge ou Chrome |
 | **3. Ligar ao portfólio** | Em Iniciativas, liga épicos às iniciativas da Central ou usa **Trazer** | Quadro | Códigos da Central entram nos cards | |
-| **4. Dia a dia** | Move cards, cria pela barra rápida, acompanha WIP e envelhecimento | Quadro | Backlog publicado sozinho a cada movimentação | |
+| **4. Dia a dia** | Move cards, cria pela barra rápida, acompanha WIP e envelhecimento; agrupa cards em features (da Central ou do time) | Quadro | Backlog publicado sozinho a cada movimentação; Iniciativa › Feature › Card igual à Central | |
+| **4b. Exportar** | Baixa a planilha dos cards ou o JSON legível para levar a outra ferramenta | Quadro (Exportar) | Só sai depois de confirmar que vai sem criptografia; nada vai para a pasta compartilhada | Guardar numa pasta só sua |
 | **5. Recados** | Lê post-its no topo e clica **Vi** | Quadro | O gestor vê quem leu | |
 | **6. Fim de sprint** | Fecha a sprint e confirma a publicação das métricas | Quadro | Métricas autodescritivas, a Central só desenha | |
 | **7. Convidar o time** | Envia o mesmo HTML às pessoas do time, com a chave por mensagem direta | Teams / e-mail | Cada pessoa grava o próprio arquivo, sem conflito | |

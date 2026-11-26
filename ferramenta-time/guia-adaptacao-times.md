@@ -1,6 +1,6 @@
 # Guia para os times · Quadro do Time e adaptação das ferramentas atuais
 
-*15/11/2026, revisto em 25/11/2026 (Quadro do Time 2.3.2, Remessa) · para os times e para os agentes de desenvolvimento deles*
+*15/11/2026, revisto em 26/11/2026 (Quadro do Time 2.5.0, Remessa) · para os times e para os agentes de desenvolvimento deles*
 
 > **Para quem é:** cada time que acompanha iniciativas em nível de card e precisa enviar backlog e métricas para a Central de Gestão do gestor.
 > **O que este guia resolve:** escolher entre (A) **usar o Quadro do Time** (`quadro_do_time_v1.html`, pronto) ou (B) **adaptar a ferramenta HTML que o time já tem**, seguindo a mesma arquitetura.
@@ -100,12 +100,14 @@ O arquivo do quadro é JSON aberto (`quadro-time/1`), então um agente pode escr
   "settings": { "upd": 0, "commitCol": "pronto", "startCol": "fazendo", "autoPublish": true,
     "columns": [ { "id": "backlog", "name": "Backlog", "wip": null }, { "id": "pronto", "name": "Pronto para fazer", "wip": null },
                  { "id": "fazendo", "name": "Fazendo", "wip": 6 }, { "id": "concluido", "name": "Concluído", "wip": null } ] },
-  "seq": { "card": 1, "epic": 1, "sprint": 0, "person": 1 },
+  "seq": { "card": 1, "epic": 1, "sprint": 0, "person": 1, "feature": 1 },
   "people": [ { "id": "P-1", "uid": "1", "name": "Diego Reis", "role": "Desenvolvimento", "active": true, "upd": 0 } ],
   "epics": [ { "id": "EPIC-1", "uid": "1", "name": "Pix parcelado", "centralRef": "PAG-042", "status": "auto", "forecastEnd": "",
                "link": "", "updates": [], "featureNotes": {}, "upd": 0 } ],
+  "features": [ { "id": "FEAT-1", "uid": "1", "epicId": "EPIC-1", "name": "Comprovante por e-mail", "owner": "Diego Reis", "due": "",
+                  "status": "open", "notes": "", "doneAt": null, "upd": 0 } ],
   "cards": [ { "id": "CARD-1", "uid": "1", "title": "Tela de contratação", "kind": "história", "epicId": "EPIC-1",
-               "featureRef": "PAG-042.F2", "owner": "Diego Reis", "due": "2026-11-21", "points": null, "notes": "", "link": "",
+               "featureRef": "PAG-042.F2", "featureId": null, "owner": "Diego Reis", "due": "2026-11-21", "points": null, "notes": "", "link": "",
                "showToCentral": false, "col": "fazendo", "sprintId": null, "order": 1000, "upd": 0,
                "history": [ { "col": "backlog", "at": "2026-11-03T10:00:00-03:00" }, { "col": "fazendo", "at": "2026-11-05T09:12:00-03:00" } ],
                "blocked": null, "blocks": [ { "from": "2026-11-06T10:00:00-03:00", "to": "2026-11-07T15:00:00-03:00", "cat": "terceiro", "reason": "…" } ] } ],
@@ -118,6 +120,7 @@ O arquivo do quadro é JSON aberto (`quadro-time/1`), então um agente pode escr
 - `history` é o que alimenta lead time, cycle time e fluxo cumulativo: converta o histórico de colunas que existir (a primeira entrada é a criação do card). Sem histórico, use uma entrada só com a coluna atual e a data de criação; as métricas de tempo começam a aparecer a partir das próximas movimentações.
 - `owner` do card é o **nome** da pessoa (igual a `people[].name`); é o nome que vai para a Central em `items[].owner`. Se `people` faltar, a ferramenta cria as pessoas a partir dos responsáveis dos cards ao abrir o arquivo.
 - `cat` do bloqueio: `terceiro`, `decisao`, `ambiente`, `negocio` ou `outro`.
+- Hierarquia igual à da Central: **Iniciativa › Feature › Card** ([ADR-0039](../docs/adr/0039-hierarquia-iniciativa-feature-card.md)). O card fica em no máximo uma feature: `featureRef` (feature da Central, ex.: `PAG-042.F2`) **ou** `featureId` (feature do time em `features[]`, ex.: `FEAT-1`). A feature do time fica numa iniciativa (`epicId`) e não muda dela; `status` é `open`, `done` ou `cancelled`. "feature" deixou de ser tipo de card: se a ferramenta antiga tinha cards do tipo feature com filhos, converta cada um numa entrada de `features[]` e ligue os filhos por `featureId`.
 - Preserve os ids antigos dos itens se o gestor já os conhece (eles viram `localId` na Central); senão use `CARD-<n>` e `EPIC-<n>`, e ajuste `seq`.
 
 ---
@@ -150,6 +153,7 @@ A pasta `contratos/` descreve **o que** implementar (receita A de [`05-como-inte
    | Código da Central no épico | `ref` (`PAG-042`) ou `null` |
    | História, tarefa, card | Entra nas métricas sempre; entra em `items[]` se tem feature ou é relevante para o gestor |
    | Card ligado a feature | `items[].featureRef` (`PAG-042.F2`) e uma entrada em `features[]` com a visão do time |
+   | Feature criada pelo time (épico filho, agrupador de cards) | item com `kind: "feature"` e `localId` próprio; os cards dela levam `items[].featureLocalId` |
    | Coluna onde o card entra no fluxo | marco **compromisso** |
    | Coluna onde o trabalho começa | marco **início** |
    | Coluna final | marco **entrega** |

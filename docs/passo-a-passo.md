@@ -1,6 +1,6 @@
 # Passo a passo · como lidar com a solução
 
-*26/11/2026 · Remessa · Central v15.17, Quadro do Time 2.4, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.2, contratos 1.0 · visual experimental em `experimental/`*
+*26/11/2026 · Remessa · Central v15.18, Quadro do Time 2.5, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.2, contratos 1.1 · visual experimental em `experimental/`*
 
 Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é independente. Antes de começar: use **Edge ou Chrome** no computador, abrindo o arquivo com dois cliques (não pela pré-visualização do Outlook, Teams ou OneDrive, nem de dentro do .zip), e tenha à mão um **cofre de senhas** (o gerenciador de senhas da empresa).
 
@@ -76,8 +76,10 @@ Times criados pelo assistente já têm prefixo, pasta e chave: pule para o passo
 3. Em **··· › Central**, cole a chave do time e conecte a pasta sincronizada (`Gestao-Compartilhado`).
 4. Responda **Quem é você neste quadro?** (nome e este computador).
 5. Em **Iniciativas**, ligue os épicos do time às iniciativas que vieram da Central, ou use **Trazer** para as que ainda não têm épico. Para criar uma iniciativa do time, clique **+ Iniciativa do time**: o formulário (2.4) pede o nome e mostra as iniciativas da Central como opções (escolher uma preenche o nome; as que já têm épico ficam apagadas), a previsão com atalhos (+2 semanas, +1 mês, +3 meses) e, ao lado, situação, link e a primeira atualização de status. **Criar iniciativa** ou Ctrl+Enter cria; Esc fecha.
-6. Pronto: cada movimentação de card publica o backlog sozinha. Ao **fechar a sprint**, confirme a publicação das métricas.
-7. Para chamar o resto do time, envie o mesmo HTML e a chave por mensagem direta. Cada pessoa repete os passos 1 a 4.
+6. Para agrupar cards, use **features** (2.5): no detalhe da iniciativa, **+ Feature do time** cria uma feature (nome, responsável, prazo); **+ Card nesta feature** cria o card já dentro dela. No card, o campo **Feature** mostra as da Central e as do time. O gestor vê a feature e os cards dela na Central, embaixo da iniciativa. Card antigo do tipo feature: abra e clique **Transformar em feature**.
+7. Pronto: cada movimentação de card publica o backlog sozinha. Ao **fechar a sprint**, confirme a publicação das métricas.
+8. Para chamar o resto do time, envie o mesmo HTML e a chave por mensagem direta. Cada pessoa repete os passos 1 a 4.
+9. **Exportar os dados em claro** (2.5): **Exportar** na barra do quadro (ou Ajustes › Exportar dados legíveis), escolha **Planilha dos cards (.csv)** ou **JSON legível**, marque **Entendo que o arquivo sai sem criptografia** e clique **Exportar sem cifra**. Guarde o arquivo numa pasta só sua e apague quando não precisar mais; nunca na pasta compartilhada. Para backup, use **Baixar cópia cifrada**.
 
 ## 4. Rotina diária do gestor
 
@@ -121,7 +123,7 @@ Times criados pelo assistente já têm prefixo, pasta e chave: pule para o passo
 3. Em **Integração › Compartilhar**, revise o que é novo, alterado ou sai, e clique **Compartilhar**.
 4. Quando o time publicar épicos ou itens sem vínculo, vá em **Integração › Conciliação**:
    - **Unir** o épico a uma iniciativa da Central, **Trazer para a Central** ou **Ignorar**;
-   - **Ligar** o item a uma feature, **Criar feature** ou **Ignorar**;
+   - **Ligar** o item a uma feature, **Criar feature** ou **Ignorar**; uma **feature do time** (◆, com a contagem de cards) ligada ou criada aqui leva todos os cards dela junto (15.18);
    - **Desfazer** uma união, se necessário.
 5. Compartilhe de novo para que o time receba os vínculos.
 

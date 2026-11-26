@@ -15,3 +15,4 @@
 
 ## Ao evoluir
 - Qualquer tela ou importação nova deve respeitar essas invariantes; o importador já recusa violações.
+- Os times seguem a mesma hierarquia, Iniciativa › Feature › Card, e podem criar features próprias que o gestor concilia ([ADR-0039](0039-hierarquia-iniciativa-feature-card.md)).

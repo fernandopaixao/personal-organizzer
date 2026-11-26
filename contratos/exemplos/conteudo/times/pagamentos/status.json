@@ -8,7 +8,7 @@
     "contact": "Ana Souza"
   },
   "generatedAt": "2026-11-14T17:40:00-03:00",
-  "revision": 231,
+  "revision": 232,
   "catalogRevision": 18,
   "initiatives": [
     {
@@ -50,7 +50,7 @@
         {
           "localId": "CARD-280",
           "title": "API de simulação de parcelas",
-          "kind": "feature",
+          "kind": "entrega",
           "status": "done",
           "featureRef": "PAG-042.F1",
           "due": "2026-11-07",
@@ -110,6 +110,37 @@
         "date": "2026-11-12",
         "text": "Iniciativa interna do time; dashboards de erro em construção."
       },
+      "items": [
+        {
+          "localId": "FEAT-7",
+          "title": "Painel de erros do checkout",
+          "kind": "feature",
+          "status": "open",
+          "featureRef": null,
+          "due": "2026-12-08",
+          "owner": "Bruno Lima"
+        },
+        {
+          "localId": "CARD-340",
+          "title": "Alertas de erro no checkout",
+          "kind": "historia",
+          "status": "done",
+          "featureRef": null,
+          "featureLocalId": "FEAT-7",
+          "doneAt": "2026-11-11",
+          "owner": "Elisa Prado"
+        },
+        {
+          "localId": "CARD-344",
+          "title": "Painel de latência do checkout",
+          "kind": "historia",
+          "status": "open",
+          "featureRef": null,
+          "featureLocalId": "FEAT-7",
+          "due": "2026-12-05",
+          "owner": "Bruno Lima"
+        }
+      ],
       "counts": {
         "cards_total": 10,
         "cards_done": 2

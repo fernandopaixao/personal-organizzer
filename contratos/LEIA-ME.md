@@ -1,6 +1,6 @@
 # Contratos de integração · Remessa
 
-*Contratos 1.0 · 25/11/2026 · vale para Central v15.14, Quadro do Time 2.3.2, Hub 2.3, Finanças do Grupo 1.7, Finanças do Time 1.5 e Mapa de Férias 1.5 (dentro da Central)*
+*Contratos 1.1 · 26/11/2026 · vale para Central v15.18, Quadro do Time 2.5.0, Hub 2.3, Finanças do Grupo 1.7, Finanças do Time 1.5 e Mapa de Férias 1.5 (dentro da Central)*
 
 A solução se chama **Remessa** ([ADR-0037](../docs/adr/0037-nome-remessa.md)): cada arquivo desta pasta é um envelope lacrado com a chave do time, deixado na caixa postal (a pasta compartilhada). Nas ferramentas, um arquivo que chegou e ainda não foi aplicado aparece como **nova remessa**.
 
@@ -81,6 +81,7 @@ O validador sai com código 1 quando há erro (bom para usar em CI ou num agente
 | 24/11/2026 | Contratos 1.0: esta pasta única, com especificação, vetores de teste, exemplos de todos os arquivos e validador ([ADR-0032](../docs/adr/0032-pasta-de-contratos.md)) |
 | 24/11/2026 | Nenhum formato mudou. Quem lê e publica as férias do gestor e da liderança passou a ser a página Férias da Central ([ADR-0033](../docs/adr/0033-ferias-dentro-da-central.md)); os arquivos `times/<time>/ferias/` e `grupos/<grupo>/ferias/` continuam iguais |
 | 25/11/2026 | Nenhum formato mudou. Só o gestor cadastra as férias, na Central ([ADR-0036](../docs/adr/0036-ferias-so-o-gestor-cadastra.md)): as pessoas dos times entram no consolidado com `people[].id` `<time>.<slug>` e `unit` do time, como já previa o schema; `times/<time>/ferias/` fica para outra solução do time |
+| 26/11/2026 | `gestao-status/1` ganhou o campo opcional `items[].featureLocalId` (contratos 1.1, aditivo: leitor antigo ignora). Hierarquia Iniciativa › Feature › Card igual na Central e nos times ([ADR-0039](../docs/adr/0039-hierarquia-iniciativa-feature-card.md)): a feature criada pelo time vai como item `kind: "feature"` e os cards dentro dela levam `featureLocalId` com o `localId` dela; quando o gestor liga essa feature a uma feature da Central, os cards vão junto. O validador recusa `featureLocalId` que não aponta para um item `feature` da mesma iniciativa e avisa sobre item `feature` com `featureRef` |
 | 25/11/2026 | Nenhum formato mudou e o envelope continua igual. O Hub 2.0 (cockpit, [ADR-0035](../docs/adr/0035-hub-cockpit-de-gestao.md)) passou a ler `status.json` (iniciativas por situação e bloqueios) e `metricas.json` (até 3 métricas, as com `highlight` primeiro, com o último valor, a série e a faixa de `thresholds`; só métricas com série em `data.series[0].points`); a solução passou a se chamar Remessa ([ADR-0037](../docs/adr/0037-nome-remessa.md)) |
 
 Mudou um contrato? Atualize nesta pasta o schema, o exemplo (`exemplos/gerar.js`), a regra no `validar.js` e esta tabela, no mesmo PR da ferramenta ([ADR-0022](../docs/adr/0022-documentacao-no-mesmo-pr.md)).

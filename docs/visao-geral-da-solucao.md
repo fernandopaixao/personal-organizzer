@@ -1,6 +1,6 @@
 # Visão geral da solução · Central de Gestão, Quadro do Time e integração
 
-*26/11/2026 · estado atual: Remessa · Central v15.17, Quadro do Time 2.4, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central) e contratos 1.0 (detalhes em `docs/plano-v15.md`, `docs/plano-hub.md`, `docs/plano-financas.md` e [`contratos/`](../contratos/LEIA-ME.md))*
+*26/11/2026 · estado atual: Remessa · Central v15.18, Quadro do Time 2.5, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central) e contratos 1.1 (detalhes em `docs/plano-v15.md`, `docs/plano-hub.md`, `docs/plano-financas.md` e [`contratos/`](../contratos/LEIA-ME.md))*
 
 > **Por onde começar:** [funcionalidades, usos e objetivos](funcionalidades.md) · [jornada do usuário](jornada-do-usuario.md) · [passo a passo](passo-a-passo.md) · [decisões de arquitetura (ADRs)](adr/README.md)
 
@@ -45,7 +45,7 @@ O desenho mostra só a troca de tarefas. Pela mesma pasta passam as finanças, o
 |---|---|---|---|
 | **Hub da solução** | Cockpit de gestão (2.3): login único, cards e lista de atenção de todos os módulos (lidos sem gravar), abre as outras ferramentas e deixa post-its cifrados para os times, que aparecem no Quadro | Fernando (e quem quiser) | Repositório: `hub.html`, plano em `docs/plano-hub.md` |
 | **Central de Gestão v15** | Gestão pessoal e de portfólio do gestor: tarefas, delegação, iniciativas e features, rituais, pessoas, métricas e integração com os times | Fernando | Repositório: `gestao_pessoal_v15.html`, plano em `docs/plano-v15.md`. Projeto: `gestao-v15/` |
-| **Quadro do Time 2.4** | Quadro de cards, backlog, sprints, iniciativas ligadas à Central e métricas de fluxo do time | Cada time | Repositório e projeto: `ferramenta-time/` (HTML, guia, telas) |
+| **Quadro do Time 2.5** | Quadro de cards, backlog, sprints, iniciativas ligadas à Central e métricas de fluxo do time | Cada time | Repositório e projeto: `ferramenta-time/` (HTML, guia, telas) |
 | **Finanças do Grupo e do Time** | Plano financeiro multianual de cada time (lançamentos locais, plano agregado publicado) e consolidado do grupo ano a ano contra o orçamento, com cards de leitura e gráficos | Fernando (grupo) e responsável financeiro de cada time | Repositório: `financas/`, plano em `docs/plano-financas.md` |
 | **Férias (página da Central)** | Férias e ausências em níveis (gestor → liderança): mapa de calor dos dias com mais e menos gente fora, calendário e sugestão de períodos. Fica na página **Férias da Central** (mesmo arquivo e senha, [ADR-0033](adr/0033-ferias-dentro-da-central.md)) e só o gestor cadastra, inclusive as pessoas dos times ([ADR-0036](adr/0036-ferias-so-o-gestor-cadastra.md)). Apoio, não substitui a ferramenta oficial | Gestores e liderança | Repositório: página Férias em `gestao_pessoal_v15.html`, montada a partir de `financas/src/ferias.html`; plano em `docs/plano-ferias.md` |
 | **Assistente inicial** | Monta a solução para o papel da pessoa e cria os primeiros arquivos cifrados | Quem está começando | Repositório: `inicio.html` |
@@ -110,6 +110,7 @@ Teclas 1 a 9 trocam de página. O botão do topo **Importar e agentes** reúne a
 | v15.14 | Entrada em dois passos em todas as ferramentas: primeiro o arquivo, depois a senha; versão só no rodapé ([ADR-0037](adr/0037-nome-remessa.md)) |
 | v15.16 | Tela de entrada com a caixa **Visual experimental**: liga e desliga o visual novo em todas as ferramentas e lembra a escolha ([ADR-0038](adr/0038-ligar-visual-experimental-na-entrada.md)) |
 | v15.17 | Prévia da importação dos agentes com **descartar linhas**: cada linha nova ou atualizada pode ser desmarcada antes de confirmar ([ADR-0013](adr/0013-downstream-previa-e-conciliacao.md)) |
+| v15.18 | Feature criada pelo time chega com os cards dela (`featureLocalId`): na conciliação e no painel da iniciativa aparece com a contagem, e ligada a uma feature da Central leva os cards junto, recuados no downstream ([ADR-0039](adr/0039-hierarquia-iniciativa-feature-card.md)) |
 
 Detalhes da v15: `docs/plano-v15.md` (e da v14 em `docs/plano-v14.md`).
 
@@ -122,6 +123,7 @@ Iniciativa  PAG-042  Pix parcelado no app
  ├─ Feature  PAG-042.F1  Simulação de parcelas      ┐ Fase PAG-042.P1 Construção  (01/10 a 28/11)
  ├─ Feature  PAG-042.F2  Contratação no app         ┘ Fase PAG-042.P2 Homologação (10/11 a 05/12)  ← fases sobrepostas
  │    └─ downstream do time Pagamentos: CARD-295, CARD-301 … 3 de 5 concluídos (só leitura)
+ │         ◆ FEAT-7 Painel de erros (feature do time, ligada a esta) ─ CARD-340, CARD-344 recuados
  ├─ Feature  PAG-042.F3  Piloto com 1% da base      ─ Fase PAG-042.P3 Piloto (01/12 a 19/12)
  └─ Tarefas ligadas à iniciativa ou a uma feature (minhas e delegadas), sem hierarquia própria
 ```
@@ -132,28 +134,32 @@ Iniciativa  PAG-042  Pix parcelado no app
 | **Feature** | O antigo "entregável". Pertence a **uma** iniciativa e **nunca muda de iniciativa** (a única exceção é unir duas iniciativas que são a mesma). Está em **no máximo uma fase**. Pode **depender de outra feature**. Código `PAG-042.F2` |
 | **Fase** | Não é mais nível da hierarquia: é um **agrupamento de features no tempo**. Fases podem começar juntas e **se sobrepor**. Código `PAG-042.P1`. Serve só de contexto para os times |
 | **Tarefa** | **Desacoplada**: ligada a uma feature, a uma iniciativa ou a nada. Compromissos de reunião viram tarefas |
+| **Feature do time** | Criada no Quadro (`FEAT-7`) quando a Central ainda não tem a feature, ou para iniciativas só do time. Mesma regra da feature da Central: pertence a uma iniciativa e não muda dela. Chega como item `kind: "feature"`, e os cards dela trazem `featureLocalId`. Na conciliação, **Ligar** ou **Criar feature** leva os cards junto ([ADR-0039](adr/0039-hierarquia-iniciativa-feature-card.md)) |
 | **Item do time** | Card que vem do `status.json` do time. Quando ligado a uma feature, aparece **abaixo dela** como acompanhamento (downstream). **Nunca vira tarefa nem feature** e nunca altera a feature; no máximo a Central sugere "Concluir feature?" |
 
 **Códigos.** O prefixo do time (2 a 5 letras, ex.: `PAG`) é definido ao criar o time e trava depois do primeiro código. Todos os códigos são imutáveis e nunca reutilizados; quem muda de time mantém o código original. O `id` interno continua sendo a chave interna; o código é a chave pública da troca com os times.
+
+**A mesma hierarquia nos times.** O Quadro do Time trabalha em **Iniciativa › Feature › Card**: a feature vem da Central ou é criada pelo time, e o card fica em no máximo uma feature. A tarefa do gestor continua desacoplada; o card do time nunca vira tarefa ([ADR-0039](adr/0039-hierarquia-iniciativa-feature-card.md)).
 
 Documento detalhado: `integracao-time/04-modelo-iniciativa-feature.md`.
 
 ---
 
-## 5. Quadro do Time (2.4)
+## 5. Quadro do Time (2.5)
 
 A ferramenta pronta para os times. Também é um HTML único (`ferramenta-time/quadro_do_time_v1.html`), aberto no Edge ou Chrome.
 
 | Tela | Para quê |
 |---|---|
-| **Quadro** | Kanban com raias (iniciativa ou pessoa), barras de WIP, envelhecimento dos cards, entrega recolhida, filtros rápidos, faixa de pulso e card em painel lateral; aviso quando a feature do card depende de outra ainda aberta. A coluna Backlog fica fora do quadro (opção em Ajustes) |
-| **Backlog** | Lista agrupável (iniciativa, responsável, sprint) com filtros e "+ Card" em cada grupo |
+| **Quadro** | Kanban com raias (iniciativa, feature ou pessoa), barras de WIP, envelhecimento dos cards, entrega recolhida, filtros rápidos, faixa de pulso e card em painel lateral; aviso quando a feature do card depende de outra ainda aberta. A coluna Backlog fica fora do quadro (opção em Ajustes) |
+| **Backlog** | Lista agrupável (iniciativa, feature, responsável, sprint) com filtros e "+ Card" em cada grupo |
 | **Novo card e criação rápida** | Formulário no padrão da tarefa da Central e barra rápida: `Ajustar retry @ana amanhã #PAG-042 F2 !bug` |
 | **Sprints** | Planejar, iniciar, fechar; ao fechar, pergunta se publica as métricas |
-| **Iniciativas** | Ligadas à Central, só do time, da Central ainda sem épico (botão Trazer) e concluídas; detalhe com progresso, bloqueios e previsão |
+| **Iniciativas** | Ligadas à Central, só do time, da Central ainda sem épico (botão Trazer) e concluídas; detalhe com progresso, bloqueios, previsão e as **features** (da Central e do time) com os cards de cada uma; **+ Feature do time** |
+| **Exportar** | CSV dos cards ou JSON legível (Iniciativa › Feature › Card), sem criptografia, só depois de confirmar ([ADR-0040](adr/0040-exportar-dados-legiveis-com-confirmacao.md)) |
 | **Métricas** | Vazão, lead time, cycle time, WIP, idade do WIP, fluxo cumulativo, demanda, compromisso cumprido, % bloqueado e outras; "Ver JSON" mostra o que vai para a Central |
 | **Central** | Slug do time, chave, pasta, catálogo, situação das publicações |
-| **Ajustes** | Nome do time, pessoas (desativar quem saiu), colunas (compromisso e início), senha, cópia de segurança |
+| **Ajustes** | Nome do time, pessoas (desativar quem saiu), colunas (compromisso e início), senha, cópia cifrada e exportação legível |
 
 Como funciona por dentro:
 - Cada pessoa tem o próprio arquivo local, **sempre cifrado com senha** (obrigatória desde o Quadro 2.1), e publica as próprias alterações em `times/<time>/quadro/<pessoa>-<computador>.json`, cifrado com a chave do time.
@@ -236,7 +242,7 @@ Iniciativas nascem dos dois lados: na Central (com código, vão ao time pelo ca
 | Bloco | Ações |
 |---|---|
 | Épicos do time sem vínculo | **Unir** a uma iniciativa da Central, **Trazer para a Central** (cria a iniciativa com os itens como sugestão de features) ou **Ignorar**. Há sugestão de par por nome e por agente |
-| Itens do time sem feature | **Ligar** a uma feature, **Criar feature** a partir do item ou **Ignorar** |
+| Itens do time sem feature | **Ligar** a uma feature, **Criar feature** a partir do item ou **Ignorar**. Feature do time (◆) aparece com a contagem de cards; ligada ou criada, leva os cards junto, e o Quadro passa os cards para o código da Central no próximo catálogo |
 | Uniões feitas | **Desfazer** |
 
 Unir duas iniciativas da própria Central também é possível: escolhe-se a principal, tudo passa para ela, e o código da outra continua aceito como apelido. No próximo compartilhamento, o catálogo leva `links[]` e `aliases[]` e a ferramenta do time grava os códigos sozinha.

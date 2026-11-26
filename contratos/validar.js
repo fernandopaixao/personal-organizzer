@@ -127,7 +127,12 @@ function regrasDoConteudo(p, papel) {
     for (const i of p.initiatives || []) {
       P(i.ref === null || i.ref === undefined || INIT_RE.test(i.ref), `${i.localId}: ref inválido`);
       for (const f of i.features || []) { P(FEAT_RE.test(f.ref), `${i.localId}: feature ${f.ref} inválida`); if (i.ref) W(f.ref.startsWith(i.ref + '.'), `${f.ref} não é feature de ${i.ref}`); }
-      for (const it of i.items || []) P(!it.link || /^https:\/\//.test(it.link), `${it.localId}: link deve ser https`);
+      const fLoc = new Set((i.items || []).filter(x => x.kind === 'feature').map(x => x.localId));
+      for (const it of i.items || []) {
+        P(!it.link || /^https:\/\//.test(it.link), `${it.localId}: link deve ser https`);
+        if (it.featureLocalId !== undefined) { P(!it.featureRef, `${it.localId}: featureLocalId só vale para item sem featureRef`); P(fLoc.has(it.featureLocalId), `${it.localId}: featureLocalId ${it.featureLocalId} não é um item kind "feature" desta iniciativa`); }
+        if (it.kind === 'feature' && it.featureRef) W(false, `${it.localId}: item kind "feature" com featureRef; feature é um nível (Iniciativa › Feature › Card), use kind "entrega" para o card que entrega a feature da Central`);
+      }
       P(!i.link || /^https:\/\//.test(i.link), `${i.localId}: link deve ser https`);
     }
   }
