@@ -1,6 +1,6 @@
 # Funcionalidades, usos e objetivos
 
-*26/11/2026 · Remessa · Central v15.18, Quadro do Time 2.5, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.2, contratos 1.1 · visual experimental em `experimental/`*
+*26/11/2026 · Remessa · Central v15.18, Quadro do Time 2.7, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.2, contratos 1.1 · visual experimental em `experimental/`*
 
 Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. Para as regras técnicas por trás, veja as [decisões de arquitetura](adr/README.md). Para o caminho de quem usa, veja a [jornada do usuário](jornada-do-usuario.md) e o [passo a passo](passo-a-passo.md).
 
@@ -190,7 +190,7 @@ Navegação em 9 páginas (teclas 1 a 9) e o botão **Importar e agentes** no to
 
 ---
 
-## 6. Quadro do Time (2.5)
+## 6. Quadro do Time (2.7)
 
 **Objetivo:** dar ao time uma ferramenta de fluxo pronta, que publica sozinha o que a Central precisa.
 
@@ -202,14 +202,17 @@ Quando o catálogo da Central chega pela pasta, o Quadro avisa **Nova remessa da
 |---|---|---|
 | **Quadro** | Kanban com raias (nenhuma, iniciativa, **feature** ou pessoa), WIP visível, envelhecimento (âmbar acima da mediana, vermelho acima do p85), entrega recolhida, filtros, faixa de pulso, card em painel lateral (↑ ↓ Esc); o card escolhe a feature num campo só, separado em "Da Central" e "Do time", com **+ Nova feature do time** | Ver gargalos e cards parados |
 | **Exportar** (2.5, [ADR-0040](adr/0040-exportar-dados-legiveis-com-confirmacao.md)) | Botão na barra do quadro e em Ajustes: **planilha dos cards (.csv)**, um card por linha com iniciativa, feature, coluna, responsável, prazo e sprint, ou **JSON legível** (Iniciativa › Feature › Card, pessoas, sprints, histórico). O arquivo sai **sem criptografia**: o botão só liga depois de marcar **Entendo que o arquivo sai sem criptografia** | Levar os dados a uma planilha, outra ferramenta ou arquivo morto |
+| **Refinamento** (2.6, [ADR-0041](adr/0041-refinamento-no-quadro.md)) | Página para usar **com o time**, em passos. **Organizar:** árvore Iniciativa › Feature (da Central só leitura, do time editáveis), cards da feature na ordem de prioridade (arrastar ou Alt+↑/↓) e a coluna **Sem feature** com **Nova ideia…**; arrastar um ou vários cards para outra feature ou **Mover para… (M)**, **Dividir**, **Juntar** e **Desfazer** (Ctrl+Z). **Refinar:** uma feature por vez com tamanho em pontos, critérios de aceite (n de m) e **pronto para sprint**. **Desenhar sprints** (2.7): grade com as features nas linhas e a sprint em andamento (só com confirmação), as próximas sprints e **Mais tarde** nas colunas; arrastar o card troca a sprint; **capacidade** de cada sprint pela vazão média das 3 últimas sprints fechadas (ou em pontos), barra âmbar quando passa; **previsão × prazo** de cada feature (fim da última sprint com card dela, contra o prazo da Central), que vai para a Central no backlog publicado. **Planejar a sprint** (2.7): nome, datas, objetivo e capacidade, **Na sprint** e **Prontos fora da sprint** (**Trazer**), aviso de card não pronto e o quadro **O que a Central vai ver**; **Iniciar sprint** grava o compromisso. **Resumo:** o que mudou na sessão, participantes, decisões e próximo refinamento; **Copiar para o Teams e encerrar** ou **Baixar .txt** | Refinar a demanda e chegar ao planejamento da sprint numa reunião só, sem abrir card por card |
 | **Post-its para o time** | Faixa no topo com os recados do hub; **Vi** grava o recibo | Receber recados do gestor |
 | **Backlog** | Lista agrupável por iniciativa, **feature** (da Central e do time, com "Sem feature" no fim), responsável ou sprint, com "+ Card" | Preparar trabalho |
 | **Criação rápida** | `Ajustar retry @ana amanhã #PAG-042 F2 !bug` | Criar card em uma linha |
 | **Iniciativas** | Ligadas à Central, só do time, da Central sem épico (**Trazer**), concluídas. **+ Iniciativa do time** (2.4) abre um formulário em duas colunas, no padrão do Novo card: nome, iniciativa da Central como opções (preenche o nome; as já ligadas ficam apagadas), previsão com atalhos; ao lado, situação em pílulas, link (só https, validado no campo), primeira atualização de status e um resumo. Ctrl+Enter cria, Esc fecha. **Editar** usa o mesmo desenho. No detalhe, **Features** mostra as da Central e as do time, cada uma com progresso e os cards abertos; **+ Feature do time** abre o formulário em duas colunas (nome, iniciativa, descrição; ao lado, responsável, prazo, situação e **Unir com a da Central**) | Ligar o trabalho do time ao portfólio |
 | **Métricas** | Vazão, lead time, cycle time, WIP, idade do WIP, fluxo cumulativo, demanda, compromisso cumprido, % bloqueado; "Ver JSON" | Melhorar o fluxo e publicar para a Central |
-| **Sprints** (menu ···) | Planejar, iniciar, fechar; ao fechar, pergunta se publica as métricas | Ritmo do time |
+| **Sprints** (menu ···) | Planejar, iniciar, fechar. Ao fechar (2.7): **objetivo atingido, em parte ou não** (quando a sprint tem objetivo) e uma linha sobre a sprint; depois pergunta se publica as métricas | Ritmo do time |
 | **Central** (menu ···) | Slug, chave, pasta, catálogo, situação das publicações | Conferir a integração |
-| **Ajustes** (menu ···) | Nome, pessoas, colunas (compromisso, início, mostrar Backlog), senha, **Baixar cópia cifrada** e **Exportar dados legíveis** | Configurar |
+| **Ajustes** (menu ···) | Nome, pessoas, **Refinamento** (itens do pronto para sprint, até 5; capacidade em cards ou pontos; duração da sprint; quantas sprints desenhar), colunas (compromisso, início, mostrar Backlog), senha, **Baixar cópia cifrada** e **Exportar dados legíveis** | Configurar |
+
+No painel do card (2.6), os blocos **Critérios de aceite** (lista que se marca; Enter adiciona) e **Pronto para sprint** (itens do time ou marcação à mão) ficam no time e não vão para a Central. A exportação legível leva os dois.
 
 Cada pessoa grava o **próprio arquivo** (`quadro/<pessoa>-<computador>.json`) e o Quadro une os arquivos de todos a cada 20 s. O backlog (`status.json`) é publicado a cada movimentação; as métricas, ao fechar a sprint.
 

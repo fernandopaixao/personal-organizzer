@@ -271,6 +271,44 @@ dialog::backdrop{background:rgba(22,26,35,.35)}
 .ph .now{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--late)}
 pre.json{background:#f6f7fb;border-radius:10px;padding:12px;font-size:11.5px;max-height:420px;overflow:auto;white-space:pre-wrap;word-break:break-all}
 @media (max-width:720px){.rail{position:fixed;top:auto;bottom:0;left:0;right:0;width:auto;height:62px;flex-direction:row;justify-content:space-around;padding:4px;border-right:0;border-top:1px solid var(--line)}.logo{display:none}.main{margin-left:0;padding-bottom:90px}.fg{grid-template-columns:1fr}.nv{width:auto;padding:6px 4px}}
+/* Refinamento (2.6) */
+.rsteps{display:flex;align-items:center;gap:6px;margin:4px 0 14px;flex-wrap:wrap}
+.rstep{display:flex;align-items:center;gap:8px;padding:7px 13px;border-radius:10px;color:var(--muted);font-size:13px;border:1px solid transparent}
+.rstep i{font-style:normal;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;background:#eceef4;color:var(--muted)}
+.rstep.on{background:#fff;border-color:var(--bv-line);color:var(--ink);font-weight:600;box-shadow:0 1px 3px rgba(20,30,80,.06)}.rstep.on i{background:var(--bv);color:#fff}
+.rsep{width:18px;height:1px;background:var(--line)}
+.rlay{display:grid;grid-template-columns:minmax(240px,300px) minmax(0,1fr) minmax(240px,320px);gap:14px;align-items:start}
+.rpane{background:#fff;border:1px solid var(--line);border-radius:14px;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.rlay .rpane{max-height:calc(100vh - 190px)}.rbody{overflow:auto;min-height:60px}
+.rph{display:flex;align-items:center;gap:8px;padding:11px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}.rph h3{font-size:13.5px;font-family:var(--title)}
+.rtool{background:#fbfbfd;padding:7px 14px}
+.rtree .rbody{padding:6px 8px 10px}
+.rinit{display:flex;align-items:center;gap:8px;margin:12px 6px 4px;font-size:12.5px}.rinit b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rti{display:flex;align-items:center;gap:7px;width:100%;padding:6px 8px 6px 18px;border-radius:9px;font-size:12.5px;text-align:left}
+.rti:hover{background:#f6f7fb}.rti.on{background:var(--bv-soft)}.rti .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rti .n{font-size:11px;color:var(--muted);min-width:14px;text-align:right}.rti.add{color:var(--bv);font-size:12px}
+.dia{width:8px;height:8px;transform:rotate(45deg);border:1.6px solid var(--bv);flex:none;display:inline-block}.dia.t{border-color:#8a5a2f}
+.rd{width:34px;height:5px;border-radius:3px;background:#eceef4;overflow:hidden;flex:none;display:inline-block}.rd i{display:block;height:100%;background:#2f7d5b}.rd.big{width:80px}
+.rrow{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line);font-size:12.5px;background:#fff;cursor:pointer}
+.rrow:hover{background:#fafbfe}.rrow.on{background:var(--bv-soft)}.rrow.drag{opacity:.4}.rrow:focus{outline:2px solid var(--bv-line);outline-offset:-2px}
+.rrow .hdl{color:var(--faint);letter-spacing:-2px;cursor:grab}.rrow .rt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rin .rrow .code{display:none}.rrow .rt small{display:block;color:var(--muted);font-size:11px}
+.rcb{width:16px;height:16px;border:1.5px solid #c9cdd8;border-radius:4px;flex:none;display:grid;place-items:center;font-size:10px;color:#fff;background:#fff}
+.rcb.on{background:var(--bv);border-color:var(--bv)}.rcb.on.ok{background:#2f7d5b;border-color:#2f7d5b}
+.rdropon{outline:2px dashed var(--bv);outline-offset:-2px;background:#eef1fd!important}
+.rnew{padding:10px 12px;border-top:1px solid var(--line)}.rnew .sin{width:100%}
+.racc{display:flex;flex-direction:column;gap:6px;font-size:12.5px}
+.chip.ok{background:#e6f3ec;color:#2f7d5b}.chip.attn{background:#fbf1e1;color:#8a5a12}
+.rpts{width:62px;padding:4px 8px}
+.toast.undo{display:flex;gap:14px;align-items:center}.toast.undo button{color:#b8c3ff;font-weight:650}
+@media (max-width:1100px){.rlay{grid-template-columns:1fr}.rlay .rpane{max-height:none}}
+.rgrid{display:grid;overflow:auto;font-size:12px}.rgrid>div{border-bottom:1px solid var(--line);border-right:1px solid var(--line);padding:8px;min-height:56px;min-width:0}
+.rgrid .rgh{min-height:auto;background:#fcfcfe;padding:10px 8px}.rgrid .rgc.act{background:repeating-linear-gradient(135deg,#fafafc 0 8px,#f4f5f9 8px 16px)}
+.rgf b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rpill{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:7px;padding:2px 6px;margin:2px;font-size:11px;background:#fff;cursor:grab;white-space:nowrap}.rpill.nr{border-style:dashed;color:var(--muted)}.rpill.drag{opacity:.4}
+.rcap{height:6px;border-radius:3px;background:#eceef4;overflow:hidden;margin-top:6px}.rcap i{display:block;height:100%;background:var(--bv)}.rcap.over i{background:#d9a23c}
+.rplan{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px;align-items:start}.rlay2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}.rlay2 .rpane{max-height:calc(100vh - 330px)}
+.rsec{padding:12px 14px;border-bottom:1px solid var(--line);line-height:1.6}.rsec .lbl{margin-bottom:4px}
+@media (max-width:1100px){.rplan,.rlay2{grid-template-columns:1fr}}
+
 </style>
 <script id="visual">
 /* visual 1.0 · liga e desliga o visual experimental pela tela de entrada (ADR-0038)
@@ -740,7 +778,7 @@ pre.json{background:#f6f7fb;border-radius:10px;padding:12px;font-size:11.5px;max
      gestao-status/1, gestao-metricas/1 dentro de gestao-envelope/1 (AES-256-GCM).
    - Só métricas de time, calculadas a partir da movimentação dos cards.
    ========================================================================= */
-const TOOL = 'quadro_do_time_v1.html', TOOL_VERSION = '2.5.0';
+const TOOL = 'quadro_do_time_v1.html', TOOL_VERSION = '2.7.0';
 /* Pré-configuração gravada pela Central de Gestão (Pessoas › Times › HTML do time).
    No arquivo original fica null; a Central troca o trecho entre os marcadores por um
    objeto quadro-preset/1: { team: { name, slug, prefix, contact }, people: [{ name, role }], key? }.
@@ -889,8 +927,8 @@ function newDb(name, slug) {
       ],
       commitCol: 'pronto', startCol: 'fazendo', autoPublish: true
     },
-    seq: { card: 0, epic: 0, sprint: 0, person: 0, feature: 0 },
-    people: [], epics: [], features: [], cards: [], sprints: [],
+    seq: { card: 0, epic: 0, sprint: 0, person: 0, feature: 0, refine: 0 },
+    people: [], epics: [], features: [], cards: [], sprints: [], refinements: [],
     publish: { revision: 0, lastStatus: null, lastMetrics: null }
   };
 }
@@ -898,7 +936,7 @@ function normalizeDb(d) {
   if (!d || d.schema !== DB_SCHEMA) throw new Error('Arquivo não é um quadro do time (quadro-time/1)');
   d.team ??= { name: 'Time', slug: '', upd: 0 }; d.settings ??= newDb('', '').settings;
   d.settings.autoPublish ??= true;
-  d.seq ??= { card: 0, epic: 0, sprint: 0 }; d.seq.person ??= 0; d.seq.feature ??= 0; d.features ??= []; d.epics ??= []; d.cards ??= []; d.sprints ??= []; d.people ??= [];
+  d.seq ??= { card: 0, epic: 0, sprint: 0 }; d.seq.person ??= 0; d.seq.feature ??= 0; d.seq.refine ??= 0; d.refinements ??= []; d.settings.refinement ??= { ready: [...READY_PADRAO], unit: 'cards', cadenceDays: 14, horizon: 3 }; d.features ??= []; d.epics ??= []; d.cards ??= []; d.sprints ??= []; d.people ??= [];
   // Migração: a lista antiga (settings.members, só nomes) e os responsáveis dos cards viram pessoas do time
   const nomes = [...(d.settings.members || []), ...d.cards.map(c => c.owner)].map(n => String(n || '').trim()).filter(Boolean);
   for (const n of nomes) if (!d.people.some(p => normName(p.name) === normName(n))) { d.seq.person++; d.people.push({ id: `P-${d.seq.person}`, uid: uid(), name: n, role: '', active: true, createdAt: agoraComFuso(), upd: Date.now() }); }
@@ -1116,7 +1154,7 @@ function buildStatus(revision, generatedAt) {
     const byF = new Map(); for (const c of cards) if (FEAT_RE.test(c.featureRef || '')) (byF.get(c.featureRef) || byF.set(c.featureRef, []).get(c.featureRef)).push(c);
     const feats = [...byF].map(([ref, cs]) => {
       const cf = catFeature(ref), openC = cs.filter(c => !isDone(c)), dues = openC.map(c => c.due).filter(isYmd).sort();
-      const fc = dues.at(-1);
+      const pv = rPrevisao('r:' + ref), fc = [dues.at(-1), pv?.end].filter(isYmd).sort().at(-1);
       const f = { ref, status: derivedStatus(cs, { due: cf?.due, forecast: fc }), progress: Math.round((cs.length - openC.length) / cs.length * 100) };
       if (fc) f.forecastEnd = fc;
       if (e.featureNotes[ref]) f.note = clip(e.featureNotes[ref], 300);
@@ -1371,14 +1409,14 @@ function pedirSenhaDlg(errou) {
 }
 function mergeDb(mine, theirs) {     // une mudanças de duas pessoas no mesmo arquivo: por item, vence a alteração mais recente
   const out = structuredClone(theirs);
-  out.people ??= []; mine.people ??= []; out.features ??= []; mine.features ??= []; out.seq ??= {}; mine.seq ??= {};
-  for (const k of ['people', 'epics', 'features', 'cards', 'sprints']) {
+  out.people ??= []; mine.people ??= []; out.features ??= []; mine.features ??= []; out.refinements ??= []; mine.refinements ??= []; out.seq ??= {}; mine.seq ??= {};
+  for (const k of ['people', 'epics', 'features', 'cards', 'sprints', 'refinements']) {
     const m = new Map(out[k].map(x => [x.id, x]));
     for (const x of mine[k]) {
       const t = m.get(x.id);
       if (!t) { out[k].push(x); continue; }
       if (t.uid !== x.uid) {         // mesmo código criado por duas pessoas: renumera o meu
-        const [pref, sk] = { cards: ['CARD', 'card'], epics: ['EPIC', 'epic'], features: ['FEAT', 'feature'], sprints: ['SPR', 'sprint'], people: ['P', 'person'] }[k];
+        const [pref, sk] = { cards: ['CARD', 'card'], epics: ['EPIC', 'epic'], features: ['FEAT', 'feature'], sprints: ['SPR', 'sprint'], people: ['P', 'person'], refinements: ['REF', 'refine'] }[k];
         if (k === 'people') { const igual = out.people.find(p => normName(p.name) === normName(x.name)); if (igual) continue; }
         out.seq[sk] = Math.max(out.seq[sk] || 0, mine.seq[sk] || 0) + 1; const novo = `${pref}-${out.seq[sk]}`;
         if (k === 'epics') { for (const c of mine.cards) if (c.epicId === x.id) { c.epicId = novo; c.upd = Date.now(); } for (const f of mine.features) if (f.epicId === x.id) { f.epicId = novo; f.upd = Date.now(); } }
@@ -1391,7 +1429,7 @@ function mergeDb(mine, theirs) {     // une mudanças de duas pessoas no mesmo a
   }
   if ((mine.settings.upd || 0) > (out.settings.upd || 0)) out.settings = mine.settings;
   if ((mine.team.upd || 0) > (out.team.upd || 0)) out.team = mine.team;
-  for (const s of ['card', 'epic', 'sprint', 'person', 'feature']) out.seq[s] = Math.max(out.seq[s] || 0, mine.seq[s] || 0);
+  for (const s of ['card', 'epic', 'sprint', 'person', 'feature', 'refine']) out.seq[s] = Math.max(out.seq[s] || 0, mine.seq[s] || 0);
   out.publish.revision = Math.max(out.publish.revision || 0, mine.publish.revision || 0);
   for (const s of ['lastStatus', 'lastMetrics']) if ((mine.publish[s]?.revision || 0) > (out.publish[s]?.revision || 0)) out.publish[s] = mine.publish[s];
   return out;
@@ -1486,7 +1524,7 @@ function novoEpico(name) { db.seq.epic++; const e = { id: `EPIC-${db.seq.epic}`,
 function novaSprint() {
   db.seq.sprint++; const last = db.sprints.filter(s => !s.deleted).sort((a, b) => (a.end || '').localeCompare(b.end || '')).at(-1);
   const start = last?.end ? addDays(last.end, 1) : ymd(weekStart(new Date()));
-  const s = { id: `SPR-${db.seq.sprint}`, uid: uid(), name: `Sprint ${db.seq.sprint}`, start, end: addDays(start, 13), goal: '', state: 'planned', committed: [], upd: Date.now() };
+  const s = { id: `SPR-${db.seq.sprint}`, uid: uid(), name: `Sprint ${db.seq.sprint}`, start, end: addDays(start, Math.max(1, Number(db.settings.refinement?.cadenceDays) || 14) - 1), goal: '', state: 'planned', committed: [], upd: Date.now() };
   db.sprints.push(s); return s;
 }
 
@@ -1494,13 +1532,14 @@ function novaSprint() {
 const ICONS = {
   board: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="11" rx="1.5"/><rect x="17" y="4" width="4" height="7" rx="1.5"/></svg>',
   backlog: '<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>',
+  refine: '<svg viewBox="0 0 24 24"><path d="M4 5h16l-6 7v6l-4 2v-8z"/></svg>',
   sprints: '<svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 3-6.2"/><path d="M4 4v4h4"/><path d="M12 8v4l3 2"/></svg>',
   epics: '<svg viewBox="0 0 24 24"><path d="M5 4h10l4 4v12H5z"/><path d="M9 12h6M9 16h4"/></svg>',
   metrics: '<svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
   central: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v4M12 17v4M3 12h4M17 12h4"/></svg>',
   settings: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6a7 7 0 0 0 0 2.4l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z"/></svg>'
 };
-const VIEWS = [['board', 'Quadro'], ['backlog', 'Backlog'], ['sprints', 'Sprints'], ['epics', 'Iniciativas'], ['metrics', 'Métricas'], ['central', 'Central'], ['settings', 'Ajustes']];
+const VIEWS = [['board', 'Quadro'], ['backlog', 'Backlog'], ['refine', 'Refinamento'], ['sprints', 'Sprints'], ['epics', 'Iniciativas'], ['metrics', 'Métricas'], ['central', 'Central'], ['settings', 'Ajustes']];
 
 function renderRail() {
   if (!db) { $('#rail').innerHTML = '<div class="logo">QT</div>'; return; }
@@ -1528,18 +1567,18 @@ function render() {
   renderRail();
   const title = VIEWS.find(v => v[0] === view)[1];
   let body = '';
-  try { body = ({ board: vBoard, backlog: vBacklog, sprints: vSprints, epics: vEpics, metrics: vMetrics, central: vCentral, settings: vSettings })[view](); }
+  try { body = ({ board: vBoard, backlog: vBacklog, refine: vRefine, sprints: vSprints, epics: vEpics, metrics: vMetrics, central: vCentral, settings: vSettings })[view](); }
   catch (e) { console.error(e); body = `<div class="banner warn">Erro ao desenhar a tela: ${esc(e.message)}</div>`; }
   const sx = $('#main').querySelector('.board')?.scrollLeft;
-  const alert = (!keysInfo.atual || !SLUG_RE.test(db.team.slug || '') || pub.err) && !db.demo, MAIN = ['board', 'backlog', 'epics', 'metrics'];
+  const alert = (!keysInfo.atual || !SLUG_RE.test(db.team.slug || '') || pub.err) && !db.demo, MAIN = ['board', 'backlog', 'refine', 'epics', 'metrics'];
   const nav = `<nav class="tnav">${VIEWS.filter(v => MAIN.includes(v[0])).map(([k, l]) => `<button class="${view === k ? 'on' : ''}" data-act="view" data-v="${k}">${l}</button>`).join('')}
     <details class="tmore"><summary title="Mais" aria-label="Mais telas">···${alert ? '<span class="b" style="position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:var(--late)"></span>' : ''}</summary><div class="menu">${VIEWS.filter(v => !MAIN.includes(v[0])).map(([k, l]) => `<button class="${view === k ? 'on' : ''}" data-act="view" data-v="${k}">${l}${k === 'central' && alert ? ' <span class="chip late" style="margin-left:auto">!</span>' : ''}</button>`).join('')}</div></details></nav>`;
-  $('#main').innerHTML = `<header class="top top2"><div class="brand"><div class="logo" title="Quadro do Time">${esc(initials(db.team.name) || 'QT')}</div><div style="min-width:0"><b>${esc(db.team.name)}</b>${db.team.slug ? `<div class="code">${esc(db.team.slug)}</div>` : ''}</div></div>${nav}<h1>${esc(title)}</h1><div class="quick"><span class="pl">+</span><input id="quickCard" autocomplete="off" placeholder="Novo card… @pessoa amanhã #iniciativa" aria-label="Criar card rápido"><button class="btn sm ghost more" data-act="quickMore" title="Abrir o formulário completo">Detalhes</button><div class="qinfo" id="qinfo">Enter cria no ${esc(cols()[0].name)} · @pessoa responsável · hoje, amanhã ou dd/mm · #iniciativa ou #PAG-042 · F2 feature da Central · !bug, !spike, !entrega…</div></div><div class="grow"></div><div id="ondeEstou"></div><div class="row" id="chrome">${chromeHtml()}</div>${view === 'backlog' ? '' : '<button class="btn pri" data-act="newCard">+ Card</button>'}</header>
+  $('#main').innerHTML = `<header class="top top2"><div class="brand"><div class="logo" title="Quadro do Time">${esc(initials(db.team.name) || 'QT')}</div><div style="min-width:0"><b>${esc(db.team.name)}</b>${db.team.slug ? `<div class="code">${esc(db.team.slug)}</div>` : ''}</div></div>${nav}<h1>${esc(title)}</h1><div class="quick"><span class="pl">+</span><input id="quickCard" autocomplete="off" placeholder="Novo card… @pessoa amanhã #iniciativa" aria-label="Criar card rápido"><button class="btn sm ghost more" data-act="quickMore" title="Abrir o formulário completo">Detalhes</button><div class="qinfo" id="qinfo">Enter cria no ${esc(cols()[0].name)} · @pessoa responsável · hoje, amanhã ou dd/mm · #iniciativa ou #PAG-042 · F2 feature da Central · !bug, !spike, !entrega…</div></div><div class="grow"></div><div id="ondeEstou"></div><div class="row" id="chrome">${chromeHtml()}</div>${view === 'backlog' || view === 'refine' ? '' : '<button class="btn pri" data-act="newCard">+ Card</button>'}</header>
     ${db.demo ? '<div class="banner">Exemplo com dados fictícios do time Pagamentos. Nada é salvo nem publicado. <button class="btn sm" data-act="home">Voltar ao início</button></div>' : ''}
     ${view === 'board' ? '' : `<h2 class="vtitle">${esc(title)}</h2>`}${body}`;
   document.body.classList.toggle('dense', view === 'board' && !!ui.dense);
   if (sx) { const b = $('#main').querySelector('.board'); if (b) b.scrollLeft = sx; }
-  wireBoard();
+  wireBoard(); wireRefine(); wireDesenhar();
 }
 
 /* ------------------------------- boas-vindas ------------------------------- */
@@ -1762,6 +1801,498 @@ function vSprints() {
     <div class="card"><div class="lbl">Sprints fechadas <span class="n">${closed.length}</span></div>${closed.length ? `<table class="t"><thead><tr><th>Sprint</th><th>Período</th><th>Compromisso</th><th>Cumprido</th><th>Fechados na sprint</th><th>Fechada em</th></tr></thead><tbody>${closed.map(s => `<tr><td>${esc(s.name)}</td><td>${fmtD(s.start)} a ${fmtD(s.end)}</td><td>${s.result?.committed ?? '–'}</td><td>${s.result?.committed ? Math.round(s.result.deliveredCommitted / s.result.committed * 100) + '%' : '–'}</td><td>${s.result?.delivered ?? '–'}</td><td>${fmtDT(s.closedAt)}</td></tr>`).join('')}</tbody></table>` : '<div class="empty">Nenhuma sprint fechada ainda.</div>'}</div></div>`;
 }
 
+/* ------------------------------ Refinamento (2.6) ------------------------------ */
+// Página usada com o time para refinar a demanda: Organizar (Iniciativa › Feature, mover cards entre features),
+// Refinar (tamanho, critérios de aceite, pronto para sprint) e Resumo da sessão. Tudo é dado do time (ADR-0041).
+const READY_PADRAO = ['Critérios de aceite escritos', 'Tamanho combinado', 'Sem dependência aberta'];
+const rCfg = () => db.settings.refinement || (db.settings.refinement = { ready: [...READY_PADRAO], unit: 'cards', cadenceDays: 14, horizon: 3 });
+const R_STEPS = [['org', 'Organizar'], ['ref', 'Refinar'], ['draw', 'Desenhar sprints'], ['plan', 'Planejar a sprint']];
+const rSel = new Set();          // cards selecionados no Organizar
+let rUndo = [];                  // pilha de desfazer da sessão (só nesta aba)
+const fKey = c => c.featureRef ? 'r:' + c.featureRef : c.featureId ? 't:' + c.featureId : '-';
+const rankOf = c => c.rank ?? (1e13 + (c.order || 0));
+const rOpen = c => !c.cancelledAt && !isDone(c) && !c.deleted;
+const rCardsOf = k => activeCards().filter(c => rOpen(c) && fKey(c) === k).sort((a, b) => rankOf(a) - rankOf(b));
+function isReady(c) {
+  const r = c.ready; if (r?.manual === true) return true; if (r?.manual === false) return false;
+  const it = rCfg().ready; return !!it.length && it.every(t => (r?.checks || []).includes(t));
+}
+function rFeatInfo(k) {           // { key, nome, code, time, epic, prazo, aberta } de uma chave de feature
+  if (k === '-') return { key: k, nome: 'Sem feature', code: '', time: false, epic: null };
+  if (k.startsWith('r:')) { const ref = k.slice(2), f = catFeature(ref), e = epicsLive().find(x => x.centralRef === ref.split('.')[0]); return { key: k, nome: f?.name || ref, code: ref, curto: ref.split('.').pop(), time: false, epic: e || null, prazo: f?.due || '', aberta: !f || f.status === 'open', fase: featPhase(f)?.name || '' }; }
+  const f = featById(k.slice(2)); return f ? { key: k, nome: f.name, code: f.id, curto: f.id, time: true, epic: epicById(f.epicId) || null, prazo: f.due || '', aberta: f.status === 'open' } : null;
+}
+function rArvore() {              // iniciativas abertas com as features da Central e do time
+  return epicsLive().filter(e => e.status !== 'done').map(e => {
+    const ci = catInit(e.centralRef), abertas = new Set(activeCards().filter(rOpen).map(fKey));
+    const cen = (ci?.features || []).filter(f => f.status === 'open' || abertas.has('r:' + f.ref)).map(f => 'r:' + f.ref);
+    const tim = epicFeats(e).filter(f => f.status === 'open' || abertas.has('t:' + f.id)).sort((a, b) => (a.rank ?? 1e9) - (b.rank ?? 1e9)).map(f => 't:' + f.id);
+    return { e, ci, feats: [...cen, ...tim].map(rFeatInfo).filter(Boolean) };
+  });
+}
+function rTodasChaves() { return rArvore().flatMap(g => g.feats.map(f => f.key)); }
+function rSessao(criar = false) {  // sessão de refinamento aberta (menos de 12 h), criada na primeira mudança
+  db.refinements ??= [];
+  let s = db.refinements.filter(x => !x.deleted && !x.endedAt && Date.now() - new Date(x.start) < 12 * 3600e3).sort((a, b) => new Date(b.start) - new Date(a.start))[0];
+  if (!s && criar) { db.seq.refine = (db.seq.refine || 0) + 1; s = { id: `REF-${db.seq.refine}`, uid: uid(), start: agoraComFuso(), endedAt: null, people: [], changes: [], notes: '', next: '', upd: Date.now() }; db.refinements.push(s); }
+  return s || null;
+}
+function registrar(kind, text, card = '') { const s = rSessao(true); s.changes.push({ at: agoraComFuso(), kind, text: clip(text, 300), ...(card ? { card } : {}) }); s.upd = Date.now(); }
+function rFoto(label, ids) {       // guarda o estado dos cards antes de mexer, para o Desfazer
+  const s = rSessao(true);
+  rUndo.push({ label, cards: ids.map(id => [id, structuredClone(cardById(id))]).filter(x => x[1]), novos: [], feats: [], n: s.changes.length });
+  if (rUndo.length > 30) rUndo.shift(); return rUndo.at(-1);
+}
+function rDesfazer() {
+  const u = rUndo.pop(); if (!u) { toast('Nada para desfazer nesta sessão.'); return; } document.querySelectorAll('.toast.undo').forEach(x => x.remove());
+  const t = Date.now();
+  for (const [id, snap] of u.cards) { const c = cardById(id); if (!c) continue; for (const k of Object.keys(c)) if (!(k in snap)) delete c[k]; Object.assign(c, snap); c.upd = t; }
+  for (const id of u.novos) { const c = cardById(id); if (c) { c.deleted = true; c.upd = t; } }
+  const s = rSessao(); if (s) { s.changes.length = Math.min(s.changes.length, u.n); s.upd = t; }
+  touch(); toast(`Desfeito: ${u.label}`);
+}
+function rToast(msg) {
+  document.querySelectorAll('.toast.undo').forEach(x => x.remove());
+  const el = document.createElement('div'); el.className = 'toast undo'; el.innerHTML = `${esc(msg)} <button type="button">Desfazer</button>`;
+  el.querySelector('button').onclick = () => { el.remove(); rDesfazer(); }; document.body.appendChild(el); setTimeout(() => el.remove(), 6000);
+}
+function rRotulo(k) { const f = rFeatInfo(k); return !f ? k : k === '-' ? 'Sem feature' : `${f.nome}${f.code ? ' (' + f.code + ')' : ''}`; }
+// Move cards para uma feature (ou para "Sem feature"). Feature não muda de iniciativa; o card muda junto com a feature escolhida.
+function moverParaFeature(ids, k, { antesDe = null, foto = true } = {}) {
+  const cs = ids.map(cardById).filter(c => c && rOpen(c)); if (!cs.length) return 0;
+  const destino = rFeatInfo(k); if (!destino) return 0;
+  const muda = cs.filter(c => fKey(c) !== k);
+  if (foto) rFoto(muda.length ? `${muda.length} card(s) para ${rRotulo(k)}` : 'nova ordem', cs.map(c => c.id));
+  for (const c of muda) {
+    const de = rRotulo(fKey(c)), epAntes = c.epicId;
+    if (k === '-') { c.featureRef = null; c.featureId = null; } else ligarFeature(c, k.slice(2));
+    c.upd = Date.now();
+    registrar('move', `${c.id} ${clip(c.title, 60)}: ${de} → ${rRotulo(k)}${epAntes !== c.epicId ? ` (iniciativa: ${epicById(c.epicId)?.name || 'nenhuma'})` : ''}`, c.id);
+  }
+  rOrdenar(cs.map(c => c.id), k, antesDe);
+  return muda.length;
+}
+function rOrdenar(ids, k, antesDe = null) {   // reescreve a prioridade da lista com os cards na posição pedida
+  const lista = rCardsOf(k).filter(c => !ids.includes(c.id)), mov = ids.map(cardById).filter(Boolean);
+  let i = antesDe ? lista.findIndex(c => c.id === antesDe) : -1; if (i < 0) i = lista.length;
+  lista.splice(i, 0, ...mov);
+  lista.forEach((c, j) => { const r = (j + 1) * 1000; if (c.rank !== r) { c.rank = r; c.upd = Date.now(); } });
+}
+function rPassos() {
+  const s = rSessao(), n = s?.changes.length || 0;
+  return `<div class="rsteps">${R_STEPS.map(([k, l], i) => `<button class="rstep ${ui.rStep === k ? 'on' : ''}" data-act="rStep" data-v="${k}"><i>${i + 1}</i>${l}</button>`).join('<span class="rsep"></span>')}
+    <span class="grow"></span><span class="small muted">${s ? `Sessão de ${fmtD(s.start)} · começou ${new Date(s.start).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} · ${n} mudança(s)` : 'A primeira mudança abre a sessão de refinamento'}</span>
+    <button class="btn sm" data-act="rUndo" ${rUndo.length ? '' : 'disabled'} title="Ctrl+Z">Desfazer</button><button class="btn sm" data-act="rResumo">Resumo</button></div>`;
+}
+function rLinha(c, { sub = false } = {}) {
+  const pts = c.points != null && c.points !== '' ? `<span class="chip line">${esc(c.points)} pt</span>` : '';
+  const ac = c.acceptance?.length ? `<span class="chip" title="Critérios de aceite">${c.acceptance.filter(a => a.done).length}/${c.acceptance.length}</span>` : '';
+  const sp = c.sprintId ? sprintById(c.sprintId) : null;
+  return `<div class="rrow ${rSel.has(c.id) ? 'on' : ''}" draggable="true" data-card="${c.id}" data-act="card" tabindex="0">
+    <span class="hdl" aria-hidden="true">⋮⋮</span><button class="rcb ${rSel.has(c.id) ? 'on' : ''}" data-act="rPick" data-card="${c.id}" aria-label="Selecionar ${esc(c.id)}">${rSel.has(c.id) ? '✓' : ''}</button>${kic(c.kind)}<span class="code muted">${esc(c.id)}</span>
+    <span class="rt">${esc(c.title)}${sub ? `<small>${c.epicId ? esc(clip(epicById(c.epicId)?.name || '', 40)) : 'Sem iniciativa'}</small>` : ''}</span>
+    ${sp && !sub ? `<span class="chip line" title="Sprint">${esc(sp.name)}</span>` : ''}${pts}${sub ? '' : ac}${isReady(c) ? '<span class="chip ok">pronto</span>' : ''}${c.owner && !sub ? avatar(c.owner) : ''}</div>`;
+}
+function vRefine() {
+  ui.rStep ??= 'org';
+  if (!rCfg()) return '';
+  return rPassos() + ({ ref: vRefinar, draw: vDesenhar, plan: vPlanejar }[ui.rStep] || vOrganizar)();
+}
+function vOrganizar() {
+  const arv = rArvore(), chaves = arv.flatMap(g => g.feats.map(f => f.key));
+  if (!ui.rFeat || (ui.rFeat !== '-' && !chaves.includes(ui.rFeat))) ui.rFeat = chaves[0] || '-';
+  for (const id of [...rSel]) { const c = cardById(id); if (!c || !rOpen(c)) rSel.delete(id); }
+  const cont = k => { const cs = rCardsOf(k); return { n: cs.length, p: cs.filter(isReady).length }; };
+  const arvore = arv.map(({ e, ci, feats }) => `<div class="rinit"><span class="${e.centralRef ? 'chip bv code' : 'chip'}">${esc(e.centralRef || 'do time')}</span><b>${esc(e.name)}</b></div>
+      ${feats.map(f => { const q = cont(f.key); return `<button class="rti ${ui.rFeat === f.key ? 'on' : ''}" data-act="rFeat" data-v="${esc(f.key)}" data-rdrop="${esc(f.key)}" title="${esc(f.code ? f.code + ' · ' : '')}${esc(f.nome)}"><span class="dia ${f.time ? 't' : ''}"></span><span class="nm">${esc(f.nome)}</span><span class="${f.time ? 'chip' : 'chip bv code'}">${esc(f.curto)}</span><span class="rd" title="${q.p} de ${q.n} prontos"><i style="width:${q.n ? q.p / q.n * 100 : 0}%"></i></span><span class="n">${q.n}</span></button>`; }).join('')}
+      <button class="rti add" data-act="newFeat" data-epic="${e.id}">+ Feature do time</button>`).join('') || '<div class="empty">Nenhuma iniciativa aberta. Crie a primeira ao lado.</div>';
+  const f = rFeatInfo(ui.rFeat), cs = rCardsOf(ui.rFeat), semF = rCardsOf('-'), selN = rSel.size;
+  return `<div class="rlay">
+    <section class="rpane rtree"><div class="rph"><h3>Iniciativas e features</h3><span class="grow"></span><button class="btn sm" data-act="newEpic">+ Iniciativa do time</button></div><div class="rbody">${arvore}</div></section>
+    <section class="rpane"><div class="rph">${f && ui.rFeat !== '-' ? `<span class="dia ${f.time ? 't' : ''}"></span><h3>${esc(f.nome)}</h3>${f.code ? `<span class="${f.time ? 'chip' : 'chip bv code'}">${esc(f.code)}${f.time ? ' · do time' : ''}</span>` : ''}<span class="small muted">${esc(f.epic?.name || '')} · ${cs.length} card(s)${f.prazo ? ' · prazo ' + fmtD(f.prazo) : ''}</span>` : '<h3>Sem feature</h3>'}<span class="grow"></span>
+      ${f?.time ? `<button class="btn sm ghost" data-act="editFeat" data-id="${esc(f.code)}">Editar feature</button>` : ''}${f && ui.rFeat !== '-' ? `<button class="btn sm" data-act="rNovoCard">+ Card</button>` : ''}</div>
+      <div class="rph rtool"><span class="small">${selN ? `<b>${selN} selecionado(s)</b>` : 'Marque cards para mover, dividir ou juntar'}</span>
+        <button class="btn sm" data-act="rMover" ${selN ? '' : 'disabled'}>Mover para… <span class="faint">(M)</span></button><button class="btn sm" data-act="rDividir" ${selN === 1 ? '' : 'disabled'}>Dividir</button><button class="btn sm" data-act="rJuntar" ${selN > 1 ? '' : 'disabled'}>Juntar</button>${selN ? '<button class="btn sm ghost" data-act="rLimpar">Limpar</button>' : ''}<span class="grow"></span><span class="small faint">Arraste para uma feature à esquerda</span></div>
+      <div class="rbody" data-rlist="${esc(ui.rFeat)}" data-rdrop="${esc(ui.rFeat)}">${cs.map(c => rLinha(c)).join('') || '<div class="empty" style="padding:16px">Nenhum card aberto nesta feature. Arraste cards da coluna "Sem feature" ou de outra feature.</div>'}
+        ${cs.length ? '<p class="small faint" style="padding:10px 14px;margin:0">A ordem é a prioridade dentro da feature: arraste para cima ou para baixo, ou Alt+↑ / Alt+↓ no card selecionado.</p>' : ''}</div></section>
+    <section class="rpane rin" data-rdrop="-" data-rlist="-"><div class="rph"><h3>Sem feature</h3><span class="chip">${semF.length}</span><span class="grow"></span><span class="small faint">entrada</span></div>
+      <div class="rbody">${semF.map(c => rLinha(c, { sub: true })).join('') || '<div class="empty" style="padding:16px">Todos os cards abertos estão numa feature.</div>'}</div>
+      <form class="rnew" data-act="rIdea"><input class="sin" name="t" placeholder="Nova ideia… Enter cria aqui" maxlength="200" autocomplete="off" aria-label="Nova ideia"></form></section></div>`;
+}
+function vRefinar() {
+  const chaves = rTodasChaves(); if (!ui.rFeat || ui.rFeat === '-' || !chaves.includes(ui.rFeat)) ui.rFeat = chaves.find(k => rCardsOf(k).length) || chaves[0] || '';
+  if (!ui.rFeat) return '<div class="card flat muted">Crie uma feature no passo Organizar para começar a refinar.</div>';
+  const f = rFeatInfo(ui.rFeat), cs = rCardsOf(ui.rFeat), i = chaves.indexOf(ui.rFeat), prontos = cs.filter(isReady).length;
+  const pts = cs.reduce((s, c) => s + (Number(c.points) || 0), 0);
+  return `<div class="bar"><span class="small muted">Feature</span><select class="sel" data-act="rFeatSel" style="min-width:300px">${rArvore().map(g => `<optgroup label="${esc(g.e.name)}${g.e.centralRef ? ' · ' + esc(g.e.centralRef) : ''}">${g.feats.map(x => `<option value="${esc(x.key)}" ${x.key === ui.rFeat ? 'selected' : ''}>${esc(x.code ? x.code + ' · ' : '')}${esc(x.nome)} (${rCardsOf(x.key).length})</option>`).join('')}</optgroup>`).join('')}</select>
+      <button class="btn sm" data-act="rFeat" data-v="${esc(chaves[i - 1] || '')}" ${i > 0 ? '' : 'disabled'}>‹ anterior</button><button class="btn sm" data-act="rFeat" data-v="${esc(chaves[i + 1] || '')}" ${i < chaves.length - 1 ? '' : 'disabled'}>próxima ›</button></div>
+    <div class="rpane"><div class="rph"><span class="dia ${f.time ? 't' : ''}"></span><h3>${esc(f.nome)}</h3>${f.code ? `<span class="${f.time ? 'chip' : 'chip bv code'}">${esc(f.code)}</span>` : ''}<span class="small muted">${f.prazo ? 'prazo ' + fmtD(f.prazo) : 'sem prazo'}${f.fase ? ' · fase ' + esc(f.fase) : ''}</span><span class="grow"></span><span class="rd big"><i style="width:${cs.length ? prontos / cs.length * 100 : 0}%"></i></span><span class="small"><b>${prontos} de ${cs.length}</b> prontos${pts ? ` · ${fmtN(pts)} pt` : ''}</span></div>
+      <table class="t rtab"><thead><tr><th style="width:30px"></th><th>Card</th><th style="width:110px">Tamanho</th><th style="width:110px">Critérios</th><th style="width:150px">Pronto para sprint</th><th style="width:50px"></th></tr></thead><tbody>
+      ${cs.map(c => { const ac = c.acceptance || [], falta = rCfg().ready.filter(t => !(c.ready?.checks || []).includes(t)).length; return `<tr class="click" data-act="card" data-card="${c.id}"><td>${kic(c.kind)}</td><td><span class="code muted">${esc(c.id)}</span> ${esc(c.title)}</td>
+        <td><input class="sin rpts" type="number" min="0" step="0.5" data-rpts="${c.id}" value="${c.points ?? ''}" placeholder="?" aria-label="Pontos de ${esc(c.id)}"> <span class="small muted">pt</span></td>
+        <td>${ac.length ? `${ac.filter(a => a.done).length} de ${ac.length}${ac.every(a => a.done) ? ' ✓' : ''}` : '<span class="faint">nenhum</span>'}</td>
+        <td>${isReady(c) ? '<span class="chip ok">✓ pronto</span>' : c.ready?.manual === false ? '<span class="chip late">não está pronto</span>' : `<span class="chip attn">${rCfg().ready.length ? `falta ${falta} item(ns)` : 'não'}</span>`}</td><td>${c.owner ? avatar(c.owner) : '<span class="faint">–</span>'}</td></tr>`; }).join('')}
+      <tr><td colspan="6"><button class="btn sm ghost" data-act="rNovoCard">+ Card nesta feature</button></td></tr></tbody></table>
+      <p class="small faint" style="padding:0 14px 12px">Clique no card para escrever os critérios de aceite e marcar o "pronto para sprint". Os itens do pronto são do time: Ajustes › Refinamento.</p></div>`;
+}
+function refineCardHtml(c) {      // blocos do refinamento dentro do painel do card
+  const ac = c.acceptance || [], it = rCfg().ready, ch = c.ready?.checks || [];
+  return `<div class="sec-t">Critérios de aceite <span class="faint" style="text-transform:none;letter-spacing:0;font-weight:500">ficam no time</span></div>
+    <div class="racc">${ac.map(a => `<div class="row"><button class="rcb ${a.done ? 'on ok' : ''}" data-act="rAccTog" data-card="${c.id}" data-id="${a.id}" aria-label="Marcar critério">${a.done ? '✓' : ''}</button><span class="grow ${a.done ? 'muted' : ''}">${esc(a.text)}</span><button class="btn sm ghost" data-act="rAccDel" data-card="${c.id}" data-id="${a.id}" aria-label="Remover critério">×</button></div>`).join('')}
+    <form class="mini" data-act="rAccAdd" data-card="${c.id}"><input class="sin" name="t" placeholder="+ Critério… Enter adiciona" maxlength="200" autocomplete="off"></form></div>
+    <div class="sec-t">Pronto para sprint ${isReady(c) ? '<span class="chip ok">pronto</span>' : ''}</div>
+    <div class="racc">${it.map(t => `<div class="row"><button class="rcb ${ch.includes(t) ? 'on ok' : ''}" data-act="rRdy" data-card="${c.id}" data-v="${esc(t)}" aria-label="${esc(t)}">${ch.includes(t) ? '✓' : ''}</button><span>${esc(t)}</span></div>`).join('') || '<div class="small muted">O time não definiu itens. Defina em Ajustes › Refinamento ou marque à mão.</div>'}
+      <div class="row small" style="margin-top:6px"><span class="muted">À mão:</span><div class="pills">${[['', 'pelos itens'], ['1', 'pronto'], ['0', 'não está pronto']].map(([v, l]) => `<button class="${String(c.ready?.manual === true ? '1' : c.ready?.manual === false ? '0' : '') === v ? 'on' : ''}" data-act="rRdyMan" data-card="${c.id}" data-v="${v}">${l}</button>`).join('')}</div></div></div>`;
+}
+function rMarcarPronto(c, antes) { const agora = isReady(c); if (agora && !antes) { c.ready.at = agoraComFuso(); registrar('ready', `${c.id} ${clip(c.title, 60)} ficou pronto para sprint`, c.id); } }
+
+/* --- formulários do refinamento: duas colunas, sem prompt() (ADR-0020) --- */
+function rFeatOpts(sel, vazio = 'Sem feature') {
+  return `<option value="-" ${sel === '-' ? 'selected' : ''}>${esc(vazio)}</option>` + rArvore().map(g => `<optgroup label="${esc(g.e.name)}${g.e.centralRef ? ' · ' + esc(g.e.centralRef) : ' · do time'}">${g.feats.map(x => `<option value="${esc(x.key)}" ${x.key === sel ? 'selected' : ''}>${x.time ? '◆ ' : ''}${esc(x.code ? x.code + ' · ' : '')}${esc(x.nome)}</option>`).join('')}</optgroup>`).join('');
+}
+function rSprintOpts(sel, manter = true) {
+  const sps = db.sprints.filter(s => !s.deleted && s.state !== 'closed').sort((a, b) => a.start.localeCompare(b.start));
+  return `${manter ? `<option value="=" ${sel === '=' ? 'selected' : ''}>Manter a sprint de cada card</option>` : ''}<option value="" ${sel === '' ? 'selected' : ''}>Sem sprint</option>${sps.map(s => `<option value="${s.id}" ${sel === s.id ? 'selected' : ''}>${esc(s.name)}${s.state === 'active' ? ' (em andamento)' : ''}</option>`).join('')}`;
+}
+let rmv = null;
+function rMoverModal() {
+  const ids = [...rSel].filter(id => rOpen(cardById(id) || {})); if (!ids.length) return;
+  rmv = { ids, k: ui.rStep === 'org' && ui.rFeat ? ui.rFeat : '-', sprint: '=' }; rMoverRender();
+}
+function rMoverRender() {
+  const cs = rmv.ids.map(cardById), dest = rFeatInfo(rmv.k), mudaIni = cs.filter(c => dest?.epic && c.epicId !== dest.epic.id).length;
+  modal(`<form class="tform" id="rmvForm" style="display:flex;flex-direction:column;min-height:0;flex:1"><div class="tf-grid">
+    <div class="tf-main"><div class="tf-h">Mover ${cs.length} card(s)</div>
+      <div class="cl">${cs.map(c => `<div class="ci" style="gap:8px">${kic(c.kind)}<span class="code muted">${c.id}</span><span class="t" style="flex:1;min-width:0">${esc(c.title)}</span><span class="faint">${esc(rRotulo(fKey(c)))}</span></div>`).join('')}</div></div>
+    <aside class="tf-side"><div class="tf-h">Para onde</div>
+      <div class="field"><label>Feature</label><select id="rmvK">${rFeatOpts(rmv.k)}</select><div class="hint">Da Central (código) ou do time (◆). A feature não muda de iniciativa; o card vai para a iniciativa dela.</div></div>
+      <div class="field"><label>Sprint</label><select id="rmvS">${rSprintOpts(rmv.sprint)}</select></div>
+      <div class="tf-sum"><b>${esc(rRotulo(rmv.k))}</b><div class="ln"><span>Iniciativa</span><span>${dest?.epic ? esc(dest.epic.name) : 'sem mudança'}</span></div>${mudaIni ? `<div class="ln"><span>Atenção</span><span>${mudaIni} card(s) mudam de iniciativa</span></div>` : ''}</div></aside></div>
+    <div class="macts"><span class="small faint" style="margin-right:auto">Ctrl+Enter move · Esc fecha</span><button type="button" class="btn" data-act="close">Cancelar</button><button class="btn pri">Mover ${cs.length} card(s)</button></div></form>`, 'wide');
+  $('#rmvK').addEventListener('change', ev => { rmv.k = ev.target.value; rMoverRender(); });
+  $('#rmvS').addEventListener('change', ev => { rmv.sprint = ev.target.value; });
+  const ir = () => { const n = moverParaFeature(rmv.ids, rmv.k); if (rmv.sprint !== '=') for (const id of rmv.ids) { const c = cardById(id); if (c.sprintId !== (rmv.sprint || null)) { rUndo.at(-1).cards.some(x => x[0] === id) || rUndo.at(-1).cards.push([id, structuredClone(c)]); c.sprintId = rmv.sprint || null; c.upd = Date.now(); } } rSel.clear(); closeModal(); touch(); rToast(`${n} card(s) movido(s) para ${rRotulo(rmv.k)}`); };
+  $('#rmvForm').addEventListener('keydown', ev => { if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) { ev.preventDefault(); ir(); } });
+  $('#rmvForm').addEventListener('submit', ev => { ev.preventDefault(); ir(); });
+}
+let rdv = null;
+function rDividirModal() {
+  const c = cardById([...rSel][0]); if (!c || !rOpen(c)) return;
+  rdv = { id: c.id, linhas: `${c.title} (parte 1)\n${c.title} (parte 2)`, crit: 'todos', orig: 'primeiro', k: fKey(c), sprint: c.sprintId || '', owner: c.owner || '', pts: '' };
+  rDividirRender(); setTimeout(() => $('#rdvL')?.focus(), 30);
+}
+function rDividirRender() {
+  const c = cardById(rdv.id), n = rdv.linhas.split('\n').map(s => s.trim()).filter(Boolean).length;
+  const seg = (k, ops) => `<div class="sg">${ops.map(([v, l]) => `<button type="button" class="${rdv[k] === v ? 'on' : ''}" data-rdv="${k}" data-v="${v}">${l}</button>`).join('')}</div>`;
+  modal(`<form class="tform" id="rdvForm" style="display:flex;flex-direction:column;min-height:0;flex:1"><div class="tf-grid">
+    <div class="tf-main"><div class="tf-h">Dividir <span class="code">${esc(c.id)}</span> <span class="small muted" style="text-transform:none;letter-spacing:0">${esc(clip(c.title, 60))}${c.points != null ? ' · ' + esc(c.points) + ' pt' : ''}</span></div>
+      <div class="field"><label>Novos cards <span class="faint">(um por linha)</span></label><textarea id="rdvL" rows="6">${esc(rdv.linhas)}</textarea></div>
+      <div class="field"><label>Critérios de aceite</label>${seg('crit', [['todos', 'copiar para todos'], ['primeiro', 'deixar no primeiro'], ['nao', 'não copiar']])}</div>
+      <div class="field"><label>O card original</label>${seg('orig', [['primeiro', 'vira o primeiro'], ['cancela', 'é cancelado']])}<div class="hint">O histórico e as métricas do ${esc(c.id)} continuam com ele.</div></div></div>
+    <aside class="tf-side"><div class="tf-h">Detalhes</div>
+      <div class="field"><label>Feature</label><select id="rdvK">${rFeatOpts(rdv.k)}</select></div>
+      <div class="field"><label>Sprint</label><select id="rdvS">${rSprintOpts(rdv.sprint, false)}</select></div>
+      <div class="field"><label>Pontos <span class="faint">(um por card, separados por vírgula; opcional)</span></label><input id="rdvP" value="${esc(rdv.pts)}" placeholder="${c.points != null ? 'ex.: 3, 2' : 'ex.: 2, 1'}"></div>
+      <div class="field"><label>Responsável</label><select id="rdvO"><option value="">Ninguém</option>${activePeople().map(p => `<option ${normName(p.name) === normName(rdv.owner) ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select></div>
+      <div class="tf-sum"><b>${n} card(s)</b><div class="ln"><span>Feature</span><span>${esc(rRotulo(rdv.k))}</span></div><div class="ln"><span>Original</span><span>${rdv.orig === 'primeiro' ? 'vira o primeiro' : 'cancelado'}</span></div></div></aside></div>
+    <div class="macts"><span class="small faint" style="margin-right:auto">Ctrl+Enter divide · Esc fecha</span><button type="button" class="btn" data-act="close">Voltar</button><button class="btn pri" ${n >= 2 || (n >= 1 && rdv.orig === 'cancela') ? '' : 'disabled'}>Dividir em ${n} card(s)</button></div></form>`, 'wide');
+  const d = $('#dlg'), ler = () => { rdv.linhas = $('#rdvL').value; rdv.pts = $('#rdvP').value; rdv.owner = $('#rdvO').value; rdv.sprint = $('#rdvS').value; rdv.k = $('#rdvK').value; };
+  d.querySelectorAll('[data-rdv]').forEach(b => b.addEventListener('click', () => { ler(); rdv[b.dataset.rdv] = b.dataset.v; rDividirRender(); }));
+  ['#rdvK', '#rdvS', '#rdvO'].forEach(s => $(s).addEventListener('change', () => { ler(); rDividirRender(); }));
+  $('#rdvL').addEventListener('input', () => { rdv.linhas = $('#rdvL').value; const k = rdv.linhas.split('\n').map(x => x.trim()).filter(Boolean).length, bt = d.querySelector('#rdvForm button.pri'); bt.textContent = `Dividir em ${k} card(s)`; bt.disabled = !(k >= 2 || (k >= 1 && rdv.orig === 'cancela')); d.querySelector('.tf-sum b').textContent = `${k} card(s)`; });
+  const ir = () => { ler(); const r = dividirCard(rdv); if (r) { rSel.clear(); closeModal(); touch(); rToast(`${c.id} dividido em ${r.length} card(s)`); } };
+  $('#rdvForm').addEventListener('keydown', ev => { if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) { ev.preventDefault(); ir(); } });
+  $('#rdvForm').addEventListener('submit', ev => { ev.preventDefault(); ir(); });
+}
+function dividirCard(o) {
+  const c = cardById(o.id); const linhas = String(o.linhas || '').split('\n').map(s => clip(s.trim(), 200)).filter(Boolean);
+  if (!c || !linhas.length || (linhas.length < 2 && o.orig !== 'cancela')) { toast('Escreva pelo menos dois cards, um por linha.'); return null; }
+  const pts = String(o.pts || '').split(/[;,]/).map(s => s.trim()).map(s => s === '' ? null : Number(s.replace(',', '.'))), u = rFoto(`dividir ${c.id}`, [c.id]);
+  const col = colIdx(c.col) <= colIdx(db.settings.commitCol) ? c.col : db.settings.commitCol, crit = (i) => o.crit === 'nao' || (o.crit === 'primeiro' && i > 0) ? [] : (c.acceptance || []).map(a => ({ ...a, id: uid(), done: false }));
+  const out = []; let i0 = 0;
+  if (o.orig === 'primeiro') { c.title = linhas[0]; if (pts[0] != null && !isNaN(pts[0])) c.points = pts[0]; if (o.owner !== undefined) c.owner = o.owner; c.upd = Date.now(); out.push(c); i0 = 1; }
+  const ids = [];
+  for (let i = i0; i < linhas.length; i++) {
+    const n = novoCard({ title: linhas[i], kind: c.kind, epicId: c.epicId, owner: o.owner ?? c.owner, col, sprintId: o.sprint || null, points: pts[i] != null && !isNaN(pts[i]) ? pts[i] : null });
+    n.acceptance = crit(i); n.splitFrom = c.id; n.rank = (c.rank ?? 0) + i; n.link = c.link || ''; ids.push(n.id); u.novos.push(n.id); out.push(n);
+    if (o.k && o.k !== '-') ligarFeature(n, o.k.slice(2));
+  }
+  if (o.orig === 'primeiro') { if (o.k && o.k !== fKey(c)) { if (o.k === '-') { c.featureRef = null; c.featureId = null; } else ligarFeature(c, o.k.slice(2)); } c.sprintId = o.sprint || null; if (o.crit === 'nao') c.acceptance = []; }
+  else { c.cancelledAt = agoraComFuso(); c.cancelReason = `dividido em ${ids.join(', ')}`; if (c.blocked) desbloquear(c); }
+  c.splitInto = [...(c.splitInto || []), ...ids]; c.upd = Date.now();
+  registrar('split', `${c.id} ${clip(c.title, 60)} dividido em ${[...(o.orig === 'primeiro' ? [c.id] : []), ...ids].join(', ')}`, c.id);
+  return out;
+}
+let rjn = null;
+function rJuntarModal() {
+  const ids = [...rSel].filter(id => rOpen(cardById(id) || {})); if (ids.length < 2) return;
+  rjn = { ids, fica: ids[0], somar: true }; rJuntarRender();
+}
+function rJuntarRender() {
+  const cs = rjn.ids.map(cardById), fica = cardById(rjn.fica), soma = cs.reduce((s, c) => s + (Number(c.points) || 0), 0);
+  modal(`<form class="tform" id="rjnForm" style="display:flex;flex-direction:column;min-height:0;flex:1"><div class="tf-grid">
+    <div class="tf-main"><div class="tf-h">Juntar ${cs.length} cards</div>
+      <div class="field"><label>Qual card fica</label><div class="pick" role="radiogroup">${cs.map(c => `<button type="button" class="${rjn.fica === c.id ? 'on' : ''}" data-rjn="${c.id}"><span class="rd"></span><span></span><span class="nm"><span class="code muted">${c.id}</span> ${esc(c.title)}<small>${esc(rRotulo(fKey(c)))}${c.points != null ? ' · ' + esc(c.points) + ' pt' : ''}</small></span></button>`).join('')}</div></div></div>
+    <aside class="tf-side"><div class="tf-h">O que acontece</div>
+      <div class="small">Os outros ${cs.length - 1} card(s) são cancelados com o motivo "juntado em ${esc(rjn.fica)}". Os critérios de aceite deles passam para o ${esc(rjn.fica)}.</div>
+      <label class="row small"><input type="checkbox" id="rjnS" ${rjn.somar ? 'checked' : ''}> Somar os pontos (${fmtN(soma)} pt)</label>
+      <div class="tf-sum"><b>${esc(fica.title)}</b><div class="ln"><span>Feature</span><span>${esc(rRotulo(fKey(fica)))}</span></div></div></aside></div>
+    <div class="macts"><span class="small faint" style="margin-right:auto">Ctrl+Enter junta · Esc fecha</span><button type="button" class="btn" data-act="close">Voltar</button><button class="btn pri">Juntar em ${esc(rjn.fica)}</button></div></form>`, 'wide');
+  $('#dlg').querySelectorAll('[data-rjn]').forEach(b => b.addEventListener('click', () => { rjn.fica = b.dataset.rjn; rJuntarRender(); }));
+  $('#rjnS').addEventListener('change', ev => { rjn.somar = ev.target.checked; });
+  const ir = () => { juntarCards(rjn.ids, rjn.fica, rjn.somar); rSel.clear(); closeModal(); touch(); rToast(`${rjn.ids.length} cards juntados em ${rjn.fica}`); };
+  $('#rjnForm').addEventListener('keydown', ev => { if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) { ev.preventDefault(); ir(); } });
+  $('#rjnForm').addEventListener('submit', ev => { ev.preventDefault(); ir(); });
+}
+function juntarCards(ids, ficaId, somar = true) {
+  const fica = cardById(ficaId), outros = ids.filter(id => id !== ficaId).map(cardById).filter(c => c && rOpen(c)); if (!fica || !outros.length) return 0;
+  rFoto(`juntar em ${ficaId}`, ids);
+  const vistos = new Set((fica.acceptance || []).map(a => normName(a.text)));
+  fica.acceptance = [...(fica.acceptance || [])];
+  for (const c of outros) {
+    for (const a of c.acceptance || []) if (!vistos.has(normName(a.text))) { vistos.add(normName(a.text)); fica.acceptance.push({ ...a, id: uid() }); }
+    if (somar && c.points != null) fica.points = (Number(fica.points) || 0) + Number(c.points);
+    c.cancelledAt = agoraComFuso(); c.cancelReason = `juntado em ${ficaId}`; c.mergedInto = ficaId; if (c.blocked) desbloquear(c); c.upd = Date.now();
+  }
+  fica.upd = Date.now();
+  registrar('join', `${outros.map(c => c.id).join(', ')} juntado(s) em ${ficaId} ${clip(fica.title, 60)}`, ficaId);
+  return outros.length;
+}
+/* Resumo da sessão: o que mudou, para copiar no Teams; fica guardado no Quadro */
+function rResumoDados(s) {
+  const ini = new Date(s.start), novo = x => x.createdAt && new Date(x.createdAt) >= ini;
+  return { s, feats: featsLive().filter(novo), epics: epicsLive().filter(novo), ideias: live().filter(c => novo(c) && !c.splitFrom), prontos: activeCards().filter(c => c.ready?.at && new Date(c.ready.at) >= ini && isReady(c)),
+    moves: s.changes.filter(x => x.kind === 'move'), outros: s.changes.filter(x => ['split', 'join', 'size'].includes(x.kind)) };
+}
+function rResumoTexto(s) {
+  const d = rResumoDados(s), L = [];
+  L.push(`Refinamento de ${fmtD(s.start)} · ${db.team.name}`); if (s.people?.length) L.push(`Participantes: ${s.people.join(', ')}`); L.push('');
+  if (d.epics.length) { L.push('Iniciativas novas:'); d.epics.forEach(e => L.push(`- ${e.name}`)); L.push(''); }
+  if (d.feats.length) { L.push('Features novas:'); d.feats.forEach(f => L.push(`- ${f.id} ${f.name} (${epicById(f.epicId)?.name || ''})${epicById(f.epicId)?.centralRef ? '' : ' · o gestor concilia'}`)); L.push(''); }
+  if (d.moves.length) { L.push('Cards movidos entre features:'); d.moves.forEach(m => L.push(`- ${m.text}`)); L.push(''); }
+  if (d.outros.length) { L.push('Divididos, juntados e estimados:'); d.outros.forEach(m => L.push(`- ${m.text}`)); L.push(''); }
+  L.push(`Prontos para sprint nesta sessão: ${d.prontos.length}`); if (d.ideias.length) L.push(`Cards novos: ${d.ideias.length}`);
+  if (s.notes?.trim()) { L.push(''); L.push('Decisões e pendências:'); L.push(s.notes.trim()); }
+  if (s.next?.trim()) { L.push(''); L.push(`Próximo refinamento: ${s.next.trim()}`); }
+  return L.join('\n');
+}
+function rResumoModal() {
+  const s = rSessao() || db.refinements?.filter(x => !x.deleted).sort((a, b) => new Date(b.start) - new Date(a.start))[0];
+  if (!s) { toast('Ainda não houve mudança nesta sessão de refinamento.'); return; }
+  const d = rResumoDados(s), fim = s.endedAt ? new Date(s.endedAt) : new Date(), hh = x => new Date(x).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  const k = (n, l) => `<div class="kpi"><b>${n}</b><span>${l}</span></div>`;
+  modal(`<div class="tf-grid" style="flex:1;min-height:0"><div class="tf-main">
+      <div class="tf-h">Refinamento de ${fmtD(s.start)} <span class="small muted" style="text-transform:none;letter-spacing:0">${hh(s.start)} a ${hh(fim)}${s.endedAt ? ' · encerrado' : ''}</span></div>
+      <div class="kpis" style="margin:0">${k(d.feats.length, 'features novas')}${k(d.moves.length, 'cards movidos')}${k(d.prontos.length, 'prontos para sprint')}${k(d.outros.length, 'divididos, juntados, estimados')}</div>
+      ${d.feats.length || d.epics.length ? `<div class="field"><label>Novas</label><div class="small" style="line-height:1.7">${d.epics.map(e => `+ iniciativa ${esc(e.name)}`).concat(d.feats.map(f => `+ ${esc(f.id)} ${esc(f.name)} <span class="muted">(${esc(epicById(f.epicId)?.name || '')}${epicById(f.epicId)?.centralRef ? '' : ': o gestor concilia'})</span>`)).join('<br>')}</div></div>` : ''}
+      <div class="field"><label>Cards movidos entre features</label><div class="small" style="line-height:1.7">${d.moves.map(m => esc(m.text)).join('<br>') || '<span class="faint">nenhum</span>'}</div></div>
+      ${d.outros.length ? `<div class="field"><label>Divididos, juntados e estimados</label><div class="small" style="line-height:1.7">${d.outros.map(m => esc(m.text)).join('<br>')}</div></div>` : ''}</div>
+    <aside class="tf-side"><div class="tf-h">Para fechar</div>
+      <div class="field"><label>Quem participou</label><div class="who">${activePeople().map(p => `<button type="button" class="${(s.people || []).includes(p.name) ? 'on' : ''}" data-rpart="${esc(p.name)}">${avatar(p.name)}${esc(p.name.split(' ')[0])}</button>`).join('')}</div></div>
+      <div class="field"><label>Decisões e pendências</label><textarea id="rsN" rows="6" placeholder="O que ficou combinado, quem leva o quê…">${esc(s.notes || '')}</textarea></div>
+      <div class="field"><label>Próximo refinamento</label><input id="rsX" value="${esc(s.next || '')}" placeholder="ex.: 03/12 às 14:00"></div>
+      ${d.feats.some(f => !epicById(f.epicId)?.centralRef) || d.feats.length ? '<div class="hint">Features criadas pelo time aparecem na Central para o gestor conciliar.</div>' : ''}</aside></div>
+    <div class="macts"><button type="button" class="btn" data-act="rTxt" style="margin-right:auto">Baixar .txt</button><button type="button" class="btn" data-act="close">${s.endedAt ? 'Fechar' : 'Continuar refinando'}</button><button type="button" class="btn pri" data-act="rEncerrar">${s.endedAt ? 'Copiar para o Teams' : 'Copiar para o Teams e encerrar'}</button></div>`, 'wide');
+  const dl = $('#dlg'); dl.dataset.rsess = s.id;
+  dl.querySelectorAll('[data-rpart]').forEach(b => b.addEventListener('click', () => { const n = b.dataset.rpart; s.people = (s.people || []).includes(n) ? s.people.filter(x => x !== n) : [...(s.people || []), n]; s.upd = Date.now(); b.classList.toggle('on'); scheduleSave(); }));
+  $('#rsN').addEventListener('input', ev => { s.notes = clip(ev.target.value, 3000); s.upd = Date.now(); scheduleSave(); });
+  $('#rsX').addEventListener('input', ev => { s.next = clip(ev.target.value, 80); s.upd = Date.now(); scheduleSave(); });
+}
+/* --- Refinamento 2.7: Desenhar sprints e Planejar a sprint --- */
+const rSprintsAbertas = () => db.sprints.filter(s => !s.deleted && s.state !== 'closed').sort((a, b) => (a.state === 'active' ? -1 : 0) - (b.state === 'active' ? -1 : 0) || a.start.localeCompare(b.start));
+const rUnidade = () => rCfg().unit === 'points' ? 'points' : 'cards';
+const rPeso = c => rUnidade() === 'points' ? (Number(c.points) || 0) : 1;
+function rVazao() {   // média das 3 últimas sprints fechadas, em cards ou pontos
+  const fs = db.sprints.filter(s => !s.deleted && s.state === 'closed' && s.result).sort((a, b) => b.start.localeCompare(a.start)).slice(0, 3);
+  if (!fs.length) return null;
+  const v = s => rUnidade() === 'points' ? (s.deliveredIds || []).map(cardById).filter(Boolean).reduce((t, c) => t + (Number(c.points) || 0), 0) : s.result.delivered;
+  return fs.reduce((t, s) => t + v(s), 0) / fs.length;
+}
+function rCapacidade(s) { const c = s.capacity; if (c && c.value != null && (c.unit || 'cards') === rUnidade()) return Number(c.value); const v = rVazao(); return v == null ? null : Math.round(v * 10) / 10; }
+function rCarga(s) { return activeCards().filter(c => c.sprintId === s.id && !c.cancelledAt && (!isDone(c) || s.state === 'active')).reduce((t, c) => t + rPeso(c), 0); }
+const rUnTxt = () => rUnidade() === 'points' ? 'pt' : 'cards';
+// Previsão da feature pelo desenho das sprints: fim da última sprint com card aberto dela.
+function rPrevisao(k) {
+  const cs = rCardsOf(k); if (!cs.length) return null;
+  const abertas = new Map(rSprintsAbertas().map(s => [s.id, s]));
+  const comS = cs.filter(c => abertas.has(c.sprintId)), sem = cs.length - comS.length;
+  const ultimo = comS.map(c => abertas.get(c.sprintId)).sort((a, b) => b.end.localeCompare(a.end))[0];
+  const fimDesenho = rSprintsAbertas().map(s => s.end).sort().at(-1);
+  if (sem) return { end: null, depois: fimDesenho || null, sem, ultimo };
+  return { end: ultimo.end, sprint: ultimo, sem: 0 };
+}
+function rPrevChip(k) {
+  const p = rPrevisao(k), f = rFeatInfo(k); if (!p) return '<span class="faint small">sem cards abertos</span>';
+  const prazo = f?.prazo, fim = p.end || p.depois, txt = p.end ? `fim da ${esc(p.sprint.name.replace(/^Sprint\s*/i, ''))} · ${fmtD(p.end)}` : p.depois ? `depois de ${fmtD(p.depois)}` : 'sem sprint';
+  const cls = !prazo ? '' : p.end ? (p.end > prazo ? 'late' : addDays(p.end, 3) > prazo ? 'attn' : 'ok') : (p.depois && p.depois >= prazo ? 'late' : 'attn');
+  const dif = prazo && fim ? Math.round((parseYmd(fim) - parseYmd(prazo)) / DAY) : null;
+  return `<span class="chip ${cls}">${txt}</span><div class="small muted">${prazo ? `prazo ${fmtD(prazo)}${dif > 0 ? ` · ${dif} dia(s) depois` : ' ✓'}` : f?.time ? 'sem prazo' : 'sem prazo da Central'}${p.sem ? ` · ${p.sem} card(s) sem sprint` : ''}</div>`;
+}
+function vDesenhar() {
+  const cfg = rCfg(), abertas = rSprintsAbertas(), ativa = abertas.find(s => s.state === 'active'), plan = abertas.filter(s => s.state === 'planned').slice(0, Math.max(1, cfg.horizon || 3));
+  const colsS = [...(ativa ? [ativa] : []), ...plan], keys = [...rTodasChaves().filter(k => rCardsOf(k).length), ...(rCardsOf('-').length ? ['-'] : [])];
+  const pill = c => `<span class="rpill ${isReady(c) ? '' : 'nr'}" draggable="true" data-card="${c.id}" data-act="card" title="${esc(c.title)}${isReady(c) ? '' : ' · não está pronto'}">${KIND_IC[c.kind] || '◧'} ${esc(c.id)}${rUnidade() === 'points' && c.points != null ? ` · ${esc(c.points)}` : ''}</span>`;
+  const head = colsS.map(s => { const cap = rCapacidade(s), carga = rCarga(s), over = cap != null && carga > cap; return `<div class="rgh"><b>${esc(s.name)}</b>${s.state === 'active' ? ' <span class="chip">em andamento</span>' : ''}<div class="small muted">${fmtD(s.start)} a ${fmtD(s.end)} · ${fmtN(carga)}${cap != null ? ` de ${fmtN(cap)}` : ''} ${rUnTxt()}</div>${cap != null ? `<div class="rcap ${over ? 'over' : ''}"><i style="width:${Math.min(100, cap ? carga / cap * 100 : 0)}%"></i></div>` : ''}</div>`; }).join('');
+  const linhas = keys.map(k => { const f = rFeatInfo(k), cs = rCardsOf(k); return `<div class="rgf"><b>${esc(f.nome)}</b><div class="small muted">${f.code ? `<span class="${f.time ? 'chip' : 'chip bv code'}">${esc(f.curto)}</span> ` : ''}${esc(f.epic?.name || '')}</div></div>
+      ${colsS.map(s => `<div class="rgc ${s.state === 'active' ? 'act' : ''}" data-rsp="${s.id}">${cs.filter(c => c.sprintId === s.id).map(pill).join('')}</div>`).join('')}
+      <div class="rgc" data-rsp="">${cs.filter(c => !colsS.some(s => s.id === c.sprintId)).map(pill).join('')}</div><div class="rgp">${k === '-' ? '' : rPrevChip(k)}</div>`; }).join('');
+  const over = colsS.filter(s => { const c = rCapacidade(s); return s.state === 'planned' && c != null && rCarga(s) > c; });
+  const v = rVazao();
+  return `<div class="bar"><span class="small muted">Capacidade</span><div class="sg"><button class="${rUnidade() === 'cards' ? 'on' : ''}" data-act="rUnit" data-v="cards">cards (vazão)</button><button class="${rUnidade() === 'points' ? 'on' : ''}" data-act="rUnit" data-v="points">pontos</button></div>
+      <span class="small muted">${v == null ? 'Sem sprint fechada ainda: informe a capacidade em Planejar a sprint.' : `Vazão média das últimas sprints: ${fmtN(Math.round(v * 10) / 10)} ${rUnTxt()}`}</span><span class="grow"></span><button class="btn sm" data-act="rNovaSprint">+ Sprint</button></div>
+    ${colsS.length ? `<div class="rpane"><div class="rgrid" style="grid-template-columns:minmax(180px,230px) repeat(${colsS.length},minmax(150px,1fr)) minmax(110px,150px) minmax(150px,190px)">
+      <div class="rgh lbl">Feature</div>${head}<div class="rgh lbl">Mais tarde</div><div class="rgh lbl">Previsão × prazo</div>${linhas || `<div class="empty" style="grid-column:1/-1;padding:16px">Nenhum card aberto.</div>`}</div></div>
+    <div class="row" style="margin-top:12px">${over.map(s => `<div class="banner warn" style="margin:0">${esc(s.name)} passou da capacidade (${fmtN(rCarga(s))} de ${fmtN(rCapacidade(s))} ${rUnTxt()}).</div>`).join('')}<div class="banner" style="margin:0">Arraste os cards entre as sprints. Card tracejado ainda não está pronto. As previsões vão para a Central no próximo backlog publicado.</div></div>`
+    : `<div class="card flat">Nenhuma sprint planejada. <button class="btn sm pri" data-act="rNovaSprint">+ Sprint</button></div>`}`;
+}
+function vPlanejar() {
+  const plan = db.sprints.filter(s => !s.deleted && s.state === 'planned').sort((a, b) => a.start.localeCompare(b.start)), ativa = activeSprint();
+  if (!ui.rPlan || !plan.some(s => s.id === ui.rPlan)) ui.rPlan = plan[0]?.id || '';
+  const s = sprintById(ui.rPlan);
+  if (!s) return `<div class="card flat">Nenhuma sprint planejada. <button class="btn sm pri" data-act="rNovaSprint">+ Sprint</button></div>`;
+  const na = activeCards().filter(c => c.sprintId === s.id && rOpen(c)).sort((a, b) => rankOf(a) - rankOf(b)), fora = activeCards().filter(c => rOpen(c) && isReady(c) && c.sprintId !== s.id && !(ativa && c.sprintId === ativa.id)).sort((a, b) => rankOf(a) - rankOf(b));
+  const cap = rCapacidade(s), carga = rCarga(s), naoP = na.filter(c => !isReady(c)), feats = [...new Set(na.map(fKey).filter(k => k !== '-'))].map(k => rFeatInfo(k)?.code).filter(Boolean);
+  const dias = Math.round((parseYmd(s.end) - parseYmd(s.start)) / DAY) + 1;
+  const lin = (c, dentro) => `<div class="rrow" data-card="${c.id}" data-act="card">${kic(c.kind)}<span class="code muted">${esc(c.id)}</span><span class="rt">${esc(c.title)}</span>${(() => { const f = rFeatInfo(fKey(c)); return f && f.code ? `<span class="${f.time ? 'chip' : 'chip bv code'}">${esc(f.curto)}</span>` : ''; })()}${c.points != null ? `<span class="chip line">${esc(c.points)} pt</span>` : ''}${dentro ? (isReady(c) ? '' : '<span class="chip attn">não pronto</span>') + `<button class="btn sm ghost" data-act="rTirar" data-card="${c.id}" title="Tirar da sprint">×</button>` : `<button class="btn sm" data-act="rTrazer" data-card="${c.id}">Trazer</button>`}</div>`;
+  return `<div class="bar"><span class="small muted">Sprint</span><select class="sel" data-act="rPlanSel">${plan.map(x => `<option value="${x.id}" ${x.id === s.id ? 'selected' : ''}>${esc(x.name)} · ${fmtD(x.start)} a ${fmtD(x.end)}</option>`).join('')}</select><span class="grow"></span><button class="btn sm" data-act="rNovaSprint">+ Sprint</button></div>
+    <div class="rplan"><div class="stack" style="min-width:0">
+      <div class="card flat"><div class="tf-row" style="grid-template-columns:1.2fr 1fr 1fr 1fr;align-items:end">
+        <div class="field"><label>Sprint</label><input class="sin" data-rsf="name" value="${esc(s.name)}"></div>
+        <div class="field"><label>Início</label><input class="sin" type="date" data-rsf="start" value="${esc(s.start)}"></div>
+        <div class="field"><label>Fim <span class="faint">(${dias} dia(s))</span></label><input class="sin" type="date" data-rsf="end" value="${esc(s.end)}"></div>
+        <div class="field"><label>Capacidade (${rUnTxt()})</label><input class="sin" type="number" min="0" step="0.5" data-rsf="capacity" value="${s.capacity?.value != null && (s.capacity.unit || 'cards') === rUnidade() ? esc(s.capacity.value) : ''}" placeholder="${rVazao() == null ? 'informe' : 'vazão: ' + fmtN(Math.round(rVazao() * 10) / 10)}"></div></div>
+        <div class="field" style="margin-top:12px"><label>Objetivo da sprint</label><input class="sin" data-rsf="goal" value="${esc(s.goal || '')}" placeholder="O que esta sprint entrega? Ex.: Liberar a contratação em homologação" maxlength="200"></div></div>
+      <div class="rlay2"><section class="rpane"><div class="rph"><h3>Na sprint</h3><span class="chip ${cap != null && carga > cap ? 'late' : ''}">${fmtN(carga)}${cap != null ? ' de ' + fmtN(cap) : ''} ${rUnTxt()}</span><span class="grow"></span><span class="small muted">vira o compromisso ao iniciar</span></div><div class="rbody">${na.map(c => lin(c, true)).join('') || '<div class="empty" style="padding:14px">Traga cards prontos da coluna ao lado ou desenhe as sprints no passo 3.</div>'}</div></section>
+        <section class="rpane"><div class="rph"><h3>Prontos fora da sprint</h3><span class="chip">${fora.length}</span></div><div class="rbody">${fora.map(c => lin(c, false)).join('') || '<div class="empty" style="padding:14px">Nenhum card pronto fora da sprint. Marque o pronto no passo Refinar.</div>'}</div></section></div></div>
+      <aside class="rpane"><div class="rph"><h3>O que a Central vai ver</h3></div>
+        <div class="rsec small"><div class="lbl">Ao iniciar a sprint</div>${esc(s.name)} · ${fmtD(s.start)} a ${fmtD(s.end)}<br>Objetivo: ${s.goal ? esc(s.goal) : '<span class="faint">sem objetivo</span>'}<br>Compromisso: ${na.length} card(s)${naoP.length ? ` (${na.length - naoP.length} prontos)` : ''}${feats.length ? `<br>Features: ${feats.map(esc).join(', ')}` : ''}</div>
+        <div class="rsec small"><div class="lbl">Durante a sprint</div>Feitos do compromisso, o que entrou e saiu, bloqueados e dias restantes, a cada movimentação.</div>
+        <div class="rsec small"><div class="lbl">Ao fechar (com confirmação)</div>Cumprido, objetivo atingido, uma linha sobre a sprint e as métricas.</div>
+        ${naoP.length ? `<div class="rsec"><div class="banner warn" style="margin:0">${naoP.length} card(s) não estão prontos (${naoP.slice(0, 3).map(c => esc(c.id)).join(', ')}${naoP.length > 3 ? '…' : ''}). Dá para iniciar mesmo assim.</div></div>` : ''}
+        ${!s.goal ? '<div class="rsec"><div class="banner" style="margin:0">Sem objetivo, o fechamento não pergunta se ele foi atingido.</div></div>' : ''}
+        <div class="rsec row"><span class="grow"></span>${ativa ? `<span class="small muted">Feche a ${esc(ativa.name)} antes de iniciar esta.</span>` : `<button class="btn pri" data-act="rIniciar" data-id="${s.id}" ${na.length ? '' : 'disabled'}>Iniciar ${esc(s.name)}</button>`}</div></aside></div>`;
+}
+function iniciarSprint(s) {
+  s.state = 'active'; s.startedAt = agoraComFuso(); s.committed = activeCards().filter(c => c.sprintId === s.id && !isDone(c)).map(c => c.id);
+  if (s.capacity?.value == null) { const v = rCapacidade(s); if (v != null) s.capacity = { value: v, unit: rUnidade(), auto: true }; }
+  s.upd = Date.now(); return s.committed.length;
+}
+// escopo da sprint em andamento, derivado: entrou depois do início e saiu do compromisso sem ser entregue
+function sprintEscopo(s) {
+  const comp = new Set(s.committed || []), cs = activeCards().filter(c => c.sprintId === s.id);
+  return { added: cs.filter(c => !comp.has(c.id)).map(c => c.id), removed: [...comp].filter(id => { const c = cardById(id); return !c || c.cancelledAt || (c.sprintId !== s.id && !(s.deliveredIds || []).includes(id)); }) };
+}
+function rMudarSprint(ids, spId) {
+  const sp = spId ? sprintById(spId) : null, cs = ids.map(cardById).filter(c => c && rOpen(c) && c.sprintId !== (spId || null)); if (!cs.length) return 0;
+  const ativa = activeSprint(), mexe = cs.filter(c => ativa && (c.sprintId === ativa.id || spId === ativa.id));
+  if (mexe.length && !confirm(`Isso muda o escopo da ${ativa.name}, que já está em andamento: ${mexe.length} card(s) ${spId === ativa.id ? 'entram' : 'saem'}. A Central vê o que entrou e saiu. Continuar?`)) return 0;
+  rFoto(`${cs.length} card(s) para ${sp ? sp.name : 'Mais tarde'}`, cs.map(c => c.id));
+  for (const c of cs) { const de = sprintById(c.sprintId)?.name || 'sem sprint'; c.sprintId = spId || null; c.upd = Date.now(); registrar('sprint', `${c.id} ${clip(c.title, 60)}: ${de} → ${sp ? sp.name : 'sem sprint'}`, c.id); }
+  return cs.length;
+}
+function wireDesenhar() {
+  const m = $('#main'); if (view !== 'refine' || !m.querySelector('.rgrid, .rplan')) return;
+  m.querySelectorAll('.rpill[draggable]').forEach(p => { p.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', p.dataset.card); p.classList.add('drag'); }); p.addEventListener('dragend', () => p.classList.remove('drag')); });
+  m.querySelectorAll('[data-rsp]').forEach(t => {
+    t.addEventListener('dragover', e => { e.preventDefault(); t.classList.add('rdropon'); });
+    t.addEventListener('dragleave', e => { if (!t.contains(e.relatedTarget)) t.classList.remove('rdropon'); });
+    t.addEventListener('drop', e => { e.preventDefault(); t.classList.remove('rdropon'); const id = e.dataTransfer.getData('text/plain'); if (!cardById(id)) return; const n = rMudarSprint([id], t.dataset.rsp || null); if (n) { touch(); rToast(`${id} agora em ${sprintById(t.dataset.rsp)?.name || 'Mais tarde'}`); } });
+  });
+  m.querySelectorAll('[data-rsf]').forEach(el => el.addEventListener('change', () => {
+    const s = sprintById(ui.rPlan); if (!s) return; const k = el.dataset.rsf, v = el.value;
+    if ((k === 'start' || k === 'end') && !isYmd(v)) return;
+    if (k === 'capacity') s.capacity = v === '' ? null : { value: Math.max(0, Number(v)) || 0, unit: rUnidade() };
+    else if (k === 'name') s.name = clip(v, 60) || s.name; else s[k] = k === 'goal' ? clip(v, 200) : v;
+    s.upd = Date.now(); touch();
+  }));
+}
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if (!el || !db) return; const a = el.dataset.act;
+  if (!['rUnit', 'rNovaSprint', 'rTrazer', 'rTirar', 'rIniciar'].includes(a)) return;
+  try {
+    if (a === 'rUnit') { rCfg().unit = el.dataset.v; db.settings.upd = Date.now(); touch(false); }
+    if (a === 'rNovaSprint') { const s = novaSprint(); ui.rPlan = s.id; touch(false); toast(`${s.name} criada: ${fmtD(s.start)} a ${fmtD(s.end)}.`); }
+    if (a === 'rTrazer' || a === 'rTirar') { e.stopPropagation(); if (rMudarSprint([el.dataset.card], a === 'rTrazer' ? ui.rPlan : null)) touch(); }
+    if (a === 'rIniciar') { const s = sprintById(el.dataset.id); if (activeSprint()) { toast('Feche a sprint em andamento antes.'); return; } const n = iniciarSprint(s); registrar('start', `${s.name} iniciada com ${n} card(s)${s.goal ? ': ' + s.goal : ''}`); touch(); toast(`${s.name} iniciada com ${n} card(s) no compromisso.`); }
+  } catch (err) { console.error(err); toast(err.message || String(err), 5000); }
+});
+document.addEventListener('change', e => { if (e.target.dataset?.act === 'rPlanSel' && db) { ui.rPlan = e.target.value; render(); } });
+
+const rSessaoPorId = id => (db.refinements || []).find(x => x.id === id);
+
+// Ações do refinamento (o listener principal ignora data-act que não conhece)
+document.addEventListener('click', async e => {
+  const el = e.target.closest('[data-act]'); if (!el || !db || el.tagName === 'FORM' || (el.tagName === 'INPUT' && el.type !== 'button')) return;
+  const a = el.dataset.act; if (!/^r[A-Z]/.test(a)) return;
+  try {
+    switch (a) {
+      case 'rStep': ui.rStep = el.dataset.v; render(); break;
+      case 'rFeat': if (!el.dataset.v) return; ui.rFeat = el.dataset.v; render(); break;
+      case 'rPick': e.stopPropagation(); { const id = el.dataset.card; rSel.has(id) ? rSel.delete(id) : rSel.add(id); render(); } break;
+      case 'rLimpar': rSel.clear(); render(); break;
+      case 'rMover': rMoverModal(); break;
+      case 'rDividir': rDividirModal(); break;
+      case 'rJuntar': rJuntarModal(); break;
+      case 'rUndo': rDesfazer(); break;
+      case 'rResumo': rResumoModal(); break;
+      case 'rNovoCard': { const f = rFeatInfo(ui.rFeat); newCardModal({ epicId: f?.epic?.id || '', featureRef: f && !f.time && f.code ? f.code : null, featureId: f?.time ? f.code : null, col: cols()[0].id, sprintId: null }); break; }
+      case 'rAccTog': { const c = cardById(el.dataset.card), x = (c.acceptance || []).find(y => y.id === el.dataset.id); if (!x) return; x.done = !x.done; c.upd = Date.now(); touch(false); cardModal(c.id); break; }
+      case 'rAccDel': { const c = cardById(el.dataset.card); c.acceptance = (c.acceptance || []).filter(y => y.id !== el.dataset.id); c.upd = Date.now(); touch(false); cardModal(c.id); break; }
+      case 'rRdy': { const c = cardById(el.dataset.card), antes = isReady(c), t = el.dataset.v; c.ready = { checks: [], manual: null, ...(c.ready || {}) }; c.ready.checks = c.ready.checks.includes(t) ? c.ready.checks.filter(x => x !== t) : [...c.ready.checks, t]; rMarcarPronto(c, antes); c.upd = Date.now(); touch(false); cardModal(c.id); break; }
+      case 'rRdyMan': { const c = cardById(el.dataset.card), antes = isReady(c), v = el.dataset.v; c.ready = { checks: [], ...(c.ready || {}), manual: v === '1' ? true : v === '0' ? false : null }; rMarcarPronto(c, antes); c.upd = Date.now(); touch(false); cardModal(c.id); break; }
+      case 'rTxt': { const s = rSessaoPorId($('#dlg').dataset.rsess); if (s) baixarTexto(`refinamento-${db.team.slug || 'time'}-${today()}.txt`, rResumoTexto(s), 'text/plain;charset=utf-8'); break; }
+      case 'rEncerrar': {
+        const s = rSessaoPorId($('#dlg').dataset.rsess); if (!s) return; const txt = rResumoTexto(s);
+        try { await navigator.clipboard.writeText(txt); toast('Resumo copiado. Cole no Teams.'); } catch { baixarTexto(`refinamento-${db.team.slug || 'time'}-${today()}.txt`, txt, 'text/plain;charset=utf-8'); toast('Não deu para copiar: o resumo foi baixado em .txt.'); }
+        if (!s.endedAt) { s.endedAt = agoraComFuso(); s.upd = Date.now(); rUndo = []; }
+        closeModal(); touch(false); break;
+      }
+    }
+  } catch (err) { console.error(err); toast(err.message || String(err), 5000); }
+});
+document.addEventListener('submit', e => {
+  const f = e.target, a = f.dataset?.act; if (!db || !['rIdea', 'rAccAdd'].includes(a)) return; e.preventDefault();
+  const t = clip(f.t.value.trim(), 200); if (!t) return;
+  if (a === 'rIdea') { const c = novoCard({ title: t, col: cols()[0].id, sprintId: null }); c.rank = 0; rFoto(`nova ideia ${c.id}`, []).novos.push(c.id); registrar('idea', `${c.id} ${clip(t, 60)} (nova ideia)`, c.id); touch(); setTimeout(() => $('#main form[data-act=rIdea] input')?.focus(), 0); return; }
+  const c = cardById(f.dataset.card); c.acceptance = [...(c.acceptance || []), { id: uid(), text: t, done: false }]; c.upd = Date.now(); touch(false); cardModal(c.id); setTimeout(() => $('#dlg form[data-act=rAccAdd] input')?.focus(), 0);
+});
+document.addEventListener('change', e => {
+  const el = e.target; if (!db) return;
+  if (el.dataset?.act === 'rFeatSel') { ui.rFeat = el.value; render(); return; }
+  if (['rUnitSel', 'rCad', 'rHor'].includes(el.dataset?.act)) { const c = rCfg(), a = el.dataset.act; if (a === 'rUnitSel') c.unit = el.value; else { const n = Math.round(Number(el.value)); if (!n || n < 1) { render(); return; } c[a === 'rCad' ? 'cadenceDays' : 'horizon'] = Math.min(a === 'rCad' ? 60 : 8, n); } db.settings.upd = Date.now(); touch(false); return; }
+  if (el.dataset?.act === 'rReadyItems') { const it = el.value.split('\n').map(s => clip(s.trim(), 80)).filter(Boolean).slice(0, 5); rCfg().ready = it; db.settings.upd = Date.now(); touch(false); toast(it.length ? `Pronto para sprint com ${it.length} item(ns).` : 'Sem itens: o pronto passa a ser marcado à mão.'); return; }
+  if (el.dataset?.rpts) { const c = cardById(el.dataset.rpts); if (!c) return; const v = el.value === '' ? null : Number(el.value); if (v != null && (isNaN(v) || v < 0)) { el.value = c.points ?? ''; return; } rFoto(`tamanho de ${c.id}`, [c.id]); const antes = c.points; c.points = v; c.upd = Date.now(); registrar('size', `${c.id} ${clip(c.title, 60)}: ${antes ?? '?'} → ${v ?? '?'} pt`, c.id); touch(false); }
+});
+document.addEventListener('keydown', e => {
+  if (!db || view !== 'refine' || $('#dlg').open || /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName)) return;
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); rDesfazer(); return; }
+  if (e.key.toLowerCase() === 'm' && !e.ctrlKey && !e.metaKey && !e.altKey && rSel.size) { e.preventDefault(); rMoverModal(); return; }
+  if (e.altKey && ['ArrowUp', 'ArrowDown'].includes(e.key)) {
+    const id = document.activeElement?.dataset?.card || (rSel.size === 1 ? [...rSel][0] : null), c = id && cardById(id); if (!c) return;
+    const lista = rCardsOf(fKey(c)), i = lista.findIndex(x => x.id === id), j = i + (e.key === 'ArrowUp' ? -1 : 1); if (j < 0 || j >= lista.length) return;
+    e.preventDefault(); rFoto('nova ordem', lista.map(x => x.id)); rOrdenar([id], fKey(c), e.key === 'ArrowUp' ? lista[j].id : lista[j + 1]?.id || null); touch(false);
+    setTimeout(() => $(`#main .rrow[data-card="${id}"]`)?.focus(), 0);
+  }
+});
+function wireRefine() {
+  const m = $('#main'); if (view !== 'refine' || !m.querySelector('.rlay')) return;
+  m.querySelectorAll('.rrow[draggable]').forEach(r => {
+    r.addEventListener('dragstart', e => { const id = r.dataset.card, ids = rSel.has(id) ? [...rSel] : [id]; e.dataTransfer.setData('text/plain', ids.join(',')); e.dataTransfer.effectAllowed = 'move'; r.classList.add('drag'); });
+    r.addEventListener('dragend', () => r.classList.remove('drag'));
+  });
+  m.querySelectorAll('[data-rdrop]').forEach(t => {
+    t.addEventListener('dragover', e => { e.preventDefault(); e.stopPropagation(); m.querySelectorAll('.rdropon').forEach(x => x.classList.remove('rdropon')); t.classList.add('rdropon'); });
+    t.addEventListener('dragleave', e => { if (!t.contains(e.relatedTarget)) t.classList.remove('rdropon'); });
+    t.addEventListener('drop', e => {
+      e.preventDefault(); e.stopPropagation(); t.classList.remove('rdropon');
+      const ids = e.dataTransfer.getData('text/plain').split(',').filter(id => cardById(id)); if (!ids.length) return;
+      const k = t.dataset.rdrop, alvo = e.target.closest('.rrow'), antes = alvo && !ids.includes(alvo.dataset.card) && t.dataset.rlist ? alvo.dataset.card : null;
+      const n = moverParaFeature(ids, k, { antesDe: antes }); rSel.clear(); touch();
+      if (n) rToast(`${n} card(s) movido(s) para ${rRotulo(k)}`);
+    });
+  });
+}
+
 /* ------------------------------- Iniciativas ------------------------------- */
 const STAGE_COL = ['#d5dbf7', '#aab6ef', '#8e9de9', '#5a6be0', '#223ad2', '#002bab'];
 function ring(pct, size = 34, st = '') {
@@ -1973,6 +2504,12 @@ function vSettings() {
       <label class="f"><span>Nome do time</span><input class="sin" data-act="teamName" value="${esc(db.team.name)}"></label>
     </div></div>
     ${vPeople()}
+    <div class="card"><div class="lbl">Refinamento</div>
+      <p class="small muted" style="margin-top:0">Itens do <b>pronto para sprint</b>, um por linha (até 5). O card fica pronto quando todos estão marcados; também dá para marcar à mão no card.</p>
+      <textarea class="sin" data-act="rReadyItems" rows="4">${esc(rCfg().ready.join('\n'))}</textarea>
+      <div class="fg" style="margin-top:12px"><label class="f"><span>Capacidade das sprints</span><select class="sel" data-act="rUnitSel"><option value="cards" ${rUnidade() === 'cards' ? 'selected' : ''}>cards, pela vazão</option><option value="points" ${rUnidade() === 'points' ? 'selected' : ''}>pontos</option></select></label>
+        <label class="f"><span>Duração da sprint (dias)</span><input class="sin" type="number" min="1" max="60" data-act="rCad" value="${esc(rCfg().cadenceDays || 14)}"></label>
+        <label class="f"><span>Sprints no desenho</span><input class="sin" type="number" min="1" max="8" data-act="rHor" value="${esc(rCfg().horizon || 3)}"></label></div></div>
     <div class="card"><div class="lbl">Colunas do quadro</div>
       <p class="small muted" style="margin-top:0">A última coluna é a entrega. Marque onde o card vira compromisso e onde o trabalho começa: as métricas de lead time, cycle time e WIP dependem disso.</p>
       <table class="t"><thead><tr><th>Coluna</th><th>Limite WIP</th><th>Compromisso</th><th>Início</th><th></th></tr></thead><tbody>${c.map((x, i) => `<tr>
@@ -2043,6 +2580,7 @@ function cardModal(id) {
         ${deps.length ? `<div class="deps">${deps.map(d => `<span class="row"><span class="hd ${d.f?.status === 'done' ? 'done' : 'late'}"></span>Depende de <span class="code">${esc(d.ref)}</span> ${esc(d.f?.name || '')} <span class="${d.f?.status === 'done' ? 'muted' : 'latec'}">${d.f?.status === 'done' ? 'concluída' : 'ainda aberta'}</span></span>`).join('')}</div>` : ''}</div>`
       : `<div class="small muted">${e ? `Escolha ao lado a feature${e.centralRef ? ' da Central ou do time' : ' do time'} que este card ajuda a entregar. Sem feature, ele conta nas métricas do time mas não aparece embaixo de uma feature.${e.centralRef ? '' : ' A iniciativa ainda não está ligada à Central: o gestor concilia depois.'}` : 'Card sem iniciativa: conta nas métricas do time. Escolha a iniciativa para poder ligá-lo a uma feature.'}</div>`}
     <label class="row small" style="margin-top:10px"><input type="checkbox" data-cf="showToCentral" ${c.showToCentral ? 'checked' : ''}> Mostrar ao gestor mesmo sem feature <span class="faint">(cards com feature sempre aparecem)</span></label>
+    ${refineCardHtml(c)}
     <div class="sec-t">Notas do time <span class="faint" style="text-transform:none;letter-spacing:0;font-weight:500">não vão para a Central</span></div>
     <textarea class="notes" data-cf="notes" placeholder="Contexto, critérios de aceite, links úteis…">${esc(c.notes)}</textarea>
     <div class="sec-t">Linha do tempo</div>
@@ -2305,7 +2843,7 @@ const situacaoCard = c => c.cancelledAt ? 'cancelado' : isDone(c) ? 'concluído'
 const nomeCol = id => cols()[colIdx(id)]?.name || id;
 function exportCard(c) {
   const da = doneAt(c);
-  return { codigo: c.id, titulo: c.title, tipo: c.kind, coluna: nomeCol(c.col), situacao: situacaoCard(c), responsavel: c.owner || null, prazo: c.due || null, sprint: sprintById(c.sprintId)?.name || null, pontos: c.points ?? null,
+  return { codigo: c.id, titulo: c.title, tipo: c.kind, coluna: nomeCol(c.col), situacao: situacaoCard(c), responsavel: c.owner || null, prazo: c.due || null, sprint: sprintById(c.sprintId)?.name || null, pontos: c.points ?? null, criteriosDeAceite: (c.acceptance || []).map(a => ({ texto: a.text, ok: !!a.done })), prontoParaSprint: isReady(c),
     bloqueado: c.blocked ? { motivo: catLabel(c.blocked.cat) + (c.blocked.reason ? ': ' + c.blocked.reason : ''), desde: c.blocked.since } : null, link: c.link || null, notas: c.notes || '', mostrarAoGestor: !!c.showToCentral,
     criadoEm: c.createdAt || null, concluidoEm: da ? agoraComFuso(da) : null, canceladoEm: c.cancelledAt || null,
     historico: c.history.map(h => ({ coluna: nomeCol(h.col), em: h.at })), bloqueios: c.blocks.map(b => ({ motivo: catLabel(b.cat) + (b.reason ? ': ' + b.reason : ''), de: b.from, ate: b.to })) };
@@ -2352,6 +2890,8 @@ function closeSprintModal(id) {
   const deliv = sprintDelivered(s), dc = s.committed.filter(cid => { const c = cardById(cid); return c && isDone(c) && deliv.includes(c); }).length;
   modal(`<div class="mh"><h2 class="grow" style="margin:0">Fechar ${esc(s.name)}</h2></div><div class="mb">
     <dl class="kv"><dt>Compromisso inicial</dt><dd>${s.committed.length} card(s)</dd><dt>Cumprido</dt><dd>${dc} (${s.committed.length ? Math.round(dc / s.committed.length * 100) : 0}%)</dd><dt>Fechados na sprint</dt><dd>${deliv.length}</dd><dt>Ficaram abertos</dt><dd>${abertos.length}</dd></dl>
+    ${s.goal ? `<div class="f" style="margin-top:14px"><span>Objetivo: “${esc(s.goal)}”</span><div class="sg" id="goalMet">${[['yes', 'atingido'], ['partly', 'em parte'], ['no', 'não']].map(([v, l]) => `<button type="button" data-v="${v}" class="${(s.goalMet || '') === v ? 'on' : ''}" onclick="this.parentElement.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === this))">${l}</button>`).join('')}</div></div>` : ''}
+    <label class="f" style="margin-top:14px"><span>Uma linha sobre a sprint <span class="faint">(vai para a Central com as métricas)</span></span><input class="sin" id="sprNote" maxlength="200" value="${esc(s.note || '')}" placeholder="Ex.: parceiro atrasou o contrato; simulação pronta."></label>
     ${abertos.length ? `<label class="f" style="margin-top:14px"><span>Cards abertos vão para</span><select class="sel" id="dest">${prox ? `<option value="${prox.id}">${esc(prox.name)}</option>` : ''}<option value="">Backlog (sem sprint)</option></select></label>` : ''}
     <p class="small muted">Em seguida a ferramenta pergunta se publica as métricas desta sprint para a Central.</p></div>
     <div class="mf"><button class="btn" data-act="close">Voltar</button><button class="btn pri" data-act="doClose" data-id="${s.id}">Fechar sprint</button></div>`);
@@ -2473,11 +3013,13 @@ document.addEventListener('click', async e => {
       case 'newSprint': { const s = novaSprint(); touch(false); sprintModal(s.id); break; }
       case 'editSprint': sprintModal(id); break;
       case 'delSprint': { const s = sprintById(id); s.deleted = true; s.upd = Date.now(); for (const c of db.cards) if (c.sprintId === id) { c.sprintId = null; c.upd = Date.now(); } closeModal(); touch(); break; }
-      case 'startSprint': { const s = sprintById(id); s.state = 'active'; s.startedAt = agoraComFuso(); s.committed = activeCards().filter(c => c.sprintId === s.id && !isDone(c)).map(c => c.id); s.upd = Date.now(); touch(); toast(`${s.name} iniciada com ${s.committed.length} card(s) no compromisso.`); break; }
+      case 'startSprint': { const s = sprintById(id); iniciarSprint(s); touch(); toast(`${s.name} iniciada com ${s.committed.length} card(s) no compromisso.`); break; }
       case 'closeSprint': closeSprintModal(id); break;
       case 'doClose': {
         const s = sprintById(id), deliv = sprintDelivered(s), dest = $('#dest')?.value || null;
-        s.result = { committed: s.committed.length, deliveredCommitted: s.committed.filter(cid => deliv.some(c => c.id === cid)).length, delivered: deliv.length };
+        s.goalMet = $('#goalMet button.on')?.dataset.v || null; s.note = clip($('#sprNote')?.value.trim() || '', 200);
+        { const esc0 = sprintEscopo(s); s.added = esc0.added; s.removed = esc0.removed; }
+        s.result = { committed: s.committed.length, deliveredCommitted: s.committed.filter(cid => deliv.some(c => c.id === cid)).length, delivered: deliv.length, carriedOver: activeCards().filter(c => c.sprintId === s.id && !isDone(c)).length };
         s.deliveredIds = deliv.map(c => c.id); s.state = 'closed'; s.closedAt = agoraComFuso(); s.upd = Date.now();
         for (const c of activeCards()) if (c.sprintId === s.id && !isDone(c)) { c.sprintId = dest; c.upd = Date.now(); }
         touch(); pubMetricsModal({ name: s.name, start: s.start, end: s.end, closedAt: s.closedAt }); break;
@@ -2609,11 +3151,19 @@ function demoDb() {
     if (sps[k + 1]) for (const c of activeCards()) if (c.sprintId === sps[k + 1].id && commitAt(c) && commitAt(c) < parseYmd(sps[k + 1].start)) s.committed.push(c.id);
   }
   for (const s of sps) { if (s.state === 'closed') { const dl = sprintDelivered(s); s.result = { committed: s.committed.length, deliveredCommitted: s.committed.filter(id => dl.some(c => c.id === id)).length, delivered: dl.length }; s.closedAt = isoAt(new Date(+parseYmd(s.end) + 18 * 3600000)); } }
-  const nx = novaSprint(); nx.name = `Sprint ${16 + sps.length}`;
+  const nx = novaSprint(); nx.name = `Sprint ${16 + sps.length}`; nx.goal = 'Liberar a contratação do Pix parcelado em homologação';
+  const nx2 = novaSprint(); nx2.name = `Sprint ${17 + sps.length}`;
   const wipC = activeCards().filter(c => isWip(c));
   if (wipC[0]) bloquear(wipC[0], 'terceiro', 'Aguardando credenciais de homologação do parceiro');
   if (wipC[1]) bloquear(wipC[1], 'decisao', 'Definição do limite de parcelas');
   d.publish.lastMetrics = { at: sps.at(-2).closedAt, revision: 230, sprint: sps.at(-2).name };
+  // refinamento (2.6): itens criados antes de hoje, alguns cards já refinados
+  for (const x of [...d.epics, ...d.features]) x.createdAt = isoAt(base);
+  const crit = [['Simulação mostra o CET de cada parcela', 'Erro do motor vira mensagem amigável', 'Teste com 3, 6 e 12 parcelas'], ['Termo aceito fica registrado com data e hora', 'Link para o contrato completo']];
+  activeCards().filter(c => !isDone(c) && c.featureRef).slice(0, 4).forEach((c, i) => { c.acceptance = crit[i % 2].map(t => ({ id: uid(), text: t, done: i === 0 })); c.points = [3, 2, 5, 1][i]; if (i < 2) c.ready = { checks: [...READY_PADRAO], manual: null, at: isoAt(new Date(Date.now() - 3 * DAY)) }; });
+  const novos = [['Taxa por parcela no recibo', e1, 'PAG-042.F2', null, 2, nx], ['Contrato v2 do parceiro em homologação', e1, 'PAG-042.F2', null, 3, nx], ['Régua de comunicação do piloto', e1, 'PAG-042.F3', null, 2, nx2], ['Painel do piloto com 1% da base', e1, 'PAG-042.F3', null, 5, nx2],
+    ['Agrupar erros por adquirente', e2, null, fa.id, 5, nx], ['Limite de latência por adquirente', e2, null, fb.id, 3, null], ['Exportar extrato em PDF', null, null, null, null, null]];
+  for (const [t, ep, ref, fid, pts, sp] of novos) { const c = novoCard({ title: t, kind: 'história', epicId: ep?.id || '', owner: nomes[Math.floor(rnd() * 5)], col: 'backlog', sprintId: sp?.id || null, points: pts }); c.featureRef = ref; c.featureId = fid; c.createdAt = c.history[0].at = isoAt(new Date(Date.now() - 6 * DAY)); if (pts && pts < 5) c.ready = { checks: [...READY_PADRAO], manual: null, at: isoAt(new Date(Date.now() - 2 * DAY)) }; c.acceptance = [{ id: uid(), text: 'Critério combinado com o PO', done: true }]; }
   return d;
 }
 
@@ -2634,7 +3184,7 @@ async function chaveDoPreset() {   // cadastra a chave embutida uma única vez (
   if (h && h.queryPermission && (await h.queryPermission({ mode: 'readwrite' })) === 'granted') { try { await abrirArquivo(h, { pedir: false }); return; } catch {} }
   renderWelcome();
 })();
-window.__qt = { PRESET, conectarPasta, get db() { return db; }, set db(v) { db = v; }, get catalog() { return catalog; }, set catalog(v) { catalog = v; }, applyCatalogLinks, buildStatus, buildMetrics, validar, exportCsv, exportLegivel, novaFeature, ligarFeature, publicar, colarChave, chaveiro, decifrar, cifrar, lerCatalogoEnvelope, render, mergeDb, demoDb, abrirArquivo, salvar, get pub() { return pub; } };
+window.__qt = { rPrevisao, rMudarSprint, rCapacidade, rVazao, iniciarSprint, sprintEscopo, moverParaFeature, dividirCard, juntarCards, rDesfazer, isReady, rSessao, rResumoTexto, rCardsOf, fKey, PRESET, conectarPasta, get db() { return db; }, set db(v) { db = v; }, get catalog() { return catalog; }, set catalog(v) { catalog = v; }, applyCatalogLinks, buildStatus, buildMetrics, validar, exportCsv, exportLegivel, novaFeature, ligarFeature, publicar, colarChave, chaveiro, decifrar, cifrar, lerCatalogoEnvelope, render, mergeDb, demoDb, abrirArquivo, salvar, get pub() { return pub; } };
 </script>
 <script id="f4seg">
 /* seguranca-comum 1.0 · aviso de senha e cofre, lembrete de teste da senha e "Onde estou?"

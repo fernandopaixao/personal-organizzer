@@ -1,6 +1,6 @@
 # Decisões de arquitetura (ADRs)
 
-*26/11/2026 · estado: Remessa · Central v15.18, Quadro do Time 2.5, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.2, contratos 1.1, visual experimental*
+*26/11/2026 · estado: Remessa · Central v15.18, Quadro do Time 2.7, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.2, contratos 1.1, visual experimental*
 
 Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequências e o que observar ao evoluir. Elas existem para que uma funcionalidade nova comece pelas regras certas, sem precisar reler todos os planos.
 
@@ -48,6 +48,7 @@ Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequê
 | [0038](0038-ligar-visual-experimental-na-entrada.md) | Ligar o visual experimental pela tela de entrada | Caixa **Visual experimental** no painel da Remessa: troca para a pasta `experimental/` e lembra a escolha no navegador; só troca sozinho para arquivos que já abriram; Quadro e Finanças do Time de um time não trocam |
 | [0039](0039-hierarquia-iniciativa-feature-card.md) | Iniciativa › Feature › Card nos times | A mesma hierarquia da Central no Quadro: feature da Central ou do time (`FEAT-n`), card em no máximo uma; "feature" deixa de ser tipo de card; `featureLocalId` no `status.json` leva os cards junto na conciliação |
 | [0040](0040-exportar-dados-legiveis-com-confirmacao.md) | Exportar dados legíveis com confirmação | CSV ou JSON em claro só depois de marcar que sai sem criptografia; separado da cópia cifrada; nunca na pasta compartilhada |
+| [0041](0041-refinamento-no-quadro.md) | Refinamento no Quadro | Página Refinamento com o time (organizar, mover entre features, dividir, juntar, critérios, pronto para sprint, resumo); a Central só lê o resultado |
 
 ## Checklist para uma funcionalidade nova
 
