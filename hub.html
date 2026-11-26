@@ -316,7 +316,10 @@ details.pis>summary:before{content:"▸";transition:transform .15s}details.pis[o
 })();
 </script>
 <script id="tema">
-/* Tema claro, escuro ou automático (segue o sistema), comum a todas as ferramentas da solução.
+/* Tema claro, escuro ou automático (segue o sistema) e estilo Remessa ou Sereno, comuns a todas as ferramentas da solução.
+   Estilo (ADR-0042): Remessa (padrão) leva o visual da tela de entrada para dentro das ferramentas (trilho e topo marinhos,
+   faixa com o padrão de envelopes); Sereno tira a decoração (sem gradiente, faixas cheias nem sombras), para menos estímulo
+   visual. A escolha fica em localStorage 'gestao.estilo' e vale com claro e com escuro.
    Injetado no <head> de cada HTML por tools/build_financas.py e tools/injetar_seguranca.py.
    - A escolha fica só neste computador (localStorage 'gestao.tema') e vale para todas as ferramentas.
    - No escuro, as variáveis da identidade (--bv, --ink, --line...) ganham a paleta escura e as cores
@@ -328,12 +331,91 @@ details.pis>summary:before{content:"▸";transition:transform .15s}details.pis[o
   const mq = window.matchMedia ? matchMedia('(prefers-color-scheme: dark)') : { matches: false, addEventListener() {} };
   const ler = () => { try { const v = localStorage.getItem(CHAVE); return v === 'claro' || v === 'escuro' ? v : 'auto'; } catch { return 'auto'; } };
   let pref = ler(), escuro = false;
+  const CHAVE_E = 'gestao.estilo';
+  const lerEstilo = () => { try { return localStorage.getItem(CHAVE_E) === 'sereno' ? 'sereno' : 'remessa'; } catch { return 'remessa'; } };
+  let estilo = lerEstilo();
+  html.dataset.estilo = estilo;
+  try { if (window.top !== window) html.classList.add('tema-embutido'); } catch { html.classList.add('tema-embutido'); }
 
   // ---- Paleta escura: mesmo branco-e-azul, invertido para azul-noite, com o azul BV mais luminoso ----
-  const VARS = '--bv:#5066ec;--bv-deep:#3a4fd6;--bv-t:#8d9cf9;--bv-deep-t:#a9b4ff;--bv-mid:#8190ee;--bv-line:#2f3a6b;--bv-soft:#1a2142;'
-    + '--ink:#e6e9f2;--muted:#99a1b7;--faint:#68708a;--line:#262d40;--bg:#0e121c;--card:#161b29;'
-    + '--late:#ec7d74;--late-soft:#3a1f24;--ok:#5cc292;--ok-soft:#15302a;--raised:#1e2436';
-  const CSS = `:root[data-tema="escuro"]{${VARS};color-scheme:dark}
+  // Remessa escuro: azul-noite, derivado do marinho da tela de entrada. Sereno escuro: grafite neutro.
+  const VARS = '--bv:#4a62e6;--bv-deep:#5d73f0;--bv-t:#a3b3ff;--bv-deep-t:#c0cbff;--bv-mid:#7f93f5;--bv-line:#2c3f8a;--bv-soft:#17255a;'
+    + '--ink:#e8ecf8;--muted:#a3aed0;--faint:#66729c;--line:#1f2d5c;--bg:#09112c;--card:#0f1a3e;'
+    + '--late:#ff8f85;--late-soft:#3b1830;--ok:#5fd3a0;--ok-soft:#0f3338;--raised:#15224d';
+  const VARS_SERENO = '--bv:#4b5bd0;--bv-deep:#6170e0;--bv-t:#a7b2ff;--bv-deep-t:#c3cbff;--bv-mid:#7c88d8;--bv-line:#2f3450;--bv-soft:#1e2030;'
+    + '--ink:#e6e6e9;--muted:#9b9ea6;--faint:#62656d;--line:#2a2b30;--bg:#121316;--card:#17181b;'
+    + '--late:#e08a82;--late-soft:#2c1d1d;--ok:#7cc3a0;--ok-soft:#1a2722;--raised:#1e1f23';
+  const CLARO_SERENO = '--bv:#3346c0;--bv-deep:#26379e;--bv-mid:#9aa3d6;--bv-line:#dfe2ef;--bv-soft:#f3f4f8;'
+    + '--ink:#1c1d21;--muted:#64676f;--faint:#a5a8b0;--line:#ececef;--bg:#ffffff;--card:#ffffff;'
+    + '--late:#b0483f;--late-soft:#f8eeec;--ok:#3a735a;--ok-soft:#eef4f0';
+  // Superfície da marca, a mesma da tela de entrada (marca.js): gradiente marinho, brilho azul e padrão de envelopes.
+  const ENVELOPES = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='96' viewBox='0 0 120 96'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.07' stroke-width='1.4'%3E%3Crect x='14' y='18' width='40' height='26' rx='3'/%3E%3Cpath d='M15 20l19 13l19-13'/%3E%3Crect x='74' y='60' width='32' height='21' rx='3'/%3E%3Cpath d='M75 62l15 10l15-10'/%3E%3C/g%3E%3C/svg%3E\")";
+  const MARINHO = `${ENVELOPES},radial-gradient(700px 420px at 10% 0%,rgba(77,134,255,.32),transparent 62%),linear-gradient(135deg,#0b2155 0%,#122f80 58%,#1e4fc8 100%)`;
+  const R = ':root[data-estilo="remessa"]:not(.tema-embutido)', S = ':root[data-estilo="sereno"]';
+  const RAIL = '.rail:not(.embutido .rail)';
+  const ESTILOS = `
+${R}:not([data-tema="escuro"]){--bg:#f4f6fb}
+${R}:not([data-tema="escuro"]) .top:not(.hub .top){background:rgba(244,246,251,.94)}
+${S}:not([data-tema="escuro"]) .top{background:rgba(255,255,255,.94)}
+${R} ${RAIL}{background:${MARINHO};background-color:#0b2155;border-right:0}
+${R} ${RAIL} .nv{color:rgba(255,255,255,.8)}
+${R} ${RAIL} .nv:hover{color:#fff;background:rgba(255,255,255,.08)}
+${R} ${RAIL} .nv.on{color:#0b2155;background:#fff;font-weight:650}
+${R} ${RAIL} .nvg{color:rgba(255,255,255,.55)}
+${R} ${RAIL} .logo{background:#fff;color:#0b2155}
+${R} ${RAIL} .railver{color:rgba(255,255,255,.6)}
+${R} ${RAIL} .nvt{background:rgba(255,255,255,.1);color:#fff}
+${R} ${RAIL} .nvt.on,${R} ${RAIL} .nvt:hover{background:#fff;color:#0b2155}
+@media (min-width:1000px){
+${R} ${RAIL}{width:200px;align-items:stretch;padding:18px 12px}
+${R} ${RAIL} .logo{margin:0 10px 14px}
+${R} ${RAIL} .nv{width:auto;flex-direction:row;justify-content:flex-start;gap:10px;padding:8px 12px;font-size:13px;border-radius:12px}
+${R} ${RAIL} .nv .b{position:static;margin-left:auto}
+${R} ${RAIL} .nvg{width:auto;text-align:left;padding:0 12px;margin:14px 0 4px;font-size:10px}
+${R} ${RAIL} .nvt{align-self:flex-start;margin:2px 0 2px 12px;width:auto;padding:0 10px}
+${R} ${RAIL} .railver{padding:10px 12px 2px}
+${R} body:not(.v2):has(${RAIL}) .main:not(.embutido .main){margin-left:200px}
+}
+${R} .hub .top{background:${MARINHO};background-color:#0b2155;color:#fff;margin:0 0 14px;padding:12px 18px;border-radius:0 0 20px 20px}
+${R} .hub .top .btn{color:var(--ink)}
+${R} .hub .top h1{color:#fff}${R} .hub .top .sub,${R} .hub .top .muted{color:rgba(255,255,255,.75)}
+${R} .hub .top .marca{background:#fff;color:#0b2155;box-shadow:none}
+${R} .hub .nav{background:rgba(255,255,255,.1)}
+${R} .hub .nav a,${R} .hub .nav summary{color:rgba(255,255,255,.82)}
+${R} .hub .nav a:hover,${R} .hub .nav summary:hover{color:#fff;background:rgba(255,255,255,.1)}
+${R} .hub .nav a.on{background:#fff;color:#0b2155}
+${R} .hub .nav .menu a{color:var(--ink)}
+${R} .hub .hero{background:${MARINHO};background-color:#0b2155}
+${R} .hub .hero:after{display:none}
+${R} .ins.hi{background:${MARINHO};background-color:#0b2155;border-color:#0b2155}
+${R} .top2{background:${MARINHO};background-color:#0b2155;border-bottom:0;color:#fff}
+${R} .top2 .brand b{color:#fff}${R} .top2 .brand .code{color:rgba(255,255,255,.7)}
+${R} .top2 .brand .logo{background:#fff;color:#0b2155}
+${R} .top2 .tnav button{color:rgba(255,255,255,.8)}
+${R} .top2 .tnav button:hover{color:#fff}
+${R} .top2 .tnav button.on{background:#fff;color:#0b2155}
+${S}:not([data-tema="escuro"]){${CLARO_SERENO}}
+${S}[data-tema="escuro"]{${VARS_SERENO}}
+${S} .hub .hero{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+${S} .hub .hero:after{display:none}
+${S} .hub .hero h2,${S} .hub .hero .resumo b,${S} .hub .hero .num{color:var(--ink)}
+${S} .hub .hero .dia,${S} .hub .hero .resumo,${S} .hub .hero .num small{color:var(--muted)}
+${S} .marca{background:var(--ink);box-shadow:none}
+${S} .ins.hi{background:var(--card);border-color:var(--bv);color:var(--ink)}
+${S} .ins.hi .k,${S} .ins.hi .s,${S} .ins.hi .mod{color:var(--muted)}${S} .ins.hi .s b{color:var(--ink)}
+${S} .ins.hi .m{background:var(--bv-soft)}${S} .ins.hi .m i,${S} .ins.hi .m em{background:var(--bv)!important}
+${S} .hub .hero .sessao{background:var(--bg);border-color:var(--line);color:var(--muted)}
+${S} .hub .hero .sessao button{background:var(--bv-soft);color:var(--bv)}
+${S} .card,${S} .kpi{box-shadow:none}
+${S} .rm-tela{background:var(--bg)!important}
+${S} .rm-lado,${S} .rm-lado .rm-nome,${S} .rm-lado a,${S} .rm-rodape b,${S} .rm-vis-t b,${S} .rm-lado .rm-extra h2,${S} .rm-lado .rm-extra li{color:var(--ink)}
+${S} .rm-lado .rm-frase,${S} .rm-lado .rm-sob,${S} .rm-rodape,${S} .rm-vis-t,${S} .rm-lado .rm-extra p{color:var(--muted)}
+${S} .rm-lado .rm-extra li svg{stroke:var(--muted)}
+${S} .rm-lado .rm-ver,${S} .rm-vis{background:var(--card);border-color:var(--line);color:var(--ink)}
+${S} .rm-vis-b{background:var(--ink);color:var(--card)}
+${S} .rm-lado .rm-logo svg{filter:none;outline:0}
+${S} .rm-tela>.entrada,${S} .rm-tela>.lockcard,${S} .rm-tela>.welcome>.card,${S} .rm-tela>.welcome>:only-child{box-shadow:0 1px 3px rgba(20,20,30,.08)!important;border:1px solid var(--line)}`;
+  const CSS = `:root[data-tema="escuro"]{${VARS};color-scheme:dark}${ESTILOS}
 :root[data-tema="escuro"] body{background:var(--bg);color:var(--ink)}
 :root[data-tema="escuro"] dialog{background:var(--card);color:var(--ink)}
 :root[data-tema="escuro"] .toast{background:#2a3147!important;color:var(--ink)!important;box-shadow:0 8px 24px rgba(0,0,0,.5)!important}
@@ -350,6 +432,9 @@ details.pis>summary:before{content:"▸";transition:transform .15s}details.pis[o
 #temaSel .menu button:hover{background:var(--bv-soft,#f2f4fd)}
 #temaSel .menu button.on{color:var(--bv,#223ad2);font-weight:650}
 #temaSel .menu small{display:block;color:var(--muted,#6f7689);font-size:10.5px;padding:4px 10px 6px}
+#temaSel .menu small.g{font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:8px 10px 2px}
+#temaSel .menu button span{display:flex;flex-direction:column}#temaSel .menu button i{font-style:normal;font-size:10.5px;color:var(--muted,#6f7689);font-weight:400}
+#temaSel .menu{min-width:210px}
 @media print{#temaSel{display:none}}`;
 
   // ---- Cores: leitura, HSL e conversão por papel ----
@@ -386,33 +471,42 @@ details.pis>summary:before{content:"▸";transition:transform .15s}details.pis[o
   const fmt = ([r, g, b], a) => a >= 1 ? `rgb(${r}, ${g}, ${b})` : `rgba(${r}, ${g}, ${b}, ${+a.toFixed(3)})`;
   const hex = c => '#' + c.slice(0, 3).map(v => v.toString(16).padStart(2, '0')).join('');
   // Cores da identidade com destino fixo, por papel (fundo, texto, borda).
-  const FIXO = {
-    '#ffffff': { f: '#161b29', b: '#262d40' }, '#fafafc': { f: '#0e121c' }, '#fbfbfd': { f: '#0e121c' },
-    '#223ad2': { f: '#5066ec', t: '#8d9cf9', b: '#5066ec' }, '#002bab': { f: '#3a4fd6', t: '#a9b4ff', b: '#3a4fd6' },
-    '#161a23': { f: '#2a3147', t: '#e6e9f2', b: '#3a4258' }, '#c4574f': { f: '#d9665d', t: '#ec7d74', b: '#c4574f' },
-    '#f2f4fd': { f: '#1a2142', b: '#2f3a6b' }, '#d5dbf7': { f: '#2f3a6b', b: '#2f3a6b' }, '#8e9de9': { t: '#a3afef', b: '#5d6cc4' },
-    '#eceef4': { f: '#232a3c', b: '#262d40' }, '#fbefee': { f: '#3a1f24', b: '#5a2c30' },
+  const FIXO_REMESSA = {
+    '#ffffff': { f: '#0f1a3e', b: '#1f2d5c' }, '#fafafc': { f: '#09112c' }, '#fbfbfd': { f: '#09112c' }, '#f4f6fb': { f: '#09112c' },
+    '#223ad2': { f: '#4a62e6', t: '#a3b3ff', b: '#4a62e6' }, '#002bab': { f: '#3a52d6', t: '#c0cbff', b: '#3a52d6' },
+    '#161a23': { f: '#1c2a5a', t: '#e8ecf8', b: '#31447f' }, '#c4574f': { f: '#d9665d', t: '#ff8f85', b: '#c4574f' },
+    '#f2f4fd': { f: '#17255a', b: '#2c3f8a' }, '#d5dbf7': { f: '#2c3f8a', b: '#2c3f8a' }, '#8e9de9': { t: '#a3b3ff', b: '#4f63c4' },
+    '#eceef4': { f: '#15224d', b: '#1f2d5c' }, '#fbefee': { f: '#3b1830', b: '#5a2440' },
   };
+  const FIXO_SERENO = {
+    '#ffffff': { f: '#17181b', b: '#2a2b30' }, '#fafafc': { f: '#121316' }, '#fbfbfd': { f: '#121316' }, '#f4f6fb': { f: '#121316' },
+    '#223ad2': { f: '#4b5bd0', t: '#a7b2ff', b: '#4b5bd0' }, '#002bab': { f: '#3d4cb8', t: '#c3cbff', b: '#3d4cb8' },
+    '#161a23': { f: '#26272c', t: '#e6e6e9', b: '#3a3c43' }, '#c4574f': { f: '#c96a62', t: '#e08a82', b: '#b0483f' },
+    '#f2f4fd': { f: '#1e2030', b: '#2f3450' }, '#d5dbf7': { f: '#2f3450', b: '#2f3450' }, '#8e9de9': { t: '#a7b2ff', b: '#4c5490' },
+    '#eceef4': { f: '#1e1f23', b: '#2a2b30' }, '#fbefee': { f: '#2c1d1d', b: '#4a2a2a' },
+  };
+  // Tons neutros convertidos: azul-noite saturado no Remessa, quase cinza no Sereno.
+  const NEUTRO = { remessa: { h: 226, sMin: 0.5, sMax: 0.62, base: 0.15, bS: 0.45, bBase: 0.2 }, sereno: { h: 230, sMin: 0.03, sMax: 0.05, base: 0.09, bS: 0.05, bBase: 0.17 } };
   function converter(papel, c) {
-    const [r, g, b, a] = c, fx = FIXO[hex(c)];
+    const [r, g, b, a] = c, fx = (estilo === 'sereno' ? FIXO_SERENO : FIXO_REMESSA)[hex(c)], N = NEUTRO[estilo];
     if (fx && fx[papel]) return fmt(parse(fx[papel]), a);
     let [h, s, l] = hsl([r, g, b]);
     const croma = s * (1 - Math.abs(2 * l - 1)), neutro = croma < 0.09;
     if (papel === 't') {                                   // texto: claro sobre fundo escuro
       if (l > 0.9) return null;                            // texto branco (sobre azul, vermelho...) continua branco
-      if (neutro) return fmt(rgb(h, Math.min(s, 0.18), 0.92 - l * 0.62), a);
+      if (neutro) return fmt(rgb(h, Math.min(s, estilo === 'sereno' ? 0.04 : 0.2), 0.92 - l * 0.62), a);
       return l >= 0.7 ? null : fmt(rgb(h, Math.min(s, 0.78), Math.max(0.7, l + 0.25)), a);
     }
     if (papel === 'b') {                                   // borda e contorno
       if (l < 0.5) return neutro ? fmt(rgb(h, Math.min(s, 0.2), 0.32), a) : null;
-      if (neutro) return fmt(rgb(h || 226, Math.min(Math.max(s, 0.12), 0.25), 0.17 + (1 - l) * 0.9), a);
+      if (neutro) return fmt(rgb(h || N.h, N.bS, N.bBase + (1 - l) * 0.9), a);
       return l > 0.75 ? fmt(rgb(h, Math.min(s, 0.42), 0.18 + (1 - l) * 0.6), a) : null;
     }
     // papel 'f' (fundo) e 'g' (desenho SVG)
     if (neutro) {
       if (l > 0.97 && a <= 0.5 && papel === 'f') return null;  // véu branco translúcido sobre cor (cards em destaque)
       if (l < 0.5) return papel === 'g' ? fmt(rgb(h, Math.min(s, 0.18), 0.92 - l * 0.62), a) : null;  // fundos escuros ficam (sombras, véus)
-      return fmt(rgb(h || 226, Math.min(Math.max(s, 0.16), 0.3), 0.135 + (1 - l) * 0.95), a);
+      return fmt(rgb(h || N.h, Math.min(Math.max(s, N.sMin), N.sMax), N.base + (1 - l) * 0.95), a);
     }
     if (l >= 0.85) return fmt(rgb(h, Math.min(s, 0.45), 0.165 + (1 - l) * 0.55), a);   // tons suaves viram tons escuros
     if (l >= 0.62) return fmt(rgb(h, Math.min(s, 0.55), 0.3 + (l - 0.62) * 0.5), a);
@@ -513,6 +607,18 @@ details.pis>summary:before{content:"▸";transition:transform .15s}details.pis[o
     else { obs.disconnect(); restaurarTudo(); }
     atualizarBotao();
   }
+  function escolherEstilo(v) {
+    estilo = v === 'sereno' ? 'sereno' : 'remessa';
+    try { estilo === 'remessa' ? localStorage.removeItem(CHAVE_E) : localStorage.setItem(CHAVE_E, estilo); } catch {}
+    aplicarEstilo();
+  }
+  // Troca de estilo com o escuro ligado: as cores fixas já convertidas voltam ao original e são convertidas de novo.
+  function aplicarEstilo() {
+    if (html.dataset.estilo === estilo) return atualizarBotao();
+    html.dataset.estilo = estilo;
+    if (escuro) { restaurarTudo(); converterTudo(); }
+    atualizarBotao();
+  }
   function escolher(v) {
     pref = v === 'claro' || v === 'escuro' ? v : 'auto';
     try { pref === 'auto' ? localStorage.removeItem(CHAVE) : localStorage.setItem(CHAVE, pref); } catch {}
@@ -526,22 +632,28 @@ details.pis>summary:before{content:"▸";transition:transform .15s}details.pis[o
     auto: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17a8.5 8.5 0 0 0 0-17z" fill="currentColor"/></svg>',
   };
   const NOME = { claro: 'Claro', escuro: 'Escuro', auto: 'Automático' };
+  const ESTILO = { remessa: ['Remessa', 'Marca, trilho e faixas marinhas'], sereno: ['Sereno', 'Menos estímulo visual'] };
+  const ICONE_E = { remessa: '<svg viewBox="0 0 24 24"><rect x="3.5" y="6" width="17" height="12" rx="2"/><path d="M4 7l8 6 8-6"/></svg>', sereno: '<svg viewBox="0 0 24 24"><path d="M4 9h16M4 15h10"/></svg>' };
   let caixa = null;
   function atualizarBotao() {
     if (!caixa) return;
     const b = caixa.firstChild; b.innerHTML = ICONE[pref];
     b.title = `Tema: ${NOME[pref]}${pref === 'auto' ? ` (agora ${escuro ? 'escuro' : 'claro'}, como o sistema)` : ''}`;
     b.setAttribute('aria-label', b.title);
-    caixa.querySelectorAll('.menu button').forEach(x => { x.classList.toggle('on', x.dataset.t === pref); x.setAttribute('aria-checked', x.dataset.t === pref); });
+    b.title += ` · Estilo: ${ESTILO[estilo][0]}`; b.setAttribute('aria-label', b.title);
+    caixa.querySelectorAll('.menu [data-t]').forEach(x => { x.classList.toggle('on', x.dataset.t === pref); x.setAttribute('aria-checked', x.dataset.t === pref); });
+    caixa.querySelectorAll('.menu [data-e]').forEach(x => { x.classList.toggle('on', x.dataset.e === estilo); x.setAttribute('aria-checked', x.dataset.e === estilo); });
   }
   function montarBotao() {
     if (caixa || !document.body) return;
     caixa = document.createElement('div'); caixa.id = 'temaSel';
-    caixa.innerHTML = '<button type="button" aria-haspopup="menu"></button><div class="menu" role="menu">'
+    caixa.innerHTML = '<button type="button" aria-haspopup="menu"></button><div class="menu" role="menu"><small class="g">Modo</small>'
       + ['claro', 'escuro', 'auto'].map(t => `<button type="button" role="menuitemradio" data-t="${t}">${ICONE[t]}${NOME[t]}</button>`).join('')
+      + '<small class="g">Estilo</small>'
+      + ['remessa', 'sereno'].map(e => `<button type="button" role="menuitemradio" data-e="${e}">${ICONE_E[e]}<span>${ESTILO[e][0]}<i>${ESTILO[e][1]}</i></span></button>`).join('')
       + '<small>Fica salvo só neste computador.</small></div>';
     caixa.firstChild.onclick = e => { e.stopPropagation(); caixa.classList.toggle('aberto'); };
-    caixa.querySelector('.menu').onclick = e => { const b = e.target.closest('[data-t]'); if (!b) return; e.stopPropagation(); escolher(b.dataset.t); caixa.classList.remove('aberto'); };
+    caixa.querySelector('.menu').onclick = e => { const b = e.target.closest('[data-t],[data-e]'); if (!b) return; e.stopPropagation(); if (b.dataset.e) escolherEstilo(b.dataset.e); else escolher(b.dataset.t); caixa.classList.remove('aberto'); };
     document.addEventListener('click', () => caixa.classList.remove('aberto'));
     document.addEventListener('keydown', e => { if (e.key === 'Escape') caixa.classList.remove('aberto'); });
     document.body.appendChild(caixa);
@@ -550,10 +662,10 @@ details.pis>summary:before{content:"▸";transition:transform .15s}details.pis[o
 
   const st = document.createElement('style'); st.id = 'temaCss'; st.textContent = CSS;
   (document.head || html).appendChild(st); const temaFolha = st.sheet; feitas.add(temaFolha);
-  window.gestaoTema = { escolher, get escolha() { return pref; }, get escuro() { return escuro; } };
+  window.gestaoTema = { escolher, escolherEstilo, get escolha() { return pref; }, get escuro() { return escuro; }, get estilo() { return estilo; } };
   aplicar();
   mq.addEventListener?.('change', () => { if (pref === 'auto') aplicar(); });
-  window.addEventListener('storage', e => { if (e.key === CHAVE || e.key === null) { pref = ler(); aplicar(); } });
+  window.addEventListener('storage', e => { if (e.key === CHAVE || e.key === null) { pref = ler(); aplicar(); } if (e.key === CHAVE_E || e.key === null) { estilo = lerEstilo(); aplicarEstilo(); } });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { montarBotao(); if (escuro) converterTudo(); });
   else montarBotao();
 })();

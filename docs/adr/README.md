@@ -49,6 +49,7 @@ Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequê
 | [0039](0039-hierarquia-iniciativa-feature-card.md) | Iniciativa › Feature › Card nos times | A mesma hierarquia da Central no Quadro: feature da Central ou do time (`FEAT-n`), card em no máximo uma; "feature" deixa de ser tipo de card; `featureLocalId` no `status.json` leva os cards junto na conciliação |
 | [0040](0040-exportar-dados-legiveis-com-confirmacao.md) | Exportar dados legíveis com confirmação | CSV ou JSON em claro só depois de marcar que sai sem criptografia; separado da cópia cifrada; nunca na pasta compartilhada |
 | [0041](0041-refinamento-no-quadro.md) | Refinamento no Quadro | Página Refinamento com o time (organizar, mover entre features, dividir, juntar, critérios, pronto para sprint, resumo); a Central só lê o resultado |
+| [0042](0042-estilos-remessa-e-sereno.md) | Estilos Remessa e Sereno | Segundo eixo no seletor de tema: Remessa (trilho e topo marinhos, escuro azul-noite) ou Sereno (sem decoração, escuro grafite); só CSS na camada de tema |
 
 ## Checklist para uma funcionalidade nova
 

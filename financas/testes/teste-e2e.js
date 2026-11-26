@@ -5,8 +5,9 @@
 const { chromium } = require('playwright');
 const http = require('http'), fs = require('fs'), path = require('path');
 // TEMA=escuro roda tudo com o sistema em modo escuro (o tema automático segue) e salva as telas em saida/escuro/.
-const ESCURO = process.env.TEMA === 'escuro', SAIDA_URL = '/financas/testes/saida/' + (ESCURO ? 'escuro/' : '');
-const RAIZ = path.resolve(__dirname, '..', '..'), SAIDA = path.join(RAIZ, 'financas', 'testes', 'saida', ESCURO ? 'escuro' : '');
+const ESCURO = process.env.TEMA === 'escuro', SERENO = process.env.ESTILO === 'sereno';
+const SUB = [SERENO ? 'sereno' : '', ESCURO ? 'escuro' : ''].filter(Boolean).join('-'), SAIDA_URL = '/financas/testes/saida/' + (SUB ? SUB + '/' : '');
+const RAIZ = path.resolve(__dirname, '..', '..'), SAIDA = path.join(RAIZ, 'financas', 'testes', 'saida', SUB);
 fs.mkdirSync(SAIDA, { recursive: true });
 const SENHA = 'senha-de-teste-123', SENHA2 = 'outra-senha-456!';
 let falhas = 0;
@@ -56,6 +57,8 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   const base = `http://127.0.0.1:${srv.address().port}`;
   const browser = await chromium.launch();
   const ctxB = await browser.newContext({ acceptDownloads: true, colorScheme: ESCURO ? 'dark' : 'light' });
+  // ESTILO=sereno roda tudo no estilo Sereno (ADR-0042), com as telas em saida/sereno/.
+  if (SERENO) await ctxB.addInitScript(() => { try { localStorage.setItem('gestao.estilo', 'sereno'); } catch {} });
   const erros = [];
   const nova = async (url, mapa) => { const p = await ctxB.newPage(); p.on('pageerror', e => erros.push(url + ': ' + e.message)); await p.addInitScript(stub(mapa)); await p.goto(base + url); return p; };
 
@@ -231,7 +234,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   fs.writeFileSync(path.join(SAIDA, 'gestao_gerada.html'), await opfs(a2, async () => ler('LocalGestor2', 'gestao_pessoal.html')));
   const c = await nova(SAIDA_URL + 'gestao_gerada.html', {});
   await c.evaluate(() => { window.__abrir = { dir: 'LocalGestor2', arq: 'gestao-tecnologia.json' }; });
-  ok(await c.evaluate(() => { const l = document.querySelector('#lock.rm-tela > .rm-lado'), r = document.querySelector('#lock.rm-tela > .rm-rodape'); const vis = [...document.querySelectorAll('#lock *')].filter(e => e.offsetParent && !e.children.length && /15\.\d+/.test(e.textContent)); return !!l && /Remessa/.test(l.textContent) && !!r && /versão 15\.\d+/.test(r.textContent) && vis.length === 1 && getComputedStyle(document.getElementById('lock')).backgroundImage.includes('gradient'); }), 'tela de entrada da Central: fundo da Remessa, painel à esquerda e a versão uma vez só, no rodapé');
+  ok(await c.evaluate(() => { const l = document.querySelector('#lock.rm-tela > .rm-lado'), r = document.querySelector('#lock.rm-tela > .rm-rodape'); const vis = [...document.querySelectorAll('#lock *')].filter(e => e.offsetParent && !e.children.length && /15\.\d+/.test(e.textContent)); return !!l && /Remessa/.test(l.textContent) && !!r && /versão 15\.\d+/.test(r.textContent) && vis.length === 1 && getComputedStyle(document.getElementById('lock')).backgroundImage.includes('gradient') === (document.documentElement.dataset.estilo !== 'sereno'); }), 'tela de entrada da Central: fundo da Remessa (sem gradiente no Sereno), painel à esquerda e a versão uma vez só, no rodapé');
   ok(await c.evaluate(() => document.getElementById('lockPass').disabled && document.getElementById('entSenha').classList.contains('off')), 'Central: a senha só aparece depois de escolher o arquivo');
   await c.click('#btnOpen'); await c.waitForFunction(() => !document.getElementById('lockPass').disabled);
   ok(/gestao-tecnologia\.json/.test(await c.textContent('#arqSel')), 'Central mostra o arquivo escolhido no passo 1');
@@ -517,24 +520,36 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   ok(!JSON.stringify(await opfs(h, async () => ler('LocalGestor2', 'hub-tecnologia.json'))).includes('pagamentos-fin'), 'chave de finanças só dentro do arquivo cifrado do hub');
   await h.setViewportSize({ width: 1280, height: 900 }); await h.screenshot({ path: path.join(SAIDA, 'hub-visao.png'), fullPage: true });
 
-  console.log('14. Tema claro, escuro e automático');
+  console.log('14. Tema claro, escuro e automático; estilo Remessa e Sereno');
   const fundo = p => p.evaluate(() => getComputedStyle(document.body).backgroundColor);
   const corCard = p => p.evaluate(() => { const e = document.querySelector('.card'); return e ? getComputedStyle(e).backgroundColor : ''; });
   const tPaginas = { hub: h, central: c, quadro: qc, grupo: g, time: t2, inicio: a };
   for (const [n, p] of Object.entries(tPaginas)) ok(await p.evaluate(() => !!document.getElementById('temaSel') && !!window.gestaoTema), `${n}: seletor de tema presente`);
   ok(await h.evaluate(() => document.documentElement.dataset.tema) === (ESCURO ? 'escuro' : 'claro'), 'automático segue o sistema');
+  if (SERENO) { await h.evaluate(() => gestaoTema.escolherEstilo('remessa')); await c.waitForTimeout(200); }
   await h.evaluate(() => gestaoTema.escolher('claro')); const bgClaro = await fundo(h), cardClaro = await corCard(h);
-  ok(bgClaro === 'rgb(250, 250, 252)', 'claro usa o fundo original: ' + bgClaro);
+  ok(bgClaro === 'rgb(244, 246, 251)', 'claro (estilo Remessa) usa o fundo azulado: ' + bgClaro);
   await h.click('#temaSel>button'); await h.click('#temaSel [data-t="escuro"]');
   ok(await h.evaluate(() => document.documentElement.dataset.tema) === 'escuro' && await h.evaluate(() => localStorage.getItem('gestao.tema')) === 'escuro', 'escolha pelo seletor fica salva neste computador');
-  ok(await fundo(h) === 'rgb(14, 18, 28)' && await corCard(h) !== cardClaro, 'escuro troca fundo e cards do hub');
+  ok(await fundo(h) === 'rgb(9, 17, 44)' && await corCard(h) !== cardClaro, 'escuro (azul-noite) troca fundo e cards do hub');
   await c.waitForTimeout(200);
-  ok(await c.evaluate(() => document.documentElement.dataset.tema) === 'escuro' && await fundo(c) === 'rgb(14, 18, 28)', 'outra ferramenta aberta acompanha a escolha (Central)');
+  ok(await c.evaluate(() => document.documentElement.dataset.tema) === 'escuro' && await fundo(c) === 'rgb(9, 17, 44)', 'outra ferramenta aberta acompanha a escolha (Central)');
   const corInline = await qc.evaluate(() => { const e = [...document.querySelectorAll('[style*="background"]')].find(x => x.offsetParent); return e ? getComputedStyle(e).backgroundColor : ''; });
   await h.evaluate(() => gestaoTema.escolher('claro')); await c.waitForTimeout(200);
-  ok(await fundo(h) === bgClaro && await corCard(h) === cardClaro && await fundo(c) === 'rgb(250, 250, 252)', 'voltar para o claro restaura as cores originais');
+  ok(await fundo(h) === bgClaro && await corCard(h) === cardClaro && await fundo(c) === 'rgb(244, 246, 251)', 'voltar para o claro restaura as cores originais');
   ok(corInline !== await qc.evaluate(() => { const e = [...document.querySelectorAll('[style*="background"]')].find(x => x.offsetParent); return e ? getComputedStyle(e).backgroundColor : ''; }) || !corInline, 'estilos inline também mudam com o tema (Quadro)');
+  // Estilo (ADR-0042): Remessa por padrão, com o trilho marinho; Sereno tira a decoração, em claro e em escuro.
+  const railFundo = p => p.evaluate(() => { const r = document.querySelector('.rail'); return r ? getComputedStyle(r).backgroundImage : ''; });
+  ok(await h.evaluate(() => document.documentElement.dataset.estilo) === 'remessa' && /gradient/.test(await railFundo(c)), 'estilo Remessa por padrão: trilho marinho na Central');
+  await h.click('#temaSel>button'); await h.click('#temaSel [data-e="sereno"]'); await c.waitForTimeout(200);
+  ok(await h.evaluate(() => localStorage.getItem('gestao.estilo')) === 'sereno' && await c.evaluate(() => document.documentElement.dataset.estilo) === 'sereno', 'estilo Sereno fica salvo e vale para as outras ferramentas');
+  ok(await fundo(h) === 'rgb(255, 255, 255)' && !/gradient/.test(await railFundo(c)) && !/gradient/.test(await h.evaluate(() => { const e = document.querySelector('.hero'); return e ? getComputedStyle(e).backgroundImage : 'none'; })), 'Sereno: fundo branco, sem gradiente no trilho nem na faixa do hub');
+  await h.evaluate(() => gestaoTema.escolher('escuro')); await c.waitForTimeout(200);
+  ok(await fundo(h) === 'rgb(18, 19, 22)' && await fundo(c) === 'rgb(18, 19, 22)', 'Sereno escuro: grafite neutro');
+  await h.evaluate(() => gestaoTema.escolherEstilo('remessa')); await c.waitForTimeout(200);
+  ok(await fundo(h) === 'rgb(9, 17, 44)' && await h.evaluate(() => localStorage.getItem('gestao.estilo')) === null, 'voltar ao Remessa com o escuro ligado reconverte para azul-noite');
   await h.evaluate(() => gestaoTema.escolher('auto'));
+  if (SERENO) await h.evaluate(() => gestaoTema.escolherEstilo('sereno'));
   ok(await h.evaluate(() => localStorage.getItem('gestao.tema')) === null && await h.evaluate(() => document.documentElement.dataset.tema) === (ESCURO ? 'escuro' : 'claro'), 'automático volta a seguir o sistema');
 
   console.log('15. Assistente: como funciona, "Estou com sorte" e checklist');
@@ -678,6 +693,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   console.log('20. Assistente 2.3: cada arquivo gerado abre pronto (chaves, arquivo e pasta lembrados)');
   // Contexto novo (IndexedDB limpo) e com os handles guardados de verdade: as ferramentas lembram arquivo e pasta.
   const ctxP = await browser.newContext({ colorScheme: ESCURO ? 'dark' : 'light' });
+  if (SERENO) await ctxP.addInitScript(() => { try { localStorage.setItem('gestao.estilo', 'sereno'); } catch {} });
   const novaP = async (url, mapa) => { const p = await ctxP.newPage(); p.on('pageerror', e => erros.push(url + ': ' + e.message));
     await p.addInitScript(stub(mapa).replace('const put0', 'window.__lembrar = true; const put0').replace('IDBObjectStore.prototype.put = function', 'IDBObjectStore.prototype.__p = function')); await p.goto(base + url); return p; };
   const ap = await novaP('/inicio.html', { 'fin-local': 'LocalPronto', 'fin-comum': 'CompPronto' });
