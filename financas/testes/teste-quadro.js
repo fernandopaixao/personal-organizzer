@@ -1,4 +1,4 @@
-// Teste do Quadro do Time 2.7: Iniciativa › Feature › Card (igual à Central), exportação legível, Refinamento e desenho de sprints.
+// Teste do Quadro do Time 2.8: Iniciativa › Feature › Card (igual à Central), exportação legível, Refinamento, desenho de sprints e sprint sincronizada com a Central.
 // Uso: node financas/testes/teste-quadro.js   (precisa do Playwright e do Chromium instalados)
 const { chromium } = require('playwright');
 const http = require('http'), fs = require('fs'), path = require('path');
@@ -269,6 +269,52 @@ const central = fs.readdirSync(RAIZ).filter(n => /^gestao_pessoal_v\d+\.html$/.t
   const novaS = await sq.evaluate(() => { const db = window.__qt.db; db.settings.refinement.cadenceDays = 7; document.querySelector('[data-act=rNovaSprint]').click(); const s = db.sprints.at(-1); return Math.round((new Date(s.end) - new Date(s.start)) / 864e5) + 1; });
   ok(novaS === 7, '+ Sprint usa a duração definida em Ajustes › Refinamento');
   await sq.screenshot({ path: path.join(RAIZ, 'financas', 'testes', 'saida', 'quadro-desenhar-sprints.png') }).catch(() => {});
+
+  console.log('8. Sprint sincronizada com a Central (contratos 1.2)');
+  const V = require(path.join(RAIZ, 'contratos', 'validar.js'));
+  const s8 = await sq.evaluate(() => { const q = window.__qt, s = q.buildStatus(20, '2026-11-26T10:00:00-03:00'); return { s, er: q.validar(s) }; });
+  const conf = p => [...V.porSchema(p, p.schema), ...V.regrasDoConteudo(p, null).erros];
+  ok(!s8.er.length && !conf(s8.s).length, 'status.json com sprints[] válido no Quadro e no validador dos contratos' + (s8.er.length || conf(s8.s).length ? ': ' + [...s8.er, ...conf(s8.s)].join('; ') : ''));
+  const sAt = (s8.s.sprints || []).find(s => s.state === 'active'), sFe = (s8.s.sprints || []).find(s => s.state === 'closed');
+  ok(sAt && sAt.localId === sp[0].id && sAt.goal === 'Contratação em homologação' && sAt.committed === ini2.n && sAt.capacity?.value === 9, 'a sprint em andamento vai com objetivo, compromisso e capacidade');
+  ok(sFe && sFe.localId === ativa && sFe.doneCommitted <= sFe.committed, 'a última sprint fechada vai junto, com compromisso × cumprido');
+  ok((s8.s.sprints || []).filter(s => s.state === 'active').length === 1 && s8.s.sprints.length <= 8, 'no máximo uma sprint em andamento e 8 no total');
+  const itS = s8.s.initiatives.flatMap(i => i.items || []).filter(i => i.sprintLocalId);
+  ok(itS.length > 0 && itS.every(i => s8.s.sprints.some(s => s.localId === i.sprintLocalId)), 'cards levam sprintLocalId da sprint em que estão');
+  ok(s8.s.initiatives.flatMap(i => i.features || []).filter(f => f.forecastEnd).every(f => ['sprints', 'due'].includes(f.forecastBasis)), 'previsão da feature diz de onde veio (forecastBasis)');
+  // fechar a sprint gera o resultado que vai no metricas.json
+  await sq.evaluate(id => { const s = window.__qt.db.sprints.find(x => x.id === id); s.goal = 'Contratação em homologação'; }, sp[0].id);
+  await sq.evaluate(() => { const bs = [...document.querySelectorAll('[data-act=view][data-v=sprints]')]; (bs.find(b => b.offsetParent) || bs[0]).click(); });
+  await sq.click(`[data-act=closeSprint][data-id="${sp[0].id}"]`); await sq.waitForSelector('#goalMet');
+  await sq.click('#goalMet [data-v=yes]'); await sq.fill('#sprNote', 'Contratação liberada.');
+  await sq.click(`#dlg [data-act=doClose][data-id="${sp[0].id}"]`); await sq.waitForSelector('[data-act=confirmPubMetrics]');
+  const m8 = await sq.evaluate(id => { const q = window.__qt, s = q.db.sprints.find(x => x.id === id), r = q.sprintResultadoPub(s), m = q.buildMetrics(21, '2026-11-26T10:05:00-03:00', r); return { r, m, er: q.validar(m) }; }, sp[0].id);
+  await sq.keyboard.press('Escape');
+  ok(!m8.er.length && !conf(m8.m).length, 'metricas.json com o resultado da sprint válido' + (m8.er.length || conf(m8.m).length ? ': ' + [...m8.er, ...conf(m8.m)].join('; ') : ''));
+  ok(m8.r.localId === sp[0].id && m8.r.goalMet === 'yes' && m8.r.note === 'Contratação liberada.' && m8.r.committed === ini2.n && m8.r.deliveredCommitted <= m8.r.committed && m8.r.delivered >= 0 && m8.r.carriedOver >= 0 && m8.r.capacity?.value === 9, 'o resultado leva objetivo atingido, a linha, compromisso × cumprido e capacidade');
+  const og = m8.m.metrics.find(x => x.standard === 'sprint_goal_met');
+  ok(og && og.data.series[0].points.some(p => p.v === 100) && og.data.series[0].points.some(p => p.v === 50), 'métrica nova "Objetivo da sprint atingido" (atingido 100, em parte 50)');
+
+  console.log('9. Central 15.19: aba Sprints do time, histórico e alertas');
+  const pc9 = await nova('/' + central);
+  const c9 = await pc9.evaluate(([st, mt]) => {
+    const chk = igCheckStatus(st).payload, mm = igCheckMetrics(mt).payload;
+    const fx = chk.initiatives.flatMap(i => i.features || []).find(f => f.forecastEnd);
+    const t = { id: 't1', slug: 'pagamentos', name: 'Pagamentos' }, ini = { id: 'i1', ref: 'PAG-042', name: 'Pix parcelado', teamId: 't1', bucket: 'now', start: '2026-10-01', end: '2026-12-20', phases: [], dependsOn: [], updates: [] };
+    db = normalizeDb(emptyDb()); db.teams = [t]; db.initiatives = [ini]; db.tasks = fx ? [{ id: 'f1', type: 'feature', ref: fx.ref, initiativeId: 'i1', title: 'Contratação no app', end: '2026-01-05', assigneeId: '', start: '' }] : [];
+    db.integ.received = { pagamentos: { status: { payload: chk, at: st.generatedAt, rev: st.revision } } }; db.integ.sprintHist = {};
+    spGuardar('pagamentos', 'status', chk); spGuardar('pagamentos', 'metricas', mm);
+    const x = spDoTime('t1'), html = tmSprintsHTML('t1');
+    let rendered = false; try { $('#lock').classList.add('hidden'); $('#app').classList.remove('hidden'); teamSel = 't1'; tmView = 'sprints'; go('team'); renderTeam(); rendered = !!document.querySelector('#team .sp-tbl') && document.querySelector('#team [data-v=sprints]').classList.contains('on'); } catch (e) { rendered = e.stack.split('\n').slice(0,3).join(' | '); }
+    return { nSp: chk.sprints.length, ativa: x.ativa?.name || null, hist: x.hist.map(h => ({ n: h.name, m: !!h.fromMetrics, g: h.goalMet, c: h.committed, d: h.deliveredCommitted, note: h.note })), html, home: spHomeCard(), meet: spMeetBlock('t1'), ds: db.tasks[0] ? igFeatDs(db.tasks[0]) : '', fx: !!fx, rendered, mmSprint: mm.sprint };
+  }, [s8.s, m8.m]).catch(e => ({ erro: e.message + ' ' + e.stack }));
+  ok(!c9.erro && c9.nSp === s8.s.sprints.length && c9.mmSprint?.goalMet === 'yes' && c9.mmSprint.committed === m8.r.committed, 'Central lê sprints[] do backlog e o resultado da sprint das métricas' + (c9.erro ? ': ' + c9.erro : ''));
+  const hFe = (c9.hist || []).find(h => h.n === m8.r.name);
+  ok(hFe && hFe.m && hFe.g === 'yes' && hFe.note === 'Contratação liberada.' && hFe.c === m8.r.committed && (c9.hist || []).length >= 2, 'a Central guarda o histórico das sprints (do backlog e das métricas)');
+  ok(c9.html && c9.html.includes('Sprints fechadas') && c9.html.includes('Contratação liberada.') && c9.html.includes('atingido') && c9.html.includes('compromisso cumprido'), 'aba Sprints mostra as sprints fechadas com compromisso × cumprido, objetivo e a linha');
+  ok(!c9.fx || (c9.html.includes('Previsão × prazo') && /depois do prazo/.test(c9.home)), 'previsão depois do prazo aparece na aba e no card de Hoje');
+  ok(c9.rendered === true, 'a aba Sprints abre na visão do time' + (c9.rendered !== true ? ': ' + c9.rendered : ''));
+  await pc9.screenshot({ path: path.join(RAIZ, 'financas', 'testes', 'saida', 'central-sprints.png'), fullPage: true }).catch(() => {});
 
   ok(!erros.length, 'sem erros de JavaScript' + (erros.length ? ': ' + erros.join(' | ') : ''));
   await browser.close(); srv.close();

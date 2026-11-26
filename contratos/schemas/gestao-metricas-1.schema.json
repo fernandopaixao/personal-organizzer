@@ -76,11 +76,17 @@
     },
     "sprint": {
       "type": "object",
-      "description": "Sprint cujo fechamento gerou esta publicação (opcional).",
+      "description": "Sprint cujo fechamento gerou esta publicação (opcional). Desde 26/11/2026 (contratos 1.2) pode levar o resultado da sprint: objetivo, compromisso × cumprido, entradas e saídas.",
       "required": [
         "name"
       ],
       "properties": {
+        "localId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "description": "Opcional (desde 26/11/2026). Mesmo localId da sprint em status.json sprints[]."
+        },
         "name": {
           "type": "string"
         },
@@ -95,6 +101,69 @@
         "closedAt": {
           "type": "string",
           "format": "date-time"
+        },
+        "goal": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "goalMet": {
+          "enum": [
+            "yes",
+            "partly",
+            "no"
+          ],
+          "description": "Objetivo atingido, em parte ou não (quem fecha a sprint informa)."
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "committed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Cards na sprint quando ela começou."
+        },
+        "deliveredCommitted": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Dos cards do compromisso, quantos foram entregues."
+        },
+        "delivered": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Todos os cards entregues na sprint, inclusive os que entraram depois."
+        },
+        "added": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "removed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "carriedOver": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Cards que ficaram abertos e passaram para a próxima sprint ou para o backlog."
+        },
+        "capacity": {
+          "type": "object",
+          "required": [
+            "value",
+            "unit"
+          ],
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 0
+            },
+            "unit": {
+              "enum": [
+                "cards",
+                "points"
+              ]
+            }
+          }
         }
       }
     }

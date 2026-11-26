@@ -1,6 +1,6 @@
 # Passo a passo · como lidar com a solução
 
-*26/11/2026 · Remessa · Central v15.18, Quadro do Time 2.7, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.2, contratos 1.1 · visual experimental em `experimental/`*
+*26/11/2026 · Remessa · Central v15.19, Quadro do Time 2.8, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.2, contratos 1.2 · visual experimental em `experimental/`*
 
 Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é independente. Antes de começar: use **Edge ou Chrome** no computador, abrindo o arquivo com dois cliques (não pela pré-visualização do Outlook, Teams ou OneDrive, nem de dentro do .zip), e tenha à mão um **cofre de senhas** (o gerenciador de senhas da empresa).
 
@@ -86,6 +86,7 @@ Times criados pelo assistente já têm prefixo, pasta e chave: pule para o passo
    - **Planejar a sprint:** escolha a próxima sprint, escreva o **objetivo**, confira a capacidade, use **Trazer** nos cards prontos e clique **Iniciar sprint** (depois de fechar a atual em **··· › Sprints**). Ao fechar uma sprint, marque se o objetivo foi atingido e escreva uma linha sobre ela.
    - **Resumo:** marque quem participou, escreva decisões e o próximo refinamento e clique **Copiar para o Teams e encerrar**.
    - O gestor vê as features novas do time na conciliação da Central; critérios e pronto ficam só no time.
+   - A sprint vai para a Central sozinha (2.8): o desenho e a sprint em andamento seguem com o backlog a cada movimentação; o resultado (objetivo atingido, a linha, compromisso × cumprido) segue quando você fecha a sprint e confirma **Publicar** as métricas.
 10. **Exportar os dados em claro** (2.5): **Exportar** na barra do quadro (ou Ajustes › Exportar dados legíveis), escolha **Planilha dos cards (.csv)** ou **JSON legível**, marque **Entendo que o arquivo sai sem criptografia** e clique **Exportar sem cifra**. Guarde o arquivo numa pasta só sua e apague quando não precisar mais; nunca na pasta compartilhada. Para backup, use **Baixar cópia cifrada**.
 
 ## 4. Rotina diária do gestor
@@ -122,6 +123,12 @@ Times criados pelo assistente já têm prefixo, pasta e chave: pule para o passo
 1. **Times** (tecla 7): abra o time e vá em **Reunião de status** (ou, no fórum do time, **Conduzir como reunião de status**).
 2. O status vem pré-preenchido com o que o time publicou; o downstream aparece abaixo de cada feature.
 3. Registre a atualização e gere a **folha para o Teams**.
+
+**Acompanhar a sprint dos times (15.19)**
+1. Em **Times**, abra o time e clique na aba **Sprints** (ou clique na linha da sprint no card do time em **Hoje**, ou num aviso do cartão **Sprints dos times**).
+2. Leia a sprint em andamento: objetivo, compromisso, feitos, o que entrou e saiu e os bloqueados.
+3. Confira **Previsão × prazo**: feature em vermelho termina depois do prazo da Central. Converse com o time; quem muda o desenho é ele, no Quadro.
+4. Em **Sprints fechadas**, acompanhe o compromisso cumprido e o objetivo atingido de cada sprint. "Sem métricas publicadas" quer dizer que o time fechou a sprint e ainda não publicou as métricas: peça para ele publicar no Quadro (**··· › Central › Publicar métricas**).
 
 ## 6. Compartilhar o portfólio e conciliar com os times
 

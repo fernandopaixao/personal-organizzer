@@ -778,7 +778,7 @@ pre.json{background:#f6f7fb;border-radius:10px;padding:12px;font-size:11.5px;max
      gestao-status/1, gestao-metricas/1 dentro de gestao-envelope/1 (AES-256-GCM).
    - Só métricas de time, calculadas a partir da movimentação dos cards.
    ========================================================================= */
-const TOOL = 'quadro_do_time_v1.html', TOOL_VERSION = '2.7.0';
+const TOOL = 'quadro_do_time_v1.html', TOOL_VERSION = '2.8.0';
 /* Pré-configuração gravada pela Central de Gestão (Pessoas › Times › HTML do time).
    No arquivo original fica null; a Central troca o trecho entre os marcadores por um
    objeto quadro-preset/1: { team: { name, slug, prefix, contact }, people: [{ name, role }], key? }.
@@ -1142,7 +1142,7 @@ function epicStatus(e) {
 function epicProgress(e) { const cs = epicCards(e); return cs.length ? Math.round(cs.filter(isDone).length / cs.length * 100) : 0; }
 function cardStatusOut(c) { return c.cancelledAt ? 'cancelled' : isDone(c) ? 'done' : 'open'; }
 function buildStatus(revision, generatedAt) {
-  const lim60 = Date.now() - 60 * DAY;
+  const lim60 = Date.now() - 60 * DAY, sprints = statusSprints(), spOut = new Set(sprints.map(s => s.localId));
   const initiatives = epicsLive().filter(e => e.status !== 'done' || !e.doneAt || new Date(e.doneAt) >= lim60).slice(0, 200).map(e => {
     const all = live().filter(c => c.epicId === e.id), cards = all.filter(c => !c.cancelledAt), done = cards.filter(isDone);
     const o = { ref: INIT_RE.test(e.centralRef || '') ? e.centralRef : null, localId: e.id, name: clip(e.name, 200), status: epicStatus(e) };
@@ -1156,7 +1156,7 @@ function buildStatus(revision, generatedAt) {
       const cf = catFeature(ref), openC = cs.filter(c => !isDone(c)), dues = openC.map(c => c.due).filter(isYmd).sort();
       const pv = rPrevisao('r:' + ref), fc = [dues.at(-1), pv?.end].filter(isYmd).sort().at(-1);
       const f = { ref, status: derivedStatus(cs, { due: cf?.due, forecast: fc }), progress: Math.round((cs.length - openC.length) / cs.length * 100) };
-      if (fc) f.forecastEnd = fc;
+      if (fc) { f.forecastEnd = fc; f.forecastBasis = pv?.end && pv.end === fc ? 'sprints' : 'due'; }
       if (e.featureNotes[ref]) f.note = clip(e.featureNotes[ref], 300);
       return f;
     });
@@ -1172,6 +1172,7 @@ function buildStatus(revision, generatedAt) {
     const items = itF.concat(all.filter(c => (c.featureRef || vivas.has(c.featureId) || c.showToCentral) && (!(isDone(c) || c.cancelledAt) || new Date(c.cancelledAt || doneAt(c) || 0) >= lim60)).map(c => {
       const it = { localId: c.id, title: clip(c.title, 200), kind: clip(c.kind || 'história', 30), status: cardStatusOut(c), featureRef: FEAT_RE.test(c.featureRef || '') ? c.featureRef : null };
       if (!it.featureRef && vivas.has(c.featureId)) it.featureLocalId = c.featureId;
+      if (c.sprintId && spOut.has(c.sprintId)) it.sprintLocalId = c.sprintId;
       if (isYmd(c.due)) it.due = c.due; const d = doneAt(c); if (d) it.doneAt = ymd(d);
       if (c.owner) it.owner = clip(c.owner, 80); if (https(c.link)) it.link = https(c.link);
       return it;
@@ -1181,7 +1182,49 @@ function buildStatus(revision, generatedAt) {
     if (https(e.link)) o.link = https(e.link);
     return o;
   });
-  return { schema: 'gestao-status/1', source: fonte(), generatedAt, revision, catalogRevision: catalog?.revision ?? 0, initiatives };
+  const o = { schema: 'gestao-status/1', source: fonte(), generatedAt, revision, catalogRevision: catalog?.revision ?? 0, initiatives };
+  if (sprints.length) o.sprints = sprints;
+  return o;
+}
+// Sprints ao vivo para a Central (contratos 1.2): a em andamento, as próximas desenhadas e a última fechada.
+function statusSprints() {
+  const vivos = db.sprints.filter(s => !s.deleted && isYmd(s.start) && isYmd(s.end));
+  const ativa = vivos.find(s => s.state === 'active'), plan = vivos.filter(s => s.state === 'planned').sort((a, b) => a.start.localeCompare(b.start)).slice(0, Math.max(1, rCfg().horizon || 3));
+  const fechada = vivos.filter(s => s.state === 'closed').sort((a, b) => b.end.localeCompare(a.end))[0];
+  const featsT = new Set((db.features || []).filter(f => !f.deleted).map(f => f.id));
+  return [...(fechada ? [fechada] : []), ...(ativa ? [ativa] : []), ...plan].slice(0, 8).map(s => {
+    const o = { localId: s.id, name: clip(s.name, 80), start: s.start, end: s.end, state: s.state };
+    if (s.goal) o.goal = clip(s.goal, 300);
+    const cap = s.capacity?.value != null ? s.capacity : (s.state === 'planned' && rCapacidade(s) != null ? { value: rCapacidade(s), unit: rUnidade() } : null);
+    if (cap && Number(cap.value) >= 0) o.capacity = { value: Number(cap.value), unit: cap.unit === 'points' ? 'points' : 'cards' };
+    const cs = activeCards().filter(c => c.sprintId === s.id && !c.cancelledAt);
+    if (s.state === 'closed' && s.result) {
+      Object.assign(o, { committed: s.result.committed, doneCommitted: s.result.deliveredCommitted, added: nIds(s.added), removed: nIds(s.removed), blocked: 0 });
+    } else if (s.state === 'active') {
+      const comp = s.committed || [], esc0 = sprintEscopo(s);
+      Object.assign(o, { committed: comp.length, doneCommitted: comp.filter(id => { const c = cardById(id); return c && isDone(c); }).length, added: esc0.added.length, removed: esc0.removed.length, blocked: cs.filter(c => c.blocked && !isDone(c)).length });
+    } else {
+      Object.assign(o, { committed: cs.length, blocked: cs.filter(c => c.blocked && !isDone(c)).length });
+    }
+    const porF = new Map();
+    for (const c of (s.state === 'closed' ? (s.deliveredIds || []).map(cardById).filter(Boolean) : cs)) {
+      const k = FEAT_RE.test(c.featureRef || '') ? 'r:' + c.featureRef : featsT.has(c.featureId) ? 't:' + c.featureId : null;
+      if (k) porF.set(k, (porF.get(k) || 0) + 1);
+    }
+    if (porF.size) o.features = [...porF].slice(0, 100).map(([k, n]) => k.startsWith('r:') ? { ref: k.slice(2), cards: n } : { localId: k.slice(2), cards: n });
+    return o;
+  });
+}
+const nIds = v => Array.isArray(v) ? v.length : Number.isInteger(v) ? v : 0;
+// Resultado da sprint que vai no metricas.json ao fechar (contratos 1.2)
+function sprintResultadoPub(s) {
+  const o = { localId: s.id, name: s.name, start: s.start, end: s.end, closedAt: s.closedAt };
+  if (s.goal) o.goal = clip(s.goal, 300);
+  if (s.goal && s.goalMet) o.goalMet = s.goalMet;
+  if (s.note) o.note = clip(s.note, 300);
+  if (s.result) Object.assign(o, { committed: s.result.committed, deliveredCommitted: s.result.deliveredCommitted, delivered: s.result.delivered, added: nIds(s.added), removed: nIds(s.removed), carriedOver: s.result.carriedOver ?? 0 });
+  if (s.capacity?.value != null) o.capacity = { value: Number(s.capacity.value), unit: s.capacity.unit === 'points' ? 'points' : 'cards' };
+  return o;
 }
 const catLabel = k => (BLOCK_CATS.find(b => b[0] === k) || [k, k || 'Bloqueado'])[1];
 function fonte() { return { team: db.team.slug, teamName: db.team.name, tool: TOOL, toolVersion: TOOL_VERSION, ...(db.team.contact ? { contact: db.team.contact } : {}) }; }
@@ -1243,6 +1286,9 @@ function buildMetrics(revision, generatedAt, sprint) {
     M.push({ id: 'compromisso_sprint', standard: 'predictability', name: 'Compromisso cumprido', definition: 'Cards na sprint quando ela começou e entregues até o fim dela ÷ cards na sprint quando ela começou.', group: 'previsibilidade', order: 2, scope: { level: 'team' },
       valueType: 'percent', unit: '%', direction: 'higher_is_better', grain: 'sprint', viz: { type: 'bar', showTarget: true }, target: { value: 80, op: '>=', label: 'Meta' },
       data: { series: [{ key: 'cumprido', label: 'Cumprido', points: sps.map(s => ({ t: s.start, label: clip(s.name, 40), v: s.state === 'active' || !s.result?.committed ? null : Math.round(s.result.deliveredCommitted / s.result.committed * 100), ...(s.result?.committed ? { n: s.result.committed } : {}) })) }] } });
+    if (sps.some(s => s.goalMet)) M.push({ id: 'objetivo_sprint', standard: 'sprint_goal_met', name: 'Objetivo da sprint atingido', definition: 'Resposta de quem fechou a sprint: atingido = 100, em parte = 50, não = 0. Sprint sem objetivo fica sem valor.', group: 'previsibilidade', order: 3, scope: { level: 'team' },
+      valueType: 'percent', unit: '%', direction: 'higher_is_better', grain: 'sprint', viz: { type: 'bar' },
+      data: { series: [{ key: 'objetivo', label: 'Objetivo', points: sps.map(s => ({ t: s.start, label: clip(s.name, 40), v: s.state === 'closed' && s.goal && s.goalMet ? { yes: 100, partly: 50, no: 0 }[s.goalMet] ?? null : null })) }] } });
   }
   // % bloqueado
   M.push({ id: 'blocked_pct', standard: 'blocked_pct', name: '% do tempo bloqueado', definition: 'Tempo bloqueado ÷ tempo do início à entrega, somado nos cards entregues na semana.', group: 'qualidade', order: 1, scope: { level: 'team' },
@@ -1280,15 +1326,19 @@ function validar(o) {
   const d = (v, m) => P(v === undefined || isYmd(v), m + ': data deve ser AAAA-MM-DD');
   if (o.schema === 'gestao-status/1') {
     P(o.initiatives.length <= 200, 'mais de 200 iniciativas');
+    const sps = o.sprints || [], spIds = new Set(sps.map(s => s.localId));
+    P(sps.length <= 8, 'mais de 8 sprints'); P(sps.filter(s => s.state === 'active').length <= 1, 'mais de uma sprint em andamento');
+    for (const s of sps) { P(s.localId && ['planned', 'active', 'closed'].includes(s.state), `sprint ${s.localId}: estado inválido`); d(s.start, s.localId); d(s.end, s.localId); P(s.doneCommitted === undefined || s.doneCommitted <= (s.committed ?? 0), `sprint ${s.localId}: feitos do compromisso acima do compromisso`); for (const f of s.features || []) P(!f.ref || FEAT_RE.test(f.ref), `sprint ${s.localId}: feature ${f.ref} inválida`); }
     for (const i of o.initiatives) {
       P(i.localId && i.localId.length <= 80, 'localId inválido'); P(i.ref === null || INIT_RE.test(i.ref), `${i.localId}: ref inválido`);
       P(['ok', 'attn', 'late', 'done', 'paused'].includes(i.status), `${i.localId}: status inválido`); d(i.forecastEnd, i.localId);
-      for (const f of i.features || []) P(FEAT_RE.test(f.ref), `${i.localId}: feature ${f.ref} inválida`);
+      for (const f of i.features || []) { P(FEAT_RE.test(f.ref), `${i.localId}: feature ${f.ref} inválida`); P(f.forecastBasis === undefined || ['sprints', 'due'].includes(f.forecastBasis), `${f.ref}: forecastBasis inválido`); }
       const fLoc = new Set((i.items || []).filter(x => x.kind === 'feature').map(x => x.localId));
-      for (const it of i.items || []) { P(it.featureRef === null || FEAT_RE.test(it.featureRef), `${it.localId}: featureRef inválido`); P(it.featureLocalId === undefined || (it.featureRef === null && fLoc.has(it.featureLocalId)), `${it.localId}: featureLocalId deve apontar para uma feature do time nesta iniciativa`); d(it.due, it.localId); d(it.doneAt, it.localId); P(!it.link || /^https:\/\//.test(it.link), `${it.localId}: link deve ser https`); }
+      for (const it of i.items || []) { P(it.sprintLocalId === undefined || spIds.has(it.sprintLocalId), `${it.localId}: sprintLocalId deve apontar para uma sprint em sprints[]`); P(it.featureRef === null || FEAT_RE.test(it.featureRef), `${it.localId}: featureRef inválido`); P(it.featureLocalId === undefined || (it.featureRef === null && fLoc.has(it.featureLocalId)), `${it.localId}: featureLocalId deve apontar para uma feature do time nesta iniciativa`); d(it.due, it.localId); d(it.doneAt, it.localId); P(!it.link || /^https:\/\//.test(it.link), `${it.localId}: link deve ser https`); }
     }
   } else if (o.schema === 'gestao-metricas/1') {
     P(o.metrics.length <= 100, 'mais de 100 métricas'); const ids = new Set();
+    if (o.sprint) { const s = o.sprint; P(s.name, 'sprint sem nome'); d(s.start, 'sprint'); d(s.end, 'sprint'); P(s.goalMet === undefined || ['yes', 'partly', 'no'].includes(s.goalMet), 'sprint: goalMet inválido'); P(s.deliveredCommitted === undefined || s.deliveredCommitted <= (s.committed ?? 0), 'sprint: cumprido acima do compromisso'); }
     for (const m of o.metrics) {
       P(/^[a-z0-9_]{1,60}$/.test(m.id) && !ids.has(m.id), `métrica ${m.id}: id inválido ou repetido`); ids.add(m.id);
       P(['team', 'initiative', 'feature'].includes(m.scope?.level ?? 'team'), `métrica ${m.id}: escopo não permitido (nada por pessoa)`);
@@ -3022,7 +3072,7 @@ document.addEventListener('click', async e => {
         s.result = { committed: s.committed.length, deliveredCommitted: s.committed.filter(cid => deliv.some(c => c.id === cid)).length, delivered: deliv.length, carriedOver: activeCards().filter(c => c.sprintId === s.id && !isDone(c)).length };
         s.deliveredIds = deliv.map(c => c.id); s.state = 'closed'; s.closedAt = agoraComFuso(); s.upd = Date.now();
         for (const c of activeCards()) if (c.sprintId === s.id && !isDone(c)) { c.sprintId = dest; c.upd = Date.now(); }
-        touch(); pubMetricsModal({ name: s.name, start: s.start, end: s.end, closedAt: s.closedAt }); break;
+        touch(); pubMetricsModal(sprintResultadoPub(s)); break;
       }
       case 'confirmPubMetrics': { const sp = pendingSprintPub; closeModal(); await publicar('metricas', { interativo: true, sprint: sp }); break; }
       case 'pubMetrics': pubMetricsModal(null); break;
@@ -3184,7 +3234,7 @@ async function chaveDoPreset() {   // cadastra a chave embutida uma única vez (
   if (h && h.queryPermission && (await h.queryPermission({ mode: 'readwrite' })) === 'granted') { try { await abrirArquivo(h, { pedir: false }); return; } catch {} }
   renderWelcome();
 })();
-window.__qt = { rPrevisao, rMudarSprint, rCapacidade, rVazao, iniciarSprint, sprintEscopo, moverParaFeature, dividirCard, juntarCards, rDesfazer, isReady, rSessao, rResumoTexto, rCardsOf, fKey, PRESET, conectarPasta, get db() { return db; }, set db(v) { db = v; }, get catalog() { return catalog; }, set catalog(v) { catalog = v; }, applyCatalogLinks, buildStatus, buildMetrics, validar, exportCsv, exportLegivel, novaFeature, ligarFeature, publicar, colarChave, chaveiro, decifrar, cifrar, lerCatalogoEnvelope, render, mergeDb, demoDb, abrirArquivo, salvar, get pub() { return pub; } };
+window.__qt = { statusSprints, sprintResultadoPub, rPrevisao, rMudarSprint, rCapacidade, rVazao, iniciarSprint, sprintEscopo, moverParaFeature, dividirCard, juntarCards, rDesfazer, isReady, rSessao, rResumoTexto, rCardsOf, fKey, PRESET, conectarPasta, get db() { return db; }, set db(v) { db = v; }, get catalog() { return catalog; }, set catalog(v) { catalog = v; }, applyCatalogLinks, buildStatus, buildMetrics, validar, exportCsv, exportLegivel, novaFeature, ligarFeature, publicar, colarChave, chaveiro, decifrar, cifrar, lerCatalogoEnvelope, render, mergeDb, demoDb, abrirArquivo, salvar, get pub() { return pub; } };
 </script>
 <script id="f4seg">
 /* seguranca-comum 1.0 · aviso de senha e cofre, lembrete de teste da senha e "Onde estou?"

@@ -177,6 +177,13 @@
                 "note": {
                   "type": "string",
                   "maxLength": 300
+                },
+                "forecastBasis": {
+                  "enum": [
+                    "sprints",
+                    "due"
+                  ],
+                  "description": "Opcional (desde 26/11/2026). De onde veio o forecastEnd: \"sprints\" quando saiu do desenho de sprints do time (vazão), \"due\" quando é o maior prazo dos cards."
                 }
               }
             }
@@ -225,6 +232,12 @@
                   "maxLength": 80,
                   "description": "Opcional (desde 26/11/2026). localId do item kind \"feature\" desta mesma iniciativa em que o card está (feature criada pelo time). Só com featureRef null. Quando o gestor liga essa feature a uma feature da Central, o card vai junto."
                 },
+                "sprintLocalId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80,
+                  "description": "Opcional (desde 26/11/2026). localId da sprint (em sprints[]) em que o card está planejado ou em andamento."
+                },
                 "due": {
                   "type": "string",
                   "format": "date"
@@ -239,6 +252,119 @@
                 "link": {
                   "type": "string",
                   "pattern": "^https://"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "sprints": {
+      "type": "array",
+      "maxItems": 8,
+      "description": "Opcional (desde 26/11/2026, contratos 1.2). Sprints do time ao vivo: a em andamento, as próximas planejadas e a última fechada. No máximo uma com state \"active\". O resultado oficial da sprint vai no metricas.json ao fechar.",
+      "items": {
+        "type": "object",
+        "required": [
+          "localId",
+          "name",
+          "state"
+        ],
+        "properties": {
+          "localId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "start": {
+            "type": "string",
+            "format": "date"
+          },
+          "end": {
+            "type": "string",
+            "format": "date"
+          },
+          "state": {
+            "enum": [
+              "planned",
+              "active",
+              "closed"
+            ]
+          },
+          "goal": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "capacity": {
+            "type": "object",
+            "required": [
+              "value",
+              "unit"
+            ],
+            "properties": {
+              "value": {
+                "type": "number",
+                "minimum": 0
+              },
+              "unit": {
+                "enum": [
+                  "cards",
+                  "points"
+                ]
+              }
+            }
+          },
+          "committed": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Cards na sprint quando ela começou (planejada: cards planejados até agora)."
+          },
+          "doneCommitted": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Dos cards do compromisso, quantos já foram entregues."
+          },
+          "added": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Cards que entraram depois do início."
+          },
+          "removed": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Cards que saíram depois do início."
+          },
+          "blocked": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Cards da sprint bloqueados agora."
+          },
+          "features": {
+            "type": "array",
+            "maxItems": 100,
+            "description": "Quanto de cada feature está nesta sprint. ref para feature da Central, localId para feature criada pelo time (item kind \"feature\").",
+            "items": {
+              "type": "object",
+              "required": [
+                "cards"
+              ],
+              "properties": {
+                "ref": {
+                  "type": "string",
+                  "pattern": "^[A-Z]{2,5}-[0-9]{3,}\\.F[0-9]+$"
+                },
+                "localId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "cards": {
+                  "type": "integer",
+                  "minimum": 0
                 }
               }
             }
