@@ -1,6 +1,6 @@
 # Visão geral da solução · Central de Gestão, Quadro do Time e integração
 
-*26/11/2026 · estado atual: Remessa · Central v15.18, Quadro do Time 2.5, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central) e contratos 1.1 (detalhes em `docs/plano-v15.md`, `docs/plano-hub.md`, `docs/plano-financas.md` e [`contratos/`](../contratos/LEIA-ME.md))*
+*26/11/2026 · estado atual: Remessa · Central v15.18, Quadro do Time 2.6, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central) e contratos 1.1 (detalhes em `docs/plano-v15.md`, `docs/plano-hub.md`, `docs/plano-financas.md` e [`contratos/`](../contratos/LEIA-ME.md))*
 
 > **Por onde começar:** [funcionalidades, usos e objetivos](funcionalidades.md) · [jornada do usuário](jornada-do-usuario.md) · [passo a passo](passo-a-passo.md) · [decisões de arquitetura (ADRs)](adr/README.md)
 
@@ -45,7 +45,7 @@ O desenho mostra só a troca de tarefas. Pela mesma pasta passam as finanças, o
 |---|---|---|---|
 | **Hub da solução** | Cockpit de gestão (2.3): login único, cards e lista de atenção de todos os módulos (lidos sem gravar), abre as outras ferramentas e deixa post-its cifrados para os times, que aparecem no Quadro | Fernando (e quem quiser) | Repositório: `hub.html`, plano em `docs/plano-hub.md` |
 | **Central de Gestão v15** | Gestão pessoal e de portfólio do gestor: tarefas, delegação, iniciativas e features, rituais, pessoas, métricas e integração com os times | Fernando | Repositório: `gestao_pessoal_v15.html`, plano em `docs/plano-v15.md`. Projeto: `gestao-v15/` |
-| **Quadro do Time 2.5** | Quadro de cards, backlog, sprints, iniciativas ligadas à Central e métricas de fluxo do time | Cada time | Repositório e projeto: `ferramenta-time/` (HTML, guia, telas) |
+| **Quadro do Time 2.6** | Quadro de cards, backlog, refinamento com o time, sprints, iniciativas ligadas à Central e métricas de fluxo do time | Cada time | Repositório e projeto: `ferramenta-time/` (HTML, guia, telas) |
 | **Finanças do Grupo e do Time** | Plano financeiro multianual de cada time (lançamentos locais, plano agregado publicado) e consolidado do grupo ano a ano contra o orçamento, com cards de leitura e gráficos | Fernando (grupo) e responsável financeiro de cada time | Repositório: `financas/`, plano em `docs/plano-financas.md` |
 | **Férias (página da Central)** | Férias e ausências em níveis (gestor → liderança): mapa de calor dos dias com mais e menos gente fora, calendário e sugestão de períodos. Fica na página **Férias da Central** (mesmo arquivo e senha, [ADR-0033](adr/0033-ferias-dentro-da-central.md)) e só o gestor cadastra, inclusive as pessoas dos times ([ADR-0036](adr/0036-ferias-so-o-gestor-cadastra.md)). Apoio, não substitui a ferramenta oficial | Gestores e liderança | Repositório: página Férias em `gestao_pessoal_v15.html`, montada a partir de `financas/src/ferias.html`; plano em `docs/plano-ferias.md` |
 | **Assistente inicial** | Monta a solução para o papel da pessoa e cria os primeiros arquivos cifrados | Quem está começando | Repositório: `inicio.html` |
@@ -145,7 +145,7 @@ Documento detalhado: `integracao-time/04-modelo-iniciativa-feature.md`.
 
 ---
 
-## 5. Quadro do Time (2.5)
+## 5. Quadro do Time (2.6)
 
 A ferramenta pronta para os times. Também é um HTML único (`ferramenta-time/quadro_do_time_v1.html`), aberto no Edge ou Chrome.
 
@@ -154,6 +154,7 @@ A ferramenta pronta para os times. Também é um HTML único (`ferramenta-time/q
 | **Quadro** | Kanban com raias (iniciativa, feature ou pessoa), barras de WIP, envelhecimento dos cards, entrega recolhida, filtros rápidos, faixa de pulso e card em painel lateral; aviso quando a feature do card depende de outra ainda aberta. A coluna Backlog fica fora do quadro (opção em Ajustes) |
 | **Backlog** | Lista agrupável (iniciativa, feature, responsável, sprint) com filtros e "+ Card" em cada grupo |
 | **Novo card e criação rápida** | Formulário no padrão da tarefa da Central e barra rápida: `Ajustar retry @ana amanhã #PAG-042 F2 !bug` |
+| **Refinamento** | Com o time: árvore Iniciativa › Feature, mover cards entre features (arrastar ou **M**), dividir, juntar, desfazer; tamanho, critérios de aceite e pronto para sprint; resumo da sessão para o Teams ([ADR-0041](adr/0041-refinamento-no-quadro.md)) |
 | **Sprints** | Planejar, iniciar, fechar; ao fechar, pergunta se publica as métricas |
 | **Iniciativas** | Ligadas à Central, só do time, da Central ainda sem épico (botão Trazer) e concluídas; detalhe com progresso, bloqueios, previsão e as **features** (da Central e do time) com os cards de cada uma; **+ Feature do time** |
 | **Exportar** | CSV dos cards ou JSON legível (Iniciativa › Feature › Card), sem criptografia, só depois de confirmar ([ADR-0040](adr/0040-exportar-dados-legiveis-com-confirmacao.md)) |

@@ -1,4 +1,4 @@
-// Teste do Quadro do Time 2.5: Iniciativa › Feature › Card (igual à Central) e exportação legível.
+// Teste do Quadro do Time 2.6: Iniciativa › Feature › Card (igual à Central), exportação legível e Refinamento.
 // Uso: node financas/testes/teste-quadro.js   (precisa do Playwright e do Chromium instalados)
 const { chromium } = require('playwright');
 const http = require('http'), fs = require('fs'), path = require('path');
@@ -142,6 +142,79 @@ const central = fs.readdirSync(RAIZ).filter(n => /^gestao_pessoal_v\d+\.html$/.t
   ok(!r.erro && r.bloco.includes('feature do time · ' + r.filhos + ' card(s)'), 'na iniciativa, a Central mostra a feature do time com a contagem de cards dela');
   ok(!r.erro && r.depois.naFeature === r.filhos + 1 && !r.depois.soltos.includes(r.fLoc), 'ligada a uma feature da Central, a feature do time leva os cards junto (downstream embaixo da feature)');
   ok(!r.erro && /padding-left:18px/.test(r.depois.html), 'cards da feature do time aparecem recuados embaixo dela');
+
+  console.log('6. Refinamento: organizar, mover, dividir, juntar, desfazer, pronto e resumo');
+  const rq = await nova(process.env.QUADRO || '/ferramenta-time/quadro_do_time_v1.html');
+  await rq.click('[data-act=demo]'); await rq.waitForSelector('.kc');
+  await rq.evaluate(() => { const bs = [...document.querySelectorAll('[data-act=view][data-v=refine]')]; (bs.find(b => b.offsetParent) || bs[0]).click(); });
+  await rq.waitForSelector('.rlay');
+  ok(await rq.locator('.tnav [data-v=refine]').count() === 1, 'Refinamento está no menu do topo');
+  ok(await rq.locator('.rtree .rti[data-rdrop^="r:PAG-042.F"]').count() >= 2 && await rq.locator('.rtree .rti[data-rdrop^="t:FEAT-"]').count() >= 1, 'árvore mostra features da Central e do time');
+  const semF = await rq.evaluate(() => window.__qt.rCardsOf('-').map(c => c.id));
+  ok(semF.length > 0 && await rq.locator('.rin .rrow').count() === semF.length, 'coluna "Sem feature" lista os cards abertos sem feature');
+  // arrastar dois cards de "Sem feature" para uma feature do time de outra iniciativa
+  const alvoT = await rq.evaluate(() => { const f = window.__qt.db.features.find(x => !x.deleted); return { k: 't:' + f.id, epic: f.epicId }; });
+  await rq.click(`.rin .rrow[data-card="${semF[0]}"] [data-act=rPick]`); await rq.click(`.rin .rrow[data-card="${semF[1]}"] [data-act=rPick]`);
+  const dt = await rq.evaluateHandle(() => new DataTransfer());
+  await rq.dispatchEvent(`.rin .rrow[data-card="${semF[0]}"]`, 'dragstart', { dataTransfer: dt });
+  await rq.dispatchEvent(`.rtree .rti[data-rdrop="${alvoT.k}"]`, 'drop', { dataTransfer: dt });
+  const mv = await rq.evaluate(([ids, k]) => ids.map(id => { const c = window.__qt.db.cards.find(x => x.id === id); return [window.__qt.fKey(c), c.epicId]; }), [semF.slice(0, 2), alvoT.k]);
+  ok(mv.every(([k, e]) => k === alvoT.k && e === alvoT.epic), 'arrastar os selecionados para a feature move os dois e acerta a iniciativa deles');
+  ok(await rq.locator('.toast.undo').count() === 1, 'aviso com Desfazer depois de mover');
+  await rq.keyboard.press('Control+z');
+  ok(await rq.evaluate(ids => ids.every(id => window.__qt.fKey(window.__qt.db.cards.find(x => x.id === id)) === '-'), semF.slice(0, 2)), 'Ctrl+Z desfaz a movimentação');
+  // mover pelo formulário (M) para uma feature da Central
+  await rq.click(`.rin .rrow[data-card="${semF[0]}"] [data-act=rPick]`); await rq.keyboard.press('m'); await rq.waitForSelector('#rmvK');
+  ok(await rq.locator('#dlg .tf-main').count() === 1 && await rq.locator('#dlg .tf-side').count() === 1, 'Mover para… é um formulário em duas colunas');
+  await rq.selectOption('#rmvK', 'r:PAG-042.F2'); await rq.click('#rmvForm button.pri');
+  const m2 = await rq.evaluate(id => { const c = window.__qt.db.cards.find(x => x.id === id), e = window.__qt.db.epics.find(x => x.id === c.epicId); return { ref: c.featureRef, fid: c.featureId, ini: e?.centralRef }; }, semF[0]);
+  ok(m2.ref === 'PAG-042.F2' && !m2.fid && m2.ini === 'PAG-042', 'card vai para a feature da Central e para a iniciativa ligada a ela');
+  // ordem dentro da feature (Alt+↑)
+  await rq.click('.rtree .rti[data-rdrop="r:PAG-042.F2"]');
+  const ordem = await rq.evaluate(() => window.__qt.rCardsOf('r:PAG-042.F2').map(c => c.id));
+  await rq.focus(`.rrow[data-card="${ordem[1]}"]`); await rq.keyboard.press('Alt+ArrowUp');
+  ok(await rq.evaluate(() => window.__qt.rCardsOf('r:PAG-042.F2')[0].id) === ordem[1], 'Alt+↑ sobe o card na prioridade da feature');
+  // dividir
+  const alvoD = ordem[0];
+  await rq.click(`.rrow[data-card="${alvoD}"] [data-act=rPick]`); await rq.click('[data-act=rDividir]'); await rq.waitForSelector('#rdvL');
+  await rq.fill('#rdvL', 'Parte A\nParte B\nParte C'); await rq.fill('#rdvP', '2, 1, 1'); await rq.click('#rdvForm button.pri');
+  const dv = await rq.evaluate(id => { const db = window.__qt.db, c = db.cards.find(x => x.id === id), n = db.cards.filter(x => x.splitFrom === id); return { t: c.title, pts: c.points, novos: n.map(x => [x.title, x.featureRef, x.points]), hist: c.history.length > 0 }; }, alvoD);
+  ok(dv.t === 'Parte A' && dv.pts === 2 && dv.novos.length === 2 && dv.novos.every(x => x[1] === 'PAG-042.F2') && dv.novos[0][2] === 1, 'Dividir: o original vira a primeira parte e as outras nascem na mesma feature, com os pontos');
+  // juntar
+  const dois = await rq.evaluate(id => window.__qt.db.cards.filter(x => x.splitFrom === id).map(x => x.id), alvoD);
+  for (const id of dois) await rq.click(`.rrow[data-card="${id}"] [data-act=rPick]`);
+  await rq.click('[data-act=rJuntar]'); await rq.waitForSelector('#rjnForm'); await rq.click('#rjnForm button.pri');
+  const jn = await rq.evaluate(([a, b]) => { const db = window.__qt.db, A = db.cards.find(x => x.id === a), B = db.cards.find(x => x.id === b); return { pts: A.points, canc: !!B.cancelledAt, motivo: B.cancelReason }; }, dois);
+  ok(jn.pts === 2 && jn.canc && /juntado em/.test(jn.motivo), 'Juntar: um card fica (com a soma dos pontos) e o outro é cancelado com o motivo');
+  // refinar: critérios e pronto para sprint
+  await rq.evaluate(id => { const c = window.__qt.db.cards.find(x => x.id === id); delete c.ready; }, alvoD);
+  await rq.click('[data-act=rStep][data-v=ref]'); await rq.waitForSelector('.rtab');
+  await rq.click(`.rtab tr[data-card="${alvoD}"] td:nth-child(2)`); await rq.waitForSelector('#dlg form[data-act=rAccAdd]');
+  await rq.fill('#dlg form[data-act=rAccAdd] input', 'Mostra o CET'); await rq.keyboard.press('Enter');
+  await rq.waitForTimeout(50);
+  for (const t of ['Critérios de aceite escritos', 'Tamanho combinado', 'Sem dependência aberta']) if (!await rq.locator(`#dlg [data-act=rRdy][data-v="${t}"].on`).count()) await rq.click(`#dlg [data-act=rRdy][data-v="${t}"]`);
+  const rd = await rq.evaluate(id => { const c = window.__qt.db.cards.find(x => x.id === id); return { ac: c.acceptance.map(a => a.text), pronto: window.__qt.isReady(c), at: !!c.ready.at }; }, alvoD);
+  ok(rd.ac.includes('Mostra o CET') && rd.pronto && rd.at, 'critério de aceite e os itens do pronto deixam o card pronto para sprint');
+  await rq.keyboard.press('Escape');
+  await rq.fill(`.rtab input[data-rpts="${alvoD}"]`, '5'); await rq.press(`.rtab input[data-rpts="${alvoD}"]`, 'Tab');
+  ok(await rq.evaluate(id => window.__qt.db.cards.find(x => x.id === id).points, alvoD) === 5, 'tamanho editado direto na tabela do Refinar');
+  // resumo
+  await rq.click('[data-act=rResumo]'); await rq.waitForSelector('#rsN');
+  await rq.fill('#rsN', 'Esperar o contrato do parceiro.');
+  const txt = await rq.evaluate(() => window.__qt.rResumoTexto(window.__qt.rSessao()));
+  ok(/Cards movidos entre features/.test(txt) && /dividido em/.test(txt) && /juntado/.test(txt) && /Esperar o contrato/.test(txt) && /Prontos para sprint nesta sessão: 1/.test(txt), 'Resumo traz movimentações, divisão, junção, prontos e decisões');
+  ok(!/Iniciativas novas|Features novas/.test(txt), 'Resumo não conta como novo o que já existia antes da sessão');
+  const [dlT] = await Promise.all([rq.waitForEvent('download'), rq.click('[data-act=rTxt]')]);
+  ok(dlT.suggestedFilename().startsWith('refinamento-pagamentos-'), 'Resumo baixa em .txt');
+  await ctx.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: base }).catch(() => {});
+  await rq.click('[data-act=rEncerrar]'); await rq.waitForFunction(() => !window.__qt.rSessao(), null, { timeout: 5000 }).catch(() => {});
+  ok(await rq.evaluate(() => !window.__qt.rSessao() && window.__qt.db.refinements.length === 1 && !!window.__qt.db.refinements[0].endedAt), 'encerrar guarda a sessão no histórico do Quadro');
+  // união de arquivos: sessão e critérios
+  const mr = await rq.evaluate(() => { const { mergeDb, db } = window.__qt; const a = structuredClone(db), b = structuredClone(db); b.refinements = []; const m = mergeDb(a, b); return m.refinements.length; });
+  ok(mr === 1, 'união de arquivos mantém o histórico de refinamentos');
+  // exportação legível leva critérios e pronto
+  ok(await rq.evaluate(id => { const j = window.__qt.exportLegivel(); const all = j.iniciativas.flatMap(i => [...i.cardsSemFeature, ...i.features.flatMap(f => f.cards)]); const c = all.find(x => x.codigo === id); return c.criteriosDeAceite.some(a => a.texto === 'Mostra o CET') && c.prontoParaSprint; }, alvoD), 'exportação legível leva critérios de aceite e pronto para sprint');
+  await rq.screenshot({ path: path.join(RAIZ, 'financas', 'testes', 'saida', 'quadro-refinamento.png') }).catch(() => {});
 
   ok(!erros.length, 'sem erros de JavaScript' + (erros.length ? ': ' + erros.join(' | ') : ''));
   await browser.close(); srv.close();

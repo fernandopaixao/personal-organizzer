@@ -1,6 +1,6 @@
 # Passo a passo · como lidar com a solução
 
-*26/11/2026 · Remessa · Central v15.18, Quadro do Time 2.5, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.2, contratos 1.1 · visual experimental em `experimental/`*
+*26/11/2026 · Remessa · Central v15.18, Quadro do Time 2.6, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.2, contratos 1.1 · visual experimental em `experimental/`*
 
 Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é independente. Antes de começar: use **Edge ou Chrome** no computador, abrindo o arquivo com dois cliques (não pela pré-visualização do Outlook, Teams ou OneDrive, nem de dentro do .zip), e tenha à mão um **cofre de senhas** (o gerenciador de senhas da empresa).
 
@@ -79,7 +79,12 @@ Times criados pelo assistente já têm prefixo, pasta e chave: pule para o passo
 6. Para agrupar cards, use **features** (2.5): no detalhe da iniciativa, **+ Feature do time** cria uma feature (nome, responsável, prazo); **+ Card nesta feature** cria o card já dentro dela. No card, o campo **Feature** mostra as da Central e as do time. O gestor vê a feature e os cards dela na Central, embaixo da iniciativa. Card antigo do tipo feature: abra e clique **Transformar em feature**.
 7. Pronto: cada movimentação de card publica o backlog sozinha. Ao **fechar a sprint**, confirme a publicação das métricas.
 8. Para chamar o resto do time, envie o mesmo HTML e a chave por mensagem direta. Cada pessoa repete os passos 1 a 4.
-9. **Exportar os dados em claro** (2.5): **Exportar** na barra do quadro (ou Ajustes › Exportar dados legíveis), escolha **Planilha dos cards (.csv)** ou **JSON legível**, marque **Entendo que o arquivo sai sem criptografia** e clique **Exportar sem cifra**. Guarde o arquivo numa pasta só sua e apague quando não precisar mais; nunca na pasta compartilhada. Para backup, use **Baixar cópia cifrada**.
+9. **Refinar com o time** (2.6): abra **Refinamento** no menu do topo e compartilhe a tela.
+   - **Organizar:** escolha a feature na árvore à esquerda. Para mudar entregáveis de feature, marque os cards e arraste para outra feature da árvore, ou tecle **M** e escolha no formulário. Use **Dividir** (um card vira vários, um por linha) e **Juntar** (vários viram um). Errou? **Desfazer** ou Ctrl+Z. Ideias novas entram pela caixa **Nova ideia…** da coluna **Sem feature**. Feature nova: **+ Feature do time** embaixo da iniciativa.
+   - **Refinar:** passe feature por feature (‹ anterior / próxima ›), digite o tamanho na tabela e abra cada card para escrever os **critérios de aceite** e marcar o **pronto para sprint**. Os itens do pronto são do time: **Ajustes › Refinamento**.
+   - **Resumo:** marque quem participou, escreva decisões e o próximo refinamento e clique **Copiar para o Teams e encerrar**.
+   - O gestor vê as features novas do time na conciliação da Central; critérios e pronto ficam só no time.
+10. **Exportar os dados em claro** (2.5): **Exportar** na barra do quadro (ou Ajustes › Exportar dados legíveis), escolha **Planilha dos cards (.csv)** ou **JSON legível**, marque **Entendo que o arquivo sai sem criptografia** e clique **Exportar sem cifra**. Guarde o arquivo numa pasta só sua e apague quando não precisar mais; nunca na pasta compartilhada. Para backup, use **Baixar cópia cifrada**.
 
 ## 4. Rotina diária do gestor
 
