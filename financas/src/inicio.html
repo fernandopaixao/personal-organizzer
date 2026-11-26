@@ -39,6 +39,9 @@
 .lid{display:grid;gap:6px;margin:4px 0}.lid label{display:flex;gap:8px;align-items:flex-start;font-size:13px;cursor:pointer}.lid input{accent-color:var(--bv);margin-top:3px}
 @media (max-width:640px){.passo{padding-left:16px;padding-top:50px}}
 .tk{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:12.5px}.tk:last-child{border-bottom:0}
+.hubguia{margin-top:18px;border:1px solid var(--bv-line);background:var(--bv-soft);border-radius:14px;padding:14px 16px;display:flex;gap:14px;align-items:flex-start}
+.hubguia .hg-ic{width:34px;height:34px;border-radius:10px;background:var(--bv);color:#fff;display:grid;place-items:center;font-size:18px;flex:none}
+.hubguia ol{margin:8px 0 8px;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 @media (max-width:720px){.combo{grid-template-columns:1fr}.ilus{grid-template-columns:1fr}.sorte{flex-direction:column;align-items:flex-start}}
 </style>
 </head>
@@ -54,7 +57,7 @@
    Pergunta o uso esperado, cria o primeiro arquivo (sempre cifrado), gera os HTMLs
    desacoplados de cada uso e o cartão "Onde fica cada coisa".
    ===================================================================== */
-const TOOL_NOME = 'Início da solução', TOOL_VERSION = '2.8.1';
+const TOOL_NOME = 'Início da solução', TOOL_VERSION = '2.8.2';
 // Nome da solução (ADR-0037): envelopes lacrados numa caixa postal. Arquivo novo de outra pessoa = "nova remessa".
 const MARCA = 'Remessa';
 const MARCA_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#0b2155"/><rect x="5" y="9" width="22" height="15" rx="2" fill="#fff"/><path d="M5.8 10l10.2 7.6L26.2 10" fill="none" stroke="#0b2155" stroke-width="1.6" stroke-linejoin="round"/><circle cx="16" cy="17.6" r="3.2" fill="#4d86ff" stroke="#fff" stroke-width="1.1"/></svg>`;
@@ -190,12 +193,12 @@ function desenhar() {
     ${doisArquivos()}${blocoChaves()}
     <p class="lbl" style="margin-top:18px">Próximos passos</p>${proximos()}
     <p class="lbl" style="margin-top:18px">Checklist para deixar tudo funcionando</p>${checklist(itensChecklist())}
-    <div class="row" style="margin-top:16px;flex-wrap:wrap">${botaoHub()}<button class="btn" id="mapa2">Abrir "Onde fica cada coisa"</button><button class="btn" id="mapa">Ferramentas da Remessa</button></div>`;
+    ${abrirHubGuia()}<div class="row" style="margin-top:16px;flex-wrap:wrap"><button class="btn" id="mapa2">Abrir "Onde fica cada coisa"</button><button class="btn" id="mapa">Ferramentas da Remessa</button></div>`;
   ligar();
 }
 function proximos() {
   const g = st.papel === 'gestor', l = [], ch = chavesUteis(), tem = tipo => ch.some(c => c.papel === tipo);
-  l.push(`Abra o hub (botão "Abrir o hub" abaixo, ou o hub.html da sua pasta, no Edge ou Chrome) como tela inicial. Neste computador, cada ferramenta já sabe onde está o seu arquivo${st.raiz ? ' e a pasta sincronizada' : ''} e abre com a senha da sessão: não precisa escolher pasta nem colar chave.`);
+  l.push(`Abra o hub.html da sua pasta pessoal (no Edge ou Chrome) como tela inicial: o quadro "Agora abra o hub" abaixo mostra como. Neste computador, cada ferramenta já sabe onde está o seu arquivo${st.raiz ? ' e a pasta sincronizada' : ''} e abre com a senha da sessão: não precisa escolher pasta nem colar chave.`);
   if (g) {
     l.push(`As chaves dos ${(st.dados.times || []).length} times já foram geradas e estão em todas as suas ferramentas${st.usos.includes('tarefas') ? ' (a Central já tem times, prefixos, chaves de tarefas e de finanças)' : ''}. Guarde-as no cofre com os botões "Copiar chave" acima.`);
     l.push('Mande a cada time a pasta para-os-times/<time> por mensagem direta ou e-mail: os HTMLs já levam a chave, o prefixo e o nome da pasta sincronizada.');
@@ -221,7 +224,7 @@ function ligar() {
   on('vol', () => { st.passo--; desenhar(); });
   on('mapa', () => ondeEstou({ ferramenta: TOOL_NOME, versao: TOOL_VERSION, arquivo: '', pastaLocal: st.dirLocal?.name, pastaComum: st.raiz?.name, writer: '',
     local: ['Os HTMLs das ferramentas', 'Arquivos de dados cifrados com a sua senha', 'Cópias de segurança (backup/)'], comum: ['Planos, diretrizes, catálogos e status cifrados com a chave de cada time', 'LEIA-ME.md (sem dados)'] }));
-  on('mapa2', abrirCartao); if ($('#abrirHub')) prepararHub(); ligarCopiar();
+  on('mapa2', abrirCartao); ligarCopiar();
   on('sorte', () => { st.modo = 'sorte'; st.sp = 0; desenhar(); });
   ligarChecklist();
   $$('[data-p]').forEach(b => b.onclick = () => { st.papel = b.dataset.p; if (st.papel === 'membro') st.usos = ['tarefas']; st.chaves = st.chaves.map(c => classificarChave(c.texto)); desenhar(); });
@@ -326,7 +329,6 @@ async function criarTudo() {
   if (st.raiz) await prepararCaixaPostal();
   if (g) await gerarPacotes();
   await lembrarTudo();
-  window.gestaoSessao?.definir(st.senha); // só para o hub aberto pelo botão do fim (ADR-0029)
   if (st.modo !== 'sorte') st.senha = null; // não fica em memória depois de usada
 }
 // Subpastas e LEIA-ME da caixa postal (pasta sincronizada). Também chamada quando a pasta é apontada no fim do Estou com sorte.
@@ -422,12 +424,12 @@ function desenharSorte(el) {
     ${doisArquivos()}
     ${blocoChaves()}
     <p class="lbl" style="margin-top:18px">Checklist para deixar tudo funcionando</p>${checklist(itensChecklist())}
-    <div class="row" style="margin-top:16px;flex-wrap:wrap">${botaoHub()}<button class="btn" id="mapa2">Abrir "Onde fica cada coisa"</button><button class="btn" id="mapa">Ferramentas da Remessa</button></div>`;
+    ${abrirHubGuia()}<div class="row" style="margin-top:16px;flex-wrap:wrap"><button class="btn" id="mapa2">Abrir "Onde fica cada coisa"</button><button class="btn" id="mapa">Ferramentas da Remessa</button></div>`;
   ligarCopiar();
   $('#mapa2').onclick = abrirCartao;
   $('#mapa').onclick = () => ondeEstou({ ferramenta: TOOL_NOME, versao: TOOL_VERSION, arquivo: '', pastaLocal: st.dirLocal?.name, pastaComum: st.raiz?.name, writer: '', local: ['Os HTMLs das ferramentas', 'Arquivos de dados cifrados com a sua senha', 'para-os-times/: as ferramentas de cada time', 'para-a-lideranca/: o envelope para a liderança (se gerado)'], comum: ['Planos, diretrizes, catálogos e status cifrados com a chave de cada time'] });
   $('#sCx').onclick = apontarCaixaPostal;
-  ligarChecklist(); prepararHub();
+  ligarChecklist();
 }
 /* ---- Passo a passo visual da Remessa (2.6): mesa, remessas para os times, remessa para a liderança, caixa postal ---- */
 // Pequenos desenhos reaproveitados: envelope com lacre azul, pessoa e seta.
@@ -615,15 +617,13 @@ function doisArquivos() {
     <p class="small" style="margin:6px 0 0"><b>Ninguém lê sem a senha.</b> Os arquivos são cifrados (AES de 256 bits, com a chave derivada da senha em 600 mil rodadas). Quem copiar o arquivo, a TI ou a Microsoft só veem letras embaralhadas. Sem a senha nem você abre, por isso ela fica no cofre.</p>
     <p class="small muted" style="margin:6px 0 0">Use um computador de cada vez: feche a ferramenta antes de abrir em outra máquina, para o OneDrive não criar cópia de conflito.</p></div>`;
 }
-// Botão do fim: abre o hub criado na pasta pessoal. Se o inicio.html está na mesma pasta, abre o próprio hub.html;
-// senão, abre uma cópia lida da pasta (os links para as outras ferramentas funcionam quando o hub.html é aberto da pasta).
-function botaoHub() { return `<a class="btn pri" id="abrirHub" href="hub.html" target="_blank" rel="opener">Abrir o hub ↗</a>`; }
-async function prepararHub() {
-  const a = $('#abrirHub'); if (!a || !st.dirLocal) return;
-  let mesma = false; try { await st.dirLocal.getFileHandle('inicio.html'); mesma = true; } catch {}
-  if (mesma && location.protocol === 'file:') return;
-  try { const txt = await lerTexto(st.dirLocal, 'hub.html'); if (!txt) return; a.href = URL.createObjectURL(new Blob([txt], { type: 'text/html' }));
-    a.insertAdjacentHTML('afterend', `<p class="small muted" style="flex-basis:100%;margin:6px 0 0">No dia a dia, abra o <span class="code">hub.html</span> direto da pasta <b>${esc(st.dirLocal.name)}</b> (dica: crie um atalho). Assim os links para as outras ferramentas funcionam.</p>`); } catch {}
+// Fim do assistente: como abrir o hub. Não há botão: a página não sabe o caminho da pasta escolhida e, aberta de
+// outra pasta (o .zip descompactado), não consegue abrir o hub.html de lá com os links e o login funcionando.
+function abrirHubGuia() {
+  const pasta = st.dirLocal?.name || 'pessoal';
+  return `<div class="hubguia" id="hubGuia"><div class="hg-ic" aria-hidden="true">⌂</div><div class="grow"><b>Agora abra o hub, a sua tela inicial</b>
+    <ol><li>Feche esta aba do assistente.</li><li>No Explorador de Arquivos, abra a pasta <b class="code">${esc(pasta)}</b> e clique duas vezes em <b class="code">hub.html</b> (no Edge ou no Chrome).</li><li>Digite a sua senha uma vez: ela vale para todas as ferramentas que você abrir pelo hub.</li><li>Salve o hub nos favoritos ou crie um atalho na área de trabalho: é por ele que você entra todo dia.</li></ol>
+    <span class="small muted">O hub não abre por aqui porque o navegador não deixa esta página abrir arquivos de outra pasta com os links funcionando.</span></div></div>`;
 }
 const CK_KEY = 'inicio-checklist';
 function ckLer() { try { return JSON.parse(localStorage.getItem(CK_KEY) || '{}'); } catch { return {}; } }

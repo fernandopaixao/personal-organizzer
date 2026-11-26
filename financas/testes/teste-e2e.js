@@ -308,6 +308,28 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   ok(!(await opfs(qc, async () => listar('Gestao-Compartilhado/times/cartoes/quadro'))).includes('caio-aaaaa-NOTEBOOK01.json'), 'cópia de conflito do próprio arquivo apagada depois de unida');
   await qb.evaluate(() => f4sincronizar()); await qb.waitForTimeout(300);
   ok(/Mais um/.test(await titulos(qb)), 'mudança nova chega para a outra pessoa');
+  // d) Quadro 2.4: formulário de nova iniciativa no padrão do "Novo card" (sem prompt do navegador)
+  qb.once('dialog', d => { erros.push('Quadro abriu um prompt do navegador: ' + d.message()); d.dismiss(); });
+  await qb.evaluate(() => { view = 'epics'; render(); }); await qb.click('[data-act="newEpic"]'); await qb.waitForSelector('#neForm');
+  ok(await qb.evaluate(() => !!document.querySelector('#neForm .tf-main #neName') && !!document.querySelector('#neForm .tf-side') && /Criar iniciativa/.test(document.querySelector('#neForm .macts').textContent)), 'nova iniciativa abre um formulário em duas colunas, com o botão "Criar iniciativa"');
+  await qb.click('#neForm button.pri'); ok(await qb.evaluate(() => !!document.querySelector('#neForm') && epicsLive().length === 0), 'sem nome, não cria');
+  await qb.fill('#neName', 'Novo checkout'); await qb.click('[data-act="neDue"][data-n="30"]'); await qb.click('[data-act="neSet"][data-k="status"][data-v="attn"]');
+  await qb.fill('#neLink', 'http://inseguro'); await qb.keyboard.press('Control+Enter');
+  ok(await qb.evaluate(() => epicsLive().length === 0 && !!document.querySelector('#neLink[aria-invalid]')), 'link sem https:// é recusado no próprio campo');
+  await qb.fill('#neLink', 'https://jira.exemplo/EP-1'); await qb.fill('#neForm textarea[data-ne="update"]', 'Começamos pelo desenho');
+  await qb.screenshot({ path: path.join(SAIDA, 'quadro-nova-iniciativa.png') });
+  await qb.keyboard.press('Control+Enter'); await qb.waitForTimeout(200);
+  ok(await qb.evaluate(() => { const e = epicsLive()[0]; return epicsLive().length === 1 && e.name === 'Novo checkout' && e.status === 'attn' && e.forecastEnd === addDays(today(), 30) && e.link === 'https://jira.exemplo/EP-1' && e.updates[0]?.text === 'Começamos pelo desenho' && !document.querySelector('#dlg[open]') && ui.epicSel === e.id; }), 'Ctrl+Enter cria a iniciativa com previsão, situação, link e primeira atualização');
+  await qb.evaluate(() => epicModal(epicsLive()[0].id)); ok(await qb.evaluate(() => !!document.querySelector('#dlg .tf-side [data-act="epSet"][data-v="attn"].on')), 'editar a iniciativa usa o mesmo desenho, com a situação em pílulas');
+  await qb.click('#dlg [data-act="epSet"][data-v="auto"]'); ok(await qb.evaluate(() => epicsLive()[0].status === 'auto'), 'pílula de situação grava na hora');
+  await qb.evaluate(() => closeModal());
+  await qb.evaluate(() => { window.__cat = catalog; catalog = { initiatives: [{ ref: 'CAR-007', name: 'Cartão virtual', team: db.team.slug, status: 'active', features: [] }, { ref: 'CAR-009', name: 'Limite dinâmico', team: db.team.slug, status: 'active', features: [] }] }; epicsLive()[0].centralRef = 'CAR-009'; newEpicModal(); });
+  ok(await qb.evaluate(() => document.querySelector('[data-act="neSet"][data-v="CAR-009"]').disabled), 'iniciativa da Central já ligada aparece desabilitada');
+  await qb.click('[data-act="neSet"][data-v="CAR-007"]');
+  ok(await qb.evaluate(() => document.getElementById('neName').value === 'Cartão virtual' && /CAR-007/.test(document.querySelector('.tf-sum').textContent)), 'escolher a iniciativa da Central preenche o nome e o resumo');
+  await qb.screenshot({ path: path.join(SAIDA, 'quadro-nova-iniciativa-central.png') });
+  await qb.click('#neForm button.pri'); ok(await qb.evaluate(() => epicsLive().some(e => e.centralRef === 'CAR-007' && e.name === 'Cartão virtual')), 'cria a iniciativa já ligada à Central');
+  await qb.evaluate(() => { for (const e of epicsLive().filter(x => x.centralRef)) e.centralRef = null; catalog = window.__cat; touch(); });
 
   ok(!/Conferi, não está/.test(fs.readFileSync(path.join(RAIZ, 'inicio.html'), 'utf8') + fs.readFileSync(path.join(RAIZ, 'financas', 'financas_time.html'), 'utf8') + fs.readFileSync(path.join(RAIZ, 'financas', 'financas_grupo.html'), 'utf8') + fs.readFileSync(path.join(RAIZ, 'hub.html'), 'utf8')), 'sem a pergunta de confirmar o ícone do OneDrive');
   ok(await c.evaluate(() => /Hub/.test(document.querySelector('#ondeEstou .f4hub')?.textContent || '')) && await t2.evaluate(() => !!document.getElementById('tHub')) && await g2.evaluate(() => !!document.getElementById('tHub')) && await qb.evaluate(() => !!document.querySelector('#ondeEstou .f4hub')), 'botão "← Hub" na Central, no Quadro e nas Finanças do Grupo e do Time');
@@ -642,7 +664,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   await h.evaluate(() => { __hub.db.times = window.__keep; });
   await h.setViewportSize({ width: 1280, height: 900 }); await h.screenshot({ path: path.join(SAIDA, 'hub-lideranca.png'), fullPage: true });
 
-  console.log('19. Assistente 2.2: pasta pessoal no OneDrive, dois tipos de arquivo e botão do hub');
+  console.log('19. Assistente 2.2: pasta pessoal no OneDrive, dois tipos de arquivo e como abrir o hub');
   await ls.bringToFront();
   const sinais = await ls.evaluate(async () => { const r = await navigator.storage.getDirectory();
     const od = await r.getDirectoryHandle('OneDrive - Empresa', { create: true }); await (await od.getFileHandle('desktop.ini', { create: true })).createWritable().then(w => w.close());
@@ -650,11 +672,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
     return [await suspeitaDeSincronizada(od), await suspeitaDeSincronizada(comp)]; });
   ok(sinais[0].length === 0 && sinais[1].length > 0, 'pasta pessoal no OneDrive é aceita; só a pasta compartilhada gera aviso');
   ok(await ls.evaluate(() => !!document.querySelector('.dois') && /Ninguém lê sem a senha/.test(document.querySelector('.dois').textContent) && /Por que separadas/.test(document.querySelector('.dois').textContent) && !!document.querySelector('[data-ck="backup"]')), 'tela final explica os dois arquivos, a senha e pede a pasta pessoal no OneDrive no checklist');
-  await ls.waitForFunction(() => /^blob:/.test(document.getElementById('abrirHub')?.href || ''), null, { timeout: 5000 }).catch(() => {});
-  const [hp] = await Promise.all([ls.waitForEvent('popup'), ls.click('#abrirHub')]); hp.on('pageerror', e => erros.push('hub do assistente: ' + e.message));
-  await hp.waitForLoadState(); await hp.waitForFunction(() => window.gestaoSessao && window.gestaoSessao.recebida !== null, null, { timeout: 5000 }).catch(() => {});
-  ok(await hp.evaluate(() => /Hub da solução/.test(document.title + document.body.textContent) && gestaoSessao.recebida) === SENHA2, 'botão "Abrir o hub" abre o hub criado na pasta, já com a senha da sessão');
-  await hp.close();
+  ok(await ls.evaluate(() => !document.getElementById('abrirHub') && /Agora abra o hub/.test(document.getElementById('hubGuia')?.textContent || '') && document.getElementById('hubGuia').textContent.includes('hub.html')), 'fim do assistente sem o botão do hub: orienta a abrir o hub.html da pasta pessoal');
   await ls.screenshot({ path: path.join(SAIDA, 'inicio-dois-arquivos.png'), fullPage: true });
 
   console.log('20. Assistente 2.3: cada arquivo gerado abre pronto (chaves, arquivo e pasta lembrados)');

@@ -1,6 +1,6 @@
 # Passo a passo · como lidar com a solução
 
-*25/11/2026 · Remessa · Central v15.17, Quadro do Time 2.3.3, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.1, contratos 1.0 · visual experimental em `experimental/`*
+*26/11/2026 · Remessa · Central v15.17, Quadro do Time 2.4, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.2, contratos 1.0 · visual experimental em `experimental/`*
 
 Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é independente. Antes de começar: use **Edge ou Chrome** no computador, abrindo o arquivo com dois cliques (não pela pré-visualização do Outlook, Teams ou OneDrive, nem de dentro do .zip), e tenha à mão um **cofre de senhas** (o gerenciador de senhas da empresa).
 
@@ -36,7 +36,7 @@ Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é ind
 8. Em **Senha**, crie a senha, **guarde no cofre** e marque "Já guardei no cofre".
 9. Em **Pronto**, a pasta pessoal passa a ter os HTMLs, os arquivos cifrados (já com as chaves), o `hub.html` e o `onde-fica-cada-coisa.html`. A tela explica os **dois tipos de arquivo**: o pessoal, cifrado com a sua senha e numa pasta só sua, e os comuns, cifrados com a chave de cada time na pasta compartilhada. Siga os **próximos passos** do seu perfil.
    Se você lidera vários times, o assistente já gerou a **chave de cada time** (tarefas e finanças) e a pasta `para-os-times/<time>/`: copie cada chave para o cofre com os botões da tela e mande cada pasta ao responsável por mensagem direta ou e-mail.
-10. Clique **Abrir o hub**: ele abre já com a senha da sessão. Cada ferramenta aberta pelo hub abre sozinha o seu arquivo, com a pasta sincronizada ligada: não precisa escolher pasta nem colar chave neste computador. Em outro computador, cada ferramenta pede a pasta pessoal uma vez. A partir de agora o hub é a sua tela inicial; no dia a dia, abra o `hub.html` da pasta pessoal (dica: crie um atalho).
+10. Abra o hub como diz o quadro **Agora abra o hub** no fim da tela: feche o assistente, abra a pasta pessoal no Explorador de Arquivos e clique duas vezes em `hub.html` (Edge ou Chrome). Digite a senha uma vez: ela vale para todas as ferramentas abertas pelo hub. (O assistente não tem mais botão para abrir o hub: aberto de outra pasta, o navegador não deixava o hub abrir com os links funcionando.) Cada ferramenta aberta pelo hub abre sozinha o seu arquivo, com a pasta sincronizada ligada: não precisa escolher pasta nem colar chave neste computador. Em outro computador, cada ferramenta pede a pasta pessoal uma vez. A partir de agora o hub é a sua tela inicial; no dia a dia, abra o `hub.html` da pasta pessoal (dica: crie um atalho).
 
 **Atalho: Estou com sorte.** Na primeira tela do assistente, quem lidera times pode clicar **Estou com sorte**:
 1. Preencha o nome do grupo, o seu nome, os times (um por linha, com o prefixo se quiser), o ano e a moeda.
@@ -48,7 +48,7 @@ Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é ind
    - **Remessas para os times**: cada `para-os-times/<time>/` é um envelope já lacrado com a chave do time. A tabela diz quem recebe cada arquivo: `quadro_<time>.html` é para todo o time; `financas_<time>.html` só para quem cuida do dinheiro do time. Mande a pasta ao responsável por mensagem direta ou e-mail, nunca pela pasta compartilhada.
    - **Remessa para a liderança**: com a chave gerada, mande `para-a-lideranca/LEIA-ME.txt` à liderança (traz a chave e onde ela cola); com a chave colada, não há nada para mandar. O que sobe é o consolidado de finanças e as férias do grupo, em `grupos/<grupo>/`.
    - **Aponte a caixa postal**: a única escolha que falta. Sincronize a pasta do SharePoint, marque **Sempre manter neste dispositivo** e clique **Apontar a pasta sincronizada**. O assistente cria as subpastas, atualiza os envelopes dos times com o nome da pasta e deixa a Central, o hub, as finanças e as férias apontando para ela.
-6. Siga o checklist e clique **Abrir o hub**.
+6. Siga o checklist e abra o `hub.html` da pasta pessoal, como diz o quadro **Agora abra o hub** no fim da tela.
 7. O time abre o `quadro_<time>.html` ou o `financas_<time>.html` e cria a própria senha: a chave já está dentro. As férias de todos ficam na página **Férias** da Central, cadastradas por você: o time não recebe ferramenta de férias.
 
 **Gestor: equipar cada time com o assistente.** Se preferir que o time rode o próprio assistente, depois de gerar as chaves dos times (seção 1 ou 2), mande a cada time o `inicio.html` e, por mensagem direta, a chave e o nome da pasta sincronizada. O responsável abre o assistente, escolhe "Sim, lidero 1 time", cola a chave e sai com o Quadro e/ou o Finanças do Time prontos. É o caminho recomendado; gerar o HTML do time pela Central (seção 2) continua valendo.
@@ -75,7 +75,7 @@ Times criados pelo assistente já têm prefixo, pasta e chave: pule para o passo
 2. Crie a **senha** do seu arquivo local e guarde no cofre.
 3. Em **··· › Central**, cole a chave do time e conecte a pasta sincronizada (`Gestao-Compartilhado`).
 4. Responda **Quem é você neste quadro?** (nome e este computador).
-5. Em **Iniciativas**, ligue os épicos do time às iniciativas que vieram da Central, ou use **Trazer** para as que ainda não têm épico.
+5. Em **Iniciativas**, ligue os épicos do time às iniciativas que vieram da Central, ou use **Trazer** para as que ainda não têm épico. Para criar uma iniciativa do time, clique **+ Iniciativa do time**: o formulário (2.4) pede o nome e mostra as iniciativas da Central como opções (escolher uma preenche o nome; as que já têm épico ficam apagadas), a previsão com atalhos (+2 semanas, +1 mês, +3 meses) e, ao lado, situação, link e a primeira atualização de status. **Criar iniciativa** ou Ctrl+Enter cria; Esc fecha.
 6. Pronto: cada movimentação de card publica o backlog sozinha. Ao **fechar a sprint**, confirme a publicação das métricas.
 7. Para chamar o resto do time, envie o mesmo HTML e a chave por mensagem direta. Cada pessoa repete os passos 1 a 4.
 
