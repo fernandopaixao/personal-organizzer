@@ -5,8 +5,9 @@
 const { chromium } = require('playwright');
 const http = require('http'), fs = require('fs'), path = require('path');
 // TEMA=escuro roda tudo com o sistema em modo escuro (o tema automático segue) e salva as telas em saida/escuro/.
-const ESCURO = process.env.TEMA === 'escuro', SERENO = process.env.ESTILO === 'sereno';
-const SUB = [SERENO ? 'sereno' : '', ESCURO ? 'escuro' : ''].filter(Boolean).join('-'), SAIDA_URL = '/financas/testes/saida/' + (SUB ? SUB + '/' : '');
+// ESTILO=sereno ou ESTILO=classico roda tudo nesse estilo (ADR-0043/0044), com as telas em saida/<estilo>/.
+const ESCURO = process.env.TEMA === 'escuro', ESTILO = ['sereno', 'classico'].includes(process.env.ESTILO) ? process.env.ESTILO : '', SERENO = !!ESTILO;
+const SUB = [ESTILO, ESCURO ? 'escuro' : ''].filter(Boolean).join('-'), SAIDA_URL = '/financas/testes/saida/' + (SUB ? SUB + '/' : '');
 const RAIZ = path.resolve(__dirname, '..', '..'), SAIDA = path.join(RAIZ, 'financas', 'testes', 'saida', SUB);
 fs.mkdirSync(SAIDA, { recursive: true });
 const SENHA = 'senha-de-teste-123', SENHA2 = 'outra-senha-456!';
@@ -58,7 +59,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   const browser = await chromium.launch();
   const ctxB = await browser.newContext({ acceptDownloads: true, colorScheme: ESCURO ? 'dark' : 'light' });
   // ESTILO=sereno roda tudo no estilo Sereno (ADR-0043), com as telas em saida/sereno/.
-  if (SERENO) await ctxB.addInitScript(() => { try { localStorage.setItem('gestao.estilo', 'sereno'); } catch {} });
+  if (SERENO) await ctxB.addInitScript(e => { try { localStorage.setItem('gestao.estilo', e); } catch {} }, ESTILO);
   const erros = [];
   const nova = async (url, mapa) => { const p = await ctxB.newPage(); p.on('pageerror', e => erros.push(url + ': ' + e.message)); await p.addInitScript(stub(mapa)); await p.goto(base + url); return p; };
 
@@ -520,36 +521,68 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   ok(!JSON.stringify(await opfs(h, async () => ler('LocalGestor2', 'hub-tecnologia.json'))).includes('pagamentos-fin'), 'chave de finanças só dentro do arquivo cifrado do hub');
   await h.setViewportSize({ width: 1280, height: 900 }); await h.screenshot({ path: path.join(SAIDA, 'hub-visao.png'), fullPage: true });
 
-  console.log('14. Tema claro, escuro e automático; estilo Remessa e Sereno');
+  console.log('14. Preferências: modo claro, escuro e automático; estilo Remessa, Sereno, Clássico e Experimental');
   const fundo = p => p.evaluate(() => getComputedStyle(document.body).backgroundColor);
   const corCard = p => p.evaluate(() => { const e = document.querySelector('.card'); return e ? getComputedStyle(e).backgroundColor : ''; });
   const tPaginas = { hub: h, central: c, quadro: qc, grupo: g, time: t2, inicio: a };
   for (const [n, p] of Object.entries(tPaginas)) ok(await p.evaluate(() => !!document.getElementById('temaSel') && !!window.gestaoTema), `${n}: seletor de tema presente`);
   ok(await h.evaluate(() => document.documentElement.dataset.tema) === (ESCURO ? 'escuro' : 'claro'), 'automático segue o sistema');
-  if (SERENO) { await h.evaluate(() => gestaoTema.escolherEstilo('remessa')); await c.waitForTimeout(200); }
+  // Telas de referência no estilo desta rodada (saida/, saida/sereno/, saida/classico/...): Central, Quadro e o painel Preferências.
+  await c.evaluate(() => document.querySelector('[data-go="home"], .nv[data-k="home"], .rail .nv')?.click()); await c.waitForTimeout(250);
+  await c.screenshot({ path: path.join(SAIDA, 'estilo-central.png') }).catch(() => {});
+  await qc.screenshot({ path: path.join(SAIDA, 'estilo-quadro.png') }).catch(() => {});
+  await h.click('#temaSel>button'); await h.waitForTimeout(150); await h.screenshot({ path: path.join(SAIDA, 'preferencias.png') }).catch(() => {}); await h.keyboard.press('Escape');
+  // Na cópia da pasta experimental/ (build_experimental.py --testar) o estilo é 'experimental': fundos e escuro de antes.
+  const EXPV = await h.evaluate(() => !!window.remessaVisual?.experimental);
+  const BG_R = EXPV ? 'rgb(250, 250, 252)' : 'rgb(244, 246, 251)', ESC_R = EXPV ? 'rgb(14, 18, 28)' : 'rgb(9, 17, 44)';
+  if (SERENO && !EXPV) { await h.evaluate(() => gestaoTema.escolherEstilo('remessa')); await c.waitForTimeout(200); }
   await h.evaluate(() => gestaoTema.escolher('claro')); const bgClaro = await fundo(h), cardClaro = await corCard(h);
-  ok(bgClaro === 'rgb(244, 246, 251)', 'claro (estilo Remessa) usa o fundo azulado: ' + bgClaro);
-  await h.click('#temaSel>button'); await h.click('#temaSel [data-t="escuro"]');
+  ok(bgClaro === BG_R, 'claro (estilo Remessa) usa o fundo azulado: ' + bgClaro);
+  await h.click('#temaSel>button');
+  ok(await h.evaluate(() => { const d = document.getElementById('gtPainel'); return !!d && d.open && /Preferências/.test(d.textContent) && ['remessa', 'sereno', 'classico', 'experimental'].every(e => d.querySelector(`[data-e="${e}"]`)) && d.querySelectorAll('[data-t]').length === 3; }), 'botão do canto abre o painel Preferências com Modo e os quatro estilos (Remessa, Sereno, Clássico, Experimental)');
+  await h.click('#gtPainel [data-t="escuro"]');
+  ok(await h.evaluate(() => document.getElementById('gtPainel').open && document.querySelector('#gtPainel [data-t="escuro"]').getAttribute('aria-checked') === 'true'), 'painel continua aberto e marca a escolha');
+  await h.keyboard.press('Escape');
   ok(await h.evaluate(() => document.documentElement.dataset.tema) === 'escuro' && await h.evaluate(() => localStorage.getItem('gestao.tema')) === 'escuro', 'escolha pelo seletor fica salva neste computador');
-  ok(await fundo(h) === 'rgb(9, 17, 44)' && await corCard(h) !== cardClaro, 'escuro (azul-noite) troca fundo e cards do hub');
+  ok(await fundo(h) === ESC_R && await corCard(h) !== cardClaro, 'escuro (azul-noite) troca fundo e cards do hub');
   await c.waitForTimeout(200);
-  ok(await c.evaluate(() => document.documentElement.dataset.tema) === 'escuro' && await fundo(c) === 'rgb(9, 17, 44)', 'outra ferramenta aberta acompanha a escolha (Central)');
+  ok(await c.evaluate(() => document.documentElement.dataset.tema) === 'escuro' && await fundo(c) === ESC_R, 'outra ferramenta aberta acompanha a escolha (Central)');
   const corInline = await qc.evaluate(() => { const e = [...document.querySelectorAll('[style*="background"]')].find(x => x.offsetParent); return e ? getComputedStyle(e).backgroundColor : ''; });
   await h.evaluate(() => gestaoTema.escolher('claro')); await c.waitForTimeout(200);
-  ok(await fundo(h) === bgClaro && await corCard(h) === cardClaro && await fundo(c) === 'rgb(244, 246, 251)', 'voltar para o claro restaura as cores originais');
+  ok(await fundo(h) === bgClaro && await corCard(h) === cardClaro && await fundo(c) === BG_R, 'voltar para o claro restaura as cores originais');
   ok(corInline !== await qc.evaluate(() => { const e = [...document.querySelectorAll('[style*="background"]')].find(x => x.offsetParent); return e ? getComputedStyle(e).backgroundColor : ''; }) || !corInline, 'estilos inline também mudam com o tema (Quadro)');
+  if (EXPV) {
+    ok(await h.evaluate(() => document.documentElement.dataset.estilo === 'experimental' && document.querySelector('#gtPainel [data-e="experimental"]')?.classList.contains('on')), 'visual experimental: estilo "experimental", sem Remessa nem Sereno por cima, marcado no painel');
+  } else {
   // Estilo (ADR-0043): Remessa por padrão, com o trilho marinho; Sereno tira a decoração, em claro e em escuro.
   const railFundo = p => p.evaluate(() => { const r = document.querySelector('.rail'); return r ? getComputedStyle(r).backgroundImage : ''; });
   ok(await h.evaluate(() => document.documentElement.dataset.estilo) === 'remessa' && /gradient/.test(await railFundo(c)), 'estilo Remessa por padrão: trilho marinho na Central');
-  await h.click('#temaSel>button'); await h.click('#temaSel [data-e="sereno"]'); await c.waitForTimeout(200);
+  await h.click('#temaSel>button'); await h.click('#gtPainel [data-e="sereno"]'); await h.click('#gtPainel [data-gt-fechar]'); await c.waitForTimeout(200);
   ok(await h.evaluate(() => localStorage.getItem('gestao.estilo')) === 'sereno' && await c.evaluate(() => document.documentElement.dataset.estilo) === 'sereno', 'estilo Sereno fica salvo e vale para as outras ferramentas');
   ok(await fundo(h) === 'rgb(255, 255, 255)' && !/gradient/.test(await railFundo(c)) && !/gradient/.test(await h.evaluate(() => { const e = document.querySelector('.hero'); return e ? getComputedStyle(e).backgroundImage : 'none'; })), 'Sereno: fundo branco, sem gradiente no trilho nem na faixa do hub');
   await h.evaluate(() => gestaoTema.escolher('escuro')); await c.waitForTimeout(200);
   ok(await fundo(h) === 'rgb(18, 19, 22)' && await fundo(c) === 'rgb(18, 19, 22)', 'Sereno escuro: grafite neutro');
   await h.evaluate(() => gestaoTema.escolherEstilo('remessa')); await c.waitForTimeout(200);
   ok(await fundo(h) === 'rgb(9, 17, 44)' && await h.evaluate(() => localStorage.getItem('gestao.estilo')) === null, 'voltar ao Remessa com o escuro ligado reconverte para azul-noite');
+  // Clássico (ADR-0044): o visual de antes dos estilos, em claro e em escuro.
+  await h.evaluate(() => gestaoTema.escolherEstilo('classico')); await c.waitForTimeout(200);
+  ok(await fundo(h) === 'rgb(14, 18, 28)' && await c.evaluate(() => document.documentElement.dataset.estilo) === 'classico' && !/gradient/.test(await railFundo(c)), 'Clássico escuro: o grafite-azulado de antes, sem trilho marinho, também nas outras ferramentas');
+  await h.evaluate(() => gestaoTema.escolher('claro')); await c.waitForTimeout(200);
+  ok(await c.evaluate(() => getComputedStyle(document.querySelector('.rail')).backgroundColor) === 'rgb(255, 255, 255)' && await h.evaluate(() => localStorage.getItem('gestao.estilo')) === 'classico', 'Clássico claro: trilho branco com siglas; escolha salva');
+  // Preferências também nos Ajustes de cada ferramenta e no botão do topo da Central.
+  await c.click('#prefBtn'); ok(await c.evaluate(() => document.getElementById('gtPainel')?.open), 'Central: botão Preferências no topo abre o painel');
+  await c.click('#gtPainel [data-e="remessa"]'); await c.keyboard.press('Escape'); await c.waitForTimeout(200);
+  ok(await h.evaluate(() => document.documentElement.dataset.estilo) === 'remessa', 'escolha feita na Central vale no hub');
+  ok(await qc.evaluate(() => { const t = document.querySelector('.top2'); return !t || document.documentElement.classList.contains('tema-embutido') || /gradient/.test(getComputedStyle(t).backgroundImage); }), 'Remessa: topo do Quadro na superfície marinha (o fundo claro do topo não cobre mais)');
+  await qc.evaluate(() => document.querySelector('[data-act="view"][data-v="settings"]').click()); await qc.waitForTimeout(300);
+  ok(await qc.evaluate(() => { const b = document.querySelector('.gt-prefs.gt-card'); return !!b && b.querySelectorAll('[data-e]').length === 4 && b.querySelector('[data-e="remessa"]').classList.contains('on'); }), 'Quadro: Ajustes mostram o bloco Preferências com o estilo marcado');
+  await qc.click('.gt-card [data-e="sereno"]'); await h.waitForTimeout(200);
+  ok(await h.evaluate(() => document.documentElement.dataset.estilo) === 'sereno', 'escolher nos Ajustes do Quadro vale para as outras ferramentas');
+  await qc.click('.gt-card [data-e="remessa"]'); await h.evaluate(() => gestaoTema.escolher('escuro'));
+  await qc.evaluate(() => document.querySelector('[data-act="view"][data-v="board"]').click());
+  }
   await h.evaluate(() => gestaoTema.escolher('auto'));
-  if (SERENO) await h.evaluate(() => gestaoTema.escolherEstilo('sereno'));
+  if (SERENO && !EXPV) await h.evaluate(e => gestaoTema.escolherEstilo(e), ESTILO);
   ok(await h.evaluate(() => localStorage.getItem('gestao.tema')) === null && await h.evaluate(() => document.documentElement.dataset.tema) === (ESCURO ? 'escuro' : 'claro'), 'automático volta a seguir o sistema');
 
   console.log('15. Assistente: como funciona, "Estou com sorte" e checklist');
@@ -693,7 +726,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   console.log('20. Assistente 2.3: cada arquivo gerado abre pronto (chaves, arquivo e pasta lembrados)');
   // Contexto novo (IndexedDB limpo) e com os handles guardados de verdade: as ferramentas lembram arquivo e pasta.
   const ctxP = await browser.newContext({ colorScheme: ESCURO ? 'dark' : 'light' });
-  if (SERENO) await ctxP.addInitScript(() => { try { localStorage.setItem('gestao.estilo', 'sereno'); } catch {} });
+  if (SERENO) await ctxP.addInitScript(e => { try { localStorage.setItem('gestao.estilo', e); } catch {} }, ESTILO);
   const novaP = async (url, mapa) => { const p = await ctxP.newPage(); p.on('pageerror', e => erros.push(url + ': ' + e.message));
     await p.addInitScript(stub(mapa).replace('const put0', 'window.__lembrar = true; const put0').replace('IDBObjectStore.prototype.put = function', 'IDBObjectStore.prototype.__p = function')); await p.goto(base + url); return p; };
   const ap = await novaP('/inicio.html', { 'fin-local': 'LocalPronto', 'fin-comum': 'CompPronto' });

@@ -1,6 +1,6 @@
 # Visão geral da solução · Central de Gestão, Quadro do Time e integração
 
-*26/11/2026 · estado atual: Remessa · Central v15.19, Quadro do Time 2.8, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central) e contratos 1.2 (detalhes em `docs/plano-v15.md`, `docs/plano-hub.md`, `docs/plano-financas.md` e [`contratos/`](../contratos/LEIA-ME.md))*
+*27/11/2026 · estado atual: Remessa · Central v15.21, Quadro do Time 2.8.1, Hub 2.4.1, Finanças do Grupo 1.7.2 e do Time 1.5.2, Mapa de Férias 1.5.2 (dentro da Central) e contratos 1.2 (detalhes em `docs/plano-v15.md`, `docs/plano-hub.md`, `docs/plano-financas.md` e [`contratos/`](../contratos/LEIA-ME.md))*
 
 > **Por onde começar:** [funcionalidades, usos e objetivos](funcionalidades.md) · [jornada do usuário](jornada-do-usuario.md) · [passo a passo](passo-a-passo.md) · [decisões de arquitetura (ADRs)](adr/README.md)
 
@@ -67,7 +67,7 @@ O desenho mostra só a troca de tarefas. Pela mesma pasta passam as finanças, o
 7. **Dado individual local, pedaço comum sincronizado.** Cada ferramenta guarda o detalhe numa pasta pessoal só sua (de preferência no seu OneDrive); na pasta sincronizada vai só o que o outro lado precisa, de preferência agregado (desde 23/11/2026).
 8. **Um escritor por arquivo.** Cada arquivo comum tem um único dono (pessoa + computador), é um retrato completo com revisão sempre maior, e cópias de conflito do OneDrive são detectadas e resolvidas.
 9. **HTMLs desacoplados.** As ferramentas se encontram pela pasta comum. Ler o arquivo de outra é exceção, só de leitura e com a senha dela: o hub resume a Central no cockpit e importa times e chaves; a Central importa as chaves de finanças do Finanças do Grupo ([ADR-0010](adr/0010-htmls-desacoplados.md), [ADR-0035](adr/0035-hub-cockpit-de-gestao.md)).
-10. **Mesma identidade no claro e no escuro.** Um seletor comum (Claro, Escuro, Automático) em todas as ferramentas; a escolha fica só no computador e o escuro é aplicado por uma camada única, `financas/src/tema.js`, injetada no build (desde 24/11/2026).
+10. **Mesma identidade no claro e no escuro, com o estilo à escolha.** Um painel **Preferências** comum (Modo: Claro, Escuro, Automático; Estilo visual: Remessa, Sereno, Clássico, Experimental; [ADR-0043](adr/0043-estilos-remessa-e-sereno.md), [ADR-0044](adr/0044-preferencias-de-estilo-visual.md)) em todas as ferramentas; a escolha fica só no computador e o escuro é aplicado por uma camada única, `financas/src/tema.js`, injetada no build (desde 24/11/2026).
 
 Cada princípio tem uma decisão registrada em [`docs/adr/`](adr/README.md).
 
@@ -112,6 +112,8 @@ Teclas 1 a 9 trocam de página. O botão do topo **Importar e agentes** reúne a
 | v15.17 | Prévia da importação dos agentes com **descartar linhas**: cada linha nova ou atualizada pode ser desmarcada antes de confirmar ([ADR-0013](adr/0013-downstream-previa-e-conciliacao.md)) |
 | v15.18 | Feature criada pelo time chega com os cards dela (`featureLocalId`): na conciliação e no painel da iniciativa aparece com a contagem, e ligada a uma feature da Central leva os cards junto, recuados no downstream ([ADR-0039](adr/0039-hierarquia-iniciativa-feature-card.md)) |
 | v15.19 | Aba **Sprints** no time, cartão **Sprints dos times** em Hoje e bloco Sprint na reunião de status: a sprint e o resultado dela chegam do Quadro 2.8 (contratos 1.2) e a Central guarda o histórico ([ADR-0042](adr/0042-sprint-sincronizada-com-a-central.md)) |
+| v15.20 | Estilos **Remessa** (padrão: trilho e topo marinhos, escuro azul-noite) e **Sereno** (menos estímulo visual) em todas as ferramentas ([ADR-0043](adr/0043-estilos-remessa-e-sereno.md)) |
+| v15.21 | Painel **Preferências** (botão do topo, botão redondo do canto e card nos Ajustes das outras ferramentas): Modo e **Estilo visual** Remessa, Sereno, Clássico (o de antes) ou Experimental; topo do Quadro de volta ao marinho no Remessa ([ADR-0044](adr/0044-preferencias-de-estilo-visual.md)) |
 
 Detalhes da v15: `docs/plano-v15.md` (e da v14 em `docs/plano-v14.md`).
 
