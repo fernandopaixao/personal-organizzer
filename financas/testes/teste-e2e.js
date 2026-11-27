@@ -57,7 +57,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   const base = `http://127.0.0.1:${srv.address().port}`;
   const browser = await chromium.launch();
   const ctxB = await browser.newContext({ acceptDownloads: true, colorScheme: ESCURO ? 'dark' : 'light' });
-  // ESTILO=sereno roda tudo no estilo Sereno (ADR-0042), com as telas em saida/sereno/.
+  // ESTILO=sereno roda tudo no estilo Sereno (ADR-0043), com as telas em saida/sereno/.
   if (SERENO) await ctxB.addInitScript(() => { try { localStorage.setItem('gestao.estilo', 'sereno'); } catch {} });
   const erros = [];
   const nova = async (url, mapa) => { const p = await ctxB.newPage(); p.on('pageerror', e => erros.push(url + ': ' + e.message)); await p.addInitScript(stub(mapa)); await p.goto(base + url); return p; };
@@ -538,7 +538,7 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   await h.evaluate(() => gestaoTema.escolher('claro')); await c.waitForTimeout(200);
   ok(await fundo(h) === bgClaro && await corCard(h) === cardClaro && await fundo(c) === 'rgb(244, 246, 251)', 'voltar para o claro restaura as cores originais');
   ok(corInline !== await qc.evaluate(() => { const e = [...document.querySelectorAll('[style*="background"]')].find(x => x.offsetParent); return e ? getComputedStyle(e).backgroundColor : ''; }) || !corInline, 'estilos inline também mudam com o tema (Quadro)');
-  // Estilo (ADR-0042): Remessa por padrão, com o trilho marinho; Sereno tira a decoração, em claro e em escuro.
+  // Estilo (ADR-0043): Remessa por padrão, com o trilho marinho; Sereno tira a decoração, em claro e em escuro.
   const railFundo = p => p.evaluate(() => { const r = document.querySelector('.rail'); return r ? getComputedStyle(r).backgroundImage : ''; });
   ok(await h.evaluate(() => document.documentElement.dataset.estilo) === 'remessa' && /gradient/.test(await railFundo(c)), 'estilo Remessa por padrão: trilho marinho na Central');
   await h.click('#temaSel>button'); await h.click('#temaSel [data-e="sereno"]'); await c.waitForTimeout(200);

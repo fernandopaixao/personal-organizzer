@@ -1,6 +1,6 @@
 # Jornada do usuário
 
-*26/11/2026 · como cada papel conhece, monta, usa e mantém a Remessa · Central v15.19, Quadro do Time 2.7, Hub 2.4, assistente 2.8.2*
+*26/11/2026 · como cada papel conhece, monta, usa e mantém a Remessa · Central v15.20, Quadro do Time 2.8, Hub 2.4, assistente 2.8.2*
 
 A solução tem quatro papéis. A mesma pessoa pode ter mais de um (o gestor costuma ser também o dono das finanças do grupo; o líder do time costuma ser também o responsável financeiro). Quem integra uma **outra solução** pelos contratos tem a jornada própria na [seção 9](#9-jornada-de-quem-integra-outra-solução).
 
@@ -39,7 +39,8 @@ A solução se chama **Remessa**: as ferramentas trocam envelopes lacrados (cifr
 | **6. Trabalhar tarefas** | Registra demandas, delega, cobra | Central (Tarefas) | Aderência por pessoa e cobranças visíveis | |
 | **7. Conversar com pessoas** | Prepara e conduz o 1:1 em modo Em conversa, copia o resumo | Central (1:1) | Pauta montada a partir de quatro fontes; combinados registrados | |
 | **8. Conduzir fóruns** | Abre o fórum, discute a pauta, registra decisões e compromissos, compartilha os acordos | Central (Fóruns) | Pauta não discutida rola para a próxima; compromissos viram tarefas | |
-| **9. Reunião de status** | Conduz a reunião do time com o status já preenchido pelo que o time publicou | Central (Times) | Downstream abaixo de cada feature; bloco Finanças quando o time passou do teto; nada da Central muda sem aceite | |
+| **9. Reunião de status** | Conduz a reunião do time com o status já preenchido pelo que o time publicou | Central (Times) | Downstream abaixo de cada feature; bloco Finanças quando o time passou do teto; bloco Sprint com objetivo e compromisso (15.19); nada da Central muda sem aceite | |
+| **9a. Acompanhar a sprint** | Abre a aba **Sprints** do time ou um aviso do cartão **Sprints dos times** em Hoje; lê a sprint em andamento, a previsão × prazo das features e o histórico de compromisso cumprido | Central (Times › Sprints, 15.19) | Sprint chega sozinha com o backlog; resultado chega ao fechar com confirmação; histórico guardado na Central | Time com ferramenta própria pode não mandar as sprints |
 | **10. Conciliar** | Une épicos do time a iniciativas, liga itens a features; a feature do time vem com os cards dela e vai inteira | Central (Integração) | Uniões podem ser desfeitas; códigos antigos viram apelidos | |
 | **11. Usar agentes** | Depois de reuniões, copia o prompt certo, roda no agente, importa o JSON | Central (Importar e agentes) | Prévia antes de aplicar, com linhas que podem ser descartadas uma a uma; reimportar não duplica | |
 | **12. Recados** | Deixa post-its para um ou vários times e vê quem leu | Hub | Cifrados por time; um time não vê o post-it do outro | Atraso normal da sincronização |
@@ -57,7 +58,7 @@ A solução se chama **Remessa**: as ferramentas trocam envelopes lacrados (cifr
 | **4a. Refinar e planejar** | Na reunião de refinamento, abre **Refinamento**: organiza as features, move entregáveis entre elas, divide e junta cards, escreve critérios, marca o pronto, desenha as próximas sprints contra a capacidade, planeja a próxima com objetivo e inicia; copia o resumo para o Teams | Quadro (Refinamento, 2.6 e 2.7) | Feature nova vai para a conciliação do gestor sozinha; critérios ficam no time | Antes, um card por vez no painel |
 | **4b. Exportar** | Baixa a planilha dos cards ou o JSON legível para levar a outra ferramenta | Quadro (Exportar) | Só sai depois de confirmar que vai sem criptografia; nada vai para a pasta compartilhada | Guardar numa pasta só sua |
 | **5. Recados** | Lê post-its no topo e clica **Vi** | Quadro | O gestor vê quem leu | |
-| **6. Fim de sprint** | Fecha a sprint, diz se o objetivo foi atingido, escreve uma linha sobre ela e confirma a publicação das métricas | Quadro | Métricas autodescritivas, a Central só desenha | |
+| **6. Fim de sprint** | Fecha a sprint, diz se o objetivo foi atingido, escreve uma linha sobre ela e confirma a publicação das métricas | Quadro | Métricas autodescritivas, a Central só desenha; o resultado da sprint vai junto e o gestor vê na aba Sprints (2.8) | |
 | **7. Convidar o time** | Envia o mesmo HTML às pessoas do time, com a chave por mensagem direta | Teams / e-mail | Cada pessoa grava o próprio arquivo, sem conflito | |
 
 ## 4. Jornada do membro do time

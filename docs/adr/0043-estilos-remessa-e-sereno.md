@@ -1,4 +1,4 @@
-# ADR-0042 · Estilos Remessa e Sereno na camada de tema
+# ADR-0043 · Estilos Remessa e Sereno na camada de tema
 
 **Status:** aceita · **Data:** 27/11/2026 · **Origem:** pedido do Fernando ("olhe a tela de login e recrie as telas a partir dela", depois "faz um segundo tema mais minimalista, com menos estímulo visual" e "implemente os 2"); modelos aprovados no Design System Remessa; fonte em `financas/src/tema.js`
 

@@ -124,6 +124,16 @@ function regrasDoConteudo(p, papel) {
   const s = p.schema;
   if (cat) for (const i of p.initiatives || []) { P(INIT_RE.test(i.ref), `iniciativa ${i.ref}: código inválido`); P(i.team === timeDoConteudo, `iniciativa ${i.ref}: team diferente de teams[0].slug`); if (p.teams?.[0]?.prefix) W(i.ref.startsWith(p.teams[0].prefix + '-'), `iniciativa ${i.ref} sem o prefixo ${p.teams[0].prefix}`); }
   if (s === 'gestao-status/1') {
+    const sps = p.sprints || [], spIds = new Set(sps.map(x => x.localId)), fLocTodas = new Set((p.initiatives || []).flatMap(i => (i.items || []).filter(x => x.kind === 'feature').map(x => x.localId)));
+    P(sps.filter(x => x.state === 'active').length <= 1, 'sprints[]: no máximo uma sprint com state "active"');
+    P(spIds.size === sps.length, 'sprints[]: localId repetido');
+    for (const x of sps) {
+      if (x.start && x.end) P(x.start <= x.end, `sprint ${x.localId}: end antes de start`);
+      if (x.doneCommitted !== undefined) P(x.doneCommitted <= (x.committed ?? 0), `sprint ${x.localId}: doneCommitted maior que committed`);
+      W(x.state !== 'planned' || x.doneCommitted === undefined, `sprint ${x.localId}: sprint planejada não tem doneCommitted`);
+      for (const f of x.features || []) { P(!!f.ref !== !!f.localId, `sprint ${x.localId}: cada feature leva ref ou localId (um dos dois)`); if (f.ref) P(FEAT_RE.test(f.ref), `sprint ${x.localId}: feature ${f.ref} inválida`); if (f.localId) W(fLocTodas.has(f.localId), `sprint ${x.localId}: feature ${f.localId} não aparece como item kind "feature"`); }
+    }
+    for (const i of p.initiatives || []) for (const it of i.items || []) if (it.sprintLocalId !== undefined) P(spIds.has(it.sprintLocalId), `${it.localId}: sprintLocalId ${it.sprintLocalId} não está em sprints[]`);
     for (const i of p.initiatives || []) {
       P(i.ref === null || i.ref === undefined || INIT_RE.test(i.ref), `${i.localId}: ref inválido`);
       for (const f of i.features || []) { P(FEAT_RE.test(f.ref), `${i.localId}: feature ${f.ref} inválida`); if (i.ref) W(f.ref.startsWith(i.ref + '.'), `${f.ref} não é feature de ${i.ref}`); }
@@ -137,7 +147,13 @@ function regrasDoConteudo(p, papel) {
     }
   }
   if (s === 'gestao-metricas/1') {
-    const ids = new Set();
+    const ids = new Set(), sp = p.sprint;
+    if (sp) {
+      if (sp.start && sp.end) P(sp.start <= sp.end, 'sprint: end antes de start');
+      if (sp.deliveredCommitted !== undefined) P(sp.deliveredCommitted <= (sp.committed ?? 0), 'sprint: deliveredCommitted maior que committed');
+      if (sp.deliveredCommitted !== undefined && sp.delivered !== undefined) P(sp.deliveredCommitted <= sp.delivered, 'sprint: deliveredCommitted maior que delivered');
+      W(sp.goalMet === undefined || sp.goal, 'sprint: goalMet sem goal');
+    }
     for (const m of p.metrics || []) {
       P(!ids.has(m.id), `métrica ${m.id} repetida`); ids.add(m.id);
       P(['team', 'initiative', 'feature'].includes(m.scope?.level ?? 'team'), `métrica ${m.id}: nada por pessoa (scope.level)`);

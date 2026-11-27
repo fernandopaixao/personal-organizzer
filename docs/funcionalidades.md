@@ -1,6 +1,6 @@
 # Funcionalidades, usos e objetivos
 
-*26/11/2026 · Remessa · Central v15.19, Quadro do Time 2.7, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.2, contratos 1.1 · visual experimental em `experimental/`*
+*26/11/2026 · Remessa · Central v15.20, Quadro do Time 2.8, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.2, contratos 1.2 · visual experimental em `experimental/`*
 
 Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. Para as regras técnicas por trás, veja as [decisões de arquitetura](adr/README.md). Para o caminho de quem usa, veja a [jornada do usuário](jornada-do-usuario.md) e o [passo a passo](passo-a-passo.md).
 
@@ -121,7 +121,7 @@ A tela final mostra cards (ferramentas geradas, times, chaves, arquivos cifrados
 
 ---
 
-## 5. Central de Gestão (v15.18)
+## 5. Central de Gestão (v15.19)
 
 **Férias dentro da Central (15.9, [ADR-0033](adr/0033-ferias-dentro-da-central.md)).** O Mapa de Férias do gestor e da liderança deixou de ser uma ferramenta à parte: é a página **Férias** (menu Pessoas), no mesmo arquivo e com a mesma senha da Central. Os times com pasta e as chaves de tarefas da Integração entram sozinhos; a pasta compartilhada é a da Integração. A página **Hoje** mostra quem está **fora hoje**.
 
@@ -136,7 +136,7 @@ Navegação em 9 páginas (teclas 1 a 9) e o botão **Importar e agentes** no to
 
 ### 5.1 Hoje (1)
 - **Cards de leitura no topo:** o dia (feitas de quantas, atrasadas), delegadas no prazo, iniciativas em andamento em dia e rituais dos próximos 7 dias. Com a chave de finanças dos times (15.5), entra o card **Finanças dos times**: previsto do ano contra o teto ou o orçado, times acima do teto e planos sem publicar há mais de 35 dias. Cada card abre a página dona do dado.
-- **Uso:** abrir o dia. Tarefas do dia e atrasadas, 1:1 da semana, fóruns dos próximos 7 dias, iniciativas pedindo atenção e o cartão **Dos times** (arquivos novos, alertas, épicos sem vínculo, times sem chave), e o cartão **Fora hoje** (15.9): quem está de férias ou ausente hoje, você, diretos e os times, lido da página Férias.
+- **Uso:** abrir o dia. Tarefas do dia e atrasadas, 1:1 da semana, fóruns dos próximos 7 dias, iniciativas pedindo atenção e o cartão **Dos times** (arquivos novos, alertas, épicos sem vínculo, times sem chave), e o cartão **Fora hoje** (15.9): quem está de férias ou ausente hoje, você, diretos e os times, lido da página Férias. O cartão **Sprints dos times** (15.19) avisa sprint que termina em até 2 dias ou passou do fim, sprint fechada sem métricas e feature com previsão depois do prazo; o card de cada time mostra a sprint em andamento.
 - **Objetivo:** responder "o que pede atenção agora" sem navegar.
 
 ### 5.2 Tarefas (2)
@@ -176,6 +176,7 @@ Navegação em 9 páginas (teclas 1 a 9) e o botão **Importar e agentes** no to
 ### 5.8 Times (8)
 - **Uso:** cadastro dos times (prefixo e pasta), **Métricas dos times** (fluxo publicado por eles), visão de cada time (backlog, features, reunião de status guiada, folha para o Teams) e **HTML do time** (gera o Quadro já configurado, com aviso de cofre).
 - **Finanças (15.5, só leitura):** com a chave de finanças do time, o card do time mostra o previsto do ano contra o teto ou o orçado. A reunião de status ganha o bloco **Finanças** quando o time passou do teto ou não publica há mais de 35 dias ([ADR-0028](adr/0028-financas-na-central-so-leitura.md)).
+- **Sprints (15.19, só leitura, [ADR-0042](adr/0042-sprint-sincronizada-com-a-central.md)):** aba **Sprints** no time com a sprint em andamento (objetivo, compromisso, feitos, entrou e saiu, bloqueados, features), as próximas sprints do desenho do time, **previsão × prazo** de cada feature e as **sprints fechadas** com compromisso × cumprido, objetivo atingido e a linha do time. A Central guarda esse histórico (até 26 sprints por time). A reunião de status abre com o bloco **Sprint** e o downstream da feature mostra em que sprint ela está.
 - **Objetivo:** acompanhar cada time e entregar a ferramenta pronta.
 
 ### 5.9 Integração (9)
@@ -190,7 +191,7 @@ Navegação em 9 páginas (teclas 1 a 9) e o botão **Importar e agentes** no to
 
 ---
 
-## 6. Quadro do Time (2.7)
+## 6. Quadro do Time (2.8)
 
 **Objetivo:** dar ao time uma ferramenta de fluxo pronta, que publica sozinha o que a Central precisa.
 
@@ -214,7 +215,7 @@ Quando o catálogo da Central chega pela pasta, o Quadro avisa **Nova remessa da
 
 No painel do card (2.6), os blocos **Critérios de aceite** (lista que se marca; Enter adiciona) e **Pronto para sprint** (itens do time ou marcação à mão) ficam no time e não vão para a Central. A exportação legível leva os dois.
 
-Cada pessoa grava o **próprio arquivo** (`quadro/<pessoa>-<computador>.json`) e o Quadro une os arquivos de todos a cada 20 s. O backlog (`status.json`) é publicado a cada movimentação; as métricas, ao fechar a sprint.
+Cada pessoa grava o **próprio arquivo** (`quadro/<pessoa>-<computador>.json`) e o Quadro une os arquivos de todos a cada 20 s. O backlog (`status.json`) é publicado a cada movimentação; as métricas, ao fechar a sprint. Desde a 2.8 ([ADR-0042](adr/0042-sprint-sincronizada-com-a-central.md)) o backlog leva também as sprints (a última fechada, a em andamento e as próximas, com objetivo, capacidade e compromisso) e as métricas levam o resultado da sprint fechada (objetivo atingido, a linha, compromisso × cumprido, o que entrou, saiu e ficou aberto) e a métrica **Objetivo da sprint atingido**.
 
 **Times com ferramenta própria** podem continuar com ela adaptando-a ao contrato (caminho B em `ferramenta-time/guia-adaptacao-times.md`).
 
@@ -289,7 +290,7 @@ O grupo enxerga os anos do próprio horizonte **mais os anos publicados pelos ti
 | **Reconhecer arquivo errado** | Todas | Dizer qual HTML abre aquele arquivo |
 | **Uma senha por sessão** | Hub, Central e assistente passam a senha; Finanças, Férias e Central recebem | Abrir pelo hub ou pela Central sem redigitar a senha. Só em memória, uma vez, para a janela recém-aberta ([ADR-0029](adr/0029-uma-senha-por-sessao.md)) |
 | **Tema claro, escuro ou automático** | Todas | Botão redondo no canto inferior direito; Automático segue o sistema. A escolha fica só neste computador e vale para todas as ferramentas abertas ([ADR-0027](adr/0027-tema-claro-escuro-compartilhado.md)) |
-| **Estilo Remessa ou Sereno** | Todas | No mesmo botão, grupo **Estilo**. **Remessa** (padrão) leva o visual da tela de entrada para dentro: trilho lateral marinho com os nomes das páginas, topo do Hub e do Quadro marinhos, escuro em azul-noite. **Sereno** é para quem prefere menos estímulo visual: sem gradiente, faixas cheias nem sombras, um só azul, escuro em grafite. Combina com Claro, Escuro e Automático; fica só neste computador ([ADR-0042](adr/0042-estilos-remessa-e-sereno.md)) |
+| **Estilo Remessa ou Sereno** | Todas | No mesmo botão, grupo **Estilo**. **Remessa** (padrão) leva o visual da tela de entrada para dentro: trilho lateral marinho com os nomes das páginas, topo do Hub e do Quadro marinhos, escuro em azul-noite. **Sereno** é para quem prefere menos estímulo visual: sem gradiente, faixas cheias nem sombras, um só azul, escuro em grafite. Combina com Claro, Escuro e Automático; fica só neste computador ([ADR-0043](adr/0043-estilos-remessa-e-sereno.md)) |
 | **Aviso quando não dá para abrir pastas** | Hub, Finanças, Central (página Férias) e assistente | No Safari, no Firefox, no celular, numa pré-visualização (Outlook, Teams, OneDrive) ou aberto de dentro do .zip, o aviso no topo diz o motivo e o que fazer, e todo botão responde ao clique ([ADR-0030](adr/0030-aviso-quando-nao-da-para-abrir-pastas.md)) |
 | **Migração automática** | Central (e demais quando o formato muda) | Abrir arquivo antigo na versão nova, com backup |
 | **Pacote .zip** | `python3 tools/empacotar.py` (e a CI do repositório pessoal) | Levar a solução para a empresa num único arquivo: HTMLs lado a lado, contratos, documentação, LEIA-ME e a pasta `experimental/` com o visual novo. Não passa pelo repositório da empresa |
@@ -314,7 +315,7 @@ Apoio para **enxergar e planejar as ausências** do time e do grupo. Não substi
 
 ---
 
-## 10. Contratos para outras soluções (`contratos/`, 1.0)
+## 10. Contratos para outras soluções (`contratos/`, 1.2)
 
 Times e gestores que usam **ferramentas próprias** (sistema do time, planilha com macro, agente) podem aparecer no hub do gestor e na visão da **liderança** (líder de líderes) sem usar os nossos HTMLs: basta gravarem na pasta compartilhada os mesmos arquivos, no mesmo formato. A pasta `contratos/` reúne tudo o que essas soluções precisam respeitar ([ADR-0032](adr/0032-pasta-de-contratos.md)).
 

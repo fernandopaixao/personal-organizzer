@@ -1,6 +1,6 @@
 {
   "schema": "gestao-dicionario-metricas/1",
-  "updated": "2026-11-15",
+  "updated": "2026-11-26",
   "description": "Índice usado pela Central para casar métricas dos times (por standard, id ou nome). Métricas fora do índice são aceitas como não mapeadas.",
   "metrics": [
     {
@@ -155,6 +155,20 @@
         "entrada",
         "demanda",
         "cards_criados_semana"
+      ]
+    },
+    {
+      "standard": "sprint_goal_met",
+      "name": "Objetivo da sprint atingido",
+      "valueType": "percent",
+      "unit": "%",
+      "direction": "higher_is_better",
+      "grain": "sprint",
+      "viz": "bar",
+      "aliases": [
+        "objetivo_sprint",
+        "sprint_goal",
+        "meta_sprint_atingida"
       ]
     }
   ]
