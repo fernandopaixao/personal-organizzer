@@ -38,7 +38,9 @@ const dia = n => { const d = new Date(seg); d.setDate(d.getDate() + n); return d
   await new Promise(r => srv.listen(0, r));
   const base = `http://127.0.0.1:${srv.address().port}`;
   const browser = await chromium.launch();
-  const ctxB = await browser.newContext();
+  // TELAS=arquivo.png salva a tela de Férias; ESTILO (sereno, classico) e TEMA=escuro trocam o visual (ADR-0043/0044).
+  const ctxB = await browser.newContext({ colorScheme: process.env.TEMA === 'escuro' ? 'dark' : 'light' });
+  if (process.env.ESTILO) await ctxB.addInitScript(e => { try { localStorage.setItem('gestao.estilo', e); } catch {} }, process.env.ESTILO);
   const erros = [];
   const nova = async (local) => { const p = await ctxB.newPage(); p.on('pageerror', e => erros.push(local + ': ' + e.message)); await p.addInitScript(stub({ 'ferias-local': local, 'ferias-comum': 'Gestao-Compartilhado' })); await p.goto(base + '/ferias/ferias.html'); return p; };
   async function criar(p, tipo, nome, slug, pessoa) {

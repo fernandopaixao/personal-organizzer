@@ -1,6 +1,6 @@
 # Passo a passo · como lidar com a solução
 
-*26/11/2026 · Remessa · Central v15.20, Quadro do Time 2.8, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.2, contratos 1.2 · visual experimental em `experimental/`*
+*27/11/2026 · Remessa · Central v15.21, Quadro do Time 2.8.1, Hub 2.4.1, Finanças do Grupo 1.7.2 e do Time 1.5.2, Mapa de Férias 1.5.2 (dentro da Central), assistente 2.8.2, contratos 1.2 · visual experimental em `experimental/`*
 
 Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é independente. Antes de começar: use **Edge ou Chrome** no computador, abrindo o arquivo com dois cliques (não pela pré-visualização do Outlook, Teams ou OneDrive, nem de dentro do .zip), e tenha à mão um **cofre de senhas** (o gerenciador de senhas da empresa).
 
@@ -234,8 +234,9 @@ Os outros times não são afetados.
 | Não consigo gravar | Navegador sem File System Access API ou pasta sem permissão | Use Edge ou Chrome e autorize a pasta de novo |
 | Aviso vermelho "Daqui não dá para abrir pastas" e os botões não seguem | O arquivo foi aberto no Safari, no Firefox, no celular ou numa pré-visualização (Outlook, Teams, OneDrive, SharePoint, biblioteca de outro aplicativo) | Faça o que o aviso diz: baixe o arquivo para uma pasta só sua e abra com dois cliques, ou botão direito > **Abrir com** > Microsoft Edge ou Google Chrome. A última linha do aviso mostra o navegador e o endereço detectados |
 | Aviso para extrair o .zip | O HTML foi aberto de dentro do .zip ou de um anexo (pasta temporária) | Botão direito no .zip > **Extrair tudo**, leve a pasta para um lugar só seu e abra o HTML de lá |
-| Quero a tela escura (ou ela ficou escura sem eu pedir) | O tema está em Automático e segue o sistema | Clique no botão redondo no canto inferior direito e escolha **Claro**, **Escuro** ou **Automático**. Fica salvo só neste computador e vale para todas as ferramentas |
-| A tela tem cor e decoração demais para mim | O estilo padrão é o **Remessa**, com trilho e faixas marinhas | No mesmo botão redondo, em **Estilo**, escolha **Sereno**: mesmas telas e informações, sem gradiente, faixas nem sombras. Vale com claro e escuro; para voltar, escolha **Remessa** |
+| Quero a tela escura (ou ela ficou escura sem eu pedir) | O tema está em Automático e segue o sistema | Clique no botão redondo no canto inferior direito (na Central, também no botão **Preferências** do topo) e, em **Modo**, escolha **Claro**, **Escuro** ou **Automático**. Fica salvo só neste computador e vale para todas as ferramentas |
+| A tela tem cor e decoração demais para mim | O estilo padrão é o **Remessa**, com trilho e faixas marinhas | No painel **Preferências** (botão redondo do canto ou Ajustes da ferramenta), em **Estilo visual**, escolha **Sereno**: mesmas telas e informações, sem gradiente, faixas nem sombras. Vale com claro e escuro; para voltar, escolha **Remessa** |
+| Prefiro o visual de antes (trilho branco com siglas) | Desde a Central 15.20 o padrão é o estilo **Remessa** | Em **Preferências › Estilo visual**, escolha **Clássico**. Para o visual da pasta `experimental/`, escolha **Experimental**: a mesma ferramenta abre lá, com os mesmos dados, e você volta pelo mesmo painel |
 | Aviso de que a pasta parece ser a compartilhada | Você escolheu a pasta dos times como pasta pessoal | Escolha uma pasta só sua (de preferência no seu OneDrive) |
 | Uma ferramenta pediu a senha mesmo aberta pelo hub | A senha dessa ferramenta é diferente da do hub, ou passaram mais de 90 segundos do clique | Digite a senha do cofre; abra as ferramentas pelos links do hub |
 

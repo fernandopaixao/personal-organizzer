@@ -1,6 +1,6 @@
 # Jornada do usuário
 
-*26/11/2026 · como cada papel conhece, monta, usa e mantém a Remessa · Central v15.20, Quadro do Time 2.8, Hub 2.4, assistente 2.8.2*
+*27/11/2026 · como cada papel conhece, monta, usa e mantém a Remessa · Central v15.21, Quadro do Time 2.8.1, Hub 2.4.1, assistente 2.8.2*
 
 A solução tem quatro papéis. A mesma pessoa pode ter mais de um (o gestor costuma ser também o dono das finanças do grupo; o líder do time costuma ser também o responsável financeiro). Quem integra uma **outra solução** pelos contratos tem a jornada própria na [seção 9](#9-jornada-de-quem-integra-outra-solução).
 
@@ -92,7 +92,8 @@ A solução se chama **Remessa**: as ferramentas trocam envelopes lacrados (cifr
 | **Chave vazou** | Gestor revoga e gera outra; envia ao responsável; o time cola a nova | [Passo a passo §11](passo-a-passo.md#11-uma-chave-vazou) |
 | **Cópia de conflito encontrada** | Aceitar a resolução proposta pela ferramenta | [ADR-0007](adr/0007-um-escritor-por-arquivo.md) |
 | **Prefere a tela escura** | Botão redondo no canto inferior direito de qualquer ferramenta: Claro, Escuro ou Automático (segue o sistema). Vale para todas as ferramentas neste computador | [Passo a passo §12](passo-a-passo.md#12-problemas-comuns) |
-| **Prefere menos estímulo visual** | No mesmo botão, **Estilo › Sereno**: tira gradientes, faixas marinhas e sombras sem esconder nenhuma informação. O padrão, **Remessa**, traz o visual da tela de entrada para dentro das ferramentas | [Passo a passo §12](passo-a-passo.md#12-problemas-comuns) |
+| **Quer escolher o visual** | Painel **Preferências** (botão redondo do canto, botão do topo da Central ou card nos Ajustes): **Estilo visual** Remessa, Sereno, Clássico (o de antes) ou Experimental, com miniatura de cada um. A escolha vale para todas as ferramentas neste computador | [Passo a passo §12](passo-a-passo.md#12-problemas-comuns) |
+| **Prefere menos estímulo visual** | Em **Preferências › Estilo visual › Sereno**: tira gradientes, faixas marinhas e sombras sem esconder nenhuma informação. O padrão, **Remessa**, traz o visual da tela de entrada para dentro das ferramentas | [Passo a passo §12](passo-a-passo.md#12-problemas-comuns) |
 | **Quer experimentar o visual novo** | Na tela de entrada do hub (ou de qualquer ferramenta), **Experimentar o visual novo**; a escolha fica lembrada e o `hub.html` de sempre passa a abrir no visual novo; **Voltar ao visual atual** na mesma caixa ([ADR-0038](adr/0038-ligar-visual-experimental-na-entrada.md)) | [Passo a passo §15](passo-a-passo.md#15-experimentar-o-visual-novo), [ADR-0034](adr/0034-visual-experimental.md) |
 | **Pessoa saiu do time** | Desativar a pessoa nos Ajustes do Quadro; o arquivo dela continua lido | |
 

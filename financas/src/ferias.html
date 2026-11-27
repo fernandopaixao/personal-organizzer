@@ -66,7 +66,7 @@
      (a mesma chave GK1.<grupo>-fin-… das Finanças do Grupo serve). Funciona em quantos níveis forem precisos.
    Notas das ausências ficam só no arquivo local cifrado. Conteúdo comum: gestao-ferias/1.
    ===================================================================== */
-const TOOL = 'ferias', TOOL_NOME = 'Mapa de Férias', TOOL_VERSION = '1.5.1';
+const TOOL = 'ferias', TOOL_NOME = 'Mapa de Férias', TOOL_VERSION = '1.5.2';
 const LOCAL_SCHEMA = 'gestao-ferias-local/1', FERIAS_SCHEMA = 'gestao-ferias/1';
 const PRESET = /*FERIAS-PRESET*/null/*FIM-FERIAS-PRESET*/;
 // Dentro da Central de Gestão (ADR-0033): a Central abre esta ferramenta num quadro da própria página e entrega
@@ -716,6 +716,7 @@ function vAjustes(el) {
     : `<div class="card"><p class="lbl">Segurança</p><p class="small">Arquivo <span class="code">${esc(arquivo)}</span> cifrado com a sua senha (AES-256, PBKDF2 600 mil). As chaves ficam dentro dele.</p>
       <div class="row"><button class="btn" id="jSenha">Trocar senha</button><button class="btn" id="jBk">Baixar cópia cifrada</button><button class="btn" id="jTeste">Testar minha senha</button></div>`}
       <p class="small muted">Apoio para enxergar e planejar ausências: não substitui a ferramenta oficial de férias da empresa.</p></div>
+    <div class="card" data-preferencias></div>
   </div>`;
   $('#jPasta').onclick = async () => { try { const h = HOST ? await HOST.escolherPasta() : await escolherPasta('ferias-comum'); if (h) await ligarPasta(h, !!HOST); } catch (e) { if (e.name !== 'AbortError') toast(e.message); } };
   if ($('#jLer')) $('#jLer').onclick = () => lerPasta();

@@ -21,7 +21,7 @@
    compara com o orçamento do grupo e publica diretrizes grupo/financas/diretriz-<time>.json.
    Orçamento aprovado, itens do grupo, chaves e versões ficam no arquivo local cifrado.
    ===================================================================== */
-const TOOL = 'financas-grupo', TOOL_NOME = 'Finanças do Grupo', TOOL_VERSION = '1.7.1';
+const TOOL = 'financas-grupo', TOOL_NOME = 'Finanças do Grupo', TOOL_VERSION = '1.7.2';
 const LOCAL_SCHEMA = 'gestao-financas-local/1', PLANO_SCHEMA = 'gestao-financas-plano/1', DIRETRIZ_SCHEMA = 'gestao-financas-diretriz/1';
 const PRESET = /*FING-PRESET*/null/*FIM-FING-PRESET*/;
 // Onde o arquivo desta ferramenta ficou neste navegador (gravado pelo assistente ou na última abertura).
@@ -563,7 +563,7 @@ function vAjustes(el) {
       <p class="small muted">Vai cifrado para <span class="code">grupos/${esc(db.grupo.slug)}/financas/plano.json</span>: uma linha por time e categoria, mês a mês, de todos os anos. Você confere antes o que sobe.</p>`; })()}</div>
     <div class="card"><p class="lbl">Segurança</p><p class="small">Arquivo <span class="code">${esc(arquivo)}</span> cifrado com a sua senha. As chaves dos times ficam dentro dele.</p>
       <div class="row"><button class="btn" id="gSenha">Trocar senha</button><button class="btn" id="gBk">Baixar cópia cifrada</button></div>
-      <p class="small muted">A pasta local guarda as 5 últimas versões em <span class="code">backup/</span>; baixe uma cópia cifrada de vez em quando.</p></div></div>`;
+      <p class="small muted">A pasta local guarda as 5 últimas versões em <span class="code">backup/</span>; baixe uma cópia cifrada de vez em quando.</p></div><div class="card" data-preferencias></div></div>`;
   $('#gN').onchange = e => { db.grupo.nome = clamp(e.target.value.trim(), 80) || db.grupo.nome; agendarSalvar(); };
   $('#gA').onchange = e => { db.ano = +e.target.value; db.orcamento.total = orcAno(db.ano); agendarSalvar(); };
   $$('[data-go]', el).forEach(i => i.onchange = () => { const a = +i.dataset.go; db.orcamento.porAno[a] = parseValor(i.value) || 0; if (a === db.ano) db.orcamento.total = db.orcamento.porAno[a]; agendarSalvar(); });
