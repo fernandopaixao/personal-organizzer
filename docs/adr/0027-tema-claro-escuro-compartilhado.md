@@ -1,6 +1,6 @@
 # ADR-0027 · Tema claro, escuro e automático numa camada compartilhada
 
-**Status:** aceita · **Data:** 24/11/2026 · **Origem:** pedido do Fernando ("Adiciona modo escuro na interface"); fonte em `financas/src/tema.js`
+**Status:** aceita, paleta escura revista pela [ADR-0043](0043-estilos-remessa-e-sereno.md) · **Data:** 24/11/2026 · **Origem:** pedido do Fernando ("Adiciona modo escuro na interface"); fonte em `financas/src/tema.js`
 
 ## Contexto
 Todas as ferramentas (hub, assistente, Central, Quadro do Time, Finanças do Grupo e do Time, Mapa de Férias) usam a mesma identidade branco e azul, mas cada uma tem o próprio CSS, centenas de cores fixas (`#fff`, `#eceef4`...) e estilos inline e gráficos SVG montados pelo JavaScript. Reescrever o CSS de cada HTML para o escuro mexeria em arquivos que outras frentes estão mudando ao mesmo tempo, e qualquer tela nova teria de lembrar do escuro.
@@ -14,7 +14,7 @@ Todas as ferramentas (hub, assistente, Central, Quadro do Time, Finanças do Gru
    - as cores fixas das folhas de estilo, dos estilos inline e dos atributos `fill`/`stroke` do SVG são **convertidas no lugar, por papel**: fundo claro vira superfície azul-noite, texto escuro vira texto claro, borda clara vira borda escura, tons suaves (azul, vermelho, âmbar, verde) viram o mesmo tom escuro; cores cheias (botões, barras, destaques) ficam;
    - texto em `var(--bv)` passa a usar a variante clara `--bv-t`, legível sobre o fundo escuro, sem mudar o azul dos botões;
    - um `MutationObserver` converte o que a tela desenhar depois; voltar para o claro restaura os valores originais.
-5. **Paleta escura** no mesmo estilo do claro: fundo `#0e121c`, cards `#161b29`, bordas `#262d40`, texto `#e6e9f2`, azul BV `#5066ec` (texto `#8d9cf9`), vermelho `#ec7d74`, verde `#5cc292`.
+5. *(Revista pela [ADR-0043](0043-estilos-remessa-e-sereno.md): o escuro passou a ser azul-noite no estilo Remessa, fundo `#09112c`, e grafite no estilo Sereno, fundo `#121316`.)* **Paleta escura** original, no mesmo estilo do claro: fundo `#0e121c`, cards `#161b29`, bordas `#262d40`, texto `#e6e9f2`, azul BV `#5066ec` (texto `#8d9cf9`), vermelho `#ec7d74`, verde `#5cc292`.
 
 ## Consequências
 - O zip continua autossuficiente: o tema vai dentro de cada HTML, inclusive nas cópias embutidas (HTML do time gerado pela Central, finanças do time geradas pelo grupo, tudo que o assistente gera).

@@ -1,6 +1,6 @@
 # Funcionalidades, usos e objetivos
 
-*26/11/2026 · Remessa · Central v15.19, Quadro do Time 2.8, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.2, contratos 1.2 · visual experimental em `experimental/`*
+*26/11/2026 · Remessa · Central v15.20, Quadro do Time 2.8, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.2, contratos 1.2 · visual experimental em `experimental/`*
 
 Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. Para as regras técnicas por trás, veja as [decisões de arquitetura](adr/README.md). Para o caminho de quem usa, veja a [jornada do usuário](jornada-do-usuario.md) e o [passo a passo](passo-a-passo.md).
 
@@ -290,6 +290,7 @@ O grupo enxerga os anos do próprio horizonte **mais os anos publicados pelos ti
 | **Reconhecer arquivo errado** | Todas | Dizer qual HTML abre aquele arquivo |
 | **Uma senha por sessão** | Hub, Central e assistente passam a senha; Finanças, Férias e Central recebem | Abrir pelo hub ou pela Central sem redigitar a senha. Só em memória, uma vez, para a janela recém-aberta ([ADR-0029](adr/0029-uma-senha-por-sessao.md)) |
 | **Tema claro, escuro ou automático** | Todas | Botão redondo no canto inferior direito; Automático segue o sistema. A escolha fica só neste computador e vale para todas as ferramentas abertas ([ADR-0027](adr/0027-tema-claro-escuro-compartilhado.md)) |
+| **Estilo Remessa ou Sereno** | Todas | No mesmo botão, grupo **Estilo**. **Remessa** (padrão) leva o visual da tela de entrada para dentro: trilho lateral marinho com os nomes das páginas, topo do Hub e do Quadro marinhos, escuro em azul-noite. **Sereno** é para quem prefere menos estímulo visual: sem gradiente, faixas cheias nem sombras, um só azul, escuro em grafite. Combina com Claro, Escuro e Automático; fica só neste computador ([ADR-0043](adr/0043-estilos-remessa-e-sereno.md)) |
 | **Aviso quando não dá para abrir pastas** | Hub, Finanças, Central (página Férias) e assistente | No Safari, no Firefox, no celular, numa pré-visualização (Outlook, Teams, OneDrive) ou aberto de dentro do .zip, o aviso no topo diz o motivo e o que fazer, e todo botão responde ao clique ([ADR-0030](adr/0030-aviso-quando-nao-da-para-abrir-pastas.md)) |
 | **Migração automática** | Central (e demais quando o formato muda) | Abrir arquivo antigo na versão nova, com backup |
 | **Pacote .zip** | `python3 tools/empacotar.py` (e a CI do repositório pessoal) | Levar a solução para a empresa num único arquivo: HTMLs lado a lado, contratos, documentação, LEIA-ME e a pasta `experimental/` com o visual novo. Não passa pelo repositório da empresa |
