@@ -1,0 +1,93 @@
+{
+  "schema": "quadro-contrib/1",
+  "revision": 1,
+  "generatedAt": "2026-11-27T16:10:00-03:00",
+  "source": {
+    "team": "pagamentos",
+    "writer": "central~gestor",
+    "tool": "gestao_pessoal_v15.html",
+    "toolVersion": "15.22"
+  },
+  "db": {
+    "schema": "quadro-time/1",
+    "createdAt": "2026-11-27T16:10:00-03:00",
+    "upd": 1,
+    "team": {
+      "name": "Pagamentos",
+      "slug": "pagamentos",
+      "contact": "",
+      "upd": 1
+    },
+    "settings": {
+      "upd": 1,
+      "columns": [
+        {
+          "id": "backlog",
+          "name": "Backlog",
+          "wip": null
+        },
+        {
+          "id": "pronto",
+          "name": "Pronto para fazer",
+          "wip": null
+        },
+        {
+          "id": "fazendo",
+          "name": "Fazendo",
+          "wip": 6
+        },
+        {
+          "id": "validacao",
+          "name": "Validação",
+          "wip": 4
+        },
+        {
+          "id": "concluido",
+          "name": "Concluído",
+          "wip": null
+        }
+      ],
+      "commitCol": "pronto",
+      "startCol": "fazendo",
+      "autoPublish": true
+    },
+    "seq": {
+      "card": 0,
+      "epic": 0,
+      "sprint": 0,
+      "person": 2,
+      "feature": 0,
+      "refine": 0
+    },
+    "people": [
+      {
+        "id": "P-1",
+        "uid": "central-p1",
+        "name": "Ana Souza",
+        "role": "Desenvolvimento",
+        "active": true,
+        "createdAt": "2026-11-27T16:10:00-03:00",
+        "upd": 1
+      },
+      {
+        "id": "P-2",
+        "uid": "central-p2",
+        "name": "Bruno Lima",
+        "role": "Qualidade",
+        "active": true,
+        "createdAt": "2026-11-27T16:10:00-03:00",
+        "upd": 1
+      }
+    ],
+    "epics": [],
+    "features": [],
+    "cards": [],
+    "sprints": [],
+    "refinements": [],
+    "publish": {
+      "revision": 0,
+      "lastStatus": null,
+      "lastMetrics": null
+    }
+  }
+}

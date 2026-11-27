@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "quadro-contrib/1",
+  "title": "Quadro do time na pasta compartilhada (conteúdo decifrado do envelope gestao-envelope/1)",
+  "description": "Arquivos times/<time>/quadro/*.json, cifrados com a chave de tarefas (integração) do time. quadro-do-time.json é a base do quadro, gravada só pela Central de Gestão ou pelo assistente Início (writer central~gestor). <pessoa>-<computador>.json é o arquivo de cada pessoa: no Quadro 2.9 é o próprio arquivo de dados dela. O Quadro do Time lê todos e une item a item (vence o upd mais recente). Formato interno do Quadro (ADR-0045): outras soluções não escrevem aqui.",
+  "type": "object",
+  "required": ["schema", "revision", "generatedAt", "source", "db"],
+  "properties": {
+    "schema": { "const": "quadro-contrib/1" },
+    "revision": { "type": "integer", "minimum": 1 },
+    "generatedAt": { "type": "string" },
+    "source": {
+      "type": "object", "required": ["team", "writer"],
+      "properties": { "team": { "type": "string" }, "writer": { "type": "string" }, "tool": { "type": "string" }, "toolVersion": { "type": "string" } }
+    },
+    "db": {
+      "type": "object",
+      "description": "Dados do quadro (quadro-time/1). Cada item (pessoa, iniciativa, feature, card, sprint, refinamento) tem id, uid e upd (ms); settings e team também têm upd. Na base, upd = 1: ela só semeia e nunca vence o que o time mudou.",
+      "required": ["schema", "team"],
+      "properties": {
+        "schema": { "const": "quadro-time/1" },
+        "upd": { "type": "number" },
+        "team": { "type": "object", "required": ["name", "slug"], "properties": { "name": { "type": "string" }, "slug": { "type": "string" }, "contact": { "type": "string" }, "upd": { "type": "number" } } },
+        "settings": { "type": "object", "properties": { "upd": { "type": "number" }, "columns": { "type": "array", "minItems": 2, "items": { "type": "object", "required": ["id", "name"], "properties": { "id": { "type": "string" }, "name": { "type": "string" }, "wip": { "type": ["integer", "null"] } } } }, "commitCol": { "type": "string" }, "startCol": { "type": "string" } } },
+        "seq": { "type": "object" },
+        "people": { "type": "array", "items": { "type": "object", "required": ["id", "name"], "properties": { "id": { "type": "string" }, "uid": { "type": "string" }, "name": { "type": "string" }, "role": { "type": "string" }, "active": { "type": "boolean" }, "upd": { "type": "number" } } } },
+        "epics": { "type": "array" }, "features": { "type": "array" }, "cards": { "type": "array" }, "sprints": { "type": "array" }, "refinements": { "type": "array" },
+        "publish": { "type": "object" }
+      }
+    }
+  }
+}

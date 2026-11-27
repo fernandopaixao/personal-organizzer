@@ -1,6 +1,6 @@
 # Decisões de arquitetura (ADRs)
 
-*26/11/2026 · estado: Remessa · Central v15.19, Quadro do Time 2.8, Hub 2.4, Finanças do Grupo 1.7.1 e do Time 1.5.1, Mapa de Férias 1.5.1 (dentro da Central), assistente 2.8.2, contratos 1.2, visual experimental*
+*27/11/2026 · estado: Remessa · Central v15.22, Quadro do Time 2.9.0, Hub 2.4.1, Finanças do Grupo 1.7.2 e do Time 1.5.2, Mapa de Férias 1.5.2 (dentro da Central), assistente 2.9.0, contratos 1.3, visual experimental*
 
 Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequências e o que observar ao evoluir. Elas existem para que uma funcionalidade nova comece pelas regras certas, sem precisar reler todos os planos.
 
@@ -51,6 +51,7 @@ Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequê
 | [0041](0041-refinamento-no-quadro.md) | Refinamento no Quadro | Página Refinamento com o time (organizar, mover entre features, dividir, juntar, critérios, pronto para sprint, resumo); a Central só lê o resultado |
 | [0042](0042-sprint-sincronizada-com-a-central.md) | Sprint sincronizada com a Central | Sprints ao vivo no `status.json` e resultado da sprint no `metricas.json` (contratos 1.2, aditivo); a Central guarda o histórico e mostra a aba Sprints, só leitura |
 | [0043](0043-estilos-remessa-e-sereno.md) | Estilos Remessa e Sereno | Segundo eixo no seletor de tema: Remessa (trilho e topo marinhos, escuro azul-noite) ou Sereno (sem decoração, escuro grafite); só CSS na camada de tema |
+| [0045](0045-quadro-do-time-na-pasta-com-a-chave-do-time.md) | Quadro do time na pasta, com a chave do time | A Central (ou o assistente) cria a base `times/<time>/quadro/quadro-do-time.json`; cada pessoa grava só o próprio arquivo, cifrado com a chave de integração do time, sem senha pessoal |
 | [0044](0044-preferencias-de-estilo-visual.md) | Preferências: escolher o estilo visual | Painel Preferências (botão do canto, topo da Central e Ajustes de cada ferramenta) com Modo e Estilo: Remessa, Sereno, Clássico (o de antes) e Experimental (troca de pasta) |
 
 ## Checklist para uma funcionalidade nova
@@ -58,7 +59,7 @@ Cada ADR registra **uma** decisão: o contexto, o que foi decidido, as consequê
 1. **Onde mora o dado?** No arquivo da ferramenta dona ([0002](0002-dados-fora-do-html.md), [0010](0010-htmls-desacoplados.md)). Antes de criar um módulo novo para o gestor, veja se ele cabe como página da Central ([0033](0033-ferias-dentro-da-central.md)). Se outra ferramenta precisa dele, é um contrato novo na pasta comum, não uma leitura do arquivo.
 2. **Local ou comum?** Só vai para a pasta o que o outro lado precisa, de preferência agregado ([0008](0008-local-individual-comum-sincronizado.md)).
 3. **Quem escreve?** Um dono por arquivo, `<pessoa>-<computador>` se várias pessoas contribuem, publicação por `publicarUnico` ([0007](0007-um-escritor-por-arquivo.md)).
-4. **Qual chave?** Senha local, chave de tarefas ou chave de finanças do time ([0003](0003-criptografia-sempre.md), [0005](0005-chave-aleatoria-por-time.md), [0006](0006-chave-de-financas-separada.md)).
+4. **Qual chave?** Senha local, chave de tarefas (que também cifra o quadro do time, [0045](0045-quadro-do-time-na-pasta-com-a-chave-do-time.md)) ou chave de finanças do time ([0003](0003-criptografia-sempre.md), [0005](0005-chave-aleatoria-por-time.md), [0006](0006-chave-de-financas-separada.md)).
 5. **Contrato:** `schema` versionado, JSON Schema e exemplo em [`contratos/`](../../contratos/LEIA-ME.md), regra no `validar.js` e linha no histórico ([0009](0009-contratos-json-versionados.md), [0032](0032-pasta-de-contratos.md)).
 6. **Migração:** campo novo com padrão em `normalizeDb`; abrir um arquivo da versão anterior ([0011](0011-migracao-aditiva-versionada.md)).
 7. **Entrada externa:** escapar, validar, prévia antes de aplicar ([0013](0013-downstream-previa-e-conciliacao.md), [0015](0015-agentes-por-arquivo.md)).

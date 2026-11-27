@@ -114,6 +114,17 @@ const vistos = {
   seen: [{ id: 'pi-mhx1d4e5f', at: '2026-11-24T09:02:00-03:00' }]
 };
 
+// 9) Base do quadro do time: times/pagamentos/quadro/quadro-do-time.json (Central de Gestão, chave de tarefas do time, ADR-0045)
+const baseQuadro = {
+  schema: 'quadro-contrib/1', revision: 1, generatedAt: '2026-11-27T16:10:00-03:00',
+  source: { team: 'pagamentos', writer: 'central~gestor', tool: 'gestao_pessoal_v15.html', toolVersion: '15.22' },
+  db: { schema: 'quadro-time/1', createdAt: '2026-11-27T16:10:00-03:00', upd: 1, team: { name: 'Pagamentos', slug: 'pagamentos', contact: '', upd: 1 },
+    settings: { upd: 1, columns: [{ id: 'backlog', name: 'Backlog', wip: null }, { id: 'pronto', name: 'Pronto para fazer', wip: null }, { id: 'fazendo', name: 'Fazendo', wip: 6 }, { id: 'validacao', name: 'Validação', wip: 4 }, { id: 'concluido', name: 'Concluído', wip: null }], commitCol: 'pronto', startCol: 'fazendo', autoPublish: true },
+    seq: { card: 0, epic: 0, sprint: 0, person: 2, feature: 0, refine: 0 },
+    people: [{ id: 'P-1', uid: 'central-p1', name: 'Ana Souza', role: 'Desenvolvimento', active: true, createdAt: '2026-11-27T16:10:00-03:00', upd: 1 }, { id: 'P-2', uid: 'central-p2', name: 'Bruno Lima', role: 'Qualidade', active: true, createdAt: '2026-11-27T16:10:00-03:00', upd: 1 }],
+    epics: [], features: [], cards: [], sprints: [], refinements: [], publish: { revision: 0, lastStatus: null, lastMetrics: null } }
+};
+
 // Métricas de integração: completa a definition das métricas próprias (boa prática; o Quadro exige).
 const met = JSON.parse(fs.readFileSync(path.join(CONT, 'times/pagamentos/metricas.json'), 'utf8'));
 const DEF = { lead_time_dist: 'Cards entregues nos últimos 90 dias por faixa de lead time (dias do compromisso à entrega).', compromisso_sprint: 'Cards na sprint quando ela começou e entregues até o fim dela ÷ cards na sprint quando ela começou.', bloqueados_por_motivo: 'Cards bloqueados agora, agrupados pelo motivo informado no bloqueio.' };
@@ -147,7 +158,8 @@ const CONTEUDOS = {
   'times/pagamentos/ferias/ana-k3f9a.json': [feriasTime, KIDS.tarefas],
   'grupos/canais/ferias/marina-p8x2c.json': [feriasGrupo, KIDS.grupo],
   'times/pagamentos/postits/marina-p8x2c.json': [postits, KIDS.tarefas],
-  'times/pagamentos/postits/vistos/ana-k3f9a.json': [vistos, KIDS.tarefas]
+  'times/pagamentos/postits/vistos/ana-k3f9a.json': [vistos, KIDS.tarefas],
+  'times/pagamentos/quadro/quadro-do-time.json': [baseQuadro, KIDS.tarefas]
 };
 
 (async () => {

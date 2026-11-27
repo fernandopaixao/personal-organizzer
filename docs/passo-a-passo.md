@@ -1,6 +1,6 @@
 # Passo a passo · como lidar com a solução
 
-*27/11/2026 · Remessa · Central v15.21, Quadro do Time 2.8.1, Hub 2.4.1, Finanças do Grupo 1.7.2 e do Time 1.5.2, Mapa de Férias 1.5.2 (dentro da Central), assistente 2.8.2, contratos 1.2 · visual experimental em `experimental/`*
+*27/11/2026 · Remessa · Central v15.22, Quadro do Time 2.9.0, Hub 2.4.1, Finanças do Grupo 1.7.2 e do Time 1.5.2, Mapa de Férias 1.5.2 (dentro da Central), assistente 2.9.0, contratos 1.3 · visual experimental em `experimental/`*
 
 Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é independente. Antes de começar: use **Edge ou Chrome** no computador, abrindo o arquivo com dois cliques (não pela pré-visualização do Outlook, Teams ou OneDrive, nem de dentro do .zip), e tenha à mão um **cofre de senhas** (o gerenciador de senhas da empresa).
 
@@ -59,9 +59,10 @@ Guia prático, na ordem em que as coisas costumam acontecer. Cada seção é ind
 Times criados pelo assistente já têm prefixo, pasta e chave: pule para o passo 3.
 1. Na Central, **Times › + Time**: o nome basta (prefixo e pasta podem ficar em branco).
 2. Abra o time: o aviso em destaque mostra **Gerar chave de integração**. Um clique gera a chave e, se faltar, define a pasta e o prefixo (dá para mudar em **Editar time**). **Guarde no cofre**.
-3. Na aba **Integração** do time, clique **HTML do time (com a chave)** (a tela mostra o aviso de cofre). Prefira enviar a chave separada do HTML.
-4. Envie o HTML ao responsável e, **à parte, por mensagem direta no Teams ou por e-mail**, o texto da chave (`GK1.…`). Nunca coloque a chave na pasta compartilhada.
-5. No hub, **Importar da Central** para poder mandar post-its a esse time.
+3. Ainda no cartão da chave, clique **Criar o quadro do time na pasta** (precisa da pasta compartilhada conectada em **Integração**): a Central grava `times/<time>/quadro/quadro-do-time.json`, cifrado com a chave do time, com o nome e as pessoas do time. Times criados pelo assistente com a pasta compartilhada ligada já têm esse arquivo. Pode clicar de novo quando entrar gente no time: o que o time fez no quadro continua.
+4. Na aba **Integração** do time, clique **HTML do time (com a chave)** (a tela mostra o aviso de cofre). Prefira enviar a chave separada do HTML.
+5. Envie o HTML ao responsável e, **à parte, por mensagem direta no Teams ou por e-mail**, o texto da chave (`GK1.…`). Nunca coloque a chave na pasta compartilhada.
+6. No hub, **Importar da Central** para poder mandar post-its a esse time.
 
 **Finanças (Finanças do Time)**
 1. No Finanças do Grupo, **Times**: cadastre o time, defina o **teto de cada ano** e a diretriz, e clique **Gerar chave** (chave de finanças, diferente da de tarefas).
@@ -72,13 +73,13 @@ Times criados pelo assistente já têm prefixo, pasta e chave: pule para o passo
 ## 3. Primeiro uso do Quadro do Time (time)
 
 1. Salve o HTML recebido numa pasta só sua (de preferência no seu OneDrive, nunca na pasta compartilhada) e abra no Edge ou Chrome.
-2. Crie a **senha** do seu arquivo local e guarde no cofre.
-3. Em **··· › Central**, cole a chave do time e conecte a pasta sincronizada (`Gestao-Compartilhado`).
-4. Responda **Quem é você neste quadro?** (nome e este computador).
+2. Clique **Abrir o quadro do time na pasta compartilhada** (2.9). Se o HTML não trouxe a chave, cole a chave do time (`GK1.…`) que o gestor mandou. Escolha a pasta sincronizada (`Gestao-Compartilhado`). **Não há senha pessoal**: o quadro do time é cifrado com a chave do time.
+3. Responda **Quem é você neste quadro?** (as pessoas do time já aparecem na lista).
+4. Pronto: você grava só o seu arquivo em `times/<time>/quadro/`, e o Quadro traz o que os outros mudaram a cada 20 s. Já tinha um quadro com senha? Abra como antes e use **Ajustes › Arquivo de dados › Passar para a pasta do time**. Se aparecer "Ainda não há quadro do time nesta pasta", peça ao gestor para clicar **Criar o quadro do time na pasta** na Central.
 5. Em **Iniciativas**, ligue os épicos do time às iniciativas que vieram da Central, ou use **Trazer** para as que ainda não têm épico. Para criar uma iniciativa do time, clique **+ Iniciativa do time**: o formulário (2.4) pede o nome e mostra as iniciativas da Central como opções (escolher uma preenche o nome; as que já têm épico ficam apagadas), a previsão com atalhos (+2 semanas, +1 mês, +3 meses) e, ao lado, situação, link e a primeira atualização de status. **Criar iniciativa** ou Ctrl+Enter cria; Esc fecha.
 6. Para agrupar cards, use **features** (2.5): no detalhe da iniciativa, **+ Feature do time** cria uma feature (nome, responsável, prazo); **+ Card nesta feature** cria o card já dentro dela. No card, o campo **Feature** mostra as da Central e as do time. O gestor vê a feature e os cards dela na Central, embaixo da iniciativa. Card antigo do tipo feature: abra e clique **Transformar em feature**.
 7. Pronto: cada movimentação de card publica o backlog sozinha. Ao **fechar a sprint**, confirme a publicação das métricas.
-8. Para chamar o resto do time, envie o mesmo HTML e a chave por mensagem direta. Cada pessoa repete os passos 1 a 4.
+8. Para chamar o resto do time, envie o mesmo HTML e a chave por mensagem direta. Cada pessoa repete os passos 1 a 3 e abre o mesmo quadro.
 9. **Refinar com o time** (2.6): abra **Refinamento** no menu do topo e compartilhe a tela.
    - **Organizar:** escolha a feature na árvore à esquerda. Para mudar entregáveis de feature, marque os cards e arraste para outra feature da árvore, ou tecle **M** e escolha no formulário. Use **Dividir** (um card vira vários, um por linha) e **Juntar** (vários viram um). Errou? **Desfazer** ou Ctrl+Z. Ideias novas entram pela caixa **Nova ideia…** da coluna **Sem feature**. Feature nova: **+ Feature do time** embaixo da iniciativa.
    - **Refinar:** passe feature por feature (‹ anterior / próxima ›), digite o tamanho na tabela e abra cada card para escrever os **critérios de aceite** e marcar o **pronto para sprint**. Os itens do pronto são do time: **Ajustes › Refinamento**.

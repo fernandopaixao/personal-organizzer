@@ -1,6 +1,6 @@
 # Contratos de integração · Remessa
 
-*Contratos 1.2 · 26/11/2026 · vale para Central v15.19, Quadro do Time 2.8.0, Hub 2.3, Finanças do Grupo 1.7, Finanças do Time 1.5 e Mapa de Férias 1.5 (dentro da Central)*
+*Contratos 1.3 · 27/11/2026 · vale para Central v15.22, Quadro do Time 2.9.0, Hub 2.3, Finanças do Grupo 1.7, Finanças do Time 1.5 e Mapa de Férias 1.5 (dentro da Central)*
 
 A solução se chama **Remessa** ([ADR-0037](../docs/adr/0037-nome-remessa.md)): cada arquivo desta pasta é um envelope lacrado com a chave do time, deixado na caixa postal (a pasta compartilhada). Nas ferramentas, um arquivo que chegou e ainda não foi aplicado aparece como **nova remessa**.
 
@@ -35,6 +35,7 @@ contratos/
     gestao-ferias-1.schema.json          férias e ausências (pessoa do time e consolidado do grupo)
     gestao-postits-1.schema.json         post-its do hub para o time
     gestao-postits-vistos-1.schema.json  recibo "Vi" dos post-its
+    quadro-contrib-1.schema.json         quadro do time na pasta (base da Central e arquivo de cada pessoa; interno do Quadro)
     financas-preset-1.md                 pré-configuração embutida no HTML de finanças (não é arquivo da pasta)
   referencia/cripto.js           implementação de referência (navegador e Node 20+, sem dependências)
   validar.js                     validador: pasta inteira, um arquivo, conteúdo em claro; também cifra e decifra
@@ -84,5 +85,6 @@ O validador sai com código 1 quando há erro (bom para usar em CI ou num agente
 | 26/11/2026 | `gestao-status/1` ganhou o campo opcional `items[].featureLocalId` (contratos 1.1, aditivo: leitor antigo ignora). Hierarquia Iniciativa › Feature › Card igual na Central e nos times ([ADR-0039](../docs/adr/0039-hierarquia-iniciativa-feature-card.md)): a feature criada pelo time vai como item `kind: "feature"` e os cards dentro dela levam `featureLocalId` com o `localId` dela; quando o gestor liga essa feature a uma feature da Central, os cards vão junto. O validador recusa `featureLocalId` que não aponta para um item `feature` da mesma iniciativa e avisa sobre item `feature` com `featureRef` |
 | 26/11/2026 | Contratos 1.2 (aditivo: leitor antigo ignora). `gestao-status/1` ganhou `sprints[]` (sprints ao vivo do time: a última fechada, a em andamento e as próximas, com objetivo, capacidade, compromisso, feitos, entrou, saiu, bloqueados e features), `items[].sprintLocalId` e `features[].forecastBasis`. `gestao-metricas/1` ganhou no objeto `sprint` o resultado da sprint (`localId`, `goal`, `goalMet`, `note`, `committed`, `deliveredCommitted`, `delivered`, `added`, `removed`, `carriedOver`, `capacity`). Dicionário: métrica `sprint_goal_met`. Regras novas no validador: uma sprint `active` no máximo, `sprintLocalId` dentro de `sprints[]`, cumprido não passa do compromisso ([ADR-0042](../docs/adr/0042-sprint-sincronizada-com-a-central.md)) |
 | 25/11/2026 | Nenhum formato mudou e o envelope continua igual. O Hub 2.0 (cockpit, [ADR-0035](../docs/adr/0035-hub-cockpit-de-gestao.md)) passou a ler `status.json` (iniciativas por situação e bloqueios) e `metricas.json` (até 3 métricas, as com `highlight` primeiro, com o último valor, a série e a faixa de `thresholds`; só métricas com série em `data.series[0].points`); a solução passou a se chamar Remessa ([ADR-0037](../docs/adr/0037-nome-remessa.md)) |
+| 27/11/2026 | Contratos 1.3 (aditivo). `quadro-contrib/1` ganhou schema, exemplo e regras: a base do quadro do time `times/<time>/quadro/quadro-do-time.json`, gravada só pela Central ou pelo assistente (`writer` `central~gestor`, datas `upd` = 1), ao lado do arquivo de cada pessoa. No Quadro 2.9 o arquivo da pessoa em `times/<time>/quadro/` é o próprio arquivo de dados dela, cifrado com a chave de tarefas do time, sem senha pessoal; o envelope passa a levar `writer` em claro também nesses arquivos ([ADR-0045](../docs/adr/0045-quadro-do-time-na-pasta-com-a-chave-do-time.md)) |
 
 Mudou um contrato? Atualize nesta pasta o schema, o exemplo (`exemplos/gerar.js`), a regra no `validar.js` e esta tabela, no mesmo PR da ferramenta ([ADR-0022](../docs/adr/0022-documentacao-no-mesmo-pr.md)).

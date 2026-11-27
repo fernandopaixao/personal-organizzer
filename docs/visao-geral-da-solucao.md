@@ -1,6 +1,6 @@
 # Visão geral da solução · Central de Gestão, Quadro do Time e integração
 
-*27/11/2026 · estado atual: Remessa · Central v15.21, Quadro do Time 2.8.1, Hub 2.4.1, Finanças do Grupo 1.7.2 e do Time 1.5.2, Mapa de Férias 1.5.2 (dentro da Central) e contratos 1.2 (detalhes em `docs/plano-v15.md`, `docs/plano-hub.md`, `docs/plano-financas.md` e [`contratos/`](../contratos/LEIA-ME.md))*
+*27/11/2026 · estado atual: Remessa · Central v15.22, Quadro do Time 2.9.0, Hub 2.4.1, Finanças do Grupo 1.7.2 e do Time 1.5.2, Mapa de Férias 1.5.2 (dentro da Central) e contratos 1.3 (detalhes em `docs/plano-v15.md`, `docs/plano-hub.md`, `docs/plano-financas.md` e [`contratos/`](../contratos/LEIA-ME.md))*
 
 > **Por onde começar:** [funcionalidades, usos e objetivos](funcionalidades.md) · [jornada do usuário](jornada-do-usuario.md) · [passo a passo](passo-a-passo.md) · [decisões de arquitetura (ADRs)](adr/README.md)
 
@@ -113,6 +113,7 @@ Teclas 1 a 9 trocam de página. O botão do topo **Importar e agentes** reúne a
 | v15.18 | Feature criada pelo time chega com os cards dela (`featureLocalId`): na conciliação e no painel da iniciativa aparece com a contagem, e ligada a uma feature da Central leva os cards junto, recuados no downstream ([ADR-0039](adr/0039-hierarquia-iniciativa-feature-card.md)) |
 | v15.19 | Aba **Sprints** no time, cartão **Sprints dos times** em Hoje e bloco Sprint na reunião de status: a sprint e o resultado dela chegam do Quadro 2.8 (contratos 1.2) e a Central guarda o histórico ([ADR-0042](adr/0042-sprint-sincronizada-com-a-central.md)) |
 | v15.20 | Estilos **Remessa** (padrão: trilho e topo marinhos, escuro azul-noite) e **Sereno** (menos estímulo visual) em todas as ferramentas ([ADR-0043](adr/0043-estilos-remessa-e-sereno.md)) |
+| v15.22 | **Criar o quadro do time na pasta** no cartão da chave do time: a base do quadro em `times/<time>/quadro/`, cifrada com a chave do time; o time abre um quadro só, sem senha pessoal (Quadro 2.9, contratos 1.3, [ADR-0045](adr/0045-quadro-do-time-na-pasta-com-a-chave-do-time.md)) |
 | v15.21 | Painel **Preferências** (botão do topo, botão redondo do canto e card nos Ajustes das outras ferramentas): Modo e **Estilo visual** Remessa, Sereno, Clássico (o de antes) ou Experimental; topo do Quadro de volta ao marinho no Remessa ([ADR-0044](adr/0044-preferencias-de-estilo-visual.md)) |
 
 Detalhes da v15: `docs/plano-v15.md` (e da v14 em `docs/plano-v14.md`).
@@ -166,7 +167,7 @@ A ferramenta pronta para os times. Também é um HTML único (`ferramenta-time/q
 | **Ajustes** | Nome do time, pessoas (desativar quem saiu), colunas (compromisso e início), senha, cópia cifrada e exportação legível |
 
 Como funciona por dentro:
-- Cada pessoa tem o próprio arquivo local, **sempre cifrado com senha** (obrigatória desde o Quadro 2.1), e publica as próprias alterações em `times/<time>/quadro/<pessoa>-<computador>.json`, cifrado com a chave do time.
+- Desde o Quadro 2.9 ([ADR-0045](adr/0045-quadro-do-time-na-pasta-com-a-chave-do-time.md)) o quadro do time mora em `times/<time>/quadro/`, cifrado com a **chave de integração do time**, sem senha pessoal: a Central (ou o assistente) cria a base `quadro-do-time.json` e cada pessoa grava só o próprio `<pessoa>-<computador>.json`, que é o arquivo de dados dela. Quem ainda usa arquivo com senha (Quadro 2.1 a 2.8) continua publicando a cópia na mesma pasta e pode passar para a pasta do time nos Ajustes.
 - Quem abre o Quadro lê os arquivos de todos a cada 20 s e une as mudanças card a card (vence a alteração mais recente). Ninguém grava o arquivo de outra pessoa, então o OneDrive não gera cópias de conflito. O antigo `quadro-<slug>.json` compartilhado continua sendo aberto e migrado.
 - No topo do quadro aparecem os **post-its** deixados pelo hub; **Vi** grava o recibo de leitura.
 - O catálogo da Central fica guardado cifrado no navegador. Quando chega um catálogo novo, o Quadro avisa **Nova remessa da Central** (2.3.1).
@@ -187,7 +188,8 @@ Gestao-Compartilhado/                   (administrada pelo Fernando)
   central/catalogo-<slug>.json          a Central escreve; o time só lê
   times/<slug>/status.json              o time escreve: backlog (a Central e o hub leem)
   times/<slug>/metricas.json            o time escreve: métricas do time (a Central e o hub leem)
-  times/<slug>/quadro/<w>.json          cada pessoa do Quadro escreve o seu
+  times/<slug>/quadro/quadro-do-time.json  base do quadro do time: só a Central (ou o assistente) escreve
+  times/<slug>/quadro/<w>.json          cada pessoa do Quadro escreve o seu (chave do time)
   times/<slug>/financas/plano.json      o responsável financeiro do time escreve
   times/<slug>/postits/…                post-its do hub e recibos "Vi"
   grupo/financas/diretriz-<slug>.json   o Finanças do Grupo escreve
