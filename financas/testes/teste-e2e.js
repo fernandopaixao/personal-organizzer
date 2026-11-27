@@ -334,6 +334,16 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   await qb.screenshot({ path: path.join(SAIDA, 'quadro-nova-iniciativa-central.png') });
   await qb.click('#neForm button.pri'); ok(await qb.evaluate(() => epicsLive().some(e => e.centralRef === 'CAR-007' && e.name === 'Cartão virtual')), 'cria a iniciativa já ligada à Central');
   await qb.evaluate(() => { for (const e of epicsLive().filter(x => x.centralRef)) e.centralRef = null; catalog = window.__cat; touch(); });
+  // e) Quadro 2.9 (ADR-0045): o arquivo só da pessoa (senha) passa para a pasta do time, cifrado com a chave do time
+  qc.once('dialog', d => d.accept());
+  await qc.evaluate(() => f4paraCompartilhado()); await qc.waitForTimeout(300);
+  ok(await qc.evaluate(() => fileKey?.tipo === 'time' && fileHandle.name === 'caio-aaaaa.json' && /Card da Bia/.test(db.cards.map(c => c.title).join())), '"Passar para a pasta do time": o arquivo de dados vira o arquivo da pessoa em times/<time>/quadro/, unido aos dos outros');
+  ok(JSON.parse(await opfs(qc, async () => ler('LocalInicio', 'quadro-cartoes.json'))).schema === 'quadro-time-cifrado/1', 'o arquivo antigo, com senha, fica como estava (cópia)');
+  await qc.evaluate(async () => { novoCard({ title: 'Depois da troca', col: cols()[0].id }); touch(); await salvar(); });
+  const envC = JSON.parse(await opfs(qc, async () => ler('Gestao-Compartilhado/times/cartoes/quadro', 'caio-aaaaa.json')));
+  ok(envC.schema === 'gestao-envelope/1' && envC.content === 'quadro-contrib/1' && envC.kid === 'cartoes-2611', 'salvar grava direto o arquivo da pessoa, cifrado com a chave do time');
+  await qb.evaluate(() => f4sincronizar()); await qb.waitForTimeout(300);
+  ok(/Depois da troca/.test(await titulos(qb)), 'quem ainda usa arquivo com senha continua recebendo as mudanças');
 
   ok(!/Conferi, não está/.test(fs.readFileSync(path.join(RAIZ, 'inicio.html'), 'utf8') + fs.readFileSync(path.join(RAIZ, 'financas', 'financas_time.html'), 'utf8') + fs.readFileSync(path.join(RAIZ, 'financas', 'financas_grupo.html'), 'utf8') + fs.readFileSync(path.join(RAIZ, 'hub.html'), 'utf8')), 'sem a pergunta de confirmar o ícone do OneDrive');
   ok(await c.evaluate(() => /Hub/.test(document.querySelector('#ondeEstou .f4hub')?.textContent || '')) && await t2.evaluate(() => !!document.getElementById('tHub')) && await g2.evaluate(() => !!document.getElementById('tHub')) && await qb.evaluate(() => !!document.querySelector('#ondeEstou .f4hub')), 'botão "← Hub" na Central, no Quadro e nas Finanças do Grupo e do Time');
@@ -767,6 +777,49 @@ async function senhaAbrir(page, senha = SENHA) { await page.waitForSelector('#pw
   await cP.evaluate(() => document.querySelectorAll('dialog[open]').forEach(d => d.close()));
   await cP.setViewportSize({ width: 1280, height: 800 }); await cP.screenshot({ path: path.join(SAIDA, 'central-integracao-time.png') });
   await ap.setViewportSize({ width: 900, height: 900 }); await ap.screenshot({ path: path.join(SAIDA, 'inicio-pronto-gestor.png'), fullPage: true });
+
+  console.log('21. Quadro 2.9: quadro do time na pasta compartilhada, cifrado com a chave do time (ADR-0045)');
+  const baseA = JSON.parse(await opfs(ap, async () => ler('CompPronto/times/pagamentos/quadro', 'quadro-do-time.json')) || 'null');
+  ok(baseA?.schema === 'gestao-envelope/1' && baseA.content === 'quadro-contrib/1' && baseA.team === 'pagamentos' && !/Pagamentos/.test(JSON.stringify(baseA)), 'assistente cria a base do quadro de cada time na pasta compartilhada, cifrada com a chave do time');
+  await cP.evaluate(() => { teamSel = db.teams.find(t => t.slug === 'pagamentos').id; tmView = 'integ'; go('team'); });
+  ok(await cP.evaluate(() => !!document.querySelector('#team .tmkey [data-act="ig-qbase"]')), 'Central: botão "Criar o quadro do time na pasta" no cartão da chave do time');
+  await cP.evaluate(() => { const pg = db.teams.find(t => t.slug === 'pagamentos'); db.people.push({ id: 'pAna', name: 'Ana Souza', role: 'Desenvolvimento', teamIds: [pg.id] }); });
+  await cP.click('#team .tmkey [data-act="ig-qbase"]'); await cP.waitForTimeout(600);
+  const baseC = JSON.parse(await opfs(cP, async () => ler('CompPronto/times/pagamentos/quadro', 'quadro-do-time.json')));
+  ok(baseC.revision === 1 && baseC.content === 'quadro-contrib/1' && await cP.evaluate(() => !!db.integ.qbase[db.teams.find(t => t.slug === 'pagamentos').id]), 'Central grava a base do quadro (revisão 1) e lembra que criou');
+  ok(await cP.evaluate(async env => { const p = (await igDecrypt(env)).payload;
+    return p.source.writer === 'central~gestor' && p.db.schema === 'quadro-time/1' && p.db.people.some(x => x.name === 'Ana Souza') && p.db.settings.upd === 1; }, baseC), 'a base leva o nome e as pessoas do time, com datas que nunca vencem o que o time mudou');
+  // o time recebe o HTML de para-os-times/ e abre o quadro da pasta, sem senha pessoal (outro computador: contexto novo)
+  fs.writeFileSync(path.join(SAIDA, 'pronto_quadro_time.html'), await opfs(ap, async () => ler('LocalPronto/para-os-times/pagamentos', 'quadro_pagamentos.html')));
+  const copiaQ = await opfs(cP, async () => { const o = {}; for (const n of await listar('CompPronto/times/pagamentos/quadro')) o[n] = await ler('CompPronto/times/pagamentos/quadro', n); return o; });
+  const ctxT = await browser.newContext({ colorScheme: ESCURO ? 'dark' : 'light' });
+  const novaT = async url => { const p = await ctxT.newPage(); p.on('pageerror', e => erros.push(url + ': ' + e.message)); await p.addInitScript(stub({ 'gestao-integracao': 'CompT' })); await p.goto(base + url); return p; };
+  const qt1 = await novaT(SAIDA_URL + 'pronto_quadro_time.html'); await qt1.waitForFunction(() => window.__qt);
+  await opfs(qt1, async o => { for (const [n, t] of Object.entries(o)) await gravar('CompT/times/pagamentos/quadro', n, t); }, copiaQ);
+  await qt1.waitForTimeout(1500); if (await qt1.$('#f4ok')) { await qt1.check('#f4ok'); await qt1.click('#f4go'); }
+  ok(await qt1.locator('[data-act="openShared"]').count() === 1 && /times\/pagamentos\/quadro/.test(await qt1.textContent('[data-act="openShared"]')), 'boas-vindas do HTML do time oferecem "Abrir o quadro do time na pasta compartilhada"');
+  await qt1.click('[data-act="openShared"]'); await qt1.waitForSelector('#f4eu');
+  ok(await qt1.evaluate(() => [...document.querySelectorAll('#f4eu option')].some(o => o.value === 'Ana Souza')), 'as pessoas da base aparecem para escolher quem é você');
+  await qt1.selectOption('#f4eu', 'Ana Souza'); await qt1.click('#f4euOk'); await qt1.waitForSelector('.kc, #main .board, #main', { timeout: 8000 }); await qt1.waitForTimeout(800);
+  ok(await qt1.evaluate(() => fileKey?.tipo === 'time' && db.team.name === 'Pagamentos' && !document.querySelector('#f4p1') && !document.querySelector('#pw')), 'quadro do time abre da pasta, cifrado com a chave do time, sem pedir nem criar senha');
+  const arqT = await opfs(qt1, async () => listar('CompT/times/pagamentos/quadro'));
+  ok(arqT.length === 2 && arqT.includes('quadro-do-time.json') && arqT.some(n => /^anasouza-[a-z0-9]{5}\.json$/.test(n)), 'a pessoa grava só o próprio arquivo ao lado da base: ' + arqT.join(', '));
+  await qt1.evaluate(async () => { novoCard({ title: 'Card da Ana', col: cols()[0].id }); db.settings.columns[1].name = 'Pronto (Ana)'; db.settings.upd = Date.now(); touch(); await salvar(); });
+  ok(JSON.parse(await opfs(qt1, async () => ler('CompT/times/pagamentos/quadro', 'quadro-do-time.json'))).revision === 1, 'a base não é regravada pelo time (um escritor por arquivo)');
+  // segunda pessoa, outro computador: abre o mesmo quadro e vê o card e a coluna da Ana
+  const qt2 = await novaT(SAIDA_URL + 'pronto_quadro_time.html'); await qt2.waitForFunction(() => window.__qt);
+  await qt2.evaluate(async () => { rootMem = await (await navigator.storage.getDirectory()).getDirectoryHandle('CompT'); f4dispositivo = () => ({ id: 'zzzzz' }); f4eu = () => 'beto'; await f4abrirCompartilhado(); });
+  ok(await qt2.evaluate(() => db.cards.some(c => c.title === 'Card da Ana') && db.settings.columns[1].name === 'Pronto (Ana)'), 'outra pessoa abre o mesmo quadro e vê o card e a coluna que a Ana mudou (a base não sobrescreve)');
+  await qt2.evaluate(async () => { novoCard({ title: 'Card do Beto', col: cols()[0].id }); touch(); await salvar(); });
+  await qt1.evaluate(() => f4sincronizar()); await qt1.waitForTimeout(400);
+  ok(await qt1.evaluate(() => db.cards.some(c => c.title === 'Card do Beto')), 'o card do Beto chega para a Ana na próxima leitura');
+  // reabrir o próprio arquivo: sem senha, a chave do navegador abre
+  const qt3 = await novaT(SAIDA_URL + 'pronto_quadro_time.html'); await qt3.waitForFunction(() => window.__qt);
+  await qt3.evaluate(async n => { const d = await (await (await (await (await navigator.storage.getDirectory()).getDirectoryHandle('CompT')).getDirectoryHandle('times')).getDirectoryHandle('pagamentos')).getDirectoryHandle('quadro'); setTimeout(async () => window.__qt.abrirArquivo(await d.getFileHandle(n)), 0); }, arqT.find(n => n !== 'quadro-do-time.json'));
+  await qt3.waitForTimeout(1500);
+  ok(await qt3.evaluate(() => fileKey?.tipo === 'time' && db?.cards.some(c => c.title === 'Card da Ana') && !document.querySelector('#pw')), 'reabrir o próprio arquivo do quadro não pede senha: a chave do time no navegador abre');
+  await qt1.setViewportSize({ width: 1280, height: 800 }); await qt1.screenshot({ path: path.join(SAIDA, 'quadro-time-na-pasta.png') });
+  await ctxT.close();
   await ctxP.close();
 
   ok(erros.length === 0, 'sem erros de JavaScript nas páginas' + (erros.length ? ': ' + erros.join(' | ') : ''));

@@ -78,6 +78,7 @@ const MAPA = [
   { re: new RegExp(`^central/catalogo-(${SLUG})\\.json$`), content: 'gestao-catalogo/1', familia: 'tarefas', dono: 'publicador', quem: 'Central de Gestão' },
   { re: new RegExp(`^times/(${SLUG})/status\\.json$`), content: 'gestao-status/1', familia: 'tarefas', dono: 'publicador', quem: 'ferramenta do time' },
   { re: new RegExp(`^times/(${SLUG})/metricas\\.json$`), content: 'gestao-metricas/1', familia: 'tarefas', dono: 'publicador', quem: 'ferramenta do time' },
+  { re: new RegExp(`^times/(${SLUG})/quadro/quadro-do-time\\.json$`), content: 'quadro-contrib/1', familia: 'tarefas', dono: 'base', interno: true, quem: 'Central de Gestão ou assistente Início (base do quadro do time)' },
   { re: new RegExp(`^times/(${SLUG})/quadro/([^/]+)\\.json$`), content: 'quadro-contrib/1', familia: 'tarefas', dono: 'pessoa', interno: true, quem: 'Quadro do Time' },
   { re: new RegExp(`^times/(${SLUG})/financas/plano\\.json$`), content: 'gestao-financas-plano/1', familia: 'financas', dono: 'unico', nivel: 'team', quem: 'finanças do time' },
   { re: new RegExp(`^grupo/financas/diretriz-(${SLUG})\\.json$`), content: 'gestao-financas-diretriz/1', familia: 'financas', dono: 'unico', quem: 'Finanças do Grupo do gestor' },
@@ -189,6 +190,12 @@ function regrasDoConteudo(p, papel) {
     for (const a of p.absences || []) { P(ids.has(a.person), `ausência de "${a.person}" sem a pessoa em people`); P(YMD.test(a.start) && YMD.test(a.end) && a.start <= a.end, `ausência de ${a.person}: start ≤ end, datas AAAA-MM-DD`); }
     W(p.hlc, 'sem hlc: quem lê fica com o arquivo de HLC mais novo de cada pessoa; publique hlc');
     if (p.source?.level === 'group') { P(p.units?.length, 'consolidado de grupo precisa de units (a primeira é a própria unidade)'); if (p.units?.length) P(p.units[0].slug === p.source.team && !p.units[0].parent, 'units[0] é a própria unidade, com parent null'); }
+  }
+  if (s === 'quadro-contrib/1') {
+    P(p.db?.team?.slug === p.source?.team, 'db.team.slug precisa ser igual a source.team');
+    if (papel?.dono === 'base') { P(p.source?.writer === 'central~gestor', 'a base do quadro (quadro-do-time.json) é gravada só pela Central ou pelo assistente, com writer central~gestor');
+      for (const [k, v] of [['team', p.db?.team], ['settings', p.db?.settings], ...(p.db?.people || []).map(x => ['people ' + x.name, x])]) if (v && v.upd !== undefined) P(v.upd <= 1, `base do quadro: ${k}.upd precisa ser 1 (a base nunca vence o que o time mudou)`); }
+    else if (papel && p.source?.writer === 'central~gestor') E.push('writer central~gestor só grava quadro-do-time.json');
   }
   if (s === 'gestao-postits/1') {
     const ids = new Set();

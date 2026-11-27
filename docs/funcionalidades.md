@@ -1,6 +1,6 @@
 # Funcionalidades, usos e objetivos
 
-*27/11/2026 · Remessa · Central v15.21, Quadro do Time 2.8.1, Hub 2.4.1, Finanças do Grupo 1.7.2 e do Time 1.5.2, Mapa de Férias 1.5.2 (dentro da Central), assistente 2.8.2, contratos 1.2 · visual experimental em `experimental/`*
+*27/11/2026 · Remessa · Central v15.22, Quadro do Time 2.9.0, Hub 2.4.1, Finanças do Grupo 1.7.2 e do Time 1.5.2, Mapa de Férias 1.5.2 (dentro da Central), assistente 2.9.0, contratos 1.3 · visual experimental em `experimental/`*
 
 Este documento descreve **o que cada ferramenta faz, para quê e quando usar**. Para as regras técnicas por trás, veja as [decisões de arquitetura](adr/README.md). Para o caminho de quem usa, veja a [jornada do usuário](jornada-do-usuario.md) e o [passo a passo](passo-a-passo.md).
 
@@ -83,7 +83,8 @@ Onde as chaves coladas vão parar: no hub (tarefas e finanças de cada time), no
 | Hub, Central (com a página Férias), Finanças do Grupo e "Onde fica cada coisa" | Na pasta escolhida | Times, prefixos, pastas e chaves já cadastrados; uma senha para todos |
 | Quadro do Time, Finanças do Time e LEIA-ME de cada time | `para-os-times/<time>/` | A chave do time e a pasta sincronizada já configuradas |
 | Chave do grupo para a liderança (2.7, se escolhida) e `para-a-lideranca/LEIA-ME.txt` | Finanças do Grupo (Nível acima), Férias da Central e o envelope para a liderança | Ou a chave que a liderança mandou, colada no formulário |
-| Estrutura da pasta sincronizada | `times/<time>/quadro`, `postits`, `financas`…, `grupos/<grupo>/` | Só pastas vazias, criadas quando você aponta a pasta no último passo |
+| Estrutura da pasta sincronizada | `times/<time>/quadro`, `postits`, `financas`…, `grupos/<grupo>/` | Pastas criadas quando você aponta a pasta no último passo |
+| Quadro do time de cada time (2.9) | `times/<time>/quadro/quadro-do-time.json` na pasta sincronizada | Cifrado com a chave de tarefas do time: o time abre direto, sem senha pessoal ([ADR-0045](adr/0045-quadro-do-time-na-pasta-com-a-chave-do-time.md)); se já existir, não mexe |
 
 **Passo a passo da Remessa (2.7).** A tela final organiza tudo em quatro passos numerados, cada um com um desenho e um exemplo: **Sua mesa** (o que fica na pasta pessoal), **Remessas para os times** (um envelope por time, com a tabela de quem recebe cada arquivo), **Remessa para a liderança** (o que sobe e como a chave chega) e **Aponte a caixa postal** (para que serve cada pasta da pasta sincronizada). A pasta sincronizada saiu do formulário: é o último passo, a única escolha que resta, e configura todas as ferramentas de uma vez. No Finanças do Grupo da liderança (1.6), **+ Grupo de outro gestor** aceita colar a chave que o gestor mandou.
 
@@ -211,11 +212,13 @@ Quando o catálogo da Central chega pela pasta, o Quadro avisa **Nova remessa da
 | **Métricas** | Vazão, lead time, cycle time, WIP, idade do WIP, fluxo cumulativo, demanda, compromisso cumprido, % bloqueado; "Ver JSON" | Melhorar o fluxo e publicar para a Central |
 | **Sprints** (menu ···) | Planejar, iniciar, fechar. Ao fechar (2.7): **objetivo atingido, em parte ou não** (quando a sprint tem objetivo) e uma linha sobre a sprint; depois pergunta se publica as métricas | Ritmo do time |
 | **Central** (menu ···) | Slug, chave, pasta, catálogo, situação das publicações | Conferir a integração |
-| **Ajustes** (menu ···) | Nome, pessoas, **Refinamento** (itens do pronto para sprint, até 5; capacidade em cards ou pontos; duração da sprint; quantas sprints desenhar), colunas (compromisso, início, mostrar Backlog), senha, **Baixar cópia cifrada** e **Exportar dados legíveis** | Configurar |
+| **Ajustes** (menu ···) | Nome, pessoas, **Refinamento** (itens do pronto para sprint, até 5; capacidade em cards ou pontos; duração da sprint; quantas sprints desenhar), colunas (compromisso, início, mostrar Backlog), **Arquivo de dados** (cifra: chave do time ou senha pessoal; **Passar para a pasta do time**), **Baixar cópia cifrada** e **Exportar dados legíveis** | Configurar |
 
 No painel do card (2.6), os blocos **Critérios de aceite** (lista que se marca; Enter adiciona) e **Pronto para sprint** (itens do time ou marcação à mão) ficam no time e não vão para a Central. A exportação legível leva os dois.
 
-Cada pessoa grava o **próprio arquivo** (`quadro/<pessoa>-<computador>.json`) e o Quadro une os arquivos de todos a cada 20 s. O backlog (`status.json`) é publicado a cada movimentação; as métricas, ao fechar a sprint. Desde a 2.8 ([ADR-0042](adr/0042-sprint-sincronizada-com-a-central.md)) o backlog leva também as sprints (a última fechada, a em andamento e as próximas, com objetivo, capacidade e compromisso) e as métricas levam o resultado da sprint fechada (objetivo atingido, a linha, compromisso × cumprido, o que entrou, saiu e ficou aberto) e a métrica **Objetivo da sprint atingido**.
+**Quadro do time na pasta compartilhada (2.9, [ADR-0045](adr/0045-quadro-do-time-na-pasta-com-a-chave-do-time.md)).** O quadro do time mora em `times/<time>/quadro/` e é cifrado com a **chave de integração do time**, não com senha pessoal. A base (`quadro-do-time.json`, com o nome do time, as colunas e as pessoas) é criada pela Central (**Criar o quadro do time na pasta**, no cartão da chave do time) ou pelo assistente; nas boas-vindas do Quadro, **Abrir o quadro do time na pasta compartilhada** cadastra a chave se faltar, liga a pasta, pergunta quem é você e abre o mesmo quadro para todos. Quem ainda usa um arquivo com senha continua abrindo como antes e pode usar **Ajustes › Passar para a pasta do time**.
+
+Cada pessoa grava o **próprio arquivo** (`quadro/<pessoa>-<computador>.json`; na 2.9 ele é o próprio arquivo de dados dela) e o Quadro une os arquivos de todos a cada 20 s. Ninguém grava o arquivo de outra pessoa nem a base. O backlog (`status.json`) é publicado a cada movimentação; as métricas, ao fechar a sprint. Desde a 2.8 ([ADR-0042](adr/0042-sprint-sincronizada-com-a-central.md)) o backlog leva também as sprints (a última fechada, a em andamento e as próximas, com objetivo, capacidade e compromisso) e as métricas levam o resultado da sprint fechada (objetivo atingido, a linha, compromisso × cumprido, o que entrou, saiu e ficou aberto) e a métrica **Objetivo da sprint atingido**.
 
 **Times com ferramenta própria** podem continuar com ela adaptando-a ao contrato (caminho B em `ferramenta-time/guia-adaptacao-times.md`).
 

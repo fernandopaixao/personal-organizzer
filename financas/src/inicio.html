@@ -57,7 +57,7 @@
    Pergunta o uso esperado, cria o primeiro arquivo (sempre cifrado), gera os HTMLs
    desacoplados de cada uso e o cartão "Onde fica cada coisa".
    ===================================================================== */
-const TOOL_NOME = 'Início da solução', TOOL_VERSION = '2.8.2';
+const TOOL_NOME = 'Início da solução', TOOL_VERSION = '2.9.0';
 // Nome da solução (ADR-0037): envelopes lacrados numa caixa postal. Arquivo novo de outra pessoa = "nova remessa".
 const MARCA = 'Remessa';
 const MARCA_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#0b2155"/><rect x="5" y="9" width="22" height="15" rx="2" fill="#fff"/><path d="M5.8 10l10.2 7.6L26.2 10" fill="none" stroke="#0b2155" stroke-width="1.6" stroke-linejoin="round"/><circle cx="16" cy="17.6" r="3.2" fill="#4d86ff" stroke="#fff" stroke-width="1.1"/></svg>`;
@@ -537,14 +537,30 @@ async function gerarPacotes() {
       itens.push(`quadro_${t.slug}.html: quadro de tarefas do time`); st.criados.push({ nome: `para-os-times/${t.slug}/quadro_${t.slug}.html`, tipo: 'QT', desc: `Quadro do Time ${t.nome}, com a chave de tarefas.` }); }
     if (fin) { await gravarLocal(dirT, `financas_${t.slug}.html`, aplicarPreset(fin, 'FIN-PRESET', { schema: 'financas-preset/1', team: { nome: t.nome, slug: t.slug, prefixo: t.prefixo }, ano: d.ano, anos: [d.ano], moeda: d.moeda, pasta, chave: t.kFin, contato: d.pessoa, geradoEm: iso }));
       itens.push(`financas_${t.slug}.html: finanças do time (só para quem cuida do dinheiro do time)`); st.criados.push({ nome: `para-os-times/${t.slug}/financas_${t.slug}.html`, tipo: 'FT', desc: `Finanças do Time ${t.nome}, com a chave de finanças.` }); }
+    if (quadro && st.raiz) await criarBaseQuadro(t, d.pessoa);
     await gravarLocal(dirT, 'apresentacao.html', await lerEmbutido('apresEmb'));
     await gravarLocal(dirT, 'LEIA-ME.txt', `Ferramentas da ${MARCA} para o time ${t.nome}, geradas por ${d.pessoa} em ${agora.toLocaleDateString('pt-BR')}.\r\n\r\n` +
       `1. Copie esta pasta para uma pasta só sua (de preferência no seu OneDrive, como backup; nunca na pasta compartilhada) e abra os HTMLs no Edge ou no Chrome.\r\n` +
       `2. ${itens.join('. ')}.\r\n` +
-      `3. Na primeira abertura, crie a sua senha e guarde no cofre de senhas. As chaves do time já estão dentro dos HTMLs: não precisa colar nada.\r\n` +
+      `3. ${quadro ? `No Quadro, clique em "Abrir o quadro do time na pasta compartilhada": o quadro do time já está em ${pasta}/times/${t.slug}/quadro/, cifrado com a chave do time, e não pede senha pessoal. ` : ''}Nas outras ferramentas, crie a sua senha na primeira abertura e guarde no cofre de senhas. As chaves do time já estão dentro dos HTMLs: não precisa colar nada.\r\n` +
       `4. Ligue a pasta sincronizada pelo OneDrive (${pasta}) quando a ferramenta pedir.\r\n` +
       `5. Marque a pasta ${pasta} como "${MANTER}" (Windows: botão direito na pasta no Explorador de Arquivos; Mac: botão direito no Finder). Sem isso os arquivos ficam só na nuvem e o navegador não os lê.\r\n\r\nNão coloque estes HTMLs na pasta compartilhada: eles levam a chave do time.\r\n\r\n${POR_QUE_REMESSA}\r\n`);
   }
+}
+// Base do quadro do time na pasta compartilhada (ADR-0045): times/<time>/quadro/quadro-do-time.json, cifrada com a chave
+// de tarefas do time (gestao-envelope/1, conteúdo quadro-contrib/1). O time abre um quadro só, pronto, sem senha pessoal.
+// Mesmo formato que a Central grava (Integração › Criar o quadro do time na pasta); se já existir, não mexe.
+async function criarBaseQuadro(t, contato) {
+  const dir = await subpasta(st.raiz, ['times', t.slug, 'quadro'], true);
+  if (!dir || await lerTexto(dir, 'quadro-do-time.json')) return;
+  const at = isoComFuso(), { kid, raw } = lerChaveTexto(t.kTar), key = await importarChave(raw);
+  const cols = [['backlog', 'Backlog', null], ['pronto', 'Pronto para fazer', null], ['fazendo', 'Fazendo', 6], ['validacao', 'Validação', 4], ['concluido', 'Concluído', null]];
+  const payload = { schema: 'quadro-contrib/1', revision: 1, generatedAt: at, source: { team: t.slug, writer: 'central~gestor', tool: 'inicio.html', toolVersion: TOOL_VERSION },
+    db: { schema: 'quadro-time/1', createdAt: at, upd: 1, team: { name: t.nome, slug: t.slug, contact: contato || '', upd: 1 },
+      settings: { upd: 1, columns: cols.map(([id, name, wip]) => ({ id, name, wip })), commitCol: 'pronto', startCol: 'fazendo', autoPublish: true },
+      seq: { card: 0, epic: 0, sprint: 0, person: 0, feature: 0, refine: 0 }, people: [], epics: [], features: [], cards: [], sprints: [], refinements: [], publish: { revision: 0, lastStatus: null, lastMetrics: null } } };
+  await gravarSeguro(dir, 'quadro-do-time.json', JSON.stringify(await cifrarEnv(payload, { key, kid, team: t.slug })));
+  st.criados.push({ nome: `${PASTA_COMUM}/times/${t.slug}/quadro/quadro-do-time.json`, tipo: 'DB', desc: `Quadro do time ${t.nome} na pasta compartilhada, cifrado com a chave do time: o time abre direto, sem senha pessoal.` });
 }
 // Grava neste navegador onde ficou cada arquivo e a pasta sincronizada: cada ferramenta abre já configurada (ADR-0030).
 async function idbPut(nome, k, v) {

@@ -39,7 +39,7 @@ async function f4ler() {
   const { mapa } = await chaveiro(); let mudou = false, lidos = 0;
   const assinatura = () => JSON.stringify([db.cards, db.epics, db.features, db.sprints, db.people, db.settings, db.team]);
   for await (const [n, h] of dir.entries()) {
-    if (h.kind !== 'file' || !n.endsWith('.json') || n.startsWith('.') || n === f4arquivo()) continue;
+    if (h.kind !== 'file' || !n.endsWith('.json') || n.startsWith('.') || n === f4arquivo() || (f4compartilhado() && n === fileHandle?.name)) continue;
     try {
       const f = await h.getFile(); if (f4vistos[n] === f.lastModified) { lidos++; continue; }
       const env = JSON.parse(await f.text()), p = await decifrar(env, mapa);
@@ -55,19 +55,23 @@ async function f4ler() {
   return mudou;
 }
 async function f4publicar() {
-  const k = keysInfo?.atual; if (!k || !f4eu()) return;
+  const k = f4chaveDoTime(db.team.slug); if (!k || !f4eu()) return;
   const dir = await f4pasta(true); if (!dir) return;
+  if (f4compartilhado()) { await f4limparCopias(dir); f4ultima.publicado = new Date().toISOString(); return; }   // 2.9: o arquivo de dados já é o arquivo da pessoa
   const chaveRev = 'quadro.contribRev.' + db.team.slug, rev = (+localStorage.getItem(chaveRev) || 0) + 1;
   const snap = structuredClone(db);
   const payload = { schema: CONTRIB, revision: rev, generatedAt: agoraComFuso(), source: { team: db.team.slug, writer: f4writer(), tool: TOOL, toolVersion: TOOL_VERSION }, db: snap };
-  const env = await cifrar(payload, { key: k.key, kid: k.kid, team: db.team.slug });
+  const env = { ...(await cifrar(payload, { key: k.key, kid: k.kid, team: db.team.slug })), writer: payload.source.writer };
   const texto = JSON.stringify(env), fh = await dir.getFileHandle(f4arquivo(), { create: true });
   const w = await fh.createWritable(); await w.write(texto); await w.close();       // troca atômica no close()
   if ((await (await fh.getFile()).text()) !== texto) throw new Error('gravação não confirmada');
   try { localStorage.setItem(chaveRev, String(rev)); } catch {}
-  const base = f4arquivo().replace(/\.json$/, ''), copia = new RegExp('^' + base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?:-[^\\\\/]+?| ?\\(\\d+\\))\\.json$');
-  for await (const [n] of dir.entries()) if (copia.test(n)) { try { await dir.removeEntry(n); } catch {} }   // cópias de conflito do próprio arquivo: já foram unidas em f4ler
+  await f4limparCopias(dir);
   f4ultima.publicado = new Date().toISOString();
+}
+async function f4limparCopias(dir) {   // cópias de conflito do próprio arquivo: já foram unidas em f4ler
+  const base = f4arquivo().replace(/\.json$/, ''), copia = new RegExp('^' + base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?:-[^\\\\/]+?| ?\\(\\d+\\))\\.json$');
+  for await (const [n] of dir.entries()) if (copia.test(n)) { try { await dir.removeEntry(n); } catch {} }
 }
 async function f4sincronizar() {
   if (f4sincronizando || !db || db.demo || !db.team.slug || !keysInfo?.atual) return;
@@ -104,8 +108,8 @@ async function f4senhaConfere(s) {
 }
 function f4info() {
   return { ferramenta: 'Quadro do Time', versao: TOOL_VERSION, arquivo: db?.demo ? 'exemplo em memória' : fileHandle?.name, pastaComum: rootMem ? `${rootMem.name}/times/${db?.team.slug || '?'}/` : '', voce: f4eu() ? f4writer() : '',
-    local: ['Arquivo do quadro (cifrado com a senha), numa pasta só sua (de preferência no seu OneDrive)', 'Chaves do time (no navegador, não exportáveis)'],
-    comum: [`quadro/${f4eu() ? f4arquivo() : '<você>.json'}: seu retrato do quadro (só você grava)`, 'Arquivos das outras pessoas do time, unidos a cada 20 s', 'status.json e metricas.json para a Central', 'Leitura de postits/: post-its deixados para o time pelo Hub', `postits/vistos/${f4eu() ? f4arquivo() : '<você>.json'}: quais post-its você já viu (só você grava)`] };
+    local: f4compartilhado() ? ['Chaves do time (no navegador, não exportáveis)', 'Nenhum arquivo de dados local: o quadro fica na pasta do time, cifrado com a chave do time'] : ['Arquivo do quadro (cifrado com a senha), numa pasta só sua (de preferência no seu OneDrive)', 'Chaves do time (no navegador, não exportáveis)'],
+    comum: [`quadro/${f4eu() ? f4arquivo() : '<você>.json'}: ${f4compartilhado() ? 'seu arquivo de dados do quadro, cifrado com a chave do time' : 'seu retrato do quadro'} (só você grava)`, `quadro/${F4BASE}: base do quadro criada pela Central (só a Central grava)`, 'Arquivos das outras pessoas do time, unidos a cada 20 s', 'status.json e metricas.json para a Central', 'Leitura de postits/: post-its deixados para o time pelo Hub', `postits/vistos/${f4eu() ? f4arquivo() : '<você>.json'}: quais post-its você já viu (só você grava)`] };
 }
 // Ganchos nas funções do Quadro (as chamadas resolvem o nome na hora, então a troca vale para todos).
 {
@@ -114,11 +118,138 @@ function f4info() {
   const apos0 = aposAbrir; aposAbrir = async function () {
     const r = await apos0.apply(this, arguments);
     if (db && !db.demo) {
-      if (!fileKey) await f4exigirSenha();
+      if (f4compartilhado()) await f4saiDaBase();
+      else if (!fileKey) await f4exigirSenha();
       else setTimeout(() => f4LembreteSenha('quadro:' + (db.team.slug || fileHandle?.name), f4senhaConfere), 1500);
       if (keysInfo?.atual && db.team.slug && (await obterPasta()) && !f4eu()) await f4quemSou();
       f4sincronizar();
     }
     return r;
   };
+}
+
+/* ---------- Quadro 2.9 · quadro do time na pasta compartilhada, cifrado com a chave do time (ADR-0045) ----------
+   times/<time>/quadro/quadro-do-time.json         base do quadro, criada pela Central ou pelo assistente (só eles gravam)
+   times/<time>/quadro/<pessoa>-<computador>.json  arquivo de cada pessoa; no modo compartilhado é o próprio arquivo de dados
+   Tudo em gestao-envelope/1 com a chave de integração do time (conteúdo quadro-contrib/1): ninguém precisa de senha
+   pessoal e o time abre um único quadro, pronto. Continua valendo um escritor por arquivo (ADR-0007): cada um grava
+   só o seu e a ferramenta une os demais a cada 20 s. Arquivos antigos com senha pessoal abrem como antes. */
+const F4BASE = 'quadro-do-time.json';
+const f4compartilhado = () => fileKey?.tipo === 'time';
+// Chave que cifra: a mais nova do time (kid <time>-…), senão a do arquivo aberto, senão a última cadastrada.
+function f4chaveDoTime(slug) {
+  const l = keysInfo?.lista || [], doTime = l.filter(c => slug && (c.kid === slug || c.kid.startsWith(slug + '-')) && !c.kid.startsWith(slug + '-fin-'));
+  return doTime.at(-1) || l.find(c => c.kid === fileKey?.kid) || keysInfo?.atual || null;
+}
+{
+  const ser0 = serializar; serializar = async function (d) {
+    if (!f4compartilhado()) return ser0.apply(this, arguments);
+    keysInfo = await chaveiro(); const k = f4chaveDoTime(d.team.slug);
+    if (!k) throw new Error('A chave do time não está neste navegador: cadastre a chave (GK1…) em Central › Chaves.');
+    const chaveRev = 'quadro.contribRev.' + d.team.slug, rev = Math.max(+localStorage.getItem(chaveRev) || 0, fileKey.rev || 0) + 1;
+    fileKey.rev = rev; fileKey.kid = k.kid; try { localStorage.setItem(chaveRev, String(rev)); } catch {}
+    const payload = { schema: CONTRIB, revision: rev, generatedAt: agoraComFuso(), source: { team: d.team.slug, writer: f4writer(), tool: TOOL, toolVersion: TOOL_VERSION }, db: structuredClone(d) };
+    return JSON.stringify({ ...(await cifrar(payload, { key: k.key, kid: k.kid, team: d.team.slug })), writer: payload.source.writer });   // dono em claro, fora do AAD (contratos)
+  };
+  const des0 = desserializar; desserializar = async function (texto) {
+    let o = null; try { o = JSON.parse(texto); } catch {}
+    if (o?.schema !== ENVELOPE) return des0.apply(this, arguments);
+    keysInfo = await chaveiro();
+    if (!keysInfo.mapa.has(o.kid)) throw new Error(`Este quadro é cifrado com a chave do time (${o.kid}), que ainda não está neste navegador. Cadastre a chave (GK1…) que o gestor enviou.`);
+    const p = await decifrar(o, keysInfo.mapa);
+    if (p.schema !== CONTRIB || p.source?.team !== o.team) throw new Error('Arquivo não é um quadro do time (quadro-contrib/1)');
+    const d = normalizeDb(p.db);
+    fileKey = { tipo: 'time', kid: o.kid, rev: p.revision, writer: String(p.source.writer || '') };
+    // Quem é você neste quadro vem do próprio arquivo (pessoa~computador): o nome do arquivo continua o mesmo.
+    const [eu] = fileKey.writer.split('~');
+    if (eu && eu !== 'central' && d.team.slug) { try { if (!localStorage.getItem('quadro.eu.' + d.team.slug)) localStorage.setItem('quadro.eu.' + d.team.slug, eu); } catch {} }
+    return d;
+  };
+}
+// Abriu a base (ou o arquivo de outra pessoa): passa a gravar no próprio arquivo, nunca no dos outros.
+async function f4saiDaBase() {
+  if (!fileHandle || fileHandle.name === f4arquivo() && f4eu()) return;
+  if (!f4eu() && !(await f4quemSou())) { toast('Sem escolher quem você é, o quadro abre só para leitura.'); return; }
+  if (fileHandle.name === f4arquivo()) return;
+  const dir = await f4pasta(true); if (!dir) { toast('Conecte a pasta compartilhada para gravar o seu arquivo do quadro.'); return; }
+  fileHandle = await dir.getFileHandle(f4arquivo(), { create: true }); lastMod = 0; dirty = true;
+  await salvar(); await IDB.set('dataFile', fileHandle);
+  toast(`Você grava em times/${db.team.slug}/quadro/${f4arquivo()}.`);
+}
+function f4pedirChave() {
+  return new Promise(ok => {
+    const d = f4Abrir(`<div class="h">Chave do time</div><div class="b"><p style="margin-top:0">O quadro do time é cifrado com a chave de integração do time. Cole a chave (GK1…) que o gestor enviou por mensagem direta ou e-mail. Ela fica guardada neste navegador, sem poder ser copiada de volta.</p>
+      <input type="password" id="f4ch" placeholder="GK1.…" autocomplete="off" spellcheck="false" style="width:100%"><p id="f4chm" style="color:#c4574f;font-size:12px"></p></div>
+      <div class="f"><button id="f4chNo">Cancelar</button><button class="p" id="f4chOk">Cadastrar</button></div>`);
+    d.querySelector('#f4chNo').onclick = () => { d.close(); ok(false); };
+    d.querySelector('#f4chOk').onclick = async () => { try { await colarChave(d.querySelector('#f4ch').value); keysInfo = await chaveiro(); d.close(); ok(true); } catch (e) { d.querySelector('#f4chm').textContent = e.message; } };
+  });
+}
+async function f4escolherTime(root) {
+  const nomes = [];
+  try { for await (const [n, h] of (await root.getDirectoryHandle('times')).entries()) { if (h.kind !== 'directory') continue; try { await h.getDirectoryHandle('quadro'); nomes.push(n); } catch {} } } catch {}
+  if (!nomes.length) throw new Error('Ainda não há quadro de time nesta pasta. Peça ao gestor para criá-lo na Central (time › Integração › Criar o quadro do time na pasta).');
+  if (nomes.length === 1) return nomes[0];
+  return new Promise(ok => {
+    const d = f4Abrir(`<div class="h">Qual time?</div><div class="b"><p style="margin-top:0">Esta pasta tem o quadro de mais de um time.</p><select id="f4tm" style="width:100%;padding:7px">${nomes.sort().map(n => `<option>${esc(n)}</option>`).join('')}</select></div>
+      <div class="f"><button id="f4tmNo">Cancelar</button><button class="p" id="f4tmOk">Abrir</button></div>`);
+    d.querySelector('#f4tmNo').onclick = () => { d.close(); ok(null); };
+    d.querySelector('#f4tmOk').onclick = () => { const v = d.querySelector('#f4tm').value; d.close(); ok(v); };
+  });
+}
+// Lê a base e os arquivos de cada pessoa em times/<time>/quadro/ e une tudo.
+async function f4lerQuadroDoTime(dir, slug) {
+  let out = null, semChave = '';
+  for await (const [n, h] of dir.entries()) {
+    if (h.kind !== 'file' || !n.endsWith('.json') || n.startsWith('.')) continue;
+    try {
+      const env = JSON.parse(await (await h.getFile()).text()); if (env.team !== slug) continue;
+      const p = await decifrar(env, keysInfo.mapa); if (p.schema !== CONTRIB || p.source?.team !== slug) continue;
+      const d = normalizeDb(p.db); out = out ? mergeDb(out, d) : d;
+    } catch (e) { if (/não cadastrada/.test(e.message)) semChave = e.message; }
+  }
+  if (!out && semChave) throw new Error(`O quadro do time está cifrado com outra chave (${semChave}). Cadastre a chave atual do time.`);
+  return out;
+}
+async function f4abrirCompartilhado() {
+  if (!window.showDirectoryPicker && !rootMem) throw new Error('Este navegador não abre pastas. Use Edge ou Chrome.');
+  keysInfo = await chaveiro();
+  if (!keysInfo.atual && !(await f4pedirChave())) return;
+  const root = (await obterPasta({ pedir: true })) || (await conectarPasta());
+  const slug = PRESET?.team.slug || (await f4escolherTime(root)); if (!slug) return;
+  let dir = null;
+  try { dir = await (await (await root.getDirectoryHandle('times', { create: !!PRESET })).getDirectoryHandle(slug, { create: !!PRESET })).getDirectoryHandle('quadro', { create: !!PRESET }); } catch {}
+  if (!dir) throw new Error(`Não achei times/${slug}/quadro/ na pasta ${root.name}. Confira se é a pasta compartilhada (Gestao-Compartilhado).`);
+  let d = await f4lerQuadroDoTime(dir, slug);
+  if (!d) {   // ninguém criou ainda: o HTML preparado pela Central cria o quadro com o nome e as pessoas do preset
+    if (!PRESET) throw new Error(`Ainda não há quadro do time em times/${slug}/quadro/. Peça ao gestor para criá-lo na Central.`);
+    db = newDb(PRESET.team.name, slug); if (PRESET.team.contact) db.team.contact = PRESET.team.contact;
+    for (const x of PRESET.people) try { novaPessoa(x.name, x.role); } catch {}
+    d = db;
+  }
+  db = d; if (!db.team.slug) db.team.slug = slug;
+  if (!f4eu() && !(await f4quemSou())) { db = null; renderWelcome(); return toast('Escolha quem você é para abrir o quadro do time.'); }
+  fileKey = { tipo: 'time', kid: f4chaveDoTime(slug)?.kid || keysInfo.atual.kid, rev: 0 };
+  fileHandle = await dir.getFileHandle(f4arquivo(), { create: true }); lastMod = 0; dirty = true; saveState = 'pending';
+  await salvar(); if (saveState === 'error') throw new Error('Não consegui gravar o seu arquivo do quadro: ' + saveErr);
+  await IDB.set('dataFile', fileHandle);
+  await aposAbrir();
+  toast(`Quadro do time ${db.team.name} aberto da pasta compartilhada, cifrado com a chave do time.`);
+}
+// Arquivo só da pessoa (com senha) → quadro do time na pasta compartilhada. O arquivo antigo fica como está (cópia).
+async function f4paraCompartilhado() {
+  if (!db || db.demo) return;
+  if (!db.team.slug) return toast('Defina o identificador do time antes (Central › Identificador do time).');
+  keysInfo = await chaveiro();
+  if (!keysInfo.atual && !(await f4pedirChave())) return;
+  if (!(await obterPasta({ pedir: true }))) await conectarPasta();
+  if (!f4eu() && !(await f4quemSou())) return;
+  if (!confirm(`Passar este quadro para a pasta do time (times/${db.team.slug}/quadro/), cifrado com a chave do time? Daqui em diante você grava ${f4arquivo()} lá e não precisa mais da senha pessoal. O arquivo ${fileHandle?.name || ''} fica como está, como cópia.`)) return;
+  const dir = await f4pasta(true); if (!dir) return toast('Não consegui abrir a pasta do time.');
+  const outros = await f4lerQuadroDoTime(dir, db.team.slug); if (outros) db = mergeDb(db, outros);
+  fileKey = { tipo: 'time', kid: f4chaveDoTime(db.team.slug)?.kid || keysInfo.atual.kid, rev: 0 };
+  fileHandle = await dir.getFileHandle(f4arquivo(), { create: true }); lastMod = 0; dirty = true;
+  await salvar(); if (saveState === 'error') throw new Error(saveErr);
+  await IDB.set('dataFile', fileHandle); render();
+  toast('Pronto: o quadro agora fica na pasta do time, cifrado com a chave do time.');
 }
